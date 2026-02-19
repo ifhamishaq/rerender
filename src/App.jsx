@@ -3,7 +3,7 @@ import Lenis from 'lenis';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Comparison from './components/Comparison';
+import ScrollToTop from './components/ScrollToTop';
 
 import Shop from './components/Shop';
 import CTA from './components/CTA';
@@ -47,6 +47,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="app">
         <NoiseOverlay />
         <Cursor />
@@ -59,7 +60,6 @@ function App() {
               <Hero />
               <Marquee />
               <main>
-                <Comparison />
                 <Shop />
                 <CTA />
               </main>

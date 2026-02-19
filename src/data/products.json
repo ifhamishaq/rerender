@@ -1,22 +1,24 @@
 [
     {
-        "id": 1,
-        "title": "LUT_PACK_VOL_1",
+        "title": "AI Prompt Pack",
         "price": "FREE",
-        "color": "#39FF14",
-        "category": "LUTS",
-        "link": "/downloads/Lut_Pack_1.zip",
-        "desc": "5 Premium Cinematic LUTs (Aether, Bluwy, Halcyon, Lucent, Relic)"
+        "color": "#2e2e2e",
+        "category": "PACKS",
+        "link": "https://drive.google.com/drive/folders/1Zuv9qViDBcz1j_Q4615sf0J45_cz5-5m?usp=sharing",
+        "desc": "A High Quality Prompt Pack, Cinematic Photo Shoot at Mount Fuji",
+        "image": "/uploads/1771483646225-378628361.png",
+        "type": "FREE",
+        "id": 1771483808004
     },
     {
-        "title": "Ai Prompt Pack",
-        "price": "$5",
+        "title": "Cinematic Lut Pack (Rec.709)",
+        "price": "FREE",
         "color": "#000000",
-        "category": "PACKS",
-        "link": "",
-        "desc": "",
-        "image": "",
-        "type": "PAID",
-        "id": 1771482054581
+        "category": "LUTS",
+        "link": "https://drive.google.com/drive/folders/1q96v-JhzPxNk65UWrUKHNzStxBovQ0sf?usp=sharing",
+        "desc": "A high quality Cinematic Lut pack, Easy apply and grade",
+        "image": "/uploads/1771483889366-619958856.webp",
+        "type": "FREE",
+        "id": 1771483962686
     }
 ]

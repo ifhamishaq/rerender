@@ -16,6 +16,11 @@ const Admin = () => {
     const [status, setStatus] = useState('');
 
     useEffect(() => {
+        // Security Check: Only allow on localhost
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            window.location.href = '/'; // Redirect to home if not local
+            return;
+        }
         fetchProducts();
     }, []);
 

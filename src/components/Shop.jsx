@@ -8,9 +8,15 @@ const Shop = () => {
 
     const filteredProducts = filter === 'ALL'
         ? products
-        : products.filter(p => p.category === filter);
+        : filter === 'FREE'
+            ? products.filter(p => p.price === 'FREE')
+            : filter === 'PAID'
+                ? products.filter(p => p.price !== 'FREE')
+                : products.filter(p => p.category === filter);
 
-    const categories = ['ALL'];
+    // Get unique categories and add special filters
+    const uniqueCategories = [...new Set(products.map(p => p.category))];
+    const categories = ['ALL', 'FREE', 'PAID', ...uniqueCategories];
 
     return (
         <section id="shop" style={{
@@ -160,7 +166,7 @@ const Shop = () => {
                                 cursor: 'pointer'
                             }}
                         >
-                            <span style={{ mixBlendMode: 'difference' }}>{product.price === 'FREE' ? 'DOWNLOAD' : 'BUY NOW'}</span>
+                            <span style={{ position: 'relative', zIndex: 1 }}>{product.price === 'FREE' ? 'DOWNLOAD' : 'BUY NOW'}</span>
                         </motion.a>
                     </motion.div>
                 ))}
