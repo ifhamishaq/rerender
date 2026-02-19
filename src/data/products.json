@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "title": "LUT_PACK_VOL_1",
+        "price": "FREE",
+        "color": "#39FF14",
+        "category": "LUTS",
+        "link": "/downloads/Lut_Pack_1.zip",
+        "desc": "5 Premium Cinematic LUTs (Aether, Bluwy, Halcyon, Lucent, Relic)"
+    },
+    {
+        "title": "Ai Prompt Pack",
+        "price": "$5",
+        "color": "#000000",
+        "category": "PACKS",
+        "link": "",
+        "desc": "",
+        "image": "",
+        "type": "PAID",
+        "id": 1771482054581
+    }
+]
