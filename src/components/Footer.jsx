@@ -34,10 +34,9 @@ const Footer = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <h4 style={{ color: '#666' }}>SOCIALS</h4>
-                    <a href="#" target="_blank">INSTAGRAM</a>
-                    <a href="#" target="_blank">TWITTER / X</a>
-                    <a href="#" target="_blank">YOUTUBE</a>
-                    <a href="#" target="_blank">DISCORD</a>
+                    <a href="https://www.instagram.com/realre.render/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>INSTAGRAM ↗</a>
+                    <a href="https://x.com/wani_ifham1" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>TWITTER / X ↗</a>
+                    <a href="https://www.threads.net/@realre.render" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>THREADS ↗</a>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

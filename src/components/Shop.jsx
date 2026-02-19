@@ -3,8 +3,26 @@ import { motion } from 'framer-motion';
 
 import products from '../data/products.json';
 
+import { useLocation } from 'react-router-dom';
+
 const Shop = () => {
     const [filter, setFilter] = React.useState('ALL');
+    const location = useLocation();
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const filterParam = params.get('filter');
+        if (filterParam) {
+            setFilter(filterParam);
+            // Force scroll to shop after a short delay to ensure rendering
+            setTimeout(() => {
+                const shopSection = document.getElementById('shop');
+                if (shopSection) {
+                    shopSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
+        }
+    }, [location]);
 
     const filteredProducts = filter === 'ALL'
         ? products

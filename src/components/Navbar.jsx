@@ -46,11 +46,9 @@ const Navbar = () => {
 
                 {/* Desktop Menu */}
                 <div className="desktop-menu" style={{ display: 'flex', gap: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', alignItems: 'center' }}>
-                    <a href="/features">FEATURES</a>
                     <a href="/#shop">SHOP</a>
-                    <a href="/#compare">BEFORE/AFTER</a>
 
-                    <a href="/#shop" style={{
+                    <a href="/?filter=FREE#shop" style={{
                         backgroundColor: 'var(--color-accent)',
                         color: 'var(--color-text)',
                         border: '1px solid var(--color-text)',
@@ -126,10 +124,8 @@ const Navbar = () => {
                     fontSize: '1.5rem'
                 }}
             >
-                <a href="/features" onClick={toggleMenu}>FEATURES</a>
                 <a href="/#shop" onClick={toggleMenu}>SHOP</a>
-                <a href="/#compare" onClick={toggleMenu}>BEFORE/AFTER</a>
-                <a href="/#shop" onClick={toggleMenu} style={{
+                <a href="/?filter=FREE#shop" onClick={toggleMenu} style={{
                     backgroundColor: 'var(--color-accent)',
                     color: 'var(--color-text)',
                     border: '1px solid var(--color-text)',
