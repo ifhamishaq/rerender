@@ -20,5 +20,16 @@
         "image": "/uploads/1771483889366-619958856.webp",
         "type": "FREE",
         "id": 1771483962686
+    },
+    {
+        "title": "AI Prompt Pack ",
+        "price": "FREE",
+        "color": "#ff0000",
+        "category": "PACKS",
+        "link": "https://drive.google.com/drive/folders/158K_wUBPMHT-tysNs1DfLO_8_F7uiwPG?usp=sharing",
+        "desc": "A High Quality AI Prompt Pack with stylish images and cinematic color grading",
+        "image": "/uploads/1771484859126-153323751.png",
+        "type": "FREE",
+        "id": 1771485020500
     }
 ]
