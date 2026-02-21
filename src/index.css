@@ -124,3 +124,66 @@ html.lenis body {
     transform: translateX(-50%);
   }
 }
+
+/* ===== Mobile Optimizations ===== */
+@media (max-width: 600px) {
+
+  /* Reduce section padding */
+  section,
+  main section {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 4rem !important;
+    padding-bottom: 3rem !important;
+  }
+
+  /* Force single column grids */
+  section>div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  /* Smaller headings */
+  h1 {
+    font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 6vw, 2rem) !important;
+  }
+
+  /* Compact filter buttons */
+  section>div>div>button {
+    font-size: 0.75rem !important;
+    padding: 0.35rem 0.7rem !important;
+  }
+
+  /* Smaller card images */
+  section img {
+    max-height: 200px !important;
+  }
+
+  /* Shop cards */
+  #shop>div[style*="grid"]>div {
+    min-height: auto !important;
+  }
+
+  /* Prompt text box */
+  div[style*="font-mono"] {
+    font-size: 0.75rem !important;
+  }
+
+  /* Footer compact */
+  footer {
+    padding: 2rem 1rem !important;
+  }
+
+  footer>div:first-child {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  footer h2 {
+    font-size: clamp(2rem, 12vw, 5rem) !important;
+  }
+}

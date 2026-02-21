@@ -47,6 +47,9 @@ const Navbar = () => {
                 {/* Desktop Menu */}
                 <div className="desktop-menu" style={{ display: 'flex', gap: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', alignItems: 'center' }}>
                     <a href="/#shop">SHOP</a>
+                    <a href="/prompts">PROMPTS</a>
+                    <a href="/submit-prompt">SUBMIT</a>
+                    <a href="mailto:real.re.render@gmail.com">CONTACT</a>
 
                     <a href="/?filter=FREE#shop" style={{
                         backgroundColor: 'var(--color-accent)',
@@ -125,6 +128,9 @@ const Navbar = () => {
                 }}
             >
                 <a href="/#shop" onClick={toggleMenu}>SHOP</a>
+                <a href="/prompts" onClick={toggleMenu}>PROMPTS</a>
+                <a href="/submit-prompt" onClick={toggleMenu}>SUBMIT</a>
+                <a href="mailto:real.re.render@gmail.com" onClick={toggleMenu}>CONTACT</a>
                 <a href="/?filter=FREE#shop" onClick={toggleMenu} style={{
                     backgroundColor: 'var(--color-accent)',
                     color: 'var(--color-text)',

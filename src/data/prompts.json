@@ -1,0 +1,23 @@
+[
+    {
+        "title": "Winter’s Monolith",
+        "prompt": "A cinematic editorial portrait captured with a Sony Alpha 1 and FE 85mm f/1.4 GM lens. Color Grade: Professional \"Midnight Dark Blue\" editorial grade; deep navy shadows and cool steel highlights. Framing: The subject is locked in a 1:1 tight 85mm compression against a vertical slab of dark, jagged mountain rock. Pose: High-fashion \"tension\" pose; the subject leans their shoulder against the rock with a sharp, angular elbow. Weight is shifted heavily to the back leg, creating a long, lean silhouette. One hand—wearing a sleek black leather glove—is tucked deep into the pocket of a heavy, structured charcoal overcoat, while the chin is tucked slightly into the high collar. Atmosphere: Micro-ice crystals catching the light in the foreground; raw, raw skin micro-textures, cold reddened cheeks. Technical: 50MP resolution, matte cinematic finish. Negatives: (smiling, airbrushed skin, distorted limbs, extra fingers, greenery, vibrant colors, reflections).",
+        "category": "PORTRAIT",
+        "image": "/uploads/1771662042117-567992088.jpeg",
+        "id": 1771662068018
+    },
+    {
+        "title": "Urban Armor",
+        "prompt": "A low-angle editorial photograph of the subject walking at a normal, steady pace past a black vintage car. Pose: A natural walking motion captured mid-step. The subject is looking slightly away from the camera, one hand adjusting the lapel of their jacket. The movement is fluid and realistic, avoiding high-fashion stiffness. Composition: Focus is locked on the face. The car and concrete pillars are in the background with a sophisticated, slight bokeh. Technical: Sony Alpha 1, FE 50mm f/1.2 GM. Deep, cold shadows and overexposed white highlights. Negative Constraints: No snow, no trees, no saturated colors, no beautification, no extra limbs, no distorted joints, no runway-style exaggerated posing.",
+        "category": "PORTRAIT",
+        "image": "/uploads/1771662266059-992889349.jpeg",
+        "id": 1771662337287
+    },
+    {
+        "title": "The Cold Edge of Solitude",
+        "prompt": "A cinematic editorial portrait captured with a Sony Alpha 1 and FE 85mm f/1.4 GM lens. Color Grade: Professional \"Midnight Dark Blue\" editorial grade; deep navy shadows and cool steel highlights. Framing: The subject is locked in a 1:1 tight 85mm compression against a vertical slab of dark, jagged mountain rock. Pose: High-fashion \"tension\" pose; the subject leans their shoulder against the rock with a sharp, angular elbow. Weight is shifted heavily to the back leg, creating a long, lean silhouette. One hand is tucked deep into the pocket of a heavy, structured charcoal overcoat, while the chin is tucked slightly into the high collar. Atmosphere: Micro-ice crystals catching the light in the foreground; raw, cold-reddened skin texture. Technical: 50MP resolution, matte cinematic finish. Negatives: (smiling, airbrushed skin, distorted limbs, extra fingers, greenery, vibrant colors, reflections).",
+        "category": "LANDSCAPE",
+        "image": "/uploads/1771662367674-419181230.jpeg",
+        "id": 1771662390570
+    }
+]

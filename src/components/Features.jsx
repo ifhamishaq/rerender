@@ -15,7 +15,7 @@ const Features = () => {
                 SYSTEM<br />FEATURES
             </h1>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '3rem' }}>
                 {features.map((f, i) => (
                     <motion.div
                         key={i}

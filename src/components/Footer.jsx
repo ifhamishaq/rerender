@@ -18,10 +18,11 @@ const Footer = () => {
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <h4 style={{ color: '#666' }}>SITEMAP</h4>
-                    <Link to="/features">FEATURES</Link>
+                    <Link to="/prompts">PROMPTS</Link>
                     <a href="/#shop">SHOP</a>
-                    <a href="/#compare">BEFORE/AFTER</a>
-                    <a href="#">LOGIN</a>
+                    <Link to="/submit-prompt">SUBMIT_PROMPT</Link>
+                    <Link to="/features">FEATURES</Link>
+                    <a href="mailto:real.re.render@gmail.com">CONTACT_US ↗</a>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

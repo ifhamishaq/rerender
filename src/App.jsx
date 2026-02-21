@@ -19,6 +19,9 @@ import RefundPolicy from './components/RefundPolicy';
 import Features from './components/Features';
 import NotFound from './components/NotFound';
 import Admin from './components/Admin';
+import Prompts from './components/Prompts';
+import SubmitPrompt from './components/SubmitPrompt';
+import PromptPreview from './components/PromptPreview';
 
 function App() {
   useEffect(() => {
@@ -61,11 +64,14 @@ function App() {
               <Marquee />
               <main>
                 <Shop />
+                <PromptPreview />
                 <CTA />
               </main>
             </>
           } />
           <Route path="/features" element={<Features />} />
+          <Route path="/prompts" element={<Prompts />} />
+          <Route path="/submit-prompt" element={<SubmitPrompt />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />

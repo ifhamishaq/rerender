@@ -1,32 +1,49 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Primary Meta Tags -->
-    <title>RE-RENDER | Digital Assets for Creators</title>
-    <meta name="title" content="RE-RENDER | Digital Assets for Creators" />
-    <meta name="description" content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://re-render.com/" />
-    <meta property="og:title" content="RE-RENDER | Digital Assets for Creators" />
-    <meta property="og:description" content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
-    <meta property="og:image" content="/og-image.jpg" />
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://re-render.com/" />
-    <meta property="twitter:title" content="RE-RENDER | Digital Assets for Creators" />
-    <meta property="twitter:description" content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
-    <meta property="twitter:image" content="/og-image.jpg" />
+  <!-- Primary Meta Tags -->
+  <title>RE-RENDER | Digital Assets for Creators</title>
+  <meta name="title" content="RE-RENDER | Digital Assets for Creators" />
+  <meta name="description"
+    content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
 
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://re-render.com/" />
+  <meta property="og:title" content="RE-RENDER | Digital Assets for Creators" />
+  <meta property="og:description"
+    content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
+  <meta property="og:image" content="/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://re-render.com/" />
+  <meta property="twitter:title" content="RE-RENDER | Digital Assets for Creators" />
+  <meta property="twitter:description"
+    content="High-fashion meets lo-fi. Premium PowerGrades, LUTs, and textures for filmmakers and designers who want to disrupt the norm." />
+  <meta property="twitter:image" content="/og-image.jpg" />
+
+</head>
+
+<body>
+  <!-- Hidden Netlify form for build-time detection -->
+  <form name="prompt-submissions" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" />
+    <input name="name" />
+    <input name="email" />
+    <input name="prompt-title" />
+    <input name="category" />
+    <textarea name="prompt"></textarea>
+    <input name="ai-tool" />
+  </form>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

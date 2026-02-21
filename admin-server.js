@@ -66,6 +66,32 @@ app.post('/api/products', (req, res) => {
     });
 });
 
+// --- Prompts ---
+const PROMPTS_FILE = path.join(__dirname, 'src', 'data', 'prompts.json');
+
+// Get Prompts
+app.get('/api/prompts', (req, res) => {
+    fs.readFile(PROMPTS_FILE, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to read prompts' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+// Save Prompts
+app.post('/api/prompts', (req, res) => {
+    const prompts = req.body;
+    fs.writeFile(PROMPTS_FILE, JSON.stringify(prompts, null, 4), (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to save prompts' });
+        }
+        res.json({ success: true, message: 'Prompts saved successfully' });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Admin Server running on http://localhost:${PORT}`);
 });
