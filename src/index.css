@@ -125,55 +125,143 @@ html.lenis body {
   }
 }
 
+/* ===== Tablet Optimizations ===== */
+@media (max-width: 768px) {
+
+  /* Hero left panel */
+  .hero-section>div:first-child {
+    padding: 2rem !important;
+  }
+
+  /* Hero image container */
+  .hero-section>div:nth-child(2) {
+    min-height: 300px;
+  }
+}
+
 /* ===== Mobile Optimizations ===== */
 @media (max-width: 600px) {
 
-  /* Reduce section padding */
+  /* --- GLOBAL --- */
   section,
   main section {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 4rem !important;
-    padding-bottom: 3rem !important;
+    padding: 3rem 1rem !important;
   }
 
-  /* Force single column grids */
-  section>div[style*="grid"] {
+  /* Force single column for ALL grids */
+  div[style*="grid-template-columns"],
+  div[style*="gridTemplateColumns"] {
     grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
+    gap: 1.25rem !important;
   }
 
-  /* Smaller headings */
+  /* --- TYPOGRAPHY --- */
   h1 {
-    font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
+    font-size: clamp(1.8rem, 10vw, 2.5rem) !important;
+    min-height: auto !important;
   }
 
   h2 {
-    font-size: clamp(1.2rem, 6vw, 2rem) !important;
+    font-size: clamp(1.4rem, 8vw, 2rem) !important;
   }
 
-  /* Compact filter buttons */
-  section>div>div>button {
-    font-size: 0.75rem !important;
-    padding: 0.35rem 0.7rem !important;
+  h3 {
+    font-size: 0.9rem !important;
   }
 
-  /* Smaller card images */
+  p {
+    font-size: 0.85rem !important;
+  }
+
+  /* --- HERO --- */
+  .hero-section {
+    min-height: auto !important;
+    padding-top: 5rem !important;
+  }
+
+  .hero-section>div:first-child {
+    padding: 1.5rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-text);
+  }
+
+  .hero-section>div:nth-child(2) {
+    min-height: 250px;
+    max-height: 300px;
+  }
+
+  /* Scroll indicator on mobile */
+  .hero-section>div:last-child {
+    left: 1.5rem !important;
+    bottom: 1rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* --- SHOP --- */
+  #shop {
+    padding: 3rem 1rem !important;
+  }
+
+  /* Shop product image — square is too tall on mobile */
+  .shop-item-image {
+    aspect-ratio: 4/3 !important;
+  }
+
+  /* Shop filter buttons */
+  #shop button {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+
+  /* Shop section header gap */
+  #shop>div:first-child {
+    margin-bottom: 2rem !important;
+    gap: 1rem !important;
+  }
+
+  /* Buy/Download buttons */
+  #shop a[style*="padding: 1rem"] {
+    padding: 0.7rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* --- PROMPT CARDS --- */
+  /* Prompt image max height */
   section img {
     max-height: 200px !important;
   }
 
-  /* Shop cards */
-  #shop>div[style*="grid"]>div {
-    min-height: auto !important;
+  /* Prompt filter pills */
+  section>div>div>button {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.6rem !important;
   }
 
   /* Prompt text box */
-  div[style*="font-mono"] {
-    font-size: 0.75rem !important;
+  div[style*="border: 2px solid var(--color-text)"][style*="font-mono"] {
+    padding: 0.75rem !important;
+    font-size: 0.7rem !important;
+    min-height: 60px !important;
   }
 
-  /* Footer compact */
+  /* --- CTA --- */
+  section[style*="backgroundColor: var(--color-text)"] {
+    padding: 4rem 1.5rem !important;
+  }
+
+  /* --- SUBMIT FORM --- */
+  input,
+  textarea,
+  select {
+    font-size: 0.8rem !important;
+  }
+
+  form button[type="submit"] {
+    padding: 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* --- FOOTER --- */
   footer {
     padding: 2rem 1rem !important;
   }
@@ -184,6 +272,34 @@ html.lenis body {
   }
 
   footer h2 {
-    font-size: clamp(2rem, 12vw, 5rem) !important;
+    font-size: clamp(2.5rem, 15vw, 5rem) !important;
+  }
+
+  footer a {
+    font-size: 0.8rem !important;
+  }
+
+  /* Footer bottom bar */
+  footer>div:last-child {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    text-align: center;
+  }
+
+  /* --- MARQUEE --- */
+  .marquee-content {
+    font-size: 0.9rem !important;
+  }
+
+  /* --- FEATURES --- */
+  section>div[style*="grid"]>div {
+    padding: 1.5rem !important;
+  }
+
+  /* --- MISC --- */
+  /* Hide custom cursor on mobile */
+  .custom-cursor {
+    display: none !important;
   }
 }
