@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Lenis from 'lenis';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
@@ -22,6 +22,28 @@ import Admin from './components/Admin';
 import Prompts from './components/Prompts';
 import SubmitPrompt from './components/SubmitPrompt';
 import PromptPreview from './components/PromptPreview';
+
+const TitleManager = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const titleMap = {
+      '/': 'RE-RENDER | Digital Assets for Creators',
+      '/features': 'Features | RE-RENDER',
+      '/prompts': 'Prompt Lab | RE-RENDER',
+      '/submit-prompt': 'Submit Prompt | RE-RENDER',
+      '/admin': 'Admin Panel | RE-RENDER',
+      '/privacy': 'Privacy Policy | RE-RENDER',
+      '/terms': 'Terms of Service | RE-RENDER',
+      '/license': 'License Agreement | RE-RENDER',
+      '/refund': 'Refund Policy | RE-RENDER',
+    };
+
+    document.title = titleMap[location.pathname] || 'RE-RENDER | Digital Assets for Creators';
+  }, [location]);
+
+  return null;
+};
 
 function App() {
   useEffect(() => {
@@ -50,6 +72,7 @@ function App() {
 
   return (
     <Router>
+      <TitleManager />
       <ScrollToTop />
       <div className="app">
         <NoiseOverlay />
