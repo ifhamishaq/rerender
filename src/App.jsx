@@ -6,7 +6,6 @@ import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
 
 import Shop from './components/Shop';
-import CTA from './components/CTA';
 import Footer from './components/Footer';
 import Marquee from './components/Marquee';
 import Cursor from './components/Cursor';
@@ -22,6 +21,7 @@ import Admin from './components/Admin';
 import Prompts from './components/Prompts';
 import SubmitPrompt from './components/SubmitPrompt';
 import PromptPreview from './components/PromptPreview';
+import About from './components/About';
 
 const TitleManager = () => {
   const location = useLocation();
@@ -88,7 +88,7 @@ function App() {
               <main>
                 <Shop />
                 <PromptPreview />
-                <CTA />
+                <About />
               </main>
             </>
           } />

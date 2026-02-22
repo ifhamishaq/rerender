@@ -20,6 +20,7 @@ const Footer = () => {
                     <h4 style={{ color: '#666' }}>SITEMAP</h4>
                     <Link to="/prompts">PROMPTS</Link>
                     <a href="/#shop">SHOP</a>
+                    <a href="/#about">ABOUT</a>
                     <Link to="/submit-prompt">SUBMIT_PROMPT</Link>
                     <Link to="/features">FEATURES</Link>
                     <a href="mailto:real.re.render@gmail.com">CONTACT_US ↗</a>
