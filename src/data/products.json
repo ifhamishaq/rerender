@@ -31,5 +31,16 @@
         "image": "/uploads/1771484859126-153323751.png",
         "type": "FREE",
         "id": 1771485020500
+    },
+    {
+        "title": "Cherry Bloom",
+        "price": "FREE",
+        "color": "#000000",
+        "category": "PACKS",
+        "link": "https://drive.google.com/drive/folders/1Fs8C0PFjkWAAdB88_yg3-WyU01APejoX?usp=sharing",
+        "desc": "Anti AI images in a cherry bloom orchard",
+        "image": "/uploads/1771750077064-448893040.png",
+        "type": "FREE",
+        "id": 1771750121731
     }
 ]

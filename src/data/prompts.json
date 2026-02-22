@@ -19,5 +19,12 @@
         "category": "LANDSCAPE",
         "image": "/uploads/1771662367674-419181230.jpeg",
         "id": 1771662390570
+    },
+    {
+        "title": "Cherry Bloom",
+        "prompt": "A tight, \"arty\" editorial face photo captured with an FE 85mm f/1.4 GM. Framing: The subject's face is seen through a thick \"wall\" of cherry blossoms in the immediate foreground, creating a soft, pink out-of-focus frame. Pose: A static, intense face photo; chin tucked into the high collar. Visual Hook: The eyes are in tack-sharp focus through a small gap in the blurred pink petals. Color Grade: Deep \"Blossom Warmth\" with soft pink highlights and warm, desaturated charcoal tones. Technical: 85mm bokeh effect; raw skin micro-textures visible. Negatives: (cold blue light, walking away, motion blur, wide shot, greenery).",
+        "category": "PORTRAIT",
+        "image": "/uploads/1771750209512-153736578.jpeg",
+        "id": 1771750222825
     }
 ]
