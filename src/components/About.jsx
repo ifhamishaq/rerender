@@ -108,7 +108,7 @@ const About = () => {
                     </p>
 
                     <motion.a
-                        href="https://ifhamishaq.netlify.app/" // To be updated with portfolio link
+                        href="https://ifhamishaq.netlify.app/" 
                         whileHover={{ x: 10 }}
                         style={{
                             display: 'inline-flex',

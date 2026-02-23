@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import prompts from '../data/prompts.json';
 
-const DISPLAY_COUNT = 3;
+const DISPLAY_COUNT = 6;
 const CHAR_LIMIT = 120;
 
 const PromptPreview = () => {
