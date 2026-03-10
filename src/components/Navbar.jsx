@@ -52,32 +52,6 @@ const Navbar = () => {
                     <a href="/prompts">PROMPTS</a>
                     <a href="/submit-prompt">SUBMIT</a>
                     <a href="mailto:real.re.render@gmail.com">CONTACT</a>
-
-                    <a href="/?filter=FREE#shop" style={{
-                        backgroundColor: 'var(--color-accent)',
-                        color: 'var(--color-text)',
-                        border: '1px solid var(--color-text)',
-                        padding: '0.75rem 1.5rem',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        textDecoration: 'none',
-                        boxShadow: '4px 4px 0px var(--color-text)',
-                        transition: 'transform 0.1s ease, box-shadow 0.1s ease',
-                        cursor: 'pointer',
-                        display: 'inline-block'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                            e.currentTarget.style.boxShadow = '6px 6px 0px var(--color-text)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translate(0, 0)';
-                            e.currentTarget.style.boxShadow = '4px 4px 0px var(--color-text)';
-                        }}
-                    >
-                        DOWNLOAD FREE
-                    </a>
                 </div>
 
                 {/* Hamburger Button */}
@@ -135,22 +109,6 @@ const Navbar = () => {
                 <a href="/prompts" onClick={toggleMenu}>PROMPTS</a>
                 <a href="/submit-prompt" onClick={toggleMenu}>SUBMIT</a>
                 <a href="mailto:real.re.render@gmail.com" onClick={toggleMenu}>CONTACT</a>
-                <a href="/?filter=FREE#shop" onClick={toggleMenu} style={{
-                    backgroundColor: 'var(--color-accent)',
-                    color: 'var(--color-text)',
-                    border: '1px solid var(--color-text)',
-                    padding: '1rem 2rem',
-                    fontFamily: 'var(--font-mono)',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    textDecoration: 'none',
-                    boxShadow: '4px 4px 0px var(--color-text)',
-                    fontSize: '1.2rem',
-                    cursor: 'pointer'
-                }}
-                >
-                    DOWNLOAD FREE
-                </a>
             </motion.div>
         </>
     );
