@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import Lenis from 'lenis';
+import { AnimatePresence } from 'framer-motion';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -27,6 +28,8 @@ import Services from './pages/Services';
 import ShopPage from './pages/ShopPage';
 import AboutPage from './pages/AboutPage';
 
+import TransitionWipe from './components/Animations/TransitionWipe';
+
 const TitleManager = () => {
   const location = useLocation();
 
@@ -50,6 +53,30 @@ const TitleManager = () => {
   }, [location]);
 
   return null;
+};
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<TransitionWipe><Home /></TransitionWipe>} />
+        <Route path="/services" element={<TransitionWipe><Services /></TransitionWipe>} />
+        <Route path="/shop" element={<TransitionWipe><ShopPage /></TransitionWipe>} />
+        <Route path="/about" element={<TransitionWipe><AboutPage /></TransitionWipe>} />
+        <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
+        <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
+        <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
+        <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />
+        <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
+        <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
+        <Route path="/license" element={<TransitionWipe><LicenseAgreement /></TransitionWipe>} />
+        <Route path="/refund" element={<TransitionWipe><RefundPolicy /></TransitionWipe>} />
+        <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />
+      </Routes>
+    </AnimatePresence>
+  );
 };
 
 function App() {
@@ -87,21 +114,7 @@ function App() {
         <ScrollProgress />
         <Navbar />
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/prompts" element={<Prompts />} />
-          <Route path="/submit-prompt" element={<SubmitPrompt />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/license" element={<LicenseAgreement />} />
-          <Route path="/refund" element={<RefundPolicy />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AnimatedRoutes />
 
         <Footer />
       </div>
