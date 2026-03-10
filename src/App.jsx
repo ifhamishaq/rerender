@@ -20,15 +20,22 @@ import NotFound from './components/NotFound';
 import Admin from './components/Admin';
 import Prompts from './components/Prompts';
 import SubmitPrompt from './components/SubmitPrompt';
-import PromptPreview from './components/PromptPreview';
-import About from './components/About';
+
+// Pages
+import Home from './pages/Home';
+import Services from './pages/Services';
+import ShopPage from './pages/ShopPage';
+import AboutPage from './pages/AboutPage';
 
 const TitleManager = () => {
   const location = useLocation();
 
   useEffect(() => {
     const titleMap = {
-      '/': 'RE-RENDER | Digital Assets for Creators',
+      '/': 'RE-RENDER | Digital Agency & Assets',
+      '/about': 'About | RE-RENDER',
+      '/shop': 'Shop | RE-RENDER',
+      '/services': 'Services | RE-RENDER',
       '/features': 'Features | RE-RENDER',
       '/prompts': 'Prompt Lab | RE-RENDER',
       '/submit-prompt': 'Submit Prompt | RE-RENDER',
@@ -39,7 +46,7 @@ const TitleManager = () => {
       '/refund': 'Refund Policy | RE-RENDER',
     };
 
-    document.title = titleMap[location.pathname] || 'RE-RENDER | Digital Assets for Creators';
+    document.title = titleMap[location.pathname] || 'RE-RENDER | Digital Agency & Assets';
   }, [location]);
 
   return null;
@@ -81,17 +88,10 @@ function App() {
         <Navbar />
 
         <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <Marquee />
-              <main>
-                <Shop />
-                <PromptPreview />
-                <About />
-              </main>
-            </>
-          } />
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/features" element={<Features />} />
           <Route path="/prompts" element={<Prompts />} />
           <Route path="/submit-prompt" element={<SubmitPrompt />} />

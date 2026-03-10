@@ -46,8 +46,9 @@ const Navbar = () => {
 
                 {/* Desktop Menu */}
                 <div className="desktop-menu" style={{ display: 'flex', gap: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', alignItems: 'center' }}>
-                    <a href="/#shop">SHOP</a>
-                    <a href="/#about">ABOUT</a>
+                    <a href="/services">SERVICES</a>
+                    <a href="/shop">SHOP</a>
+                    <a href="/about">ABOUT</a>
                     <a href="/prompts">PROMPTS</a>
                     <a href="/submit-prompt">SUBMIT</a>
                     <a href="mailto:real.re.render@gmail.com">CONTACT</a>
@@ -128,8 +129,9 @@ const Navbar = () => {
                     fontSize: '1.5rem'
                 }}
             >
-                <a href="/#shop" onClick={toggleMenu}>SHOP</a>
-                <a href="/#about" onClick={toggleMenu}>ABOUT</a>
+                <a href="/services" onClick={toggleMenu}>SERVICES</a>
+                <a href="/shop" onClick={toggleMenu}>SHOP</a>
+                <a href="/about" onClick={toggleMenu}>ABOUT</a>
                 <a href="/prompts" onClick={toggleMenu}>PROMPTS</a>
                 <a href="/submit-prompt" onClick={toggleMenu}>SUBMIT</a>
                 <a href="mailto:real.re.render@gmail.com" onClick={toggleMenu}>CONTACT</a>
