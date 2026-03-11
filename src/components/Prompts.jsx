@@ -26,7 +26,8 @@ const Prompts = () => {
         <section style={{
             padding: '8rem 2rem 6rem',
             minHeight: '100vh',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
         }}>
             {/* Header */}
             <div style={{
@@ -51,7 +52,7 @@ const Prompts = () => {
                     <p style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.9rem',
-                        color: '#666',
+                        color: 'var(--color-text-secondary)',
                         marginTop: '1rem',
                         maxWidth: '500px'
                     }}>
@@ -97,8 +98,8 @@ const Prompts = () => {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            border: '1px solid var(--color-text)',
-                            backgroundColor: '#fff',
+                            border: '1px solid var(--color-border)',
+                            backgroundColor: 'var(--color-bg)',
                             overflow: 'hidden',
                         }}
                     >
@@ -107,7 +108,7 @@ const Prompts = () => {
                             whileHover={{ scale: 0.98 }}
                             style={{
                                 maxHeight: '300px',
-                                backgroundColor: '#fff',
+                                backgroundColor: 'var(--color-bg)',
                                 position: 'relative',
                                 overflow: 'hidden',
                                 cursor: 'pointer',
@@ -133,9 +134,10 @@ const Prompts = () => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: '#333',
+                                    color: 'var(--color-text-secondary)',
                                     fontFamily: 'var(--font-mono)',
                                     fontSize: '0.8rem',
+                                    backgroundColor: 'var(--color-surface)',
                                 }}>
                                     [ IMAGE PENDING ]
                                 </div>
@@ -171,7 +173,7 @@ const Prompts = () => {
 
                             {/* Prompt Text Box */}
                             <div style={{
-                                backgroundColor: '#f5f5f5',
+                                backgroundColor: 'var(--color-surface)',
                                 color: 'var(--color-text)',
                                 padding: '1.25rem',
                                 fontFamily: 'var(--font-mono)',
@@ -248,7 +250,7 @@ const Prompts = () => {
                     textAlign: 'center',
                     padding: '4rem',
                     fontFamily: 'var(--font-mono)',
-                    color: '#999'
+                    color: 'var(--color-text-secondary)'
                 }}>
                     No prompts found for this category.
                 </div>

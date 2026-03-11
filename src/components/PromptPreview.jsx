@@ -19,8 +19,9 @@ const PromptPreview = () => {
     return (
         <section style={{
             padding: '6rem 2rem',
-            backgroundColor: '#f5f5f5',
-            borderTop: '1px solid var(--color-text)',
+            backgroundColor: 'var(--color-surface)',
+            color: 'var(--color-text)',
+            borderTop: '1px solid var(--color-border)',
         }}>
             {/* Section Header */}
             <div style={{
@@ -44,7 +45,7 @@ const PromptPreview = () => {
                     <p style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.85rem',
-                        color: '#666',
+                        color: 'var(--color-text-secondary)',
                         marginTop: '0.75rem',
                     }}>
                         Copy-paste ready prompts for AI image generation.
@@ -79,15 +80,15 @@ const PromptPreview = () => {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            border: '1px solid var(--color-text)',
-                            backgroundColor: '#fff',
+                            border: '1px solid var(--color-border)',
+                            backgroundColor: 'var(--color-bg)',
                             overflow: 'hidden',
                         }}
                     >
                         {/* Image */}
                         <div style={{
                             maxHeight: '220px',
-                            backgroundColor: '#fff',
+                            backgroundColor: 'var(--color-bg)',
                             overflow: 'hidden',
                             display: 'flex',
                             alignItems: 'center',
@@ -111,10 +112,10 @@ const PromptPreview = () => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: '#999',
+                                    color: 'var(--color-text-secondary)',
                                     fontFamily: 'var(--font-mono)',
                                     fontSize: '0.75rem',
-                                    backgroundColor: '#eee',
+                                    backgroundColor: 'var(--color-surface)',
                                 }}>
                                     [ IMAGE ]
                                 </div>
@@ -146,7 +147,7 @@ const PromptPreview = () => {
                             </h3>
 
                             <div style={{
-                                backgroundColor: '#f5f5f5',
+                                backgroundColor: 'var(--color-surface)',
                                 color: 'var(--color-text)',
                                 padding: '1rem',
                                 fontFamily: 'var(--font-mono)',
@@ -203,7 +204,7 @@ const PromptPreview = () => {
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 'bold',
                     fontSize: '0.85rem',
-                    color: '#666',
+                    color: 'var(--color-text-secondary)',
                     textDecoration: 'underline',
                 }}>
                     Have a unique prompt? Submit yours →

@@ -15,7 +15,7 @@ const ShopPage = () => {
                 </h1>
                 <p style={{ 
                     fontFamily: 'var(--font-mono)', 
-                    color: '#666', 
+                    color: 'var(--color-text-secondary)', 
                     marginTop: '1rem',
                     fontSize: '1rem'
                 }}>

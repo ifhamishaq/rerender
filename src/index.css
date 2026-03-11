@@ -1,23 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&display=swap');
 
 :root {
-  --color-bg: #FFFFFF;
-  --color-text: #121212;
+  --color-bg: #F8F6F1;
+  --color-text: #0E0E0E;
+  --color-text-secondary: #5A5A5A;
   --color-accent: #39FF14;
+  --color-surface: #EFEDE8;
+  --color-border: #D8D5CE;
 
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Space Grotesk', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Space Grotesk', sans-serif;
 
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 2rem;
   --spacing-xl: 4rem;
+
+  --nav-height: 64px;
+}
+
+body.dark-mode {
+  --color-bg: #080808;
+  --color-text: #EFEFEF;
+  --color-text-secondary: #888888;
+  --color-accent: #39FF14;
+  --color-surface: #141414;
+  --color-border: #252525;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
 }
 
 body {
@@ -28,6 +64,206 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   line-height: 1.5;
+}
+
+/* === EDITORIAL UTILITIES === */
+
+/* Section label: e.g. "01 — SERVICES" */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.section-label::after {
+  content: '';
+  display: block;
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Accent dot used in nav and section markers */
+.accent-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: inline-block;
+}
+
+/* Nav link hover underline */
+.nav-link {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 1;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width 0.25s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* === MICRO-ANIMATIONS === */
+
+@keyframes pulse-accent {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Accent dot pulse in nav */
+.accent-dot {
+  animation: pulse-accent 2.5s ease-in-out infinite;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === GLOBAL DARK MODE FALLBACKS ===
+   These catch any remaining hardcoded colors that cause contrast issues.
+   CSS variables in components take precedence, these are safe fallbacks. */
+body.dark-mode section,
+body.dark-mode main,
+body.dark-mode div:not([class*="noise"]):not([class*="cursor"]):not([class*="progress"]) {
+  /* Only inherit background, don't force it — avoids breaking intentional surfaces */
+  color: inherit;
+}
+
+/* Ensure all text elements in dark mode get proper color if not explicitly set */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+  color: var(--color-text);
+}
+
+body.dark-mode p {
+  color: var(--color-text);
+}
+
+body.dark-mode button {
+  color: var(--color-text);
+}
+
+body.dark-mode a:not([style]) {
+  color: var(--color-text);
+}
+
+/* Catch sections with hardcoded white/light backgrounds */
+body.dark-mode section[style*="background-color: #f5f5f5"],
+body.dark-mode section[style*="background-color:#f5f5f5"],
+body.dark-mode section[style*="background-color: rgb(245"],
+body.dark-mode section[style*="background-color: white"],
+body.dark-mode section[style*="background-color:#fff"],
+body.dark-mode section[style*="background-color: #fff"],
+body.dark-mode section[style*="background-color: #ffffff"],
+body.dark-mode section[style*="background-color: #FFFFFF"] {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+/* Catch hardcoded dark text on any element in dark mode */
+body.dark-mode [style*="color: #333"],
+body.dark-mode [style*="color: #444"],
+body.dark-mode [style*="color: #555"],
+body.dark-mode [style*="color: #666"],
+body.dark-mode [style*="color: #777"],
+body.dark-mode [style*="color: #888"],
+body.dark-mode [style*="color: #999"],
+body.dark-mode [style*="color: rgb(51"],
+body.dark-mode [style*="color: rgb(68"],
+body.dark-mode [style*="color: rgb(85"],
+body.dark-mode [style*="color: rgb(102"],
+body.dark-mode [style*="color: rgb(119"] {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Catch hardcoded white text (#fff/#ffffff) that should stay in dark mode accents */
+body.dark-mode [style*="color: #fff"]:not([style*="background"]),
+body.dark-mode [style*="color: #ffffff"]:not([style*="background"]),
+body.dark-mode [style*="color: white"]:not([style*="background"]) {
+  color: var(--color-text) !important;
+}
+
+/* Hardcoded white/light backgrounds on divs/motion.divs */
+body.dark-mode [style*="background-color: #fff"],
+body.dark-mode [style*="background-color: #ffffff"],
+body.dark-mode [style*="background-color: white"],
+body.dark-mode [style*="background-color: #eee"],
+body.dark-mode [style*="background-color: #f5f5f5"],
+body.dark-mode [style*="background-color: rgb(255, 255"],
+body.dark-mode [style*="background-color: rgb(238"],
+body.dark-mode [style*="background-color: rgb(245"] {
+  background-color: var(--color-surface) !important;
 }
 
 h1,
@@ -57,6 +293,27 @@ button {
   background: none;
   cursor: pointer;
   font-family: inherit;
+}
+
+/* === NATIVE FORM ELEMENTS DARK MODE === */
+input,
+textarea,
+select {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s ease, background-color 0.3s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 img,
@@ -93,7 +350,7 @@ html.lenis body {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  border-bottom: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-border);
   position: relative;
   padding-top: 6rem;
 }

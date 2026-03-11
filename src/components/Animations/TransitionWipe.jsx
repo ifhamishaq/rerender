@@ -1,88 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const wipeVariants = {
-    initial: {
-        x: '100%',
-    },
-    animate: {
-        x: '100%',
-        transition: {
-            duration: 0.8,
-            ease: [0.76, 0, 0.24, 1]
-        }
-    },
-    exit: {
-        x: '0%',
-        transition: {
-            duration: 0.8,
-            ease: [0.76, 0, 0.24, 1]
-        }
-    }
-};
-
-const secondaryWipeVariants = {
-    initial: {
-        x: '100%',
-    },
-    animate: {
-        x: '-100%',
-        transition: {
-            duration: 0.8,
-            ease: [0.76, 0, 0.24, 1],
-            delay: 0.1
-        }
-    },
-    exit: {
-        x: '0%',
-        transition: {
-            duration: 0.8,
-            ease: [0.76, 0, 0.24, 1],
-            delay: 0.1
-        }
-    }
-};
-
+/**
+ * Smooth editorial page transition.
+ * Content fades + slides up on enter, fades + slides down on exit.
+ * Fast and clean — no jarring full-screen wipe.
+ */
 const TransitionWipe = ({ children }) => {
     return (
-        <div style={{ position: 'relative' }}>
-            <motion.div
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={wipeVariants}
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    backgroundColor: '#121212',
-                    zIndex: 9999,
-                    pointerEvents: 'none',
-                    transformOrigin: 'left'
-                }}
-            />
-            {/* Secondary Accent Wipe */}
-            <motion.div
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={secondaryWipeVariants}
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    backgroundColor: 'var(--color-accent)',
-                    zIndex: 9998,
-                    pointerEvents: 'none',
-                    transformOrigin: 'left'
-                }}
-            />
+        <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{
+                duration: 0.45,
+                ease: [0.25, 0.46, 0.45, 0.94]
+            }}
+        >
             {children}
-        </div>
+        </motion.div>
     );
 };
 

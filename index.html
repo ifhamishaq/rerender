@@ -52,6 +52,17 @@
 
 <body>
   <!-- Hidden Netlify form for build-time detection -->
+  <form name="project-inquiry" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" />
+    <input name="name" />
+    <input name="email" />
+    <input name="company" />
+    <input name="service" />
+    <input name="budget" />
+    <textarea name="brief"></textarea>
+    <input name="applied_discount" />
+  </form>
+
   <form name="prompt-submissions" netlify netlify-honeypot="bot-field" hidden>
     <input name="bot-field" />
     <input name="name" />

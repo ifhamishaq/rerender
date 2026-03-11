@@ -24,8 +24,8 @@ const SubmitPrompt = () => {
         padding: '0.75rem',
         fontFamily: 'var(--font-mono)',
         fontSize: '0.85rem',
-        border: '2px solid var(--color-text)',
-        backgroundColor: '#fff',
+        border: '2px solid var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
         color: 'var(--color-text)',
         outline: 'none',
         transition: 'border-color 0.2s ease',
@@ -36,7 +36,8 @@ const SubmitPrompt = () => {
             <section style={{
                 padding: '8rem 2rem 6rem',
                 minHeight: '100vh',
-                backgroundColor: '#f5f5f5',
+                backgroundColor: 'var(--color-bg)',
+                color: 'var(--color-text)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -57,7 +58,7 @@ const SubmitPrompt = () => {
                     </h1>
                     <p style={{
                         fontFamily: 'var(--font-mono)',
-                        color: '#666',
+                        color: 'var(--color-text-secondary)',
                         fontSize: '0.9rem',
                         lineHeight: 1.6,
                     }}>
@@ -84,7 +85,8 @@ const SubmitPrompt = () => {
         <section style={{
             padding: '8rem 2rem 6rem',
             minHeight: '100vh',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
         }}>
             <div style={{ maxWidth: '600px', margin: '0 auto' }}>
                 {/* Header */}
@@ -103,7 +105,7 @@ const SubmitPrompt = () => {
                     <p style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.9rem',
-                        color: '#666',
+                        color: 'var(--color-text-secondary)',
                         marginTop: '1rem',
                     }}>
                         Share your unique AI prompts with the community. Selected prompts will be featured on the Prompts page.
@@ -254,8 +256,8 @@ const SubmitPrompt = () => {
                             style={{
                                 width: '100%',
                                 padding: '1rem',
-                                backgroundColor: 'var(--color-text)',
-                                color: '#fff',
+                                backgroundColor: 'var(--color-accent)',
+                                color: '#000',
                                 fontFamily: 'var(--font-mono)',
                                 fontWeight: 'bold',
                                 fontSize: '1rem',
@@ -275,14 +277,14 @@ const SubmitPrompt = () => {
                 <div style={{
                     marginTop: '3rem',
                     padding: '1.5rem',
-                    border: '2px solid var(--color-text)',
-                    backgroundColor: '#fff',
+                    border: '2px solid var(--color-border)',
+                    backgroundColor: 'var(--color-surface)',
                     textAlign: 'center',
                 }}>
                     <p style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.85rem',
-                        color: '#666',
+                        color: 'var(--color-text-secondary)',
                         margin: 0,
                     }}>
                         Have questions? Reach out directly:

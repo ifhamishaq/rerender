@@ -5,14 +5,15 @@ const CTA = () => {
     return (
         <section style={{
             padding: '8rem 2rem',
-            backgroundColor: 'var(--color-text)',
-            color: 'var(--color-bg)',
+            backgroundColor: 'var(--color-surface)',
+            color: 'var(--color-text)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            borderTop: '1px solid var(--color-accent)'
+            borderTop: '2px solid var(--color-accent)',
+            borderBottom: '1px solid var(--color-border)'
         }}>
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}

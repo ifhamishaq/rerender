@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Lenis from 'lenis';
 import { AnimatePresence } from 'framer-motion';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
@@ -27,8 +28,29 @@ import Home from './pages/Home';
 import Services from './pages/Services';
 import ShopPage from './pages/ShopPage';
 import AboutPage from './pages/AboutPage';
+import PricingPage from './pages/PricingPage';
+import ArcadePage from './pages/ArcadePage';
+import CreativeStudioPage from './pages/CreativeStudioPage';
+import TypeRacerPage from './pages/TypeRacerPage';
+import HexCodeHeroPage from './pages/HexCodeHeroPage';
+import PalettePickerPage from './pages/PalettePickerPage';
+import ReflexGamePage from './pages/ReflexGamePage';
 
+import SlotMachineWidget from './components/SlotMachineWidget';
 import TransitionWipe from './components/Animations/TransitionWipe';
+
+// Global persistent audio — lives outside routing so it never resets on page nav
+const GlobalAudio = () => {
+  useEffect(() => {
+    const audio = document.getElementById('bg-audio');
+    if (audio) {
+      audio.volume = 0.2; // Low ambient volume as requested
+      // Intentionally NOT autoplaying as per user request
+    }
+  }, []);
+
+  return <audio id="bg-audio" loop src="/bg-music.mp3" style={{ display: 'none' }} />;
+};
 
 const TitleManager = () => {
   const location = useLocation();
@@ -42,6 +64,12 @@ const TitleManager = () => {
       '/features': 'Features | RE-RENDER',
       '/prompts': 'Prompt Lab | RE-RENDER',
       '/submit-prompt': 'Submit Prompt | RE-RENDER',
+      '/arcade': 'The Arcade | RE-RENDER',
+      '/arcade/creative-studio': 'Creative Studio | RE-RENDER',
+      '/arcade/type-racer': 'Type Racer | RE-RENDER',
+      '/arcade/hex-code-hero': 'Hex Code Hero | RE-RENDER',
+      '/arcade/palette-thief': 'Palette Thief | RE-RENDER',
+      '/arcade/reflex': 'Chrono Strike | RE-RENDER',
       '/admin': 'Admin Panel | RE-RENDER',
       '/privacy': 'Privacy Policy | RE-RENDER',
       '/terms': 'Terms of Service | RE-RENDER',
@@ -64,7 +92,14 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<TransitionWipe><Home /></TransitionWipe>} />
         <Route path="/services" element={<TransitionWipe><Services /></TransitionWipe>} />
         <Route path="/shop" element={<TransitionWipe><ShopPage /></TransitionWipe>} />
+        <Route path="/pricing" element={<TransitionWipe><PricingPage /></TransitionWipe>} />
         <Route path="/about" element={<TransitionWipe><AboutPage /></TransitionWipe>} />
+        <Route path="/arcade" element={<TransitionWipe><ArcadePage /></TransitionWipe>} />
+        <Route path="/arcade/creative-studio" element={<TransitionWipe><CreativeStudioPage /></TransitionWipe>} />
+        <Route path="/arcade/type-racer" element={<TransitionWipe><TypeRacerPage /></TransitionWipe>} />
+        <Route path="/arcade/hex-code-hero" element={<TransitionWipe><HexCodeHeroPage /></TransitionWipe>} />
+        <Route path="/arcade/palette-thief" element={<TransitionWipe><PalettePickerPage /></TransitionWipe>} />
+        <Route path="/arcade/reflex" element={<TransitionWipe><ReflexGamePage /></TransitionWipe>} />
         <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
@@ -105,20 +140,31 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <TitleManager />
-      <ScrollToTop />
-      <div className="app">
-        <NoiseOverlay />
-        <Cursor />
-        <ScrollProgress />
-        <Navbar />
+    <ThemeProvider>
+      <Router>
+        <TitleManager />
+        <ScrollToTop />
+        <GlobalAudio />
+        <div className="app">
+          <Cursor />
+          <ScrollProgress />
+          <Navbar />
 
-        <AnimatedRoutes />
+          <AnimatedRoutes />
 
-        <Footer />
-      </div>
-    </Router>
+          {/* The SlotMachineWidget is intended to be rendered within the Home component,
+              as indicated by the context of the provided Code Edit snippet.
+              The instruction "render the widget right above the CTA component on the main page"
+              implies a modification to the Home component's structure, not App.jsx directly.
+              Since the Home component's content is not provided, this change cannot be
+              applied here directly without breaking the App component's structure.
+              The "remove the Lucky Render route" instruction is also not applicable
+              as no such route exists in the provided AnimatedRoutes. */}
+
+          <Footer />
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

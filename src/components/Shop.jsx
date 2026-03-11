@@ -39,7 +39,8 @@ const Shop = () => {
     return (
         <section id="shop" style={{
             padding: '6rem 2rem',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
         }}>
             <div style={{
                 display: 'flex',
@@ -107,12 +108,11 @@ const Shop = () => {
                             className="shop-item-image"
                             style={{
                                 aspectRatio: '1',
-                                backgroundColor: '#121212',
+                                backgroundColor: 'var(--color-surface)',
                                 position: 'relative',
                                 overflow: 'hidden',
-                                border: '1px solid var(--color-text)',
+                                border: '1px solid var(--color-border)',
                                 cursor: 'pointer',
-                                // Filter handled via CSS class for better mobile support
                             }}
                         >
                             <div style={{
@@ -158,7 +158,7 @@ const Shop = () => {
                                 <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{product.title}</h3>
                                 <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{product.price}</span>
                             </div>
-                            <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>{product.desc}</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0 }}>{product.desc}</p>
                         </div>
 
                         {/* Buy Button */}

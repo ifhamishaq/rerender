@@ -5,11 +5,11 @@ const About = () => {
     return (
         <section id="about" style={{
             padding: '8rem 2rem',
-            backgroundColor: '#000',
-            color: '#fff',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
             position: 'relative',
             overflow: 'hidden',
-            borderTop: '1px solid var(--color-text)'
+            borderTop: '1px solid var(--color-border)'
         }}>
             {/* Background Accent */}
             <div style={{
@@ -18,7 +18,8 @@ const About = () => {
                 right: '5%',
                 fontSize: '15vw',
                 fontWeight: '900',
-                color: 'rgba(255,255,255,0.03)',
+                color: 'var(--color-text)',
+                opacity: 0.04,
                 pointerEvents: 'none',
                 lineHeight: 0.8,
                 zIndex: 0
@@ -90,7 +91,7 @@ const About = () => {
                         fontSize: '1.2rem',
                         lineHeight: 1.6,
                         marginBottom: '2rem',
-                        color: '#ccc'
+                        color: 'var(--color-text-secondary)'
                     }}>
                         Based at the intersection of high-fashion aesthetics and raw lo-fi digital culture.
                         I build tools and assets that disrupt the mainstream frequency. RE-RENDER is my laboratory
@@ -101,7 +102,7 @@ const About = () => {
                         fontSize: '1.1rem',
                         lineHeight: 1.6,
                         marginBottom: '3rem',
-                        color: '#888'
+                        color: 'var(--color-text-secondary)'
                     }}>
                         My work is defined by a commitment to the 'Unseen' finding beauty in the glitch,
                         the noise, and the raw digital texture that defines our post-internet era.
