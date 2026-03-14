@@ -30,11 +30,12 @@ import ShopPage from './pages/ShopPage';
 import AboutPage from './pages/AboutPage';
 import PricingPage from './pages/PricingPage';
 import ArcadePage from './pages/ArcadePage';
-import CreativeStudioPage from './pages/CreativeStudioPage';
 import TypeRacerPage from './pages/TypeRacerPage';
 import HexCodeHeroPage from './pages/HexCodeHeroPage';
 import PalettePickerPage from './pages/PalettePickerPage';
 import ReflexGamePage from './pages/ReflexGamePage';
+import WallpaperLab from './pages/WallpaperLab';
+import ToolsPage from './pages/ToolsPage';
 
 import SlotMachineWidget from './components/SlotMachineWidget';
 import TransitionWipe from './components/Animations/TransitionWipe';
@@ -70,6 +71,8 @@ const TitleManager = () => {
       '/arcade/hex-code-hero': 'Hex Code Hero | RE-RENDER',
       '/arcade/palette-thief': 'Palette Thief | RE-RENDER',
       '/arcade/reflex': 'Chrono Strike | RE-RENDER',
+      '/arcade/wallpaper-lab': 'AI Wallpaper Lab | RE-RENDER',
+      '/tools': 'Utility Labs | RE-RENDER',
       '/admin': 'Admin Panel | RE-RENDER',
       '/privacy': 'Privacy Policy | RE-RENDER',
       '/terms': 'Terms of Service | RE-RENDER',
@@ -95,11 +98,12 @@ const AnimatedRoutes = () => {
         <Route path="/pricing" element={<TransitionWipe><PricingPage /></TransitionWipe>} />
         <Route path="/about" element={<TransitionWipe><AboutPage /></TransitionWipe>} />
         <Route path="/arcade" element={<TransitionWipe><ArcadePage /></TransitionWipe>} />
-        <Route path="/arcade/creative-studio" element={<TransitionWipe><CreativeStudioPage /></TransitionWipe>} />
         <Route path="/arcade/type-racer" element={<TransitionWipe><TypeRacerPage /></TransitionWipe>} />
         <Route path="/arcade/hex-code-hero" element={<TransitionWipe><HexCodeHeroPage /></TransitionWipe>} />
         <Route path="/arcade/palette-thief" element={<TransitionWipe><PalettePickerPage /></TransitionWipe>} />
         <Route path="/arcade/reflex" element={<TransitionWipe><ReflexGamePage /></TransitionWipe>} />
+        <Route path="/arcade/wallpaper-lab" element={<TransitionWipe><WallpaperLab /></TransitionWipe>} />
+        <Route path="/tools" element={<TransitionWipe><ToolsPage /></TransitionWipe>} />
         <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />

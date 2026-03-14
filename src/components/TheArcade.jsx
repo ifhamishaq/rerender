@@ -154,12 +154,6 @@ const TheArcade = () => {
                         gap: '1px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-border)'
                     }}>
                         <ArcadeGameCard
-                            icon="🎨"
-                            title="CREATIVE STUDIO"
-                            desc="Design custom UIs with RE-RENDER elements. Drag, drop, edit, and export your creations directly to image."
-                            link="/arcade/creative-studio"
-                        />
-                        <ArcadeGameCard
                             icon="⌨️"
                             title="TYPE RACER"
                             desc="Your keyboard is the weapon. Type design manifests and code snippets. Speed earns glory, mistakes cost time."
