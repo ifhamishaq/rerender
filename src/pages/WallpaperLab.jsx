@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Download, Share2, RefreshCw, Layers, Layout, Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+import { Download, Share2, RefreshCw, Layers, Layout, Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown, Sparkles, Wand2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const COLORS = {
@@ -132,12 +132,118 @@ const WallpaperLab = () => {
         setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`].slice(-5));
     };
 
+    const applyWatermark = async (imageUrl) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                
+                // Minimalist RE-RENDER Watermark
+                const fontSize = Math.max(24, Math.floor(img.width * 0.025));
+                ctx.font = `900 ${fontSize}px "Space Grotesk", sans-serif`;
+                ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.textAlign = "right";
+                ctx.letterSpacing = "2px";
+                ctx.fillText("RE-RENDER", canvas.width - fontSize, canvas.height - fontSize);
+                
+                // Secondary stamp
+                ctx.font = `500 ${fontSize * 0.4}px "JetBrains Mono", monospace`;
+                ctx.fillText("// PRODUCTION_ASSET", canvas.width - fontSize, canvas.height - (fontSize * 0.5));
+                
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.onerror = () => resolve(imageUrl); // Fallback to original
+            img.src = imageUrl;
+        });
+    };
+
+    const generateSpecCard = async (asset) => {
+        addLog('ENGINE: Composite rendering active...');
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1080;
+                canvas.height = 1440; // Editorial Portrait
+                const ctx = canvas.getContext('2d');
+                
+                // Styling
+                const ACCENT = '#39FF14'; 
+                
+                // 1. Background
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 2. Draw Wallpaper (Square Crop/Fit)
+                const targetH = 800;
+                const aspect = img.width / img.height;
+                let drawW = canvas.width;
+                let drawH = canvas.width / aspect;
+                
+                ctx.drawImage(img, 0, 80, drawW, drawH);
+                
+                // 3. Editorial Masthead
+                ctx.fillStyle = ACCENT;
+                ctx.font = `900 70px "Space Grotesk"`;
+                ctx.fillText("RE-RENDER", 60, drawH + 180);
+                
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.font = `700 18px "JetBrains Mono"`;
+                ctx.fillText("PRO_MANIFEST // VOLUME_01", 60, drawH + 210);
+                
+                // 4. Metadata
+                ctx.fillStyle = "#fff";
+                ctx.font = `900 32px "Space Grotesk"`;
+                ctx.fillText(`${asset.genre.toUpperCase()} // ${asset.style.toUpperCase()}`, 60, drawH + 300);
+                
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                ctx.font = `500 20px "Inter"`;
+                const promptLines = asset.prompt.match(/.{1,50}(\s|$)/g) || [];
+                promptLines.slice(0, 2).forEach((line, i) => {
+                    ctx.fillText(line.trim(), 60, drawH + 350 + (i * 30));
+                });
+                
+                // 5. Technical Footer
+                ctx.fillStyle = ACCENT;
+                ctx.fillRect(60, canvas.height - 120, 100, 4);
+                
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                ctx.font = `500 14px "JetBrains Mono"`;
+                ctx.fillText(`ENGINE: FLUX.1_SCHNELL`, 60, canvas.height - 80);
+                ctx.fillText(`SEED: ${asset.seed}`, canvas.width - 250, canvas.height - 80);
+                
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.src = asset.url;
+        });
+    };
+
     const handleSurpriseMe = () => {
         const randomGenre = GENRES[Math.floor(Math.random() * GENRES.length)].id;
         const randomStyle = STYLES[Math.floor(Math.random() * STYLES.length)].id;
         setGenre(randomGenre);
         setStyle(randomStyle);
         addLog(`SURPRISE_ME: Randomized Aesthetic`);
+    };
+
+    const handleMagicEnhance = () => {
+        const enhancers = [
+            "Shot on 70mm Imax // Deep Cinematic Contrast",
+            "High-fashion editorial lighting // Subsurface scattering",
+            "Volumetric atmosphere // Hyper-realistic textures",
+            "Anamorphic lens flare // 8k raw detail",
+            "Avant-garde composition // Ethereal glow",
+            "Masterpiece quality // Ray-traced reflections"
+        ];
+        const randomEnhancer = enhancers[Math.floor(Math.random() * enhancers.length)];
+        setCustomSupplement(prev => prev ? `${prev}, ${randomEnhancer}` : randomEnhancer);
+        addLog("ENGINE: Orchestrating aesthetic manifest...");
     };
 
     const handleGenerate = async () => {
@@ -235,11 +341,14 @@ const WallpaperLab = () => {
             }
 
             if (finalUrl) {
-                setResultUrl(finalUrl);
+                // Apply Watermark before displaying/saving
+                addLog('ENGINE: Watermarking active...');
+                const watermarkedUrl = await applyWatermark(finalUrl);
+                
+                setResultUrl(watermarkedUrl);
                 addLog('GENERATION_SUCCESS: ASSET_RENDERED');
-                addLog(`URL_PRV: ${finalUrl.toString().slice(0, 40)}...`);
                 updateQuota();
-                saveToArchive(finalUrl, {
+                saveToArchive(watermarkedUrl, {
                     genre: selectedGenre.name,
                     style: selectedStyle.name,
                     prompt: compositePrompt,
@@ -450,6 +559,74 @@ const WallpaperLab = () => {
 
     // --- UI SUB-COMPONENTS ---
 
+    const MistyReveal = () => {
+        return (
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.5, 0.2, 0.8, 0.3, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                        filter: 'blur(40px)',
+                    }}
+                />
+                <motion.div
+                    animate={{ 
+                        backgroundPosition: ['0% 0%', '100% 100%'],
+                        opacity: [0.1, 0.3, 0.1]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                        backgroundSize: '200px 200px',
+                        mixBlendMode: 'overlay',
+                    }}
+                />
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: '1.5rem',
+                    zIndex: 2
+                }}>
+                    <div className="pulse-ring" />
+                    <div style={{ 
+                        fontFamily: COLORS.display, 
+                        fontSize: '1.2rem', 
+                        fontWeight: 900, 
+                        letterSpacing: '0.4em',
+                        color: COLORS.accent,
+                        textShadow: `0 0 20px ${COLORS.accent}44`
+                    }}>
+                        RESOLVING_AESTHETIC
+                    </div>
+                </div>
+                <style>{`
+                    .pulse-ring {
+                        width: 60px;
+                        height: 60px;
+                        border: 2px solid ${COLORS.accent};
+                        border-radius: 50%;
+                        animation: pulse 2s infinite;
+                    }
+                    @keyframes pulse {
+                        0% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 0 0 ${COLORS.accent}66; }
+                        70% { transform: scale(1.2); opacity: 0; box-shadow: 0 0 0 20px ${COLORS.accent}00; }
+                        100% { transform: scale(0.8); opacity: 0; }
+                    }
+                `}</style>
+            </div>
+        );
+    };
+
     const Lightbox = ({ asset, onClose }) => {
         if (!asset) return null;
         return (
@@ -514,21 +691,44 @@ const WallpaperLab = () => {
                                 <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>FLUX.1_SCHNELL // ULTRA_HD</div>
                             </div>
                         </div>
-
-                        <div style={{ marginTop: '3rem', display: 'flex', gap: '0.75rem' }}>
-                            <button 
-                                onClick={() => {
-                                    const link = document.createElement('a');
-                                    link.href = asset.url;
-                                    link.download = `render-${asset.id}.png`;
-                                    link.click();
-                                }}
-                                style={{ flex: 1, padding: '1rem', backgroundColor: COLORS.accent, color: '#000', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
-                            > DOWNLOAD_ASSET </button>
-                            <button 
-                                onClick={onClose}
-                                style={{ padding: '1rem', backgroundColor: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
-                            > CLOSE </button>
+                        <div style={{ marginTop: '3rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                                <button 
+                                    onClick={async () => {
+                                        const specUrl = await generateSpecCard(asset);
+                                        const link = document.createElement('a');
+                                        link.href = specUrl;
+                                        link.download = `spec-card-${asset.id}.png`;
+                                        link.click();
+                                    }}
+                                    style={{ 
+                                        flex: 1, 
+                                        padding: '1rem', 
+                                        backgroundColor: 'transparent', 
+                                        color: COLORS.accent, 
+                                        border: `1px solid ${COLORS.accent}`, 
+                                        fontWeight: 900, 
+                                        cursor: 'pointer', 
+                                        fontSize: '0.7rem', 
+                                        fontFamily: COLORS.display 
+                                    }}
+                                > EXPORT_SPEC_CARD </button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button 
+                                    onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = asset.url;
+                                        link.download = `render-${asset.id}.png`;
+                                        link.click();
+                                    }}
+                                    style={{ flex: 1, padding: '1rem', backgroundColor: COLORS.accent, color: '#000', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                                > DOWNLOAD_RAW </button>
+                                <button 
+                                    onClick={onClose}
+                                    style={{ padding: '1rem', backgroundColor: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                                > CLOSE </button>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
@@ -609,604 +809,350 @@ const WallpaperLab = () => {
         };
     };
 
-    const dynamicStyles = getDynamicStyles();
-
-    return (
+    const dynamicStyles = getDynamicStyles();    return (
         <div style={{
-            minHeight: '100vh',
             backgroundColor: COLORS.bg,
             color: COLORS.text,
+            minHeight: '100vh',
             fontFamily: COLORS.sans,
-            padding: '8rem 2rem 4rem 2rem',
             position: 'relative',
             overflowX: 'hidden',
-            background: dynamicStyles.background,
-            transition: 'background 1s ease'
+            paddingBottom: '120px' // Space for floating bar
         }}>
-            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-                <header style={{ 
-                    marginBottom: '6rem', 
-                    borderBottom: `1px solid ${COLORS.border}`, 
-                    paddingBottom: '2.5rem',
+            {/* Ambient Sync Background */}
+            <div className="ambient-glow" style={{
+                background: resultUrl ? `url(${resultUrl}) center/cover` : `linear-gradient(45deg, ${COLORS.accent}22, #000 70%)`
+            }} />
+
+            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '2rem' }}>
+                {/* Minimal Editorial Header */}
+                <header style={{
+                    paddingTop: '2rem',
+                    paddingBottom: '6rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1rem'
+                    gap: '1rem',
+                    textAlign: 'center'
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.3em' }}>
-                            WALLPAPER_STUDIO // PRO_EDITION
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.1em', fontWeight: 700, marginBottom: '0.2rem' }}>DAILY_COMPUTE</div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: COLORS.display }}>{credits}/10 CREDITS</div>
-                        </div>
+                    <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.3em' }}>
+                        HIGGSFIELD_X_RERENDER // VOID_ENGINE
                     </div>
-                    <h1 style={{ fontSize: 'clamp(3rem, 10vw, 8rem)', fontFamily: COLORS.display, fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.03em', margin: 0 }}>
-                        THE_LABORATORY
+                    <h1 style={{ fontSize: 'clamp(4rem, 12vw, 10rem)', fontFamily: COLORS.display, fontWeight: 900, lineHeight: 0.8, letterSpacing: '-0.04em', margin: 0 }}>
+                        GENERATION
                     </h1>
                 </header>
-                <div style={{ marginBottom: '2rem' }}>
-                    <Link to="/tools" style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700,
-                        letterSpacing: '0.1em', color: COLORS.accent, textDecoration: 'none',
-                        textTransform: 'uppercase',
-                        transition: 'opacity 0.2s'
-                    }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = 0.7}
-                        onMouseLeave={e => e.currentTarget.style.opacity = 1}>
-                        ← BACK_TO_TOOLS
-                    </Link>
-                </div>
 
-
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                    gap: '2.5rem',
-                    alignItems: 'start'
-                }}>
-                    {/* Controls Panel */}
+                {/* Main Centered Stage */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4rem' }}>
+                    
+                    {/* Immersive Preview */}
                     <div style={{
-                        backgroundColor: COLORS.surface,
-                        border: `1px solid ${COLORS.border}`,
-                        padding: '2rem',
+                        width: '100%',
+                        maxWidth: ratio === '16:9' ? '1200px' : (ratio === '9:16' ? '500px' : '800px'),
                         position: 'relative'
                     }}>
                         <div style={{
-                            position: 'absolute',
-                            top: '-1px',
-                            right: '2rem',
-                            padding: '0 1rem',
-                            backgroundColor: credits > 0 ? COLORS.bg : 'rgba(232, 17, 26, 0.1)',
-                            fontSize: '0.6rem',
-                            color: credits > 0 ? COLORS.success : COLORS.accent,
-                            borderLeft: `1px solid ${COLORS.border}`,
-                            borderRight: `1px solid ${COLORS.border}`,
-                            fontWeight: 900
+                            backgroundColor: 'rgba(5,5,5,0.4)',
+                            backdropFilter: 'blur(40px)',
+                            border: `1px solid rgba(255,255,255,0.05)`,
+                            borderRadius: '32px',
+                            padding: '1.5rem',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            boxShadow: '0 50px 100px rgba(0,0,0,0.8)'
                         }}>
-                            {credits}/{DAILY_LIMIT} RENDERS_REMAINING
-                        </div>
-
-                        <StackedSelector 
-                            genreOptions={GENRES}
-                            styleOptions={STYLES}
-                            currentGenre={genre}
-                            currentStyle={style}
-                            onGenreChange={setGenre}
-                            onStyleChange={setStyle}
-                            isGenerating={isGenerating}
-                            onGenerate={handleGenerate}
-                        />
-
-                        <button
-                            onClick={handleSurpriseMe}
-                            style={{
+                             <div style={{
+                                aspectRatio: ratio === '9:16' ? '9/16' : (ratio === '16:9' ? '16/9' : '1/1'),
                                 width: '100%',
-                                marginBottom: '2rem',
-                                padding: '0.75rem',
-                                backgroundColor: 'transparent',
-                                border: `1px solid ${COLORS.border}`,
-                                color: COLORS.accent,
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.7rem',
-                                fontWeight: 900,
-                                cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '0.5rem',
-                                textTransform: 'uppercase',
-                                transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(57, 255, 20, 0.05)'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                        >
-                            <Sparkles size={16} />
-                            [ SURPRISE_ME // SHUFFLE_AESTHETIC ]
-                        </button>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.65rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em' }}>
-                                    // COLOR_BIAS
-                                </label>
-                                <select
-                                    value={colorBias || ''}
-                                    onChange={(e) => setColorBias(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: `1px solid ${COLORS.border}`,
-                                        color: COLORS.text,
-                                        padding: '0.6rem',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.75rem',
-                                        outline: 'none',
-                                        borderRadius: 0
-                                    }}
-                                >
-                                    {COLOR_BIASES.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name.toUpperCase()}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.65rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em' }}>
-                                    // RATIO
-                                </label>
-                                <select
-                                    value={ratio || ''}
-                                    onChange={(e) => setRatio(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: `1px solid ${COLORS.border}`,
-                                        color: COLORS.text,
-                                        padding: '0.6rem',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.75rem',
-                                        outline: 'none',
-                                        borderRadius: 0
-                                    }}
-                                >
-                                    {RATIOS.map(r => (
-                                        <option key={r.id} value={r.id}>{r.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Advanced Settings */}
-                        <div style={{ marginBottom: '2rem' }}>
-                            <button
-                                onClick={() => setShowAdvanced(!showAdvanced)}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: 'transparent',
-                                    border: `1px solid ${COLORS.border}`,
-                                    color: COLORS.textSecondary,
-                                    padding: '0.75rem',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.65rem',
-                                    textAlign: 'left',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <span>[ {showAdvanced ? '-' : '+'} ] ADVANCED_SYSTEM_SETTINGS</span>
-                                <span>{showAdvanced ? 'COLLAPSE' : 'EXPAND'}</span>
-                            </button>
-
-                            <AnimatePresence>
-                                {showAdvanced && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        style={{ overflow: 'hidden' }}
-                                    >
-                                        <div style={{ padding: '1.5rem 0', borderBottom: `1px solid ${COLORS.border}` }}>
-                                            <div style={{ marginBottom: '1.5rem' }}>
-                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-                                                    RENDER SEED
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={seed}
-                                                    onChange={(e) => setSeed(parseInt(e.target.value))}
-                                                    style={{
-                                                        width: '100%',
-                                                        backgroundColor: 'transparent',
-                                                        border: `1px solid ${COLORS.border}`,
-                                                        color: COLORS.text,
-                                                        padding: '0.75rem',
-                                                        fontFamily: COLORS.mono,
-                                                        fontSize: '0.8rem',
-                                                        outline: 'none'
-                                                    }}
-                                                />
-                                            </div>
-                                            <div style={{ marginBottom: '1.5rem' }}>
-                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-                                                    PROMPT SUPPLEMENT
-                                                </label>
-                                                <textarea
-                                                    value={customSupplement}
-                                                    onChange={(e) => setCustomSupplement(e.target.value)}
-                                                    placeholder="Add modifiers (e.g. volumetric, 8k)"
-                                                    style={{
-                                                        width: '100%',
-                                                        minHeight: '60px',
-                                                        backgroundColor: 'transparent',
-                                                        border: `1px solid ${COLORS.border}`,
-                                                        color: COLORS.text,
-                                                        padding: '0.75rem',
-                                                        fontFamily: COLORS.sans,
-                                                        fontSize: '0.8rem',
-                                                        outline: 'none',
-                                                        resize: 'none'
-                                                    }}
-                                                />
-                                            </div>
-
-                                            <div style={{ marginBottom: '1.5rem' }}>
-                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-                                                    NEGATIVE PROMPT
-                                                </label>
-                                                <textarea
-                                                    value={negativePrompt}
-                                                    onChange={(e) => setNegativePrompt(e.target.value)}
-                                                    placeholder="Things to avoid (e.g. blurry, faces)"
-                                                    style={{
-                                                        width: '100%',
-                                                        minHeight: '60px',
-                                                        backgroundColor: 'transparent',
-                                                        border: `1px solid ${COLORS.border}`,
-                                                        color: COLORS.text,
-                                                        padding: '0.75rem',
-                                                        fontFamily: COLORS.sans,
-                                                        fontSize: '0.8rem',
-                                                        outline: 'none',
-                                                        resize: 'none'
-                                                    }}
-                                                />
-                                            </div>
-
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <Sparkles size={16} style={{ color: isHighQuality ? COLORS.accent : COLORS.textSecondary }} />
-                                                    <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
-                                                        MASTERPIECE_ENGINE
-                                                    </span>
-                                                </div>
-                                                <div 
-                                                    onClick={() => setIsHighQuality(!isHighQuality)}
-                                                    style={{
-                                                        width: '44px',
-                                                        height: '24px',
-                                                        backgroundColor: isHighQuality ? COLORS.accent : COLORS.border,
-                                                        padding: '2px',
-                                                        borderRadius: '0',
-                                                        position: 'relative',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease'
-                                                    }}
-                                                >
-                                                    <motion.div 
-                                                        animate={{ x: isHighQuality ? 20 : 0 }}
-                                                        style={{
-                                                            width: '20px',
-                                                            height: '20px',
-                                                            backgroundColor: isHighQuality ? '#000' : COLORS.textSecondary,
-                                                            border: `1px solid ${isHighQuality ? '#000' : COLORS.border}`,
-                                                            position: 'relative'
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
+                                position: 'relative',
+                                borderRadius: '20px',
+                                overflow: 'hidden',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                                <AnimatePresence mode="wait">
+                                    {isGenerating ? (
+                                        <MistyReveal />
+                                    ) : resultUrl ? (
+                                        <motion.div
+                                            key="result"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            style={{ width: '100%', height: '100%' }}
+                                        >
+                                            <img
+                                                src={resultUrl}
+                                                alt="AI Render"
+                                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                            />
+                                        </motion.div>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', opacity: 0.3 }}>
+                                            <Sparkles size={64} style={{ marginBottom: '1rem' }} />
+                                            <div style={{ fontFamily: COLORS.display, fontSize: '1.5rem', fontWeight: 900 }}>READY_TO_ENGINEER</div>
                                         </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Floating Action Buttons over preview */}
+                            {resultUrl && !isGenerating && (
+                                <div style={{ position: 'absolute', top: '2.5rem', right: '2.5rem', display: 'flex', gap: '0.75rem' }}>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={handleDownload}
+                                        style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '12px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}
+                                    > <Download size={20} /> </motion.button>
+                                     <motion.button 
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={() => setSelectedAsset({url: resultUrl, prompt: 'Current Render', genre: 'Active', style: 'Active', seed: seed === -1 ? 'auto' : seed, id: Date.now()})}
+                                        style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '12px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}
+                                    > <Layout size={20} /> </motion.button>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Execute Button */}
-                        <motion.button
-                            onClick={handleGenerate}
-                            disabled={isGenerating}
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                            style={{
-                                width: '100%',
-                                padding: '1.5rem',
-                                backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
-                                color: isGenerating ? COLORS.textSecondary : '#000',
-                                border: `1px solid ${COLORS.border}`,
-                                fontFamily: COLORS.display,
-                                fontWeight: 900,
-                                fontSize: '1.1rem',
-                                cursor: isGenerating ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '1rem',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em'
-                            }}
-                        >
-                            {isGenerating ? (
-                                <>
-                                    <RefreshCw size={20} className="spin" style={{ animation: 'spin 1.5s linear infinite' }} />
-                                    ENGINE_ACTIVE...
-                                </>
-                            ) : (
-                                <>
-                                    <TerminalIcon size={20} />
-                                    GENERATE_RENDER
-                                </>
-                            )}
-                        </motion.button>
-
-                        {/* Production Manifest (Replacing Sys Logs) */}
-                        <div style={{ marginTop: '2.5rem', border: `1px solid ${COLORS.border}`, padding: '1.5rem' }}>
-                            <div style={{ borderBottom: `1px solid ${COLORS.border}`, paddingBottom: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontFamily: COLORS.mono, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em' }}>PRODUCTION_MANIFEST</span>
-                                <span style={{ fontFamily: COLORS.mono, fontSize: '0.6rem', color: COLORS.textSecondary }}>DEV_ID: {deviceId}</span>
-                            </div>
-                            
-                            <div style={{ maxHeight: '120px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                {logs.length === 0 && <div style={{ fontSize: '0.7rem', color: COLORS.textSecondary, fontStyle: 'italic' }}>Awaiting production command...</div>}
-                                {logs.map((log, i) => (
-                                    <div key={i} style={{ 
-                                        fontSize: '0.65rem', 
-                                        fontFamily: COLORS.mono,
-                                        color: log.includes('ERR') ? '#E8111A' : COLORS.text,
-                                        display: 'flex',
-                                        gap: '1rem'
-                                    }}>
-                                        <span style={{ color: COLORS.textSecondary, opacity: 0.5 }}>{(i + 1).toString().padStart(2, '0')}</span>
-                                        <span>{log}</span>
-                                    </div>
-                                ))}
-                            </div>
+                        {/* Credits / Status Badge */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '-20px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: COLORS.accent,
+                            color: '#000',
+                            padding: '0.5rem 1.5rem',
+                            borderRadius: '40px',
+                            fontSize: '0.7rem',
+                            fontWeight: 900,
+                            fontFamily: COLORS.display,
+                            zIndex: 10,
+                            boxShadow: '0 10px 20px rgba(57, 255, 20, 0.3)'
+                        }}>
+                            {credits}/10 COMPUTATIONAL_CREDITS_REMAINING
                         </div>
                     </div>
 
-                    {/* Preview Panel */}
-                    <div style={{
-                        backgroundColor: COLORS.surface,
-                        border: `1px solid ${COLORS.border}`,
-                        padding: '2rem',
-                        minHeight: '500px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        position: 'relative'
-                    }}>
-                        <div style={{
-                            position: 'absolute',
-                            top: '-1px',
-                            right: '2rem',
-                            padding: '0 1rem',
-                            backgroundColor: COLORS.bg,
-                            fontSize: '0.6rem',
-                            color: COLORS.textSecondary,
-                            borderLeft: `1px solid ${COLORS.border}`,
-                            borderRight: `1px solid ${COLORS.border}`
-                        }}>
-                            RENDER_OUTPUT
-                        </div>
+                    {/* Featured Manifests (Prompt Tags) */}
+                    <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
+                        {[
+                            "Cinematic Noir // High Contrast",
+                            "Vogue Editorial // Soft Flow",
+                            "Cyberpunk Void // Neon Bloom",
+                            "Classic Minimalist // Pure Forms",
+                            "Surrealism // Liquid Metal",
+                            "8mm Retro // Grainy Texture"
+                        ].map(tag => (
+                            <motion.button
+                                key={tag}
+                                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                                onClick={() => setCustomSupplement(tag)}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    borderRadius: '30px',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    color: 'rgba(255,255,255,0.6)',
+                                    fontSize: '0.7rem',
+                                    fontFamily: COLORS.mono,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease'
+                                }}
+                            >
+                                {tag}
+                            </motion.button>
+                        ))}
+                    </div>
 
-                        <div style={{
-                            flexGrow: 1,
-                            backgroundColor: 'var(--color-bg)',
-                            border: `1px solid ${COLORS.border}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            overflow: 'hidden',
-                            position: 'relative',
-                            aspectRatio: ratio === '9:16' ? '9/16' : (ratio === '16:9' ? '16/9' : '1/1'),
-                            maxHeight: '600px',
-                            margin: '0 auto',
-                            width: '100%'
-                        }}>
-                            <AnimatePresence mode="wait">
-                                {isGenerating ? (
-                                    <ScanningLoader />
-                                ) : resultUrl ? (
-                                    <motion.div
-                                        key="result"
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        style={{ width: '100%', height: '100%', position: 'relative' }}
-                                    >
-                                        <img
-                                            src={resultUrl}
-                                            alt="AI Generated Wallpaper"
-                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                        />
-                                        
-                                        {/* Actions Overlay */}
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '1rem',
-                                            right: '1rem',
-                                            display: 'flex',
-                                            gap: '0.5rem'
-                                        }}>
-                                            <button
-                                                onClick={handleDownload}
-                                                style={{
-                                                    backgroundColor: COLORS.bg,
-                                                    border: `1px solid ${COLORS.border}`,
-                                                    color: COLORS.text,
-                                                    padding: '0.75rem',
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.5rem',
-                                                    fontSize: '0.7rem'
+                    {/* Local Archive Section */}
+                     <div style={{ width: '100%', maxWidth: '1200px' }}>
+                        {archive.length > 0 && (
+                            <div style={{ marginTop: '2rem' }}>
+                                <div style={{ marginBottom: '3rem', borderBottom: `1px solid ${COLORS.border}`, paddingBottom: '1rem' }}>
+                                    <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.2em', marginBottom: '1rem' }}>
+                                        05 — ASSET_ARCHIVE
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '2rem' }}>
+                                        <h2 style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', fontFamily: COLORS.display, fontWeight: 900, margin: 0 }}>LOCAL_COLLECTION</h2>
+                                        <div style={{ display: 'flex', gap: '1rem', paddingBottom: '0.5rem' }}>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.1em', fontWeight: 700 }}>ITEMS_SAVED</div>
+                                                <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: COLORS.display }}>{archive.length.toString().padStart(2, '0')}</div>
+                                            </div>
+                                            <button 
+                                                onClick={() => { if(confirm('Purge archive?')) setArchive([]); }}
+                                                style={{ 
+                                                    padding: '0.5rem 1rem', 
+                                                    border: `1px solid ${COLORS.border}`, 
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 700,
+                                                    fontFamily: COLORS.mono,
+                                                    height: 'fit-content',
+                                                    alignSelf: 'flex-end',
+                                                    cursor: 'pointer'
                                                 }}
                                             >
-                                                <Download size={16} />
-                                                SAVE
+                                                PURGE_DATABASE
                                             </button>
                                         </div>
-                                    </motion.div>
-                                ) : (
-                                    <div key="placeholder" style={{ color: COLORS.textSecondary, textAlign: 'center' }}>
-                                        <Layout size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                                        <div style={{ fontSize: '0.75rem', letterSpacing: '0.1em' }}>BUFFER_READY // AWAITING_RENDER</div>
                                     </div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                                </div>
 
-                        {error && (
-                            <div style={{
-                                marginTop: '1rem',
-                                padding: '1rem',
-                                backgroundColor: 'rgba(232, 17, 26, 0.1)',
-                                border: `1px solid ${COLORS.accent}`,
-                                color: COLORS.accent,
-                                fontSize: '0.8rem'
-                            }}>
-                                [!] ERROR: {error}
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                    gap: '1.5rem'
+                                }}>
+                                    <AnimatePresence mode="popLayout">
+                                        {archive.map((item, index) => (
+                                            <motion.div
+                                                key={item.id}
+                                                id={`archive-item-${item.id}`}
+                                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                                animate={{ 
+                                                    opacity: 1, 
+                                                    scale: 1, 
+                                                    y: 0,
+                                                    transition: { delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 } 
+                                                }}
+                                                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                                                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                                                style={{
+                                                    backgroundColor: COLORS.surface,
+                                                    border: `1px solid ${COLORS.border}`,
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                }}
+                                                onClick={() => setSelectedAsset(item)}
+                                            >
+                                                <div style={{ aspectRatio: '1/1', overflow: 'hidden', position: 'relative' }}>
+                                                    <img src={item.url} alt="Archived" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                </div>
+                                                <div style={{ padding: '0.75rem', position: 'relative' }}>
+                                                    <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '0.25rem' }}>
+                                                        {item.genre} // {item.style}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
-
-                {/* Local Archive Section */}
-                {archive.length > 0 && (
-                    <div style={{ marginTop: '6rem' }}>
-                        <div style={{ marginBottom: '3rem', borderBottom: `1px solid ${COLORS.border}`, paddingBottom: '1rem' }}>
-                            <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.2em', marginBottom: '1rem' }}>
-                                05 — ASSET_ARCHIVE
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '2rem' }}>
-                                <h2 style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', fontFamily: COLORS.display, fontWeight: 900, margin: 0 }}>LOCAL_COLLECTION</h2>
-                                <div style={{ display: 'flex', gap: '1rem', paddingBottom: '0.5rem' }}>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.1em', fontWeight: 700 }}>ITEMS_SAVED</div>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: COLORS.display }}>{archive.length.toString().padStart(2, '0')}</div>
-                                    </div>
-                                    <button 
-                                        onClick={() => { if(confirm('Purge archive?')) setArchive([]); }}
-                                        style={{ 
-                                            padding: '0.5rem 1rem', 
-                                            border: `1px solid ${COLORS.border}`, 
-                                            fontSize: '0.65rem',
-                                            fontWeight: 700,
-                                            fontFamily: COLORS.mono,
-                                            height: 'fit-content',
-                                            alignSelf: 'flex-end',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        PURGE_DATABASE
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                            gap: '1.5rem'
-                        }}>
-                            <AnimatePresence mode="popLayout">
-                                {archive.map((item, index) => (
-                                    <motion.div
-                                        key={item.id}
-                                        id={`archive-item-${item.id}`}
-                                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                        animate={{ 
-                                            opacity: 1, 
-                                            scale: 1, 
-                                            y: 0,
-                                            transition: { delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 } 
-                                        }}
-                                        exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-                                        whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                                        style={{
-                                            backgroundColor: COLORS.surface,
-                                            border: `1px solid ${COLORS.border}`,
-                                            position: 'relative',
-                                            overflow: 'hidden',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                        }}
-                                        onClick={() => setSelectedAsset(item)}
-                                    >
-                                        <div style={{ aspectRatio: '1/1', overflow: 'hidden', position: 'relative' }}>
-                                            <img src={item.url} alt="Archived" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            <div 
-                                                className="hover-overlay"
-                                                style={{
-                                                    position: 'absolute',
-                                                    inset: 0,
-                                                    backgroundColor: 'rgba(0,0,0,0.4)',
-                                                    opacity: 0,
-                                                    transition: 'opacity 0.2s',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                <div style={{ fontSize: '0.6rem', color: '#000', backgroundColor: COLORS.accent, fontWeight: 900, padding: '0.4rem 0.8rem', fontFamily: COLORS.display }}>
-                                                    VIEW_SPEC
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div style={{ padding: '0.75rem', position: 'relative' }}>
-                                            <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '0.25rem' }}>
-                                                {item.genre} // {item.style}
-                                            </div>
-                                            <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.05em' }}>
-                                                {item.date}
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Item Delete */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteFromArchive(item.id);
-                                            }}
-                                            className="delete-btn"
-                                            style={{
-                                                position: 'absolute',
-                                                top: '0.5rem',
-                                                right: '0.5rem',
-                                                width: '24px',
-                                                height: '24px',
-                                                backgroundColor: 'rgba(232, 17, 26, 0.9)',
-                                                border: 'none',
-                                                color: '#fff',
-                                                fontSize: '1rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                cursor: 'pointer',
-                                                zIndex: 5,
-                                                opacity: 0,
-                                                transition: 'opacity 0.2s'
-                                            }}
-                                        >
-                                            ×
-                                        </button>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {/* Floating Command Bar */}
+            <div className="floating-bar glass-panel" style={{ 
+                boxShadow: '0 -20px 50px rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2rem'
+            }}>
+                {/* Prompt & Controls Composite */}
+                <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1rem' }}>
+                        {RATIOS.map(r => (
+                            <motion.button
+                                key={r.id}
+                                whileHover={{ scale: 1.1 }}
+                                onClick={() => setRatio(r.id)}
+                                style={{
+                                    width: '32px',
+                                    height: '42px',
+                                    backgroundColor: ratio === r.id ? COLORS.accent : 'transparent',
+                                    border: `1px solid ${ratio === r.id ? COLORS.accent : 'rgba(255,255,255,0.2)'}`,
+                                    borderRadius: '4px',
+                                    boxSizing: 'border-box',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.5rem',
+                                    fontWeight: 900,
+                                    color: ratio === r.id ? '#000' : '#fff'
+                                }}
+                            >
+                                {r.id}
+                            </motion.button>
+                        ))}
+                    </div>
+                    
+                    <input 
+                        value={customSupplement}
+                        onChange={(e) => setCustomSupplement(e.target.value)}
+                        placeholder="Define your aesthetic manifest..."
+                        style={{
+                            flexGrow: 1,
+                            background: 'none',
+                            border: 'none',
+                            color: '#fff',
+                            fontFamily: COLORS.sans,
+                            fontSize: '0.9rem',
+                            outline: 'none',
+                            padding: '0.5rem'
+                        }}
+                    />
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <motion.button
+                            whileHover={{ scale: 1.1, color: COLORS.accent }}
+                            onClick={handleMagicEnhance}
+                            title="Magic Enhance"
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'rgba(255,255,255,0.4)',
+                                cursor: 'pointer',
+                                transition: 'color 0.2s ease'
+                            }}
+                        >
+                            <Wand2 size={20} />
+                        </motion.button>
+                         <motion.button
+                            onClick={() => setIsHighQuality(!isHighQuality)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: isHighQuality ? COLORS.accent : 'rgba(255,255,255,0.4)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <Sparkles size={20} />
+                        </motion.button>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            style={{
+                                backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
+                                color: '#000',
+                                border: 'none',
+                                padding: '0.8rem 2rem',
+                                borderRadius: '12px',
+                                fontFamily: COLORS.display,
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}
+                        >
+                            {isGenerating ? <RefreshCw size={18} className="spin" /> : <TerminalIcon size={18} />}
+                            {isGenerating ? 'INGESTING...' : 'GENERATE'}
+                        </motion.button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Lightbox / Archive Detail */}
             <AnimatePresence>
                 {selectedAsset && (
                     <Lightbox asset={selectedAsset} onClose={() => setSelectedAsset(null)} />
@@ -1221,6 +1167,42 @@ const WallpaperLab = () => {
                 div:hover > div > .hover-overlay { opacity: 1 !important; }
                 div:hover > .delete-btn { opacity: 1 !important; }
                 
+                .glass-panel {
+                    background: rgba(10, 10, 10, 0.7);
+                    backdrop-filter: blur(12px) saturate(180%); /* Reduced blur from 20px */
+                    -webkit-backdrop-filter: blur(12px) saturate(180%);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    transform: translateZ(0); /* Force GPU acceleration */
+                }
+
+                .floating-bar {
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 90%;
+                    max-width: 900px;
+                    z-index: 1000;
+                    padding: 1rem 2rem;
+                    border-radius: 24px;
+                }
+
+                .ambient-glow {
+                    position: fixed;
+                    inset: 0;
+                    z-index: -1;
+                    opacity: 0.3;
+                    filter: blur(80px); /* Reduced blur for performance */
+                    transition: opacity 1.5s ease;
+                    will-change: opacity; /* GPU optimization */
+                }
+
+                @keyframes float {
+                    0% { transform: translate(-50%, 0px); }
+                    50% { transform: translate(-50%, -10px); }
+                    100% { transform: translate(-50%, 0px); }
+                }
+
                 select {
                     -webkit-appearance: none;
                     -moz-appearance: none;
