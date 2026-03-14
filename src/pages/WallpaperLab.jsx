@@ -164,7 +164,7 @@ const WallpaperLab = () => {
         try {
             const selectedRatio = RATIOS.find(r => r.id === ratio);
             
-            const response = await fetch('/.netlify/functions/generate-wallpaper', {
+            const response = await fetch('/api/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -185,7 +185,7 @@ const WallpaperLab = () => {
             const data = await response.json();
 
             // Comprehensive URL extraction from various API response structures
-            let finalUrl = 
+            let extracted = 
                 data.url || 
                 (data.images && data.images[0]?.url) || 
                 (data.data && data.data[0]?.url) || 
@@ -193,9 +193,20 @@ const WallpaperLab = () => {
                 (data[0]?.url) ||
                 (typeof data[0] === 'string' ? data[0] : null);
 
+            // Sanitize: If it's a raw base64 string, add the data URI prefix
+            let finalUrl = extracted;
+            if (extracted && typeof extracted === 'string' && !extracted.startsWith('http') && !extracted.startsWith('data:')) {
+                // Heuristic: if it's long and has no spaces, assume base64
+                if (extracted.length > 100 && !extracted.includes(' ')) {
+                    finalUrl = `data:image/png;base64,${extracted}`;
+                    addLog('INFO: Detected raw base64 payload');
+                }
+            }
+
             if (finalUrl) {
                 setResultUrl(finalUrl);
                 addLog('GENERATION_SUCCESS: ASSET_RENDERED');
+                addLog(`URL_PRV: ${finalUrl.toString().slice(0, 40)}...`);
                 updateQuota();
                 saveToArchive(finalUrl, {
                     genre: selectedGenre.name,
