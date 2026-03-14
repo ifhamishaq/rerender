@@ -184,9 +184,16 @@ const WallpaperLab = () => {
 
             const data = await response.json();
 
-            // The API returns an object which should contain the image URL
-            if (data.url || (data[0] && data[0].url)) {
-                const finalUrl = data.url || data[0].url;
+            // Comprehensive URL extraction from various API response structures
+            let finalUrl = 
+                data.url || 
+                (data.images && data.images[0]?.url) || 
+                (data.data && data.data[0]?.url) || 
+                (data.output && (typeof data.output[0] === 'string' ? data.output[0] : data.output[0]?.url)) ||
+                (data[0]?.url) ||
+                (typeof data[0] === 'string' ? data[0] : null);
+
+            if (finalUrl) {
                 setResultUrl(finalUrl);
                 addLog('GENERATION_SUCCESS: ASSET_RENDERED');
                 updateQuota();
@@ -196,6 +203,8 @@ const WallpaperLab = () => {
                     prompt: compositePrompt
                 });
             } else {
+                const keys = Object.keys(data).join(', ');
+                addLog(`ERR_STRUCTURE: detected_keys [${keys}]`);
                 throw new Error('No image URL returned from API');
             }
 
