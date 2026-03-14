@@ -9,9 +9,12 @@ const COLORS = {
     surface: 'var(--color-surface)',
     border: 'var(--color-border)',
     accent: 'var(--color-accent)', 
-    success: '#39FF14', // Core Accent Green
+    success: 'var(--color-accent)', 
     text: 'var(--color-text)',
-    textSecondary: 'var(--color-text-secondary)'
+    textSecondary: 'var(--color-text-secondary)',
+    display: 'var(--font-display)',
+    sans: 'var(--font-sans)',
+    mono: 'var(--font-mono)'
 };
 
 import { GENRES, STYLES, COLOR_BIASES, RANDOM_MODIFIERS, PROMPT_TEMPLATES } from '../data/wallpaperConfig';
@@ -48,6 +51,8 @@ const WallpaperLab = () => {
     // Advanced Settings
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [seed, setSeed] = useState(-1);
+    const [negativePrompt, setNegativePrompt] = useState('blurry, low quality, distorted, grainy, text, watermark');
+    const [isHighQuality, setIsHighQuality] = useState(false);
     const [customSupplement, setCustomSupplement] = useState('');
     
     // Rate Limiting
@@ -59,6 +64,9 @@ const WallpaperLab = () => {
     const [resultUrl, setResultUrl] = useState(null);
     const [error, setError] = useState(null);
     const [logs, setLogs] = useState([]);
+    const [selectedAsset, setSelectedAsset] = useState(null);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedItems, setSelectedItems] = useState([]);
 
     // Initialize Quota
     React.useEffect(() => {
@@ -88,6 +96,8 @@ const WallpaperLab = () => {
             id: Date.now(),
             url,
             date: new Date().toLocaleString(),
+            seed: metadata.seed || 'auto',
+            isMasterpiece: metadata.isMasterpiece || false,
             ...metadata
         };
         const updatedArchive = [newAsset, ...archive].slice(0, 50); // Keep last 50
@@ -158,13 +168,33 @@ const WallpaperLab = () => {
             compositePrompt += `, ${customSupplement}`;
         }
 
+        // Apply Negative Prompt if relevant
+        if (negativePrompt) {
+            // Some Flux variants use [brackets] for negatives if not natively supported, 
+            // but we'll prepend/append clearly.
+            compositePrompt += ` --no ${negativePrompt}`;
+        }
+
+        // Apply Quality Boosts
+        if (isHighQuality) {
+            compositePrompt += `, hyper-realistic, 8k resolution, cinematic lighting, masterpiece quality, highly detailed`;
+        }
+
         addLog(`INITIATING_RENDER: composite_key_detected`);
         addLog(`AESTHETIC: ${selectedStyle.name} | ${selectedGenre.name}`);
 
         try {
             const selectedRatio = RATIOS.find(r => r.id === ratio);
+            const isLocal = window.location.hostname === 'localhost';
             
-            const response = await fetch('/.netlify/functions/generate-wallpaper', {
+            let response;
+            if (isLocal) {
+                // To test locally without Netlify CLI, you can temporarily put a key here, 
+                // but for security, it is best to use Netlify Dev or Environment Variables.
+                addLog('INFO: Running in LOCAL_MODE');
+            }
+
+            response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -187,6 +217,7 @@ const WallpaperLab = () => {
             // Comprehensive URL extraction from various API response structures
             let extracted = 
                 data.url || 
+                (typeof data.output === 'string' ? data.output : null) ||
                 (data.images && data.images[0]?.url) || 
                 (data.data && data.data[0]?.url) || 
                 (data.output && (typeof data.output[0] === 'string' ? data.output[0] : data.output[0]?.url)) ||
@@ -211,7 +242,9 @@ const WallpaperLab = () => {
                 saveToArchive(finalUrl, {
                     genre: selectedGenre.name,
                     style: selectedStyle.name,
-                    prompt: compositePrompt
+                    prompt: compositePrompt,
+                    seed: seed === -1 ? 'auto' : seed,
+                    isMasterpiece: isHighQuality
                 });
             } else {
                 const keys = Object.keys(data).join(', ');
@@ -415,16 +448,203 @@ const WallpaperLab = () => {
         );
     };
 
+    // --- UI SUB-COMPONENTS ---
+
+    const Lightbox = ({ asset, onClose }) => {
+        if (!asset) return null;
+        return (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.92)',
+                    zIndex: 2000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '2rem',
+                    backdropFilter: 'blur(20px)'
+                }}
+                onClick={onClose}
+            >
+                <motion.div 
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    style={{ position: 'relative', maxWidth: '1200px', width: '100%', maxHeight: '90vh', display: 'flex', gap: '0', background: '#000', border: `1px solid rgba(255,255,255,0.1)`, overflow: 'hidden' }}
+                    onClick={e => e.stopPropagation()}
+                >
+                    {/* Main Image */}
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#050505' }}>
+                        <img src={asset.url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="Asset" />
+                    </div>
+
+                    {/* Metadata Overlay - Fashion Spec Style */}
+                    <div style={{ width: '360px', padding: '2.5rem', fontFamily: COLORS.sans, display: 'flex', flexDirection: 'column', color: '#fff' }}>
+                        <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
+                            <div style={{ fontFamily: COLORS.mono, fontSize: '0.6rem', color: COLORS.accent, fontWeight: 700, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
+                                ARCHIVE_SPEC_001
+                            </div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, fontFamily: COLORS.display, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                                {asset.genre} // {asset.style}
+                            </h3>
+                        </div>
+                        
+                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>PROMPT_MANIFEST</div>
+                                <div style={{ fontSize: '0.8rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>"{asset.prompt}"</div>
+                            </div>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>DATE_CREATED</div>
+                                    <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.date}</div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>ENGINE_SEED</div>
+                                    <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.seed || 'RANDOM'}</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>OUTPUT_ENGINE</div>
+                                <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>FLUX.1_SCHNELL // ULTRA_HD</div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '3rem', display: 'flex', gap: '0.75rem' }}>
+                            <button 
+                                onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = asset.url;
+                                    link.download = `render-${asset.id}.png`;
+                                    link.click();
+                                }}
+                                style={{ flex: 1, padding: '1rem', backgroundColor: COLORS.accent, color: '#000', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                            > DOWNLOAD_ASSET </button>
+                            <button 
+                                onClick={onClose}
+                                style={{ padding: '1rem', backgroundColor: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                            > CLOSE </button>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+        );
+    };
+
+    const ScanningLoader = () => (
+        <div style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 20,
+            backdropFilter: 'blur(10px)'
+        }}>
+            <div style={{ position: 'absolute', top: '2rem', left: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
+                SCANNING PRODUCTION LINE
+            </div>
+            <div style={{ position: 'absolute', bottom: '2rem', right: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
+                INFERENCE ACTIVE // HIGH_FIDELITY
+            </div>
+
+            <motion.div 
+                animate={{ 
+                    top: ['0%', '100%', '0%'],
+                }}
+                transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    ease: "linear" 
+                }}
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${COLORS.accent}, transparent)`,
+                    boxShadow: `0 0 20px ${COLORS.accent}`,
+                    zIndex: 25
+                }}
+            />
+            
+            <div style={{ textAlign: 'center' }}>
+                <RefreshCw size={48} className="spin" style={{ color: COLORS.accent, marginBottom: '1.5rem', animation: 'spin 2s linear infinite' }} />
+                <div style={{ 
+                    fontFamily: 'var(--font-mono)', 
+                    fontSize: '0.8rem', 
+                    letterSpacing: '0.3em', 
+                    color: COLORS.accent,
+                    fontWeight: 900
+                }}>
+                    RENDER_IN_PROGRESS
+                </div>
+            </div>
+        </div>
+    );
+
+    const getDynamicStyles = () => {
+        const selectedGenre = GENRES.find(g => g.id === genre);
+        const selectedStyle = STYLES.find(s => s.id === style);
+        
+        // Dynamic background tint based on genre
+        const baseColor = isDarkMode ? '0, 0, 0' : '255, 255, 255';
+        let tintColor = '57, 255, 20'; // Default Neon Green
+        
+        if (genre === 'cyberpunk') tintColor = '255, 0, 255';
+        if (genre === 'space') tintColor = '0, 191, 255';
+        if (genre === 'horror') tintColor = '255, 69, 0';
+        
+        return {
+            background: `radial-gradient(circle at 50% 50%, rgba(${tintColor}, 0.05) 0%, rgba(${baseColor}, 1) 100%)`,
+            accentShadow: `0 0 40px rgba(${tintColor}, 0.2)`
+        };
+    };
+
+    const dynamicStyles = getDynamicStyles();
+
     return (
         <div style={{
             minHeight: '100vh',
             backgroundColor: COLORS.bg,
             color: COLORS.text,
-            padding: '100px 2rem 4rem',
-            fontFamily: 'var(--font-mono)',
+            fontFamily: COLORS.sans,
+            padding: '8rem 2rem 4rem 2rem',
+            position: 'relative',
+            overflowX: 'hidden',
+            background: dynamicStyles.background,
+            transition: 'background 1s ease'
         }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                {/* Back to Tools */}
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                <header style={{ 
+                    marginBottom: '6rem', 
+                    borderBottom: `1px solid ${COLORS.border}`, 
+                    paddingBottom: '2.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.3em' }}>
+                            WALLPAPER_STUDIO // PRO_EDITION
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.1em', fontWeight: 700, marginBottom: '0.2rem' }}>DAILY_COMPUTE</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: COLORS.display }}>{credits}/10 CREDITS</div>
+                        </div>
+                    </div>
+                    <h1 style={{ fontSize: 'clamp(3rem, 10vw, 8rem)', fontFamily: COLORS.display, fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.03em', margin: 0 }}>
+                        THE_LABORATORY
+                    </h1>
+                </header>
                 <div style={{ marginBottom: '2rem' }}>
                     <Link to="/tools" style={{
                         display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -439,32 +659,6 @@ const WallpaperLab = () => {
                     </Link>
                 </div>
 
-                {/* Header */}
-                <div style={{ marginBottom: '4rem' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '1rem',
-                        color: COLORS.accent
-                    }}>
-                        <Layers size={20} />
-                        <span style={{ fontSize: '0.8rem', letterSpacing: '0.2em' }}>LABS // ENGINE_V1.0</span>
-                    </div>
-                    <h1 style={{
-                        fontSize: 'clamp(2.5rem, 8vw, 5rem)',
-                        fontFamily: 'var(--font-sans)',
-                        fontWeight: 900,
-                        lineHeight: 0.9,
-                        margin: 0,
-                        textTransform: 'uppercase'
-                    }}>
-                        WALLPAPER <span style={{ color: COLORS.accent }}>LAB</span>
-                    </h1>
-                    <p style={{ color: COLORS.textSecondary, marginTop: '1.5rem', maxWidth: '600px', fontSize: '0.9rem' }}>
-                        Leverage our proprietary Flux-1 Schnell engine to render high-fidelity digital backdrops for the post-internet era.
-                    </p>
-                </div>
 
                 <div style={{
                     display: 'grid',
@@ -538,7 +732,7 @@ const WallpaperLab = () => {
                                     // COLOR_BIAS
                                 </label>
                                 <select
-                                    value={colorBias}
+                                    value={colorBias || ''}
                                     onChange={(e) => setColorBias(e.target.value)}
                                     style={{
                                         width: '100%',
@@ -562,7 +756,7 @@ const WallpaperLab = () => {
                                     // RATIO
                                 </label>
                                 <select
-                                    value={ratio}
+                                    value={ratio || ''}
                                     onChange={(e) => setRatio(e.target.value)}
                                     style={{
                                         width: '100%',
@@ -616,8 +810,8 @@ const WallpaperLab = () => {
                                     >
                                         <div style={{ padding: '1.5rem 0', borderBottom: `1px solid ${COLORS.border}` }}>
                                             <div style={{ marginBottom: '1.5rem' }}>
-                                                <label style={{ display: 'block', fontSize: '0.65rem', color: COLORS.textSecondary, marginBottom: '0.75rem' }}>
-                                                    // RENDER_SEED (-1 = RANDOM)
+                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                                                    RENDER SEED
                                                 </label>
                                                 <input
                                                     type="number"
@@ -625,37 +819,93 @@ const WallpaperLab = () => {
                                                     onChange={(e) => setSeed(parseInt(e.target.value))}
                                                     style={{
                                                         width: '100%',
-                                                        backgroundColor: 'var(--color-bg)',
+                                                        backgroundColor: 'transparent',
                                                         border: `1px solid ${COLORS.border}`,
-                                                        color: '#fff',
+                                                        color: COLORS.text,
                                                         padding: '0.75rem',
-                                                        fontFamily: 'var(--font-mono)',
+                                                        fontFamily: COLORS.mono,
                                                         fontSize: '0.8rem',
                                                         outline: 'none'
                                                     }}
                                                 />
                                             </div>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.65rem', color: COLORS.textSecondary, marginBottom: '0.75rem' }}>
-                                                    // PROMPT_SUPPLEMENT
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                                                    PROMPT SUPPLEMENT
                                                 </label>
                                                 <textarea
                                                     value={customSupplement}
                                                     onChange={(e) => setCustomSupplement(e.target.value)}
-                                                    placeholder="Add extra modifiers... (e.g. volumetric lighting, 8k resolution)"
+                                                    placeholder="Add modifiers (e.g. volumetric, 8k)"
                                                     style={{
                                                         width: '100%',
-                                                        minHeight: '80px',
-                                                        backgroundColor: 'var(--color-bg)',
+                                                        minHeight: '60px',
+                                                        backgroundColor: 'transparent',
                                                         border: `1px solid ${COLORS.border}`,
-                                                        color: '#fff',
+                                                        color: COLORS.text,
                                                         padding: '0.75rem',
-                                                        fontFamily: 'var(--font-mono)',
+                                                        fontFamily: COLORS.sans,
                                                         fontSize: '0.8rem',
                                                         outline: 'none',
                                                         resize: 'none'
                                                     }}
                                                 />
+                                            </div>
+
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: COLORS.text, marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+                                                    NEGATIVE PROMPT
+                                                </label>
+                                                <textarea
+                                                    value={negativePrompt}
+                                                    onChange={(e) => setNegativePrompt(e.target.value)}
+                                                    placeholder="Things to avoid (e.g. blurry, faces)"
+                                                    style={{
+                                                        width: '100%',
+                                                        minHeight: '60px',
+                                                        backgroundColor: 'transparent',
+                                                        border: `1px solid ${COLORS.border}`,
+                                                        color: COLORS.text,
+                                                        padding: '0.75rem',
+                                                        fontFamily: COLORS.sans,
+                                                        fontSize: '0.8rem',
+                                                        outline: 'none',
+                                                        resize: 'none'
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <Sparkles size={16} style={{ color: isHighQuality ? COLORS.accent : COLORS.textSecondary }} />
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+                                                        MASTERPIECE_ENGINE
+                                                    </span>
+                                                </div>
+                                                <div 
+                                                    onClick={() => setIsHighQuality(!isHighQuality)}
+                                                    style={{
+                                                        width: '44px',
+                                                        height: '24px',
+                                                        backgroundColor: isHighQuality ? COLORS.accent : COLORS.border,
+                                                        padding: '2px',
+                                                        borderRadius: '0',
+                                                        position: 'relative',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.3s ease'
+                                                    }}
+                                                >
+                                                    <motion.div 
+                                                        animate={{ x: isHighQuality ? 20 : 0 }}
+                                                        style={{
+                                                            width: '20px',
+                                                            height: '20px',
+                                                            backgroundColor: isHighQuality ? '#000' : COLORS.textSecondary,
+                                                            border: `1px solid ${isHighQuality ? '#000' : COLORS.border}`,
+                                                            position: 'relative'
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -664,76 +914,65 @@ const WallpaperLab = () => {
                         </div>
 
                         {/* Execute Button */}
-                        <button
+                        <motion.button
                             onClick={handleGenerate}
                             disabled={isGenerating}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                             style={{
                                 width: '100%',
-                                padding: '1.25rem',
+                                padding: '1.5rem',
                                 backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
                                 color: isGenerating ? COLORS.textSecondary : '#000',
-                                border: 'none',
-                                fontFamily: 'var(--font-mono)',
+                                border: `1px solid ${COLORS.border}`,
+                                fontFamily: COLORS.display,
                                 fontWeight: 900,
-                                fontSize: '1rem',
+                                fontSize: '1.1rem',
                                 cursor: isGenerating ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '1rem',
-                                transition: 'all 0.1s ease',
-                                boxShadow: isGenerating ? 'none' : `4px 4px 0px ${isDarkMode ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)'}`,
-                                textTransform: 'uppercase'
-                            }}
-                            onMouseDown={(e) => {
-                                if (!isGenerating) {
-                                    e.target.style.transform = 'translate(2px, 2px)';
-                                    e.target.style.boxShadow = '2px 2px 0px rgba(0,0,0,0.2)';
-                                }
-                            }}
-                            onMouseUp={(e) => {
-                                if (!isGenerating) {
-                                    e.target.style.transform = 'translate(0, 0)';
-                                    e.target.style.boxShadow = `4px 4px 0px ${isDarkMode ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)'}`;
-                                }
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
                             }}
                         >
                             {isGenerating ? (
                                 <>
                                     <RefreshCw size={20} className="spin" style={{ animation: 'spin 1.5s linear infinite' }} />
-                                    [ EXECUTING... ]
+                                    ENGINE_ACTIVE...
                                 </>
                             ) : (
                                 <>
                                     <TerminalIcon size={20} />
-                                    [ EXECUTE_RENDER ]
+                                    GENERATE_RENDER
                                 </>
                             )}
-                        </button>
+                        </motion.button>
 
-                        {/* System Logs */}
-                        <div style={{ marginTop: '2rem', backgroundColor: 'var(--color-bg)', padding: '1rem', border: `1px solid ${COLORS.border}` }}>
-                            <div style={{ fontSize: '0.6rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>SYS_LOGS:</span>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <button 
-                                        onClick={() => {
-                                            localStorage.removeItem(STORAGE_KEY);
-                                            window.location.reload();
-                                        }}
-                                        style={{ background: 'none', border: 'none', color: COLORS.accent, cursor: 'pointer', fontSize: '0.6rem', padding: 0, fontWeight: 900 }}
-                                    >
-                                        [ RESET_QUOTA ]
-                                    </button>
-                                    <span>DEVICE_ID: {deviceId}</span>
-                                </div>
+                        {/* Production Manifest (Replacing Sys Logs) */}
+                        <div style={{ marginTop: '2.5rem', border: `1px solid ${COLORS.border}`, padding: '1.5rem' }}>
+                            <div style={{ borderBottom: `1px solid ${COLORS.border}`, paddingBottom: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontFamily: COLORS.mono, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em' }}>PRODUCTION_MANIFEST</span>
+                                <span style={{ fontFamily: COLORS.mono, fontSize: '0.6rem', color: COLORS.textSecondary }}>DEV_ID: {deviceId}</span>
                             </div>
-                            {logs.length === 0 && <div style={{ fontSize: '0.7rem', color: '#333' }}>STDBY // AWAITING_COMMAND</div>}
-                            {logs.map((log, i) => (
-                                <div key={i} style={{ fontSize: '0.7rem', color: log.includes('ERR') ? '#E8111A' : COLORS.success, marginBottom: '0.25rem' }}>
-                                    {log}
-                                </div>
-                            ))}
+                            
+                            <div style={{ maxHeight: '120px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                {logs.length === 0 && <div style={{ fontSize: '0.7rem', color: COLORS.textSecondary, fontStyle: 'italic' }}>Awaiting production command...</div>}
+                                {logs.map((log, i) => (
+                                    <div key={i} style={{ 
+                                        fontSize: '0.65rem', 
+                                        fontFamily: COLORS.mono,
+                                        color: log.includes('ERR') ? '#E8111A' : COLORS.text,
+                                        display: 'flex',
+                                        gap: '1rem'
+                                    }}>
+                                        <span style={{ color: COLORS.textSecondary, opacity: 0.5 }}>{(i + 1).toString().padStart(2, '0')}</span>
+                                        <span>{log}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -777,24 +1016,7 @@ const WallpaperLab = () => {
                         }}>
                             <AnimatePresence mode="wait">
                                 {isGenerating ? (
-                                    <motion.div
-                                        key="generating"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        style={{ textAlign: 'center' }}
-                                    >
-                                        <div style={{ fontSize: '3rem', fontWeight: 900, color: COLORS.border, marginBottom: '1rem' }}>
-                                            RENDERING
-                                        </div>
-                                        <div style={{ width: '100px', height: '2px', backgroundColor: COLORS.accent, margin: '0 auto' }}>
-                                            <motion.div
-                                                animate={{ scaleX: [0, 1, 0] }}
-                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                                style={{ width: '100%', height: '100%', backgroundColor: COLORS.success, originX: 0 }}
-                                            />
-                                        </div>
-                                    </motion.div>
+                                    <ScanningLoader />
                                 ) : resultUrl ? (
                                     <motion.div
                                         key="result"
@@ -836,11 +1058,9 @@ const WallpaperLab = () => {
                                         </div>
                                     </motion.div>
                                 ) : (
-                                    <div key="placeholder" style={{ textAlign: 'center', opacity: 0.2 }}>
-                                        <Layout size={60} strokeWidth={1} />
-                                        <div style={{ fontSize: '0.7rem', marginTop: '1rem', letterSpacing: '0.2em' }}>
-                                            AWAITING_INPUT
-                                        </div>
+                                    <div key="placeholder" style={{ color: COLORS.textSecondary, textAlign: 'center' }}>
+                                        <Layout size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                                        <div style={{ fontSize: '0.75rem', letterSpacing: '0.1em' }}>BUFFER_READY // AWAITING_RENDER</div>
                                     </div>
                                 )}
                             </AnimatePresence>
@@ -864,36 +1084,34 @@ const WallpaperLab = () => {
                 {/* Local Archive Section */}
                 {archive.length > 0 && (
                     <div style={{ marginTop: '6rem' }}>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'baseline',
-                            marginBottom: '2rem',
-                            borderBottom: `2px solid ${COLORS.border}`,
-                            paddingBottom: '1rem'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <RefreshCw size={20} style={{ color: COLORS.accent }} />
-                                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                    LOCAL_ASSET_ARCHIVE
-                                </h2>
+                        <div style={{ marginBottom: '3rem', borderBottom: `1px solid ${COLORS.border}`, paddingBottom: '1rem' }}>
+                            <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono, fontWeight: 700, color: COLORS.accent, letterSpacing: '0.2em', marginBottom: '1rem' }}>
+                                05 — ASSET_ARCHIVE
                             </div>
-                            <button 
-                                onClick={clearArchive}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: COLORS.textSecondary,
-                                    fontSize: '0.65rem',
-                                    fontFamily: 'var(--font-mono)',
-                                    cursor: 'pointer',
-                                    textTransform: 'uppercase'
-                                }}
-                                onMouseEnter={e => e.target.style.color = COLORS.accent}
-                                onMouseLeave={e => e.target.style.color = COLORS.textSecondary}
-                            >
-                                [ CLEAR_ALL ]
-                            </button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '2rem' }}>
+                                <h2 style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', fontFamily: COLORS.display, fontWeight: 900, margin: 0 }}>LOCAL_COLLECTION</h2>
+                                <div style={{ display: 'flex', gap: '1rem', paddingBottom: '0.5rem' }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.1em', fontWeight: 700 }}>ITEMS_SAVED</div>
+                                        <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: COLORS.display }}>{archive.length.toString().padStart(2, '0')}</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => { if(confirm('Purge archive?')) setArchive([]); }}
+                                        style={{ 
+                                            padding: '0.5rem 1rem', 
+                                            border: `1px solid ${COLORS.border}`, 
+                                            fontSize: '0.65rem',
+                                            fontWeight: 700,
+                                            fontFamily: COLORS.mono,
+                                            height: 'fit-content',
+                                            alignSelf: 'flex-end',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        PURGE_DATABASE
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div style={{
@@ -901,70 +1119,108 @@ const WallpaperLab = () => {
                             gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                             gap: '1.5rem'
                         }}>
-                            {archive.map((item) => (
-                                <motion.div
-                                    key={item.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    whileHover={{ y: -5 }}
-                                    style={{
-                                        backgroundColor: COLORS.surface,
-                                        border: `1px solid ${COLORS.border}`,
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                        cursor: 'pointer'
-                                    }}
-                                    onClick={() => setResultUrl(item.url)}
-                                >
-                                    <div style={{ aspectRatio: '1/1', overflow: 'hidden' }}>
-                                        <img src={item.url} alt="Archived" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    </div>
-                                    <div style={{ padding: '0.75rem' }}>
-                                        <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '0.25rem' }}>
-                                            {item.genre} // {item.style}
-                                        </div>
-                                        <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary }}>
-                                            {item.date}
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Item Delete */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteFromArchive(item.id);
+                            <AnimatePresence mode="popLayout">
+                                {archive.map((item, index) => (
+                                    <motion.div
+                                        key={item.id}
+                                        id={`archive-item-${item.id}`}
+                                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                        animate={{ 
+                                            opacity: 1, 
+                                            scale: 1, 
+                                            y: 0,
+                                            transition: { delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 } 
                                         }}
+                                        exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                                        whileHover={{ y: -8, transition: { duration: 0.2 } }}
                                         style={{
-                                            position: 'absolute',
-                                            top: '0.5rem',
-                                            right: '0.5rem',
-                                            width: '24px',
-                                            height: '24px',
-                                            backgroundColor: 'rgba(0,0,0,0.8)',
+                                            backgroundColor: COLORS.surface,
                                             border: `1px solid ${COLORS.border}`,
-                                            color: '#fff',
-                                            fontSize: '0.7rem',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
+                                            position: 'relative',
+                                            overflow: 'hidden',
                                             cursor: 'pointer',
-                                            zIndex: 5
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                                         }}
+                                        onClick={() => setSelectedAsset(item)}
                                     >
-                                        ×
-                                    </button>
-                                </motion.div>
-                            ))}
+                                        <div style={{ aspectRatio: '1/1', overflow: 'hidden', position: 'relative' }}>
+                                            <img src={item.url} alt="Archived" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <div 
+                                                className="hover-overlay"
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    backgroundColor: 'rgba(0,0,0,0.4)',
+                                                    opacity: 0,
+                                                    transition: 'opacity 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >
+                                                <div style={{ fontSize: '0.6rem', color: '#000', backgroundColor: COLORS.accent, fontWeight: 900, padding: '0.4rem 0.8rem', fontFamily: COLORS.display }}>
+                                                    VIEW_SPEC
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ padding: '0.75rem', position: 'relative' }}>
+                                            <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '0.25rem' }}>
+                                                {item.genre} // {item.style}
+                                            </div>
+                                            <div style={{ fontSize: '0.55rem', color: COLORS.textSecondary, letterSpacing: '0.05em' }}>
+                                                {item.date}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Item Delete */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteFromArchive(item.id);
+                                            }}
+                                            className="delete-btn"
+                                            style={{
+                                                position: 'absolute',
+                                                top: '0.5rem',
+                                                right: '0.5rem',
+                                                width: '24px',
+                                                height: '24px',
+                                                backgroundColor: 'rgba(232, 17, 26, 0.9)',
+                                                border: 'none',
+                                                color: '#fff',
+                                                fontSize: '1rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                zIndex: 5,
+                                                opacity: 0,
+                                                transition: 'opacity 0.2s'
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </div>
                 )}
             </div>
+            <AnimatePresence>
+                {selectedAsset && (
+                    <Lightbox asset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+                )}
+            </AnimatePresence>
 
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
+                div:hover > div > .hover-overlay { opacity: 1 !important; }
+                div:hover > .delete-btn { opacity: 1 !important; }
+                
                 select {
                     -webkit-appearance: none;
                     -moz-appearance: none;
