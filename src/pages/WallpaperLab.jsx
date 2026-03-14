@@ -1,8 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Download, Share2, RefreshCw, Layers, Layout, Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown, Sparkles, Wand2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+    Download, Share2, RefreshCw, Layers, Layout, 
+    Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown, 
+    Sparkles, Wand2, ArrowLeft
+} from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import Magnetic from '../components/Animations/Magnetic';
+import { 
+    GENRES, STYLES, STORAGE_KEY, ARCHIVE_KEY, DAILY_LIMIT, 
+    COLOR_BIASES, RATIOS, PROMPT_TEMPLATES,
+    PROMPT_COLLECTIONS, FEATURED_TAGS, NEGATIVE_PROMPT
+} from '../data/wallpaperConfig';
 
 const COLORS = {
     bg: 'var(--color-bg)',
@@ -17,19 +27,6 @@ const COLORS = {
     mono: 'var(--font-mono)'
 };
 
-import { GENRES, STYLES, COLOR_BIASES, RANDOM_MODIFIERS, PROMPT_TEMPLATES } from '../data/wallpaperConfig';
-
-const RATIOS = [
-    { id: '9:16', label: 'MOBILE (9:16)', width: 1080, height: 1920 },
-    { id: '16:9', label: 'DESKTOP (16:9)', width: 1920, height: 1080 },
-    { id: '21:9', label: 'ULTRAWIDE (21:9)', width: 2560, height: 1080 },
-    { id: '1:1', label: 'SQUARE (1:1)', width: 1024, height: 1024 }
-];
-
-const DAILY_LIMIT = 10;
-const STORAGE_KEY = '_sys_compute_quota';
-const ARCHIVE_KEY = '_sys_asset_archive';
-
 const getDeviceId = () => {
     // Basic hardware fingerprinting to deter easy bypass
     const canvas = document.createElement('canvas');
@@ -41,6 +38,405 @@ const getDeviceId = () => {
     return btoa(`${renderer}-${screenRes}-${hardwareThreads}`).slice(0, 16);
 };
 
+// --- SUB-COMPONENTS (Moved outside to prevent re-renders) ---
+
+const StackedSelector = ({ genreOptions, styleOptions, currentGenre, currentStyle, onGenreChange, onStyleChange, isGenerating, onGenerate }) => {
+    const [genreDir, setGenreDir] = useState(0);
+    const [styleDir, setStyleDir] = useState(0);
+
+    const genreIndex = genreOptions.findIndex(g => g.id === currentGenre);
+    const styleIndex = styleOptions.findIndex(s => s.id === currentStyle);
+
+    const handleNextGenre = () => {
+        setGenreDir(1);
+        onGenreChange(genreOptions[(genreIndex + 1) % genreOptions.length].id);
+    };
+
+    const handlePrevGenre = () => {
+        setGenreDir(-1);
+        onGenreChange(genreOptions[(genreIndex - 1 + genreOptions.length) % genreOptions.length].id);
+    };
+
+    const handleNextStyle = () => {
+        setStyleDir(1);
+        onStyleChange(styleOptions[(styleIndex + 1) % styleOptions.length].id);
+    };
+
+    const handlePrevStyle = () => {
+        setStyleDir(-1);
+        onStyleChange(styleOptions[(styleIndex - 1 + styleOptions.length) % styleOptions.length].id);
+    };
+
+    const slideVariants = {
+        enter: (direction) => ({
+            y: direction > 0 ? 100 : -100,
+            opacity: 0,
+            filter: 'blur(10px)'
+        }),
+        center: {
+            y: 0,
+            opacity: 1,
+            filter: 'blur(0px)'
+        },
+        exit: (direction) => ({
+            y: direction < 0 ? 100 : -100,
+            opacity: 0,
+            filter: 'blur(10px)'
+        })
+    };
+
+    return (
+        <div style={{ position: 'relative', width: '100%', maxWidth: '450px', margin: '0 auto 3rem' }}>
+            <div style={{
+                backgroundColor: '#000',
+                borderRadius: '40px',
+                overflow: 'hidden',
+                aspectRatio: '0.8/1',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+                border: `1px solid ${COLORS.border}`
+            }}>
+                {/* Top: Genre */}
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
+                    <AnimatePresence initial={false} custom={genreDir}>
+                        <motion.div
+                            key={currentGenre}
+                            custom={genreDir}
+                            variants={slideVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                            style={{ width: '100%', height: '100%', position: 'absolute' }}
+                        >
+                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                <img 
+                                    src={genreOptions[genreIndex].image} 
+                                    alt="" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} 
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '1rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                        {genreOptions[genreIndex].name}
+                                    </h3>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+                    
+                    {/* Genre Nav */}
+                    <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
+                        <button onClick={handlePrevGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
+                        <button onClick={handleNextGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
+                    </div>
+                </div>
+
+                {/* Bottom: Style */}
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <AnimatePresence initial={false} custom={styleDir}>
+                        <motion.div
+                            key={currentStyle}
+                            custom={styleDir}
+                            variants={slideVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                            style={{ width: '100%', height: '100%', position: 'absolute' }}
+                        >
+                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                <img 
+                                    src={styleOptions[styleIndex].image} 
+                                    alt="" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} 
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '1rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                        {styleOptions[styleIndex].name}
+                                    </h3>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    {/* Style Nav */}
+                    <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
+                        <button onClick={handlePrevStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
+                        <button onClick={handleNextStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
+                    </div>
+                </div>
+
+                {/* Central Plus Button (Decorative) */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        backgroundColor: '#fff',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                        color: '#000',
+                        opacity: 0.8
+                    }}
+                >
+                    <Plus size={40} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const MistyReveal = () => {
+    return (
+        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.5, 0.2, 0.8, 0.3, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                    filter: 'blur(40px)',
+                }}
+            />
+            <motion.div
+                animate={{ 
+                    backgroundPosition: ['0% 0%', '100% 100%'],
+                    opacity: [0.1, 0.3, 0.1]
+                }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundSize: '200px 200px',
+                    mixBlendMode: 'overlay',
+                }}
+            />
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: '1.5rem',
+                zIndex: 2
+            }}>
+                <div className="pulse-ring" />
+                <div style={{ 
+                    fontFamily: COLORS.display, 
+                    fontSize: '1.2rem', 
+                    fontWeight: 900, 
+                    letterSpacing: '0.4em',
+                    color: COLORS.accent,
+                    textShadow: `0 0 20px ${COLORS.accent}44`
+                }}>
+                    RESOLVING_AESTHETIC
+                </div>
+            </div>
+            <style>{`
+                .pulse-ring {
+                    width: 60px;
+                    height: 60px;
+                    border: 2px solid ${COLORS.accent};
+                    border-radius: 50%;
+                    animation: pulse 2s infinite;
+                }
+                @keyframes pulse {
+                    0% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 0 0 ${COLORS.accent}66; }
+                    70% { transform: scale(1.2); opacity: 0; box-shadow: 0 0 0 20px ${COLORS.accent}00; }
+                    100% { transform: scale(0.8); opacity: 0; }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+const Lightbox = ({ asset, onClose, onExportSpecCard }) => {
+    if (!asset) return null;
+    return (
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.92)',
+                zIndex: 2000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                backdropFilter: 'blur(20px)'
+            }}
+            onClick={onClose}
+        >
+            <motion.div 
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                style={{ position: 'relative', maxWidth: '1200px', width: '100%', maxHeight: '90vh', display: 'flex', gap: '0', background: '#000', border: `1px solid rgba(255,255,255,0.1)`, overflow: 'hidden' }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Main Image */}
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#050505' }}>
+                    <img src={asset.url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="Asset" />
+                </div>
+
+                {/* Metadata Overlay - Fashion Spec Style */}
+                <div style={{ width: '360px', padding: '2.5rem', fontFamily: COLORS.sans, display: 'flex', flexDirection: 'column', color: '#fff' }}>
+                    <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
+                        <div style={{ fontFamily: COLORS.mono, fontSize: '0.6rem', color: COLORS.accent, fontWeight: 700, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
+                            ARCHIVE_SPEC_001
+                        </div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 900, fontFamily: COLORS.display, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                            {asset.genre} // {asset.style}
+                        </h3>
+                    </div>
+                    
+                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>PROMPT_MANIFEST</div>
+                            <div style={{ fontSize: '0.8rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>"{asset.prompt}"</div>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>DATE_CREATED</div>
+                                <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.date}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>ENGINE_SEED</div>
+                                <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.seed || 'RANDOM'}</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>OUTPUT_ENGINE</div>
+                            <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>FLUX.1_SCHNELL // ULTRA_HD</div>
+                        </div>
+                    </div>
+                    <div style={{ marginTop: '3rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                            <button 
+                                onClick={() => onExportSpecCard(asset)}
+                                style={{ 
+                                    flex: 1, 
+                                    padding: '1rem', 
+                                    backgroundColor: 'transparent', 
+                                    color: COLORS.accent, 
+                                    border: `1px solid ${COLORS.accent}`, 
+                                    fontWeight: 900, 
+                                    cursor: 'pointer', 
+                                    fontSize: '0.7rem', 
+                                    fontFamily: COLORS.display 
+                                }}
+                            > EXPORT_SPEC_CARD </button>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button 
+                                onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = asset.url;
+                                    link.download = `render-${asset.id}.png`;
+                                    link.click();
+                                }}
+                                style={{ flex: 1, padding: '1rem', backgroundColor: COLORS.accent, color: '#000', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                            > DOWNLOAD_RAW </button>
+                            <button 
+                                onClick={onClose}
+                                style={{ padding: '1rem', backgroundColor: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
+                            > CLOSE </button>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const ScanningLoader = () => (
+    <div style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 20,
+        backdropFilter: 'blur(10px)'
+    }}>
+        <div style={{ position: 'absolute', top: '2rem', left: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
+            SCANNING PRODUCTION LINE
+        </div>
+        <div style={{ position: 'absolute', bottom: '2rem', right: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
+            INFERENCE ACTIVE // HIGH_FIDELITY
+        </div>
+
+        <motion.div 
+            animate={{ 
+                top: ['0%', '100%', '0%'],
+            }}
+            transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "linear" 
+            }}
+            style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                height: '2px',
+                background: `linear-gradient(90deg, transparent, ${COLORS.accent}, transparent)`,
+                boxShadow: `0 0 20px ${COLORS.accent}`,
+                zIndex: 25
+            }}
+        />
+        
+        <div style={{ textAlign: 'center' }}>
+            <RefreshCw size={48} className="spin" style={{ color: COLORS.accent, marginBottom: '1.5rem', animation: 'spin 2s linear infinite' }} />
+            <div style={{ 
+                fontFamily: 'var(--font-mono)', 
+                fontSize: '0.8rem', 
+                letterSpacing: '0.3em', 
+                color: COLORS.accent,
+                fontWeight: 900
+            }}>
+                RENDER_IN_PROGRESS
+            </div>
+        </div>
+    </div>
+);
+
 const WallpaperLab = () => {
     const { isDarkMode } = useTheme();
     const [genre, setGenre] = useState(GENRES[0].id);
@@ -51,7 +447,7 @@ const WallpaperLab = () => {
     // Advanced Settings
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [seed, setSeed] = useState(-1);
-    const [negativePrompt, setNegativePrompt] = useState('blurry, low quality, distorted, grainy, text, watermark');
+    const [negativePrompt, setNegativePrompt] = useState(NEGATIVE_PROMPT);
     const [isHighQuality, setIsHighQuality] = useState(false);
     const [customSupplement, setCustomSupplement] = useState('');
     
@@ -67,6 +463,7 @@ const WallpaperLab = () => {
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [activeSelector, setActiveSelector] = useState(null); // 'genre' | 'style' | 'mods' | null
 
     // Initialize Quota
     React.useEffect(() => {
@@ -130,6 +527,13 @@ const WallpaperLab = () => {
 
     const addLog = (message) => {
         setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`].slice(-5));
+    };
+
+    const removeMod = (modToRemove) => {
+        const mods = customSupplement.split(',').map(m => m.trim());
+        const updatedMods = mods.filter(m => m !== modToRemove);
+        setCustomSupplement(updatedMods.join(', '));
+        addLog(`ENGINE: Removed modifier segment`);
     };
 
     const applyWatermark = async (imageUrl) => {
@@ -233,17 +637,13 @@ const WallpaperLab = () => {
     };
 
     const handleMagicEnhance = () => {
-        const enhancers = [
-            "Shot on 70mm Imax // Deep Cinematic Contrast",
-            "High-fashion editorial lighting // Subsurface scattering",
-            "Volumetric atmosphere // Hyper-realistic textures",
-            "Anamorphic lens flare // 8k raw detail",
-            "Avant-garde composition // Ethereal glow",
-            "Masterpiece quality // Ray-traced reflections"
-        ];
-        const randomEnhancer = enhancers[Math.floor(Math.random() * enhancers.length)];
+        const categories = Object.keys(PROMPT_COLLECTIONS);
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        const collection = PROMPT_COLLECTIONS[randomCategory];
+        const randomEnhancer = collection[Math.floor(Math.random() * collection.length)];
+        
         setCustomSupplement(prev => prev ? `${prev}, ${randomEnhancer}` : randomEnhancer);
-        addLog("ENGINE: Orchestrating aesthetic manifest...");
+        addLog(`ENGINE: Orchestrating ${randomCategory.toLowerCase()} aesthetic...`);
     };
 
     const handleGenerate = async () => {
@@ -260,30 +660,34 @@ const WallpaperLab = () => {
         const selectedGenre = GENRES.find(g => g.id === genre);
         const selectedStyle = STYLES.find(s => s.id === style);
         const selectedColor = COLOR_BIASES.find(c => c.id === colorBias);
-        const randomModifier = RANDOM_MODIFIERS[Math.floor(Math.random() * RANDOM_MODIFIERS.length)];
         const template = PROMPT_TEMPLATES[Math.floor(Math.random() * PROMPT_TEMPLATES.length)];
+        
+        // Pick one random modifier from each major collection for variety
+        const lighting = PROMPT_COLLECTIONS.LIGHTING[Math.floor(Math.random() * PROMPT_COLLECTIONS.LIGHTING.length)];
+        const atmosphere = PROMPT_COLLECTIONS.ATMOSPHERE[Math.floor(Math.random() * PROMPT_COLLECTIONS.ATMOSPHERE.length)];
+        const randomModifier = `${lighting}, ${atmosphere}`;
 
         // Build composite prompt strictly from config + advanced supplement
         let compositePrompt = template
-            .replace('{style}', selectedStyle.prompt)
-            .replace('{genre}', selectedGenre.prompt)
+            .replace('{style_prompt}', selectedStyle.prompt)
+            .replace('{genre_prompt}', selectedGenre.prompt)
+            .replace('{style_keywords}', selectedStyle.keywords || '')
             .replace('{color}', selectedColor ? selectedColor.name : 'natural')
-            + `, ${randomModifier}`;
+            .replace('{random_modifier}', randomModifier)
+            .replace('{style_tag}', selectedStyle.name.toUpperCase());
 
         if (customSupplement) {
             compositePrompt += `, ${customSupplement}`;
         }
 
-        // Apply Negative Prompt if relevant
+        // Apply Negative Prompt
         if (negativePrompt) {
-            // Some Flux variants use [brackets] for negatives if not natively supported, 
-            // but we'll prepend/append clearly.
             compositePrompt += ` --no ${negativePrompt}`;
         }
 
         // Apply Quality Boosts
         if (isHighQuality) {
-            compositePrompt += `, hyper-realistic, 8k resolution, cinematic lighting, masterpiece quality, highly detailed`;
+            compositePrompt += `, hyper-realistic 8k resolution, cinematic mastery, high fidelity render`;
         }
 
         addLog(`INITIATING_RENDER: composite_key_detected`);
@@ -386,410 +790,11 @@ const WallpaperLab = () => {
         }
     };
 
-    const StackedSelector = ({ genreOptions, styleOptions, currentGenre, currentStyle, onGenreChange, onStyleChange, isGenerating, onGenerate }) => {
-        const [genreDir, setGenreDir] = useState(0);
-        const [styleDir, setStyleDir] = useState(0);
-
-        const genreIndex = genreOptions.findIndex(g => g.id === currentGenre);
-        const styleIndex = styleOptions.findIndex(s => s.id === currentStyle);
-
-        const handleNextGenre = () => {
-            setGenreDir(1);
-            onGenreChange(genreOptions[(genreIndex + 1) % genreOptions.length].id);
-        };
-
-        const handlePrevGenre = () => {
-            setGenreDir(-1);
-            onGenreChange(genreOptions[(genreIndex - 1 + genreOptions.length) % genreOptions.length].id);
-        };
-
-        const handleNextStyle = () => {
-            setStyleDir(1);
-            onStyleChange(styleOptions[(styleIndex + 1) % styleOptions.length].id);
-        };
-
-        const handlePrevStyle = () => {
-            setStyleDir(-1);
-            onStyleChange(styleOptions[(styleIndex - 1 + styleOptions.length) % styleOptions.length].id);
-        };
-
-        const slideVariants = {
-            enter: (direction) => ({
-                y: direction > 0 ? 100 : -100,
-                opacity: 0,
-                filter: 'blur(10px)'
-            }),
-            center: {
-                y: 0,
-                opacity: 1,
-                filter: 'blur(0px)'
-            },
-            exit: (direction) => ({
-                y: direction < 0 ? 100 : -100,
-                opacity: 0,
-                filter: 'blur(10px)'
-            })
-        };
-
-        return (
-            <div style={{ position: 'relative', width: '100%', maxWidth: '450px', margin: '0 auto 3rem' }}>
-                <div style={{
-                    backgroundColor: '#000',
-                    borderRadius: '40px',
-                    overflow: 'hidden',
-                    aspectRatio: '0.8/1',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
-                    border: `1px solid ${COLORS.border}`
-                }}>
-                    {/* Top: Genre */}
-                    <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
-                        <AnimatePresence initial={false} custom={genreDir}>
-                            <motion.div
-                                key={currentGenre}
-                                custom={genreDir}
-                                variants={slideVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                style={{ width: '100%', height: '100%', position: 'absolute' }}
-                            >
-                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                    <img 
-                                        src={genreOptions[genreIndex].image} 
-                                        alt="" 
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} 
-                                    />
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: '1rem',
-                                        textAlign: 'center'
-                                    }}>
-                                        <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                                            {genreOptions[genreIndex].name}
-                                        </h3>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </AnimatePresence>
-                        
-                        {/* Genre Nav */}
-                        <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
-                            <button onClick={handlePrevGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
-                            <button onClick={handleNextGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
-                        </div>
-                    </div>
-
-                    {/* Bottom: Style */}
-                    <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                        <AnimatePresence initial={false} custom={styleDir}>
-                            <motion.div
-                                key={currentStyle}
-                                custom={styleDir}
-                                variants={slideVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                style={{ width: '100%', height: '100%', position: 'absolute' }}
-                            >
-                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                    <img 
-                                        src={styleOptions[styleIndex].image} 
-                                        alt="" 
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} 
-                                    />
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: '1rem',
-                                        textAlign: 'center'
-                                    }}>
-                                        <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                                            {styleOptions[styleIndex].name}
-                                        </h3>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </AnimatePresence>
-
-                        {/* Style Nav */}
-                        <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
-                            <button onClick={handlePrevStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
-                            <button onClick={handleNextStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
-                        </div>
-                    </div>
-
-                    {/* Central Plus Button (Decorative) */}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            left: '50%',
-                            top: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '50%',
-                            backgroundColor: '#fff',
-                            border: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 10,
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                            color: '#000',
-                            opacity: 0.8
-                        }}
-                    >
-                        <Plus size={40} />
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     // --- UI SUB-COMPONENTS ---
 
-    const MistyReveal = () => {
-        return (
-            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0, 0.5, 0.2, 0.8, 0.3, 1] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)',
-                        filter: 'blur(40px)',
-                    }}
-                />
-                <motion.div
-                    animate={{ 
-                        backgroundPosition: ['0% 0%', '100% 100%'],
-                        opacity: [0.1, 0.3, 0.1]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                        backgroundSize: '200px 200px',
-                        mixBlendMode: 'overlay',
-                    }}
-                />
-                <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'column',
-                    gap: '1.5rem',
-                    zIndex: 2
-                }}>
-                    <div className="pulse-ring" />
-                    <div style={{ 
-                        fontFamily: COLORS.display, 
-                        fontSize: '1.2rem', 
-                        fontWeight: 900, 
-                        letterSpacing: '0.4em',
-                        color: COLORS.accent,
-                        textShadow: `0 0 20px ${COLORS.accent}44`
-                    }}>
-                        RESOLVING_AESTHETIC
-                    </div>
-                </div>
-                <style>{`
-                    .pulse-ring {
-                        width: 60px;
-                        height: 60px;
-                        border: 2px solid ${COLORS.accent};
-                        border-radius: 50%;
-                        animation: pulse 2s infinite;
-                    }
-                    @keyframes pulse {
-                        0% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 0 0 ${COLORS.accent}66; }
-                        70% { transform: scale(1.2); opacity: 0; box-shadow: 0 0 0 20px ${COLORS.accent}00; }
-                        100% { transform: scale(0.8); opacity: 0; }
-                    }
-                `}</style>
-            </div>
-        );
-    };
 
-    const Lightbox = ({ asset, onClose }) => {
-        if (!asset) return null;
-        return (
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                    position: 'fixed',
-                    inset: 0,
-                    backgroundColor: 'rgba(0,0,0,0.92)',
-                    zIndex: 2000,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '2rem',
-                    backdropFilter: 'blur(20px)'
-                }}
-                onClick={onClose}
-            >
-                <motion.div 
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{ position: 'relative', maxWidth: '1200px', width: '100%', maxHeight: '90vh', display: 'flex', gap: '0', background: '#000', border: `1px solid rgba(255,255,255,0.1)`, overflow: 'hidden' }}
-                    onClick={e => e.stopPropagation()}
-                >
-                    {/* Main Image */}
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#050505' }}>
-                        <img src={asset.url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="Asset" />
-                    </div>
 
-                    {/* Metadata Overlay - Fashion Spec Style */}
-                    <div style={{ width: '360px', padding: '2.5rem', fontFamily: COLORS.sans, display: 'flex', flexDirection: 'column', color: '#fff' }}>
-                        <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-                            <div style={{ fontFamily: COLORS.mono, fontSize: '0.6rem', color: COLORS.accent, fontWeight: 700, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
-                                ARCHIVE_SPEC_001
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, fontFamily: COLORS.display, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                                {asset.genre} // {asset.style}
-                            </h3>
-                        </div>
-                        
-                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div>
-                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>PROMPT_MANIFEST</div>
-                                <div style={{ fontSize: '0.8rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>"{asset.prompt}"</div>
-                            </div>
-                            
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div>
-                                    <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>DATE_CREATED</div>
-                                    <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.date}</div>
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>ENGINE_SEED</div>
-                                    <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>{asset.seed || 'RANDOM'}</div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>OUTPUT_ENGINE</div>
-                                <div style={{ fontSize: '0.75rem', fontFamily: COLORS.mono }}>FLUX.1_SCHNELL // ULTRA_HD</div>
-                            </div>
-                        </div>
-                        <div style={{ marginTop: '3rem' }}>
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                <button 
-                                    onClick={async () => {
-                                        const specUrl = await generateSpecCard(asset);
-                                        const link = document.createElement('a');
-                                        link.href = specUrl;
-                                        link.download = `spec-card-${asset.id}.png`;
-                                        link.click();
-                                    }}
-                                    style={{ 
-                                        flex: 1, 
-                                        padding: '1rem', 
-                                        backgroundColor: 'transparent', 
-                                        color: COLORS.accent, 
-                                        border: `1px solid ${COLORS.accent}`, 
-                                        fontWeight: 900, 
-                                        cursor: 'pointer', 
-                                        fontSize: '0.7rem', 
-                                        fontFamily: COLORS.display 
-                                    }}
-                                > EXPORT_SPEC_CARD </button>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <button 
-                                    onClick={() => {
-                                        const link = document.createElement('a');
-                                        link.href = asset.url;
-                                        link.download = `render-${asset.id}.png`;
-                                        link.click();
-                                    }}
-                                    style={{ flex: 1, padding: '1rem', backgroundColor: COLORS.accent, color: '#000', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
-                                > DOWNLOAD_RAW </button>
-                                <button 
-                                    onClick={onClose}
-                                    style={{ padding: '1rem', backgroundColor: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.7rem', fontFamily: COLORS.display }}
-                                > CLOSE </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
-        );
-    };
-
-    const ScanningLoader = () => (
-        <div style={{
-            position: 'absolute',
-            inset: 0,
-            overflow: 'hidden',
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 20,
-            backdropFilter: 'blur(10px)'
-        }}>
-            <div style={{ position: 'absolute', top: '2rem', left: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
-                SCANNING PRODUCTION LINE
-            </div>
-            <div style={{ position: 'absolute', bottom: '2rem', right: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: COLORS.accent, opacity: 0.6, letterSpacing: '0.1em' }}>
-                INFERENCE ACTIVE // HIGH_FIDELITY
-            </div>
-
-            <motion.div 
-                animate={{ 
-                    top: ['0%', '100%', '0%'],
-                }}
-                transition={{ 
-                    duration: 3, 
-                    repeat: Infinity, 
-                    ease: "linear" 
-                }}
-                style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    height: '2px',
-                    background: `linear-gradient(90deg, transparent, ${COLORS.accent}, transparent)`,
-                    boxShadow: `0 0 20px ${COLORS.accent}`,
-                    zIndex: 25
-                }}
-            />
-            
-            <div style={{ textAlign: 'center' }}>
-                <RefreshCw size={48} className="spin" style={{ color: COLORS.accent, marginBottom: '1.5rem', animation: 'spin 2s linear infinite' }} />
-                <div style={{ 
-                    fontFamily: 'var(--font-mono)', 
-                    fontSize: '0.8rem', 
-                    letterSpacing: '0.3em', 
-                    color: COLORS.accent,
-                    fontWeight: 900
-                }}>
-                    RENDER_IN_PROGRESS
-                </div>
-            </div>
-        </div>
-    );
 
     const getDynamicStyles = () => {
         const selectedGenre = GENRES.find(g => g.id === genre);
@@ -936,14 +941,7 @@ const WallpaperLab = () => {
 
                     {/* Featured Manifests (Prompt Tags) */}
                     <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
-                        {[
-                            "Cinematic Noir // High Contrast",
-                            "Vogue Editorial // Soft Flow",
-                            "Cyberpunk Void // Neon Bloom",
-                            "Classic Minimalist // Pure Forms",
-                            "Surrealism // Liquid Metal",
-                            "8mm Retro // Grainy Texture"
-                        ].map(tag => (
+                        {FEATURED_TAGS.map(tag => (
                             <motion.button
                                 key={tag}
                                 whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
@@ -1084,6 +1082,162 @@ const WallpaperLab = () => {
                         ))}
                     </div>
                     
+                    {/* Prompt Recipe Preview */}
+                    <div style={{ 
+                        position: 'absolute', 
+                        bottom: '100%', 
+                        left: '0', 
+                        right: '0', 
+                        padding: '1rem 2rem', 
+                        backgroundColor: 'rgba(5,5,5,0.9)', 
+                        backdropFilter: 'blur(30px)',
+                        borderTop: `1px solid rgba(255,255,255,0.05)`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        zIndex: 1000
+                    }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', overflowX: 'auto', scrollbarWidth: 'none' }}>
+                            <span style={{ fontSize: '0.6rem', fontFamily: COLORS.mono, color: COLORS.accent, fontWeight: 700 }}>RECIPE:</span>
+                            
+                            <motion.button 
+                                whileHover={{ color: COLORS.accent }}
+                                onClick={() => setActiveSelector(activeSelector === 'genre' ? null : 'genre')}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.65rem', color: activeSelector === 'genre' ? COLORS.accent : 'rgba(255,255,255,0.6)', fontWeight: 700 }}
+                            >
+                                {GENRES.find(g => g.id === genre)?.name}
+                            </motion.button>
+
+                            <span style={{ color: 'rgba(255,255,255,0.2)' }}>/</span>
+                            
+                            <motion.button 
+                                whileHover={{ color: COLORS.accent }}
+                                onClick={() => setActiveSelector(activeSelector === 'style' ? null : 'style')}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.65rem', color: activeSelector === 'style' ? COLORS.accent : '#fff', fontWeight: 900 }}
+                            >
+                                {STYLES.find(s => s.id === style)?.name.toUpperCase()}
+                            </motion.button>
+
+                            {isHighQuality && (
+                                <>
+                                    <span style={{ color: 'rgba(255,255,255,0.2)' }}>/</span>
+                                    <span style={{ fontSize: '0.65rem', color: COLORS.accent, fontWeight: 900 }}>ULTRA_HD</span>
+                                </>
+                            )}
+
+                            {customSupplement && (
+                                <>
+                                    <span style={{ color: 'rgba(255,255,255,0.2)' }}>/</span>
+                                    <motion.button 
+                                        whileHover={{ color: COLORS.accent }}
+                                        onClick={() => setActiveSelector(activeSelector === 'mods' ? null : 'mods')}
+                                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.65rem', color: activeSelector === 'mods' ? COLORS.accent : 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}
+                                    >
+                                        +MODS
+                                    </motion.button>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Interactive Selector Overlays */}
+                        <AnimatePresence>
+                            {activeSelector && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    style={{ 
+                                        padding: '1.5rem', 
+                                        backgroundColor: 'rgba(255,255,255,0.03)', 
+                                        border: '1px solid rgba(255,255,255,0.05)', 
+                                        borderRadius: '16px' 
+                                    }}
+                                >
+                                    {activeSelector === 'genre' && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                            {GENRES.map(g => (
+                                                <button 
+                                                    key={g.id}
+                                                    onClick={() => { setGenre(g.id); setActiveSelector(null); }}
+                                                    style={{ 
+                                                        padding: '0.5rem', 
+                                                        background: genre === g.id ? COLORS.accent : 'rgba(255,255,255,0.05)', 
+                                                        color: genre === g.id ? '#000' : '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 700,
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {g.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {activeSelector === 'style' && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.5rem' }}>
+                                            {STYLES.map(s => (
+                                                <button 
+                                                    key={s.id}
+                                                    onClick={() => { setStyle(s.id); setActiveSelector(null); }}
+                                                    style={{ 
+                                                        padding: '0.5rem', 
+                                                        background: style === s.id ? COLORS.accent : 'rgba(255,255,255,0.05)', 
+                                                        color: style === s.id ? '#000' : '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 700,
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {s.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {activeSelector === 'mods' && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {customSupplement.split(',').map((mod, i) => (
+                                                <div 
+                                                    key={i}
+                                                    style={{ 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '0.5rem', 
+                                                        padding: '0.4rem 0.8rem', 
+                                                        background: 'rgba(255,255,255,0.1)', 
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.65rem'
+                                                    }}
+                                                >
+                                                    <span>{mod.trim()}</span>
+                                                    <button 
+                                                        onClick={() => removeMod(mod.trim())}
+                                                        style={{ background: 'none', border: 'none', color: COLORS.accent, cursor: 'pointer', padding: '0 0.2rem', fontWeight: 900 }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {customSupplement.trim() && (
+                                                <button 
+                                                    onClick={() => { setCustomSupplement(''); setActiveSelector(null); }}
+                                                    style={{ padding: '0.4rem 0.8rem', background: 'none', border: `1px solid ${COLORS.border}`, color: 'rgba(255,255,255,0.5)', borderRadius: '20px', fontSize: '0.6rem', cursor: 'pointer' }}
+                                                >
+                                                    CLEAR_ALL
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     <input 
                         value={customSupplement}
                         onChange={(e) => setCustomSupplement(e.target.value)}
@@ -1126,28 +1280,30 @@ const WallpaperLab = () => {
                         >
                             <Sparkles size={20} />
                         </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleGenerate}
-                            disabled={isGenerating}
-                            style={{
-                                backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
-                                color: '#000',
-                                border: 'none',
-                                padding: '0.8rem 2rem',
-                                borderRadius: '12px',
-                                fontFamily: COLORS.display,
-                                fontWeight: 900,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            {isGenerating ? <RefreshCw size={18} className="spin" /> : <TerminalIcon size={18} />}
-                            {isGenerating ? 'INGESTING...' : 'GENERATE'}
-                        </motion.button>
+                        <Magnetic strength={0.2}>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleGenerate}
+                                disabled={isGenerating}
+                                style={{
+                                    backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '0.8rem 2rem',
+                                    borderRadius: '12px',
+                                    fontFamily: COLORS.display,
+                                    fontWeight: 900,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                {isGenerating ? <RefreshCw size={18} className="spin" /> : <TerminalIcon size={18} />}
+                                {isGenerating ? 'INGESTING...' : 'GENERATE'}
+                            </motion.button>
+                        </Magnetic>
                     </div>
                 </div>
             </div>
@@ -1155,7 +1311,17 @@ const WallpaperLab = () => {
             {/* Lightbox / Archive Detail */}
             <AnimatePresence>
                 {selectedAsset && (
-                    <Lightbox asset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+                    <Lightbox 
+                        asset={selectedAsset} 
+                        onClose={() => setSelectedAsset(null)} 
+                        onExportSpecCard={async (asset) => {
+                            const specUrl = await generateSpecCard(asset);
+                            const link = document.createElement('a');
+                            link.href = specUrl;
+                            link.download = `spec-card-${asset.id}.png`;
+                            link.click();
+                        }}
+                    />
                 )}
             </AnimatePresence>
 

@@ -8,6 +8,7 @@ import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
 import SlotMachineWidget from '../components/SlotMachineWidget';
 import { useTheme } from '../context/ThemeContext';
+import Magnetic from '../components/Animations/Magnetic';
 
 const Home = () => {
     const { isDarkMode } = useTheme();
@@ -299,30 +300,30 @@ const Home = () => {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                        <Link to="/services" style={{
-                            display: 'inline-block',
-                            padding: '1rem 2.5rem',
-                            backgroundColor: 'transparent',
-                            color: 'var(--color-accent)',
-                            border: '2px solid var(--color-accent)',
-                            fontFamily: 'var(--font-mono)',
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem',
-                            textDecoration: 'none',
-                            textTransform: 'uppercase',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '4px 4px 0px var(--color-accent)'
-                        }}
-                            onMouseEnter={(e) => {
-                                e.target.style.transform = 'translate(-4px, -4px)';
-                                e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
+                        <Magnetic strength={0.3}>
+                            <Link to="/services" style={{
+                                display: 'inline-block',
+                                padding: '1rem 2.5rem',
+                                backgroundColor: 'transparent',
+                                color: 'var(--color-accent)',
+                                border: '2px solid var(--color-accent)',
+                                fontFamily: 'var(--font-mono)',
+                                fontWeight: 'bold',
+                                fontSize: '1.1rem',
+                                textDecoration: 'none',
+                                textTransform: 'uppercase',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '4px 4px 0px var(--color-accent)'
                             }}
-                            onMouseLeave={(e) => {
-                                e.target.style.transform = 'translate(0, 0)';
-                                e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
-                            }}>
-                            VIEW FULL SERVICES
-                        </Link>
+                                onMouseEnter={(e) => {
+                                    e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
+                                }}>
+                                VIEW FULL SERVICES
+                            </Link>
+                        </Magnetic>
                     </div>
                 </div>
             </section>
@@ -540,29 +541,29 @@ const Home = () => {
                     }}>
                         STOP BLENDING IN. LET'S BUILD SOMETHING UNFORGETTABLE.
                     </p>
-                    <a href="/services#inquiry" style={{
-                        display: 'inline-block',
-                        padding: '1.5rem 4rem',
-                        backgroundColor: 'var(--color-text)',
-                        color: 'var(--color-accent)',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 900,
-                        fontSize: '1.5rem',
-                        textDecoration: 'none',
-                        textTransform: 'uppercase',
-                        boxShadow: '8px 8px 0px #121212',
-                        transition: 'transform 0.1s ease, box-shadow 0.1s ease'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.transform = 'translate(-4px, -4px)';
-                            e.target.style.boxShadow = '12px 12px 0px #121212';
+                    <Magnetic strength={0.2}>
+                        <a href="/services#inquiry" style={{
+                            display: 'inline-block',
+                            padding: '1.5rem 4rem',
+                            backgroundColor: 'var(--color-text)',
+                            color: 'var(--color-accent)',
+                            fontFamily: 'var(--font-mono)',
+                            fontWeight: 900,
+                            fontSize: '1.5rem',
+                            textDecoration: 'none',
+                            textTransform: 'uppercase',
+                            boxShadow: '8px 8px 0px #121212',
+                            transition: 'transform 0.1s ease, box-shadow 0.1s ease'
                         }}
-                        onMouseLeave={(e) => {
-                            e.target.style.transform = 'translate(0, 0)';
-                            e.target.style.boxShadow = '8px 8px 0px #121212';
-                        }}>
-                        CONTACT US TODAY
-                    </a>
+                            onMouseEnter={(e) => {
+                                e.target.style.boxShadow = '12px 12px 0px #121212';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.boxShadow = '8px 8px 0px #121212';
+                            }}>
+                            CONTACT US TODAY
+                        </a>
+                    </Magnetic>
                 </div>
             </section>
 

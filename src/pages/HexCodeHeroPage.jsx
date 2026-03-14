@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const RED = '#E8111A';
 
 // Helper to generate a random hex color
-const randomHex = () => '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0').toUpperCase();
+const randomHex = () => '#' + Math.floor(Math.random() * 16777216).toString(16).padStart(6, '0').toUpperCase();
 
 // Helper to generate a color close to the target color (for higher difficulty)
 const getSimilarColor = (baseHex, variance) => {

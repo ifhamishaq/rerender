@@ -100,27 +100,47 @@ const Hero = () => {
             const RADIUS = 120;
             const dotColor = isDarkMode ? '239,239,239' : '14,14,14';
 
+            // 1. Draw inactive dots in batch
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(${dotColor}, 0.12)`;
             for (let r = 0; r <= rows; r++) {
                 for (let c = 0; c <= cols; c++) {
                     const dx = c * GAP - mx;
                     const dy = r * GAP - my;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    const proximity = Math.max(0, 1 - dist / RADIUS);
-                    const size = 1.5 + proximity * 4;
-                    const alpha = 0.12 + proximity * 0.88;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq >= RADIUS * RADIUS) {
+                        ctx.moveTo(c * GAP, r * GAP);
+                        ctx.arc(c * GAP, r * GAP, 1.5, 0, Math.PI * 2);
+                    }
+                }
+            }
+            ctx.fill();
 
-                    if (proximity > 0) {
-                        // Accent glow for close dots
+            // 2. Draw active dots with individual properties
+            for (let r = 0; r <= rows; r++) {
+                for (let c = 0; c <= cols; c++) {
+                    const dx = c * GAP - mx;
+                    const dy = r * GAP - my;
+                    const distSq = dx * dx + dy * dy;
+                    
+                    if (distSq < RADIUS * RADIUS) {
+                        const dist = Math.sqrt(distSq);
+                        const proximity = Math.max(0, 1 - dist / RADIUS);
+                        const size = 1.5 + proximity * 4;
+                        const alpha = 0.12 + proximity * 0.88;
+
+                        // Accent glow
                         ctx.beginPath();
                         ctx.arc(c * GAP, r * GAP, size + 2, 0, Math.PI * 2);
                         ctx.fillStyle = `rgba(57,255,20,${proximity * 0.4})`;
                         ctx.fill();
-                    }
 
-                    ctx.beginPath();
-                    ctx.arc(c * GAP, r * GAP, size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(${dotColor},${alpha})`;
-                    ctx.fill();
+                        // Base dot
+                        ctx.beginPath();
+                        ctx.arc(c * GAP, r * GAP, size, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${dotColor},${alpha})`;
+                        ctx.fill();
+                    }
                 }
             }
             animId = requestAnimationFrame(draw);
