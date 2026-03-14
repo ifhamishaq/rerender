@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Download, Share2, RefreshCw, Layers, Layout, Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Download, Share2, RefreshCw, Layers, Layout, Terminal as TerminalIcon, Plus, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const COLORS = {
@@ -122,6 +122,14 @@ const WallpaperLab = () => {
         setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`].slice(-5));
     };
 
+    const handleSurpriseMe = () => {
+        const randomGenre = GENRES[Math.floor(Math.random() * GENRES.length)].id;
+        const randomStyle = STYLES[Math.floor(Math.random() * STYLES.length)].id;
+        setGenre(randomGenre);
+        setStyle(randomStyle);
+        addLog(`SURPRISE_ME: Randomized Aesthetic`);
+    };
+
     const handleGenerate = async () => {
         if (credits <= 0) {
             setError("DAILY_COMPUTE_QUOTA_EXHAUSTED");
@@ -167,14 +175,16 @@ const WallpaperLab = () => {
                 })
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || 'Generation failed');
+                const errorData = await response.json().catch(() => ({}));
+                const msg = errorData.error || errorData.details || 'SERVER_ERROR';
+                addLog(`ERR_SVR: ${msg.slice(0, 50)}`);
+                throw new Error(msg);
             }
 
+            const data = await response.json();
+
             // The API returns an object which should contain the image URL
-            // Based on user's code, data is returned directly
             if (data.url || (data[0] && data[0].url)) {
                 const finalUrl = data.url || data[0].url;
                 setResultUrl(finalUrl);
@@ -475,6 +485,33 @@ const WallpaperLab = () => {
                             onGenerate={handleGenerate}
                         />
 
+                        <button
+                            onClick={handleSurpriseMe}
+                            style={{
+                                width: '100%',
+                                marginBottom: '2rem',
+                                padding: '0.75rem',
+                                backgroundColor: 'transparent',
+                                border: `1px solid ${COLORS.border}`,
+                                color: COLORS.accent,
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.7rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                textTransform: 'uppercase',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(57, 255, 20, 0.05)'}
+                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                            <Sparkles size={16} />
+                            [ SURPRISE_ME // SHUFFLE_AESTHETIC ]
+                        </button>
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '0.65rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em' }}>
@@ -656,9 +693,20 @@ const WallpaperLab = () => {
 
                         {/* System Logs */}
                         <div style={{ marginTop: '2rem', backgroundColor: 'var(--color-bg)', padding: '1rem', border: `1px solid ${COLORS.border}` }}>
-                            <div style={{ fontSize: '0.6rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ fontSize: '0.6rem', color: COLORS.textSecondary, marginBottom: '0.5rem', letterSpacing: '0.1em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span>SYS_LOGS:</span>
-                                <span>DEVICE_ID: {deviceId}</span>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <button 
+                                        onClick={() => {
+                                            localStorage.removeItem(STORAGE_KEY);
+                                            window.location.reload();
+                                        }}
+                                        style={{ background: 'none', border: 'none', color: COLORS.accent, cursor: 'pointer', fontSize: '0.6rem', padding: 0, fontWeight: 900 }}
+                                    >
+                                        [ RESET_QUOTA ]
+                                    </button>
+                                    <span>DEVICE_ID: {deviceId}</span>
+                                </div>
                             </div>
                             {logs.length === 0 && <div style={{ fontSize: '0.7rem', color: '#333' }}>STDBY // AWAITING_COMMAND</div>}
                             {logs.map((log, i) => (
