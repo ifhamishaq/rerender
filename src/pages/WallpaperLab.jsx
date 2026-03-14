@@ -164,7 +164,7 @@ const WallpaperLab = () => {
         try {
             const selectedRatio = RATIOS.find(r => r.id === ratio);
             
-            const response = await fetch('/api/generate-wallpaper', {
+            const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
