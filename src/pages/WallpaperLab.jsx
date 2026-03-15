@@ -38,195 +38,25 @@ const getDeviceId = () => {
 
 // --- SUB-COMPONENTS (Moved outside to prevent re-renders) ---
 
-const StackedSelector = ({ genreOptions, styleOptions, currentGenre, currentStyle, onGenreChange, onStyleChange, isGenerating, onGenerate }) => {
-    const [genreDir, setGenreDir] = useState(0);
-    const [styleDir, setStyleDir] = useState(0);
-
-    const genreIndex = genreOptions.findIndex(g => g.id === currentGenre);
-    const styleIndex = styleOptions.findIndex(s => s.id === currentStyle);
-
-    const handleNextGenre = () => {
-        setGenreDir(1);
-        onGenreChange(genreOptions[(genreIndex + 1) % genreOptions.length].id);
-    };
-
-    const handlePrevGenre = () => {
-        setGenreDir(-1);
-        onGenreChange(genreOptions[(genreIndex - 1 + genreOptions.length) % genreOptions.length].id);
-    };
-
-    const handleNextStyle = () => {
-        setStyleDir(1);
-        onStyleChange(styleOptions[(styleIndex + 1) % styleOptions.length].id);
-    };
-
-    const handlePrevStyle = () => {
-        setStyleDir(-1);
-        onStyleChange(styleOptions[(styleIndex - 1 + styleOptions.length) % styleOptions.length].id);
-    };
-
-    const slideVariants = {
-        enter: (direction) => ({
-            opacity: 0
-        }),
-        center: {
-            y: 0,
-            opacity: 1
-        },
-        exit: (direction) => ({
-            y: direction < 0 ? 100 : -100,
-            opacity: 0
-        })
-    };
-
-    return (
-        <div style={{ position: 'relative', width: '100%', maxWidth: '450px', margin: '0 auto 3rem' }}>
-            <div style={{
-                backgroundColor: '#000',
-                borderRadius: '40px',
-                overflow: 'hidden',
-                aspectRatio: '0.8/1',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
-                border: `1px solid ${COLORS.border}`
-            }}>
-                {/* Top: Genre */}
-                <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
-                    <AnimatePresence initial={false} custom={genreDir}>
-                        <motion.div
-                            key={currentGenre}
-                            custom={genreDir}
-                            variants={slideVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                            style={{ width: '100%', height: '100%', position: 'absolute' }}
-                        >
-                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                <img
-                                    src={genreOptions[genreIndex].image}
-                                    alt=""
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }}
-                                />
-                                <div style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: '1rem',
-                                    textAlign: 'center'
-                                }}>
-                                    <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                                        {genreOptions[genreIndex].name}
-                                    </h3>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Genre Nav */}
-                    <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
-                        <button onClick={handlePrevGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
-                        <button onClick={handleNextGenre} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
-                    </div>
-                </div>
-
-                {/* Bottom: Style */}
-                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                    <AnimatePresence initial={false} custom={styleDir}>
-                        <motion.div
-                            key={currentStyle}
-                            custom={styleDir}
-                            variants={slideVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                            style={{ width: '100%', height: '100%', position: 'absolute' }}
-                        >
-                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                <img
-                                    src={styleOptions[styleIndex].image}
-                                    alt=""
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }}
-                                />
-                                <div style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: '1rem',
-                                    textAlign: 'center'
-                                }}>
-                                    <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                                        {styleOptions[styleIndex].name}
-                                    </h3>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Style Nav */}
-                    <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 5 }}>
-                        <button onClick={handlePrevStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronUp size={16} /></button>
-                        <button onClick={handleNextStyle} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}><ChevronDown size={16} /></button>
-                    </div>
-                </div>
-
-                {/* Central Plus Button (Decorative) */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        left: '50%',
-                        top: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        backgroundColor: '#fff',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 10,
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                        color: '#000',
-                        opacity: 0.8
-                    }}
-                >
-                    <Plus size={40} />
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const MistyReveal = () => {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
             <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.5, 0.2, 0.8, 0.3, 1] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                animate={{ opacity: 0.4 }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatType: 'reverse' }}
                 style={{
                     position: 'absolute',
                     inset: 0,
                     background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 80%)',
+                    willChange: 'opacity'
                 }}
             />
-            <motion.div
-                animate={{
-                    opacity: [0.03, 0.08, 0.03]
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    backgroundColor: 'rgba(255,255,255,0.01)',
                     mixBlendMode: 'overlay',
                 }}
             />
@@ -261,9 +91,9 @@ const MistyReveal = () => {
                     animation: pulse 2s infinite;
                 }
                 @keyframes pulse {
-                    0% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 0 0 ${COLORS.accent}66; }
-                    70% { transform: scale(1.2); opacity: 0; box-shadow: 0 0 0 20px ${COLORS.accent}00; }
-                    100% { transform: scale(0.8); opacity: 0; }
+                    0% { opacity: 0.3; }
+                    50% { opacity: 0.8; }
+                    100% { opacity: 0.3; }
                 }
             `}</style>
         </div>
@@ -426,8 +256,22 @@ const ScanningLoader = () => (
     </div>
 );
 
+const triggerHaptic = (intensity = 10) => {
+    if (window.navigator?.vibrate) {
+        window.navigator.vibrate(intensity);
+    }
+};
+
 const WallpaperLab = () => {
     const { isDarkMode } = useTheme();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     const [genre, setGenre] = useState(GENRES[0].id);
     const [style, setStyle] = useState(STYLES[0].id);
     const [colorBias, setColorBias] = useState(COLOR_BIASES[0].id);
@@ -459,30 +303,31 @@ const WallpaperLab = () => {
     const currentStyleIndex = STYLES.findIndex(s => s.id === style);
 
     const handleNextGenre = () => {
-        const nextIndex = (currentGenreIndex + 1) % GENRES.length;
-        setGenre(GENRES[nextIndex].id);
-        addLog(`NAV: Switched to Genre [${GENRES[nextIndex].name}]`);
+        triggerHaptic(6);
+        const currentIndex = GENRES.findIndex(g => g.id === genre);
+        setGenre(GENRES[(currentIndex + 1) % GENRES.length].id);
     };
 
     const handlePrevGenre = () => {
-        const prevIndex = (currentGenreIndex - 1 + GENRES.length) % GENRES.length;
-        setGenre(GENRES[prevIndex].id);
-        addLog(`NAV: Switched to Genre [${GENRES[prevIndex].name}]`);
+        triggerHaptic(6);
+        const currentIndex = GENRES.findIndex(g => g.id === genre);
+        setGenre(GENRES[(currentIndex - 1 + GENRES.length) % GENRES.length].id);
     };
 
     const handleNextStyle = () => {
-        const nextIndex = (currentStyleIndex + 1) % STYLES.length;
-        setStyle(STYLES[nextIndex].id);
-        addLog(`NAV: Switched to Style [${STYLES[nextIndex].name}]`);
+        triggerHaptic(6);
+        const currentIndex = STYLES.findIndex(s => s.id === style);
+        setStyle(STYLES[(currentIndex + 1) % STYLES.length].id);
     };
 
     const handlePrevStyle = () => {
-        const prevIndex = (currentStyleIndex - 1 + STYLES.length) % STYLES.length;
-        setStyle(STYLES[prevIndex].id);
-        addLog(`NAV: Switched to Style [${STYLES[prevIndex].name}]`);
+        triggerHaptic(6);
+        const currentIndex = STYLES.findIndex(s => s.id === style);
+        setStyle(STYLES[(currentIndex - 1 + STYLES.length) % STYLES.length].id);
     };
 
     const handleShuffle = () => {
+        triggerHaptic(15);
         const randomGenre = GENRES[Math.floor(Math.random() * GENRES.length)].id;
         const randomStyle = STYLES[Math.floor(Math.random() * STYLES.length)].id;
         setGenre(randomGenre);
@@ -559,6 +404,16 @@ const WallpaperLab = () => {
         const updatedMods = mods.filter(m => m !== modToRemove);
         setCustomSupplement(updatedMods.join(', '));
         addLog(`ENGINE: Removed modifier segment`);
+    };
+
+    const toggleMod = (mod) => {
+        const mods = customSupplement.split(',').map(m => m.trim()).filter(Boolean);
+        if (mods.includes(mod)) {
+            setCustomSupplement(mods.filter(m => m !== mod).join(', '));
+        } else {
+            setCustomSupplement(prev => prev ? `${prev}, ${mod}` : mod);
+        }
+        triggerHaptic(5);
     };
 
     const applyWatermark = async (imageUrl) => {
@@ -873,7 +728,7 @@ const WallpaperLab = () => {
                 </header>
 
                 {/* Main Centered Stage */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isMobile ? '2rem' : '4rem' }}>
 
                     {/* Immersive Preview */}
                     <div style={{
@@ -882,23 +737,24 @@ const WallpaperLab = () => {
                         position: 'relative'
                     }}>
                         <div style={{
-                            backgroundColor: 'rgba(5,5,5,0.7)', // Slightly more opaque to compensate for less blur
-                            backdropFilter: 'blur(16px)', // Reduced from 40px for performance
-                            border: `1px solid rgba(255,255,255,0.08)`,
-                            borderRadius: '32px',
-                            padding: '1.5rem',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            boxShadow: '0 50px 100px rgba(0,0,0,0.8)'
+                                backgroundColor: 'rgba(10,10,10,0.85)', 
+                                backdropFilter: 'blur(8px)', 
+                                border: `1px solid rgba(255,255,255,0.12)`,
+                                borderRadius: isMobile ? '24px' : '32px',
+                                padding: isMobile ? '0.75rem' : '1.5rem',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                                transform: 'translateZ(0)'
                         }}>
                             <div style={{
-                                aspectRatio: ratio === '9:16' ? '9/16' : (ratio === '16:9' ? '16/9' : '1/1'),
+                                aspectRatio: isMobile ? '4/5' : (ratio === '9:16' ? '9/16' : (ratio === '16:9' ? '16/9' : '1/1')),
                                 width: '100%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 position: 'relative',
-                                borderRadius: '20px',
+                                borderRadius: isMobile ? '16px' : '20px',
                                 overflow: 'hidden',
                                 border: '1px solid rgba(255,255,255,0.1)'
                             }}>
@@ -919,7 +775,7 @@ const WallpaperLab = () => {
                                             />
                                         </motion.div>
                                     ) : (
-                                        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: isMobile ? 'column' : 'column' }}>
                                             {/* Top Segment: Genre Slider */}
                                             <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <AnimatePresence initial={false}>
@@ -927,9 +783,21 @@ const WallpaperLab = () => {
                                                             key={genre}
                                                             initial={{ opacity: 0, scale: 1.1 }}
                                                             animate={{ opacity: 1, scale: 1 }}
-                                                            exit={{ opacity: 0, scale: 0.9 }}
-                                                            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                                            style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity' }}
+                                                            exit={{ opacity: 0, scale: 1 }}
+                                                            transition={{ 
+                                                                type: 'spring', 
+                                                                stiffness: 260, 
+                                                                damping: 30, 
+                                                                mass: 0.5 
+                                                            }}
+                                                            drag="x"
+                                                            dragConstraints={{ left: 0, right: 0 }}
+                                                            onDragEnd={(e, { offset, velocity }) => {
+                                                                if (offset.x > 50) handlePrevGenre();
+                                                                else if (offset.x < -50) handleNextGenre();
+                                                            }}
+                                                            style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity', cursor: 'grab' }}
+                                                            whileTap={{ cursor: 'grabbing' }}
                                                         >
                                                         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                                                             <img 
@@ -947,20 +815,20 @@ const WallpaperLab = () => {
                                                             }}>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
                                                                     <motion.button 
-                                                                        whileHover={{ scale: 1.2, color: COLORS.accent }}
+                                                                        whileHover={{ x: -2, color: COLORS.accent }}
                                                                         onClick={handlePrevGenre}
                                                                         style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7 }}
                                                                     > <ChevronLeft size={32} /> </motion.button>
                                                                     
                                                                     <div style={{ textAlign: 'center' }}>
                                                                         <div style={{ fontSize: '0.7rem', color: COLORS.accent, fontWeight: 900, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>SELECT_GENRE</div>
-                                                                        <h3 style={{ fontFamily: COLORS.display, fontSize: '2.8rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', lineHeight: 1 }}>
+                                                                        <h3 style={{ fontFamily: COLORS.display, fontSize: isMobile ? '2.2rem' : '2.8rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', lineHeight: 1 }}>
                                                                             {GENRES.find(g => g.id === genre).name}
                                                                         </h3>
                                                                     </div>
 
                                                                     <motion.button 
-                                                                        whileHover={{ scale: 1.2, color: COLORS.accent }}
+                                                                        whileHover={{ x: 2, color: COLORS.accent }}
                                                                         onClick={handleNextGenre}
                                                                         style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7 }}
                                                                     > <ChevronRight size={32} /> </motion.button>
@@ -974,7 +842,7 @@ const WallpaperLab = () => {
                                             {/* Center Controls Divider */}
                                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                 <motion.button
-                                                    whileHover={{ scale: 1.2, rotate: 180, color: COLORS.accent }}
+                                                    whileHover={{ rotate: 180, color: COLORS.accent }}
                                                     whileTap={{ scale: 0.9 }}
                                                     onClick={handleShuffle}
                                                     style={{ 
@@ -997,7 +865,7 @@ const WallpaperLab = () => {
                                                 </div>
 
                                                 <motion.button
-                                                    whileHover={{ scale: 1.2, color: COLORS.accent }}
+                                                    whileHover={{ color: COLORS.accent }}
                                                     whileTap={{ scale: 0.9 }}
                                                     onClick={handleSurpriseMe} // Existing randomizer for fallback
                                                     style={{ 
@@ -1018,9 +886,21 @@ const WallpaperLab = () => {
                                                         key={style}
                                                         initial={{ opacity: 0, scale: 1.1 }}
                                                         animate={{ opacity: 1, scale: 1 }}
-                                                        exit={{ opacity: 0, scale: 0.9 }}
-                                                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                                        style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity' }}
+                                                        exit={{ opacity: 0, scale: 1 }}
+                                                        transition={{ 
+                                                            type: 'spring', 
+                                                            stiffness: 260, 
+                                                            damping: 30, 
+                                                            mass: 0.5 
+                                                        }}
+                                                        drag="x"
+                                                        dragConstraints={{ left: 0, right: 0 }}
+                                                        onDragEnd={(e, { offset, velocity }) => {
+                                                            if (offset.x > 50) handlePrevStyle();
+                                                            else if (offset.x < -50) handleNextStyle();
+                                                        }}
+                                                        style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity', cursor: 'grab' }}
+                                                        whileTap={{ cursor: 'grabbing' }}
                                                     >
                                                         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                                                             <img 
@@ -1038,20 +918,20 @@ const WallpaperLab = () => {
                                                             }}>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
                                                                     <motion.button 
-                                                                        whileHover={{ scale: 1.2, color: COLORS.accent }}
+                                                                        whileHover={{ x: -2, color: COLORS.accent }}
                                                                         onClick={handlePrevStyle}
                                                                         style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7 }}
                                                                     > <ChevronLeft size={32} /> </motion.button>
                                                                     
                                                                     <div style={{ textAlign: 'center' }}>
                                                                         <div style={{ fontSize: '0.7rem', color: COLORS.accent, fontWeight: 900, letterSpacing: '0.2em', marginBottom: '0.5rem' }}>SELECT_STYLE</div>
-                                                                        <h3 style={{ fontFamily: COLORS.display, fontSize: '2.8rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', lineHeight: 1 }}>
+                                                                        <h3 style={{ fontFamily: COLORS.display, fontSize: isMobile ? '2.2rem' : '2.8rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', lineHeight: 1 }}>
                                                                             {STYLES.find(s => s.id === style).name}
                                                                         </h3>
                                                                     </div>
 
                                                                     <motion.button 
-                                                                        whileHover={{ scale: 1.2, color: COLORS.accent }}
+                                                                        whileHover={{ x: 2, color: COLORS.accent }}
                                                                         onClick={handleNextStyle}
                                                                         style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7 }}
                                                                     > <ChevronRight size={32} /> </motion.button>
@@ -1059,7 +939,44 @@ const WallpaperLab = () => {
                                                             </div>
                                                         </div>
                                                     </motion.div>
-                                                </AnimatePresence>
+                                                 </AnimatePresence>
+                                            </div>
+
+                                            {/* Technical Spec / Recipe Overlay */}
+                                            <div style={{ 
+                                                position: 'absolute', 
+                                                bottom: isMobile ? '0.75rem' : '1.5rem', 
+                                                left: isMobile ? '0.75rem' : '1.5rem', 
+                                                maxWidth: '70%',
+                                                pointerEvents: 'none',
+                                                zIndex: 5
+                                            }}>
+                                                <div style={{ 
+                                                    fontFamily: COLORS.mono, 
+                                                    fontSize: '0.5rem', 
+                                                    color: COLORS.accent, 
+                                                    opacity: 0.8,
+                                                    backgroundColor: 'rgba(0,0,0,0.6)',
+                                                    padding: '2px 6px',
+                                                    borderRadius: '2px',
+                                                    display: 'inline-block',
+                                                    marginBottom: '4px',
+                                                    letterSpacing: '0.1em'
+                                                }}>
+                                                    RECIPE_MOD_MANIFEST
+                                                </div>
+                                                <div style={{ 
+                                                    fontSize: isMobile ? '0.6rem' : '0.7rem', 
+                                                    color: '#fff', 
+                                                    textShadow: '0 2px 8px rgba(0,0,0,0.9)',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.05em',
+                                                    lineHeight: 1.4,
+                                                    opacity: 0.9,
+                                                    fontWeight: 700
+                                                }}>
+                                                    {genre} // {style} {customSupplement ? `// ${customSupplement}` : ''}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -1068,17 +985,40 @@ const WallpaperLab = () => {
 
                             {/* Floating Action Buttons over preview */}
                             {resultUrl && !isGenerating && (
-                                <div style={{ position: 'absolute', top: '2.5rem', right: '2.5rem', display: 'flex', gap: '0.75rem' }}>
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    top: isMobile ? '1rem' : '2.5rem', 
+                                    right: isMobile ? '1rem' : '2.5rem', 
+                                    display: 'flex', 
+                                    gap: '0.75rem',
+                                    zIndex: 10 
+                                }}>
                                     <motion.button
-                                        whileHover={{ scale: 1.1 }}
+                                        whileHover={{ y: -2 }}
                                         onClick={handleDownload}
-                                        style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '12px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}
-                                    > <Download size={20} /> </motion.button>
+                                        style={{ 
+                                            background: 'rgba(0,0,0,0.8)', 
+                                            border: '1px solid rgba(255,255,255,0.2)', 
+                                            color: '#fff', 
+                                            padding: isMobile ? '0.5rem' : '0.75rem', 
+                                            borderRadius: '12px', 
+                                            cursor: 'pointer', 
+                                            backdropFilter: 'blur(10px)' 
+                                        }}
+                                    > <Download size={isMobile ? 16 : 20} /> </motion.button>
                                     <motion.button
-                                        whileHover={{ scale: 1.1 }}
+                                        whileHover={{ y: -2 }}
                                         onClick={() => setSelectedAsset({ url: resultUrl, prompt: 'Current Render', genre: 'Active', style: 'Active', seed: seed === -1 ? 'auto' : seed, id: Date.now() })}
-                                        style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '12px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}
-                                    > <Layout size={20} /> </motion.button>
+                                        style={{ 
+                                            background: 'rgba(0,0,0,0.8)', 
+                                            border: '1px solid rgba(255,255,255,0.2)', 
+                                            color: '#fff', 
+                                            padding: isMobile ? '0.5rem' : '0.75rem', 
+                                            borderRadius: '12px', 
+                                            cursor: 'pointer', 
+                                            backdropFilter: 'blur(10px)' 
+                                        }}
+                                    > <Layout size={isMobile ? 16 : 20} /> </motion.button>
                                 </div>
                             )}
                         </div>
@@ -1171,16 +1111,23 @@ const WallpaperLab = () => {
                                         {archive.map((item, index) => (
                                             <motion.div
                                                 key={item.id}
+                                                layout
                                                 id={`archive-item-${item.id}`}
                                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                                 animate={{
                                                     opacity: 1,
                                                     scale: 1,
                                                     y: 0,
-                                                    transition: { delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 }
+                                                    transition: { 
+                                                        delay: index * 0.02, 
+                                                        type: 'spring', 
+                                                        stiffness: 300, 
+                                                        damping: 25, 
+                                                        mass: 0.5 
+                                                    }
                                                 }}
                                                 exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-                                                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                                                whileHover={{ y: -8, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
                                                 style={{
                                                     backgroundColor: COLORS.surface,
                                                     border: `1px solid ${COLORS.border}`,
@@ -1209,272 +1156,354 @@ const WallpaperLab = () => {
                 </div>
             </div>
 
-            {/* Floating Command Bar */}
-            <div className="floating-bar glass-panel" style={{
-                boxShadow: '0 -20px 50px rgba(0,0,0,0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2rem'
-            }}>
-                {/* Prompt & Controls Composite */}
-                <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1rem' }}>
-                        {RATIOS.map(r => (
-                            <motion.button
-                                key={r.id}
-                                whileHover={{ scale: 1.1 }}
-                                onClick={() => setRatio(r.id)}
-                                style={{
-                                    width: '32px',
-                                    height: '42px',
-                                    backgroundColor: ratio === r.id ? COLORS.accent : 'transparent',
-                                    border: `1px solid ${ratio === r.id ? COLORS.accent : 'rgba(255,255,255,0.2)'}`,
-                                    borderRadius: '4px',
-                                    boxSizing: 'border-box',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '0.5rem',
-                                    fontWeight: 900,
-                                    color: ratio === r.id ? '#000' : '#fff'
-                                }}
-                            >
-                                {r.id}
-                            </motion.button>
-                        ))}
-                    </div>
-
-                    {/* Selector Overlay Container (Anchored to Command Bar) */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '100%',
-                        left: '0',
-                        right: '0',
-                        padding: '1.5rem 2rem', 
-                        backgroundColor: 'transparent',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1rem',
-                        zIndex: 1000
-                    }}>
-                        {/* Interactive Selector Overlays */}
-                        <AnimatePresence>
-                            {activeSelector && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
+            {/* Desktop Controls (Floating Bar) */}
+            {!isMobile && (
+                <div className="floating-bar glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    {/* Prompt & Controls Composite */}
+                    <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1rem' }}>
+                            {RATIOS.map(r => (
+                                <motion.button
+                                    key={r.id}
+                                    whileHover={{ scale: 1.1 }}
+                                    onClick={() => setRatio(r.id)}
                                     style={{
-                                        padding: '1.5rem',
-                                        backgroundColor: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        borderRadius: '16px'
+                                        width: '32px',
+                                        height: '42px',
+                                        backgroundColor: ratio === r.id ? COLORS.accent : 'transparent',
+                                        border: `1px solid ${ratio === r.id ? COLORS.accent : 'rgba(255,255,255,0.2)'}`,
+                                        borderRadius: '4px',
+                                        boxSizing: 'border-box',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '0.5rem',
+                                        fontWeight: 900,
+                                        color: ratio === r.id ? '#000' : '#fff'
                                     }}
                                 >
-                                    {activeSelector === 'genre' && (
-                                        <div style={{
-                                            display: 'flex',
-                                            gap: '1rem',
-                                            overflowX: 'auto',
-                                            padding: '0.5rem 0',
-                                            scrollbarWidth: 'none',
-                                            msOverflowStyle: 'none'
-                                        }}>
-                                            {GENRES.map(g => (
-                                                <motion.button
-                                                    key={g.id}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => { setGenre(g.id); setActiveSelector(null); }}
-                                                    style={{
-                                                        minWidth: '140px',
-                                                        height: '180px',
-                                                        position: 'relative',
-                                                        background: 'none',
-                                                        border: genre === g.id ? `2px solid ${COLORS.accent}` : '1px solid rgba(255,255,255,0.1)',
-                                                        borderRadius: '12px',
-                                                        overflow: 'hidden',
-                                                        cursor: 'pointer',
-                                                        flexShrink: 0
-                                                    }}
-                                                >
-                                                    <img src={g.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: genre === g.id ? 0.8 : 0.4 }} />
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        inset: 0,
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'flex-end',
-                                                        padding: '0.75rem',
-                                                        textAlign: 'left'
-                                                    }}>
-                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: genre === g.id ? COLORS.accent : '#fff', textTransform: 'uppercase', lineHeight: 1 }}>{g.name}</div>
-                                                        {genre === g.id && (
-                                                            <div style={{ fontSize: '0.5rem', fontWeight: 900, color: COLORS.accent, marginTop: '0.25rem', letterSpacing: '0.1em' }}>[ SELECTED ]</div>
-                                                        )}
-                                                    </div>
-                                                </motion.button>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {r.id}
+                                </motion.button>
+                            ))}
+                        </div>
 
-                                    {activeSelector === 'style' && (
-                                        <div style={{
-                                            display: 'flex',
-                                            gap: '1rem',
-                                            overflowX: 'auto',
-                                            padding: '0.5rem 0',
-                                            scrollbarWidth: 'none',
-                                            msOverflowStyle: 'none'
-                                        }}>
-                                            {STYLES.map(s => (
-                                                <motion.button
-                                                    key={s.id}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => { setStyle(s.id); setActiveSelector(null); }}
-                                                    style={{
-                                                        minWidth: '140px',
-                                                        height: '180px',
-                                                        position: 'relative',
-                                                        background: 'none',
-                                                        border: style === s.id ? `2px solid ${COLORS.accent}` : '1px solid rgba(255,255,255,0.1)',
-                                                        borderRadius: '12px',
-                                                        overflow: 'hidden',
-                                                        cursor: 'pointer',
-                                                        flexShrink: 0
-                                                    }}
-                                                >
-                                                    <img src={s.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: style === s.id ? 0.8 : 0.4 }} />
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        inset: 0,
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'flex-end',
-                                                        padding: '0.75rem',
-                                                        textAlign: 'left'
-                                                    }}>
-                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: style === s.id ? COLORS.accent : '#fff', textTransform: 'uppercase', lineHeight: 1 }}>{s.name}</div>
-                                                        {style === s.id && (
-                                                            <div style={{ fontSize: '0.5rem', fontWeight: 900, color: COLORS.accent, marginTop: '0.25rem', letterSpacing: '0.1em' }}>[ SELECTED ]</div>
-                                                        )}
-                                                    </div>
-                                                </motion.button>
-                                            ))}
-                                        </div>
-                                    )}
+                        <div style={{ position: 'relative' }}>
+                            <motion.button
+                                onClick={() => setActiveSelector(activeSelector === 'modifiers' ? null : 'modifiers')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: `1px solid ${activeSelector === 'modifiers' ? COLORS.accent : 'rgba(255,255,255,0.1)'}`,
+                                    color: activeSelector === 'modifiers' ? COLORS.accent : '#fff',
+                                    padding: '0.6rem 1.2rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                    fontFamily: COLORS.mono,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                <Plus size={14} /> MODS
+                            </motion.button>
 
-                                    {activeSelector === 'mods' && (
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                            {customSupplement.split(',').map((mod, i) => (
-                                                <div
-                                                    key={i}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem',
-                                                        padding: '0.4rem 0.8rem',
-                                                        background: 'rgba(255,255,255,0.1)',
-                                                        borderRadius: '20px',
-                                                        fontSize: '0.65rem'
-                                                    }}
-                                                >
-                                                    <span>{mod.trim()}</span>
-                                                    <button
-                                                        onClick={() => removeMod(mod.trim())}
-                                                        style={{ background: 'none', border: 'none', color: COLORS.accent, cursor: 'pointer', padding: '0 0.2rem', fontWeight: 900 }}
-                                                    >
-                                                        ×
-                                                    </button>
+                            <AnimatePresence>
+                                {activeSelector === 'modifiers' && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: '100%',
+                                            left: 0,
+                                            marginBottom: '1.5rem',
+                                            width: '400px',
+                                            backgroundColor: 'rgba(10,10,10,0.98)',
+                                            backdropFilter: 'blur(20px)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '24px',
+                                            padding: '1.5rem',
+                                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                                            zIndex: 1100
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+                                            <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, letterSpacing: '0.1em' }}>AESTHETIC_REFINERS</div>
+                                            <button onClick={() => setActiveSelector(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>×</button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                                            {Object.entries(PROMPT_COLLECTIONS).map(([category, mods]) => (
+                                                <div key={category} style={{ width: '100%', marginBottom: '0.5rem' }}>
+                                                    <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{category.replace('_', ' ')}</div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                        {mods.map(mod => (
+                                                            <button
+                                                                key={mod}
+                                                                onClick={() => toggleMod(mod)}
+                                                                className={customSupplement.includes(mod) ? 'mod-active' : ''}
+                                                                style={{
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    background: customSupplement.includes(mod) ? COLORS.accent : 'rgba(255,255,255,0.05)',
+                                                                    border: 'none',
+                                                                    color: customSupplement.includes(mod) ? '#000' : 'rgba(255,255,255,0.6)',
+                                                                    borderRadius: '8px',
+                                                                    fontSize: '0.6rem',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.2s ease'
+                                                                }}
+                                                            >
+                                                                {mod}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             ))}
-                                            {customSupplement.trim() && (
-                                                <button
-                                                    onClick={() => { setCustomSupplement(''); setActiveSelector(null); }}
-                                                    style={{ padding: '0.4rem 0.8rem', background: 'none', border: `1px solid ${COLORS.border}`, color: 'rgba(255,255,255,0.5)', borderRadius: '20px', fontSize: '0.6rem', cursor: 'pointer' }}
-                                                >
-                                                    CLEAR_ALL
-                                                </button>
-                                            )}
                                         </div>
-                                    )}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
 
-                    <input
-                        value={customSupplement}
-                        onChange={(e) => setCustomSupplement(e.target.value)}
-                        placeholder="Define your aesthetic manifest..."
-                        style={{
-                            flexGrow: 1,
-                            background: 'none',
-                            border: 'none',
-                            color: '#fff',
-                            fontFamily: COLORS.sans,
-                            fontSize: '0.9rem',
-                            outline: 'none',
-                            padding: '0.5rem'
-                        }}
-                    />
+                                        {customSupplement.trim() && (
+                                            <div style={{ marginTop: '1.2rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                {customSupplement.split(',').filter(m => m.trim()).map(mod => (
+                                                    <div
+                                                        key={mod}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.5rem',
+                                                            padding: '0.4rem 0.8rem',
+                                                            background: 'rgba(255,255,255,0.1)',
+                                                            borderRadius: '20px',
+                                                            fontSize: '0.65rem'
+                                                        }}
+                                                    >
+                                                        <span>{mod.trim()}</span>
+                                                        <button
+                                                            onClick={() => removeMod(mod.trim())}
+                                                            style={{ background: 'none', border: 'none', color: COLORS.accent, cursor: 'pointer', padding: '0 0.2rem', fontWeight: 900 }}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                {customSupplement.trim() && (
+                                                    <button
+                                                        onClick={() => { setCustomSupplement(''); setActiveSelector(null); }}
+                                                        style={{ padding: '0.4rem 0.8rem', background: 'none', border: `1px solid ${COLORS.border}`, color: 'rgba(255,255,255,0.5)', borderRadius: '20px', fontSize: '0.6rem', cursor: 'pointer' }}
+                                                    >
+                                                        CLEAR_ALL
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <motion.button
-                            whileHover={{ scale: 1.1, color: COLORS.accent }}
-                            onClick={handleMagicEnhance}
-                            title="Magic Enhance"
+                        <input
+                            value={customSupplement}
+                            onChange={(e) => setCustomSupplement(e.target.value)}
+                            placeholder="Define your aesthetic manifest..."
                             style={{
+                                flexGrow: 1,
                                 background: 'none',
                                 border: 'none',
-                                color: 'rgba(255,255,255,0.4)',
-                                cursor: 'pointer',
-                                transition: 'color 0.2s ease'
+                                color: '#fff',
+                                fontFamily: COLORS.sans,
+                                fontSize: '0.9rem',
+                                outline: 'none',
+                                padding: '0.5rem'
                             }}
-                        >
-                            <Wand2 size={20} />
-                        </motion.button>
-                        <motion.button
-                            onClick={() => setIsHighQuality(!isHighQuality)}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: isHighQuality ? COLORS.accent : 'rgba(255,255,255,0.4)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <Sparkles size={20} />
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleGenerate}
-                            disabled={isGenerating}
-                            style={{
-                                backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
-                                color: '#000',
-                                border: 'none',
-                                padding: '0.8rem 2rem',
-                                borderRadius: '12px',
-                                fontFamily: COLORS.display,
-                                fontWeight: 900,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            {isGenerating ? <RefreshCw size={18} className="spin" /> : <TerminalIcon size={18} />}
-                            {isGenerating ? 'INGESTING...' : 'GENERATE'}
-                        </motion.button>
+                        />
+
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <motion.button
+                                whileHover={{ scale: 1.1, color: COLORS.accent }}
+                                onClick={handleMagicEnhance}
+                                title="Magic Enhance"
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'rgba(255,255,255,0.4)',
+                                    cursor: 'pointer',
+                                    transition: 'color 0.2s ease'
+                                }}
+                            >
+                                <Wand2 size={20} />
+                            </motion.button>
+                            <motion.button
+                                onClick={() => setIsHighQuality(!isHighQuality)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: isHighQuality ? COLORS.accent : 'rgba(255,255,255,0.4)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <Sparkles size={20} />
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleGenerate}
+                                disabled={isGenerating}
+                                style={{
+                                    backgroundColor: isGenerating ? COLORS.surface : COLORS.accent,
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '0.8rem 2rem',
+                                    borderRadius: '12px',
+                                    fontFamily: COLORS.display,
+                                    fontWeight: 900,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                {isGenerating ? <RefreshCw size={18} className="spin" /> : <TerminalIcon size={18} />}
+                                {isGenerating ? 'INGESTING...' : 'GENERATE'}
+                            </motion.button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Mobile Bottom Sheet */}
+            {isMobile && (
+                <>
+                    <div
+                        onClick={() => setIsSheetOpen(true)}
+                        className="glass-panel"
+                        style={{
+                            position: 'fixed',
+                            bottom: '1.5rem',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '90%',
+                            padding: '1rem',
+                            borderRadius: '20px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            zIndex: 900,
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        <div style={{ fontFamily: COLORS.mono, fontSize: '0.7rem', color: COLORS.accent, letterSpacing: '0.1em' }}>OPEN_CONFIG_MANIFEST</div>
+                        <Plus size={16} color={COLORS.accent} />
+                    </div>
+
+                    <AnimatePresence>
+                        {isSheetOpen && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsSheetOpen(false)}
+                                    style={{
+                                        position: 'fixed',
+                                        inset: 0,
+                                        backgroundColor: 'rgba(0,0,0,0.8)',
+                                        backdropFilter: 'blur(5px)',
+                                        zIndex: 1100
+                                    }}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    style={{
+                                        position: 'fixed',
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        backgroundColor: '#050505',
+                                        borderTop: `1px solid ${COLORS.border}`,
+                                        borderTopLeftRadius: '32px',
+                                        borderTopRightRadius: '32px',
+                                        padding: '2rem 1.5rem 3rem',
+                                        zIndex: 1200,
+                                        maxHeight: '85vh',
+                                        overflowY: 'auto'
+                                    }}
+                                >
+                                    <div style={{ width: '40px', height: '4px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '2px', margin: '0 auto 2rem' }} />
+
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '1rem', letterSpacing: '0.1em' }}>MANIFEST_INPUT</div>
+                                        <input
+                                            value={customSupplement}
+                                            onChange={(e) => setCustomSupplement(e.target.value)}
+                                            placeholder="Define aesthetic..."
+                                            style={{
+                                                width: '100%',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                border: `1px solid ${COLORS.border}`,
+                                                borderRadius: '12px',
+                                                padding: '1rem',
+                                                color: '#fff',
+                                                fontSize: '1rem',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div style={{ marginBottom: '2.5rem' }}>
+                                        <div style={{ fontSize: '0.6rem', color: COLORS.accent, fontWeight: 900, marginBottom: '1rem', letterSpacing: '0.1em' }}>MODIFIERS</div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                                            {Object.entries(PROMPT_COLLECTIONS).flatMap(([_, mods]) => mods).map(mod => (
+                                                <button
+                                                    key={mod}
+                                                    onClick={() => { toggleMod(mod); triggerHaptic(5); }}
+                                                    style={{
+                                                        padding: '0.6rem 1rem',
+                                                        background: customSupplement.includes(mod) ? COLORS.accent : 'rgba(255,255,255,0.05)',
+                                                        borderRadius: '10px',
+                                                        border: 'none',
+                                                        color: customSupplement.includes(mod) ? '#000' : 'rgba(255,255,255,0.6)',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600
+                                                    }}
+                                                >
+                                                    {mod}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
+                                        <motion.button
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => { handleGenerate(); setIsSheetOpen(false); }}
+                                            style={{
+                                                flex: 1,
+                                                backgroundColor: COLORS.accent,
+                                                color: '#000',
+                                                padding: '1.2rem',
+                                                borderRadius: '16px',
+                                                border: 'none',
+                                                fontFamily: COLORS.display,
+                                                fontWeight: 900,
+                                                fontSize: '1rem'
+                                            }}
+                                        >
+                                            EXECUTE_GENERATION
+                                        </motion.button>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </>
+            )}
 
             {/* Lightbox / Archive Detail */}
             <AnimatePresence>
@@ -1498,12 +1527,18 @@ const WallpaperLab = () => {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
+
+                .spin {
+                    animation: spin 2s linear infinite;
+                }
+
                 div:hover > div > .hover-overlay { opacity: 1 !important; }
                 div:hover > .delete-btn { opacity: 1 !important; }
                 
                 .glass-panel {
-                    background: rgba(10, 10, 10, 0.95);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(10, 10, 10, 0.9);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(8px);
                     transform: translateZ(0); /* Force GPU acceleration */
                     backface-visibility: hidden;
                     perspective: 1000;
@@ -1525,9 +1560,9 @@ const WallpaperLab = () => {
                     position: fixed;
                     inset: 0;
                     z-index: -1;
-                    opacity: 0.15; /* Lowered opacity */
-                    background: radial-gradient(circle at 50% 50%, var(--color-accent)22, transparent 70%); /* CSS gradient instead of blur filter */
-                    transition: opacity 1.5s ease;
+                    opacity: 0.08; /* Lowered opacity */
+                    background: radial-gradient(circle at 50% 50%, var(--color-accent) 0%, transparent 70%); /* CSS gradient instead of blur filter */
+                    transition: opacity 1s ease;
                     will-change: opacity;
                     pointer-events: none; /* Isolation */
                     transform: translate3d(0,0,0); /* Hardware layer */
