@@ -8,7 +8,6 @@ import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
 import SlotMachineWidget from '../components/SlotMachineWidget';
 import { useTheme } from '../context/ThemeContext';
-import Magnetic from '../components/Animations/Magnetic';
 
 const Home = () => {
     const { isDarkMode } = useTheme();
@@ -300,7 +299,6 @@ const Home = () => {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                        <Magnetic strength={0.3}>
                             <Link to="/services" style={{
                                 display: 'inline-block',
                                 padding: '1rem 2.5rem',
@@ -323,7 +321,6 @@ const Home = () => {
                                 }}>
                                 VIEW FULL SERVICES
                             </Link>
-                        </Magnetic>
                     </div>
                 </div>
             </section>
@@ -541,7 +538,6 @@ const Home = () => {
                     }}>
                         STOP BLENDING IN. LET'S BUILD SOMETHING UNFORGETTABLE.
                     </p>
-                    <Magnetic strength={0.2}>
                         <a href="/services#inquiry" style={{
                             display: 'inline-block',
                             padding: '1.5rem 4rem',
@@ -563,7 +559,6 @@ const Home = () => {
                             }}>
                             CONTACT US TODAY
                         </a>
-                    </Magnetic>
                 </div>
             </section>
 

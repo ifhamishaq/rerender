@@ -10,11 +10,11 @@ const Cursor = () => {
     const mouseY = useMotionValue(0);
 
     // Create smooth spring versions of the mouse coordinates
-    const springConfig = { stiffness: 500, damping: 28, mass: 0.5 };
+    const springConfig = { stiffness: 600, damping: 32, mass: 0.4 };
     const springX = useSpring(mouseX, springConfig);
     const springY = useSpring(mouseY, springConfig);
 
-    const outerSpringConfig = { stiffness: 250, damping: 20 };
+    const outerSpringConfig = { stiffness: 550, damping: 35, mass: 0.3 };
     const outerX = useSpring(mouseX, outerSpringConfig);
     const outerY = useSpring(mouseY, outerSpringConfig);
 
@@ -78,16 +78,18 @@ const Cursor = () => {
                     y: springY,
                     translateX: '-50%',
                     translateY: '-50%',
-                    willChange: 'transform' // Force hardware acceleration
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transformStyle: 'preserve-3d'
                 }}
                 animate={{
                     scale: isHovering ? 2.5 : 1,
                 }}
                 transition={{
                     type: "spring",
-                    stiffness: 600, // Faster and snappier
-                    damping: 30,
-                    mass: 0.4
+                    stiffness: 500,
+                    damping: 28,
+                    mass: 0.5
                 }}
             />
 
@@ -103,11 +105,14 @@ const Cursor = () => {
                     borderRadius: '50%',
                     pointerEvents: 'none',
                     zIndex: 9998,
+                    mixBlendMode: 'difference',
                     x: outerX,
                     y: outerY,
                     translateX: '-50%',
                     translateY: '-50%',
-                    willChange: 'transform' // Force hardware acceleration
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transformStyle: 'preserve-3d'
                 }}
                 animate={{
                     scale: isHovering ? 1.5 : 1,
@@ -115,8 +120,9 @@ const Cursor = () => {
                 }}
                 transition={{
                     type: "spring",
-                    stiffness: 300,
-                    damping: 25,
+                    stiffness: 550,
+                    damping: 35,
+                    mass: 0.3
                 }}
             />
         </>
