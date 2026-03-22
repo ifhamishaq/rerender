@@ -94,58 +94,9 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* ===== TRUSTED BY LOGO STRIP ===== */}
-            <section style={{
-                padding: '3rem 2rem',
-                backgroundColor: 'var(--color-surface)',
-                borderBottom: '1px solid var(--color-border)',
-                borderTop: '1px solid var(--color-border)',
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <p style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.7rem',
-                        letterSpacing: '0.2em',
-                        color: 'var(--color-text-secondary)',
-                        textAlign: 'center',
-                        marginBottom: '2rem',
-                        textTransform: 'uppercase'
-                    }}>
-                        Trusted by brands worldwide
-                    </p>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '2.5rem 4rem',
-                    }}>
-                        {[
-                            'BRAND ONE',
-                            'STUDIO CO.',
-                            'CREATIVE LAB',
-                            'MEDIA GROUP',
-                            'PIXEL WORKS',
-                        ].map((brand) => (
-                            <span key={brand} style={{
-                                fontFamily: 'var(--font-sans)',
-                                fontWeight: 900,
-                                fontSize: 'clamp(1rem, 3vw, 1.5rem)',
-                                letterSpacing: '-0.02em',
-                                color: 'var(--color-text)',
-                                opacity: 0.35,
-                                textTransform: 'uppercase',
-                                transition: 'opacity 0.2s ease'
-                            }}
-                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.35'}
-                            >
-                                {brand}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            {/* <section style={{ padding: '3rem 2rem' }}> 
+                (Removed fake logo strip for maximum credibility) 
+            </section> */}
 
             {/* Our Approach Section */}
             <section style={{
@@ -155,7 +106,7 @@ const Home = () => {
                 borderBottom: '1px solid var(--color-border)'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div className="section-label">01 — OUR APPROACH</div>
+                    <div className="section-label">01 &#8212; OUR APPROACH</div>
                     <FadeUp blur>
                         <motion.h2
                             style={{
@@ -210,7 +161,7 @@ const Home = () => {
                             marginBottom: '2rem'
                         }}>
                             <span style={{ color: 'var(--color-accent)', opacity: 1 }}>02</span>
-                            &mdash; OUR EXPERTISE
+                            &#8212; OUR EXPERTISE
                             <span style={{ flex: 1, height: '1px', backgroundColor: 'currentColor', opacity: 0.3, display: 'block' }} />
                         </div>
                         <h2 style={{
@@ -342,7 +293,7 @@ const Home = () => {
                             marginBottom: '3rem',
                             flexWrap: 'wrap',
                             gap: '1rem',
-                        }}>
+                        }} className="responsive-shop-header">
                             <h2 style={{
                                 fontFamily: 'var(--font-display)',
                                 fontSize: 'clamp(2rem, 5vw, 3.5rem)',
@@ -375,12 +326,12 @@ const Home = () => {
                                     e.currentTarget.style.borderColor = 'var(--color-border)';
                                 }}
                             >
-                                VIEW ALL →
+                                VIEW ALL &rarr;
                             </Link>
                         </div>
                     </FadeUp>
 
-                    <div style={{
+                    <div className="responsive-shop-grid" style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                         gap: '1.5px',

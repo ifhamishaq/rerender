@@ -56,10 +56,7 @@ const Cursor = () => {
 
     return (
         <>
-            <style>{`
-                html, body { cursor: none !important; }
-                a, button, [role="button"], input, select, textarea { cursor: none !important; }
-            `}</style>
+            {/* Removed the cursor:none override to enhance accessibility and precision for users */}
             
             {/* Inner Dot */}
             <motion.div

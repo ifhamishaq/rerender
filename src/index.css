@@ -295,6 +295,16 @@ button {
   font-family: inherit;
 }
 
+/* === ACCESSIBILITY === */
+a:focus-visible, 
+button:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 /* === NATIVE FORM ELEMENTS DARK MODE === */
 input,
 textarea,
@@ -405,9 +415,9 @@ html.lenis body {
     padding: 3rem 1rem !important;
   }
 
-  /* Force single column for ALL grids */
-  div[style*="grid-template-columns"],
-  div[style*="gridTemplateColumns"] {
+  /* Force single column for designated flexible grids instead of dangerous wildcards */
+  .responsive-grid,
+  .responsive-shop-grid {
     grid-template-columns: 1fr !important;
     gap: 1.25rem !important;
   }
@@ -483,8 +493,8 @@ html.lenis body {
   }
 
   /* --- PROMPT CARDS --- */
-  /* Prompt image max height */
-  section img {
+  /* Prompt image max height explicitly targeted via explicit class */
+  .constrained-img-container {
     max-height: 200px !important;
   }
 

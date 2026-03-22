@@ -60,7 +60,7 @@ const PromptPreview = () => {
                     textTransform: 'uppercase',
                     transition: 'all 0.2s ease',
                 }}>
-                    VIEW ALL →
+                    VIEW ALL &rarr;
                 </Link>
             </div>
 
@@ -96,15 +96,13 @@ const PromptPreview = () => {
                             position: 'relative',
                         }}>
                             {item.image ? (
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'contain',
-                                    }}
-                                />
+                                <div className="constrained-img-container" style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                }}>
+                                    <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                </div>
                             ) : (
                                 <div style={{
                                     width: '100%',
@@ -188,7 +186,7 @@ const PromptPreview = () => {
                                     textTransform: 'uppercase',
                                 }}
                             >
-                                {copiedId === item.id ? '✓ COPIED!' : 'COPY PROMPT'}
+                                {copiedId === item.id ? <span dangerouslySetInnerHTML={{ __html: '&#10003; COPIED!' }} /> : 'COPY PROMPT'}
                             </motion.button>
                         </div>
                     </motion.div>
@@ -207,7 +205,7 @@ const PromptPreview = () => {
                     color: 'var(--color-text-secondary)',
                     textDecoration: 'underline',
                 }}>
-                    Have a unique prompt? Submit yours →
+                    Have a unique prompt? Submit yours &rarr;
                 </Link>
             </div>
         </section>

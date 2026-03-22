@@ -23,19 +23,20 @@ import Admin from './components/Admin';
 import Prompts from './components/Prompts';
 import SubmitPrompt from './components/SubmitPrompt';
 
-// Pages
-import Home from './pages/Home';
-import Services from './pages/Services';
-import ShopPage from './pages/ShopPage';
-import AboutPage from './pages/AboutPage';
-import PricingPage from './pages/PricingPage';
-import ArcadePage from './pages/ArcadePage';
-import TypeRacerPage from './pages/TypeRacerPage';
-import HexCodeHeroPage from './pages/HexCodeHeroPage';
-import PalettePickerPage from './pages/PalettePickerPage';
-import ReflexGamePage from './pages/ReflexGamePage';
-import WallpaperLab from './pages/WallpaperLab';
-import ToolsPage from './pages/ToolsPage';
+// Lazy Loaded Pages
+const Home = React.lazy(() => import('./pages/Home'));
+const Services = React.lazy(() => import('./pages/Services'));
+const ShopPage = React.lazy(() => import('./pages/ShopPage'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const PricingPage = React.lazy(() => import('./pages/PricingPage'));
+const ArcadePage = React.lazy(() => import('./pages/ArcadePage'));
+const TypeRacerPage = React.lazy(() => import('./pages/TypeRacerPage'));
+const HexCodeHeroPage = React.lazy(() => import('./pages/HexCodeHeroPage'));
+const PalettePickerPage = React.lazy(() => import('./pages/PalettePickerPage'));
+const ReflexGamePage = React.lazy(() => import('./pages/ReflexGamePage'));
+const WallpaperLab = React.lazy(() => import('./pages/WallpaperLab'));
+const ToolsPage = React.lazy(() => import('./pages/ToolsPage'));
+const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
 
 import SlotMachineWidget from './components/SlotMachineWidget';
 import TransitionWipe from './components/Animations/TransitionWipe';
@@ -59,6 +60,7 @@ const TitleManager = () => {
   useEffect(() => {
     const titleMap = {
       '/': 'RE-RENDER | Digital Agency & Assets',
+      '/journey': 'My Journey | RE-RENDER',
       '/about': 'About | RE-RENDER',
       '/shop': 'Shop | RE-RENDER',
       '/services': 'Services | RE-RENDER',
@@ -86,12 +88,19 @@ const TitleManager = () => {
   return null;
 };
 
+const FullPageSuspenseLoader = () => (
+  <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>
+    <div className="shimmer-text">INITIALIZING SUBSYSTEM...</div>
+  </div>
+);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <React.Suspense fallback={<FullPageSuspenseLoader />}>
+        <Routes location={location} key={location.pathname}>
         <Route path="/" element={<TransitionWipe><Home /></TransitionWipe>} />
         <Route path="/services" element={<TransitionWipe><Services /></TransitionWipe>} />
         <Route path="/shop" element={<TransitionWipe><ShopPage /></TransitionWipe>} />
@@ -108,12 +117,14 @@ const AnimatedRoutes = () => {
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
         <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />
+        <Route path="/journey" element={<TransitionWipe><PortfolioPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
         <Route path="/license" element={<TransitionWipe><LicenseAgreement /></TransitionWipe>} />
         <Route path="/refund" element={<TransitionWipe><RefundPolicy /></TransitionWipe>} />
         <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />
       </Routes>
+      </React.Suspense>
     </AnimatePresence>
   );
 };
