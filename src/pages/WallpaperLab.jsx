@@ -12,6 +12,8 @@ import {
 } from '../data/wallpaperConfig';
 import { useAuth } from '../context/AuthContext';
 import { AI_COSTS } from '../utils/ai';
+import { supabase } from '../utils/supabase';
+import { Share2, Check } from 'lucide-react';
 
 const COLORS = {
     bgLight: '#FAFAFA',
@@ -126,6 +128,54 @@ const WallpaperLab = () => {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('genre'); // genre, style, modifiers
     const [isEnhancing, setIsEnhancing] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isPublished, setIsPublished] = useState(false);
+
+    const handlePublish = async () => {
+        if (!resultUrl || isPublishing || isPublished) return;
+        setIsPublishing(true);
+        try {
+            // 1. Convert base64 to Blob
+            const response = await fetch(resultUrl);
+            const blob = await response.blob();
+            
+            // 2. Upload to Supabase Storage
+            const fileName = `community/wp-${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('archive')
+                .upload(fileName, blob, { contentType: 'image/png' });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('archive')
+                .getPublicUrl(fileName);
+
+            // 3. Save to community_archive table
+            const { error: dbError } = await supabase
+                .from('community_archive')
+                .insert({
+                    user_id: user.id,
+                    user_name: profile?.full_name || user.email?.split('@')[0] || 'CREATOR',
+                    type: 'wallpaper',
+                    data: {
+                        prompt: livePrompt,
+                        genre: GENRES.find(g => g.id === genre)?.name,
+                        style: STYLES.find(s => s.id === style)?.name,
+                        ratio
+                    },
+                    image_url: publicUrl
+                });
+
+            if (dbError) throw dbError;
+            setIsPublished(true);
+        } catch (err) {
+            console.error('Publish failed:', err);
+            setError(`PUBLISH_FAIL: ${err.message}`);
+        } finally {
+            setIsPublishing(false);
+        }
+    };
 
     // Live prompt that auto-builds from selections
     const buildLivePrompt = () => {
@@ -245,6 +295,7 @@ const WallpaperLab = () => {
         setIsGenerating(true);
         setError(null);
         setResultUrl(null);
+        setIsPublished(false);
 
         const selectedGenre = GENRES.find(g => g.id === genre);
         const selectedStyle = STYLES.find(s => s.id === style);
@@ -413,14 +464,29 @@ const WallpaperLab = () => {
                         )}
                         
                         {resultUrl && !isGenerating && (
-                            <button onClick={handleDownload} style={{ 
-                                position: 'absolute', bottom: '1.5rem', right: '1.5rem', 
-                                background: 'var(--color-text)', color: 'var(--color-bg)', 
-                                border: 'none', padding: '1rem', cursor: 'pointer', 
-                                display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                            }}>
-                                <Download size={24} />
-                            </button>
+                            <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', gap: '0.75rem' }}>
+                                <button
+                                    onClick={handlePublish}
+                                    disabled={isPublishing || isPublished}
+                                    style={{
+                                        background: isPublished ? 'var(--color-accent)' : 'var(--color-text)',
+                                        color: isPublished ? '#000' : 'var(--color-bg)',
+                                        border: 'none', padding: '1rem', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                        fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900
+                                    }}
+                                >
+                                    {isPublishing ? <RefreshCw size={18} className="spin" /> : (isPublished ? <Check size={18} /> : <Share2 size={18} />)}
+                                    <span>{isPublished ? 'PUBLISHED' : (isPublishing ? 'PUBLISHING...' : 'PUBLISH_TO_COMMUNITY')}</span>
+                                </button>
+                                <button onClick={handleDownload} style={{ 
+                                    background: 'var(--color-text)', color: 'var(--color-bg)', 
+                                    border: 'none', padding: '1rem', cursor: 'pointer', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                                }}>
+                                    <Download size={24} />
+                                </button>
+                            </div>
                         )}
                     </div>
 

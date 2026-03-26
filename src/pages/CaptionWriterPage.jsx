@@ -21,6 +21,7 @@ const PLATFORMS = [
 ];
 
 const CaptionWriterPage = () => {
+    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [description, setDescription] = useState('');
     const [tone, setTone] = useState('professional');
     const [captions, setCaptions] = useState(null);
@@ -31,6 +32,23 @@ const CaptionWriterPage = () => {
 
     const handleGenerate = async () => {
         if (!description.trim() || isGenerating) return;
+
+        // AUTH CHECK
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        // CREDIT CHECK
+        if (!profile || profile.credits < AI_COSTS.CAPTION) {
+            alert(`📉 OUT_OF_COMPUTE: Insufficient credits. Costs ${AI_COSTS.CAPTION} credit.`);
+            return;
+        }
+
+        // SPEND CREDIT
+        const success = await spendCredits(AI_COSTS.CAPTION);
+        if (!success) return;
+
         setIsGenerating(true);
 
         try {
@@ -68,11 +86,33 @@ CRITICAL RULES:
             }
 
             const raw = data.choices?.[0]?.message?.content || '';
-            const jsonMatch = raw.match(/\{[\s\S]*\}/);
-            if (jsonMatch) setCaptions(JSON.parse(jsonMatch[0]));
+            
+            // Robust JSON extraction: look for json block first, then fallback to first/last brace
+            let cleanJson = '';
+            const mdMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (mdMatch) {
+                cleanJson = mdMatch[1];
+            } else {
+                const jsonMatch = raw.match(/\{[\s\S]*\}/);
+                if (jsonMatch) cleanJson = jsonMatch[0];
+            }
+
+            if (cleanJson) {
+                try {
+                    setCaptions(JSON.parse(cleanJson));
+                } catch (parseErr) {
+                    console.error('JSON Parse Error:', parseErr, 'Raw Content:', raw);
+                    throw new Error("INVALID_JSON_FORMAT");
+                }
+            } else {
+                throw new Error("NO_JSON_FOUND");
+            }
         } catch (err) {
             console.error('Caption generation failed:', err);
-            alert("SYSTEM_OVERLOAD: AI nodes are currently congested. Please try again in 30 seconds.");
+            const msg = err.message === "INVALID_JSON_FORMAT" 
+                ? "AI_SYNTAX_ERROR: The model returned an invalid format. Retrying may help."
+                : "SYSTEM_OVERLOAD: AI nodes are currently congested. Please try again.";
+            alert(msg);
         } finally {
             setIsGenerating(false);
         }

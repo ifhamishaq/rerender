@@ -5,9 +5,9 @@
 
 export const AI_COSTS = {
     ORACLE: 0,
-    ANALYSER: 0,
-    CAPTION: 0,
-    GEN_IMAGE: 0
+    ANALYSER: 5,
+    CAPTION: 1,
+    GEN_IMAGE: 10
 };
 
 const getApiKeys = () => {

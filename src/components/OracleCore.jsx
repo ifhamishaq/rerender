@@ -34,7 +34,9 @@ const OracleCore = ({
     onExecute = null,
     onClose = null
 }) => {
-    const storageKey = `oracle_chat_${mode}`;
+    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
+    const storageKey = user ? `oracle_chat_${mode}_${user.id}` : `oracle_chat_${mode}_guest`;
+    
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem(storageKey);
         return saved ? JSON.parse(saved) : [{ role: 'assistant', content: initialMessage }];
@@ -91,8 +93,6 @@ const OracleCore = ({
         setMessages(fresh);
         localStorage.setItem(storageKey, JSON.stringify(fresh));
     };
-
-    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
 
     const handleSendMessage = async (text) => {
         const messageText = text || input;

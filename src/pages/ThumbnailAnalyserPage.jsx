@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Check, Cpu } from 'lucide-react';
+import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Check, Cpu, Share2 } from 'lucide-react';
 import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase';
 
 const VISION_MODEL = 'google/gemini-2.0-flash-exp:free';
 
@@ -25,6 +26,8 @@ const ThumbnailAnalyserPage = () => {
     const [fakeProgress, setFakeProgress] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
     const [isThermal, setIsThermal] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isPublished, setIsPublished] = useState(false);
     
     const fileRef = useRef(null);
     const progressInterval = useRef(null);
@@ -130,6 +133,53 @@ const ThumbnailAnalyserPage = () => {
 
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
 
+    const handlePublish = async () => {
+        if (!analysis || !image || isPublishing || isPublished) return;
+        setIsPublishing(true);
+        try {
+            // 1. Convert base64 to Blob
+            const response = await fetch(image);
+            const blob = await response.blob();
+            
+            // 2. Upload to Supabase Storage
+            const fileName = `community/tn-${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('archive')
+                .upload(fileName, blob, { contentType: 'image/png' });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('archive')
+                .getPublicUrl(fileName);
+
+            // 3. Save to community_archive table
+            const { error: dbError } = await supabase
+                .from('community_archive')
+                .insert({
+                    user_id: user.id,
+                    user_name: profile?.full_name || user.email?.split('@')[0] || 'CREATOR',
+                    type: 'thumbnail',
+                    data: {
+                        ctrScore: analysis.ctrScore,
+                        predictedCTR: analysis.predictedCTR,
+                        verdict: analysis.verdict,
+                        improvements: analysis.improvements,
+                        prompt: "Thumbnail Editorial Audit"
+                    },
+                    image_url: publicUrl
+                });
+
+            if (dbError) throw dbError;
+            setIsPublished(true);
+        } catch (err) {
+            console.error('Publish failed:', err);
+            // Non-blocking error for user
+        } finally {
+            setIsPublishing(false);
+        }
+    };
+
     const handleAnalyze = async () => {
         if (!image || isAnalyzing) return;
 
@@ -139,7 +189,16 @@ const ThumbnailAnalyserPage = () => {
             return;
         }
 
-        // NO COST FOR ANALYSER AS IT USES FREE MODELS
+        // CREDIT CHECK
+        if (!profile || profile.credits < AI_COSTS.ANALYSER) {
+            alert(`📉 OUT_OF_COMPUTE: Insufficient credits. Costs ${AI_COSTS.ANALYSER} credits.`);
+            return;
+        }
+
+        // SPEND CREDIT
+        const success = await spendCredits(AI_COSTS.ANALYSER);
+        if (!success) return;
+
         setIsAnalyzing(true);
         setAnalysis(null);
         setIsThermal(false);
@@ -481,14 +540,30 @@ Return ONLY valid JSON.`
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+                            <motion.button 
+                                whileHover={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}
+                                onClick={handlePublish}
+                                disabled={isPublishing || isPublished}
+                                style={{
+                                    padding: '1.5rem 2rem', backgroundColor: isPublished ? 'var(--color-accent)' : 'transparent', 
+                                    color: isPublished ? '#000' : 'var(--color-text)',
+                                    border: '2px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
+                                    fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem',
+                                    transition: 'all 0.2s', width: '320px', justifyContent: 'center'
+                                }}
+                            >
+                                {isPublishing ? <RefreshCw size={20} className="spin" /> : (isPublished ? <Check size={20} /> : <Share2 size={20} />)}
+                                <span>{isPublished ? 'PUBLISHED' : (isPublishing ? 'PUBLISHING...' : 'PUBLISH_TO_COMMUNITY')}</span>
+                            </motion.button>
+
                             <motion.button 
                                 whileHover={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}
                                 onClick={handleExport} 
                                 style={{
-                                    padding: '1.5rem 4rem', backgroundColor: 'transparent', color: 'var(--color-text)',
-                                    border: '2px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
-                                    fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.5rem',
+                                    padding: '1.5rem 2.5rem', backgroundColor: 'transparent', color: 'var(--color-text)',
+                                    border: '2px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
+                                    fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem',
                                     transition: 'all 0.2s'
                                 }}
                             >
