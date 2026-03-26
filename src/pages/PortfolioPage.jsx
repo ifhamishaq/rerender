@@ -12,7 +12,7 @@ const PortfolioPage = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const categories = ['MOTION', '3D', 'TALKING HEAD'];
+    const categories = ['MOTION', '3D', 'TALKING HEAD', 'THUMBNAIL'];
     
     const getProjectsByCategory = (cat) => portfolioData.filter(p => p.category === cat);
 
