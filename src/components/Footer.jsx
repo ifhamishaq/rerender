@@ -52,7 +52,8 @@ const Footer = () => {
                         marginBottom: '0.5rem'
                     }}>Sitemap</h4>
                     {[
-                        { to: '/services', label: 'Services' },
+                        { to: '/work', label: 'Work' },
+                        { to: '/get-in-touch', label: 'Get In Touch' },
                         { to: '/about', label: 'About' },
                         { to: '/prompts', label: 'Prompts' },
                         { to: '/shop', label: 'Shop' },

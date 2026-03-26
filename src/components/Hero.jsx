@@ -26,7 +26,7 @@ export default function Hero() {
     const dotActive = isDarkMode ? '#39FF14' : '#5227FF';
 
     const routeToServices = () => {
-        navigate('/services');
+        navigate('/get-in-touch');
     };
 
     return (
@@ -48,7 +48,7 @@ export default function Hero() {
             {/* Massive background Infinite Marquee */}
             <div className="hero-marquee-container">
                 <div className="hero-marquee-track">
-                    DIGITAL ASSETS • CREATIVE STUDIO • NEXT GEN WEB • DIGITAL ASSETS • CREATIVE STUDIO • NEXT GEN WEB •
+                    WEBSITES • VIDEO • 3D • WEBSITES • VIDEO • 3D • WEBSITES • VIDEO • 3D •
                 </div>
             </div>
 
@@ -61,6 +61,25 @@ export default function Hero() {
                 proximity={200}
                 returnDuration={2}
             />
+
+            {/* Hero GIF Background */}
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                zIndex: 0,
+                opacity: 0.4,
+                pointerEvents: 'none'
+            }}>
+                <img 
+                    src="/hero.gif" 
+                    alt="" 
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                    }}
+                />
+            </div>
             
             <motion.div className="hero-content" style={{ opacity }}>
                 <motion.div style={{ y: titleY }}>
@@ -110,7 +129,7 @@ export default function Hero() {
                                         className="hero-cta editorial-cta"
                                         onClick={routeToServices}
                                     >
-                                        Start a Project
+                                        Get In Touch
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M5 12h14M12 5l7 7-7 7" />
                                         </svg>

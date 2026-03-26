@@ -23,8 +23,8 @@ const CareersPage = () => {
         <div className="careers-portal-page">
             <header className="portal-header container">
                 <div className="header-top">
-                    <span className="mono-tag">[RE-RENDER_TALENT_PORTAL_V2]</span>
-                    <span className="live-status">● LIVE_OPENINGS</span>
+                    <span className="mono-tag">[RE-RENDER_CAREERS]</span>
+                    <span className="live-status">● OPEN_POSITIONS</span>
                 </div>
                 <h1 className="portal-title">CAREERS</h1>
                 
@@ -110,7 +110,7 @@ const CareersPage = () => {
                                         <div className="details-body">
                                             <p className="job-full-desc">{selectedJob.description}</p>
                                             <div className="specs-section">
-                                                <label className="mono-label">TECHNICAL_SPECIFICATIONS</label>
+                                                <label className="mono-label">REQUIREMENTS</label>
                                                 <ul className="spec-list">
                                                     {selectedJob.specs.map((s, i) => (
                                                         <li key={i}>{s}</li>
@@ -122,7 +122,7 @@ const CareersPage = () => {
                                         <div className="details-footer">
                                             <Magnetic strength={0.2}>
                                                 <a href={selectedJob.link} className="main-apply-btn">
-                                                    APPLY_TO_RE_RENDER
+                                                    APPLY NOW
                                                 </a>
                                             </Magnetic>
                                         </div>
@@ -138,7 +138,7 @@ const CareersPage = () => {
 
             <footer className="portal-footer container">
                 <div className="manifesto-mini">
-                    <p>WE DON'T JUST HIRE. WE UPGRADE. JOIN OUR ROSTER OF GLOBAL CREATIVES.</p>
+                    <p>JOIN OUR TEAM OF GLOBAL CREATIVES.</p>
                 </div>
             </footer>
         </div>

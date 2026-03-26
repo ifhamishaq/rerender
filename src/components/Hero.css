@@ -283,4 +283,41 @@
     .hero-stat-number {
         font-size: 1.8rem;
     }
+
+    .hero-services-peek {
+        grid-template-columns: repeat(2, 1fr) !important;
+        margin-top: 2rem !important;
+    }
 }
+
+/* Services Peek Styles */
+.hero-services-peek-item {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 4px 4px 0px var(--color-border);
+}
+
+.hero-services-peek-item:hover {
+    box-shadow: 8px 8px 0px var(--color-accent);
+    border-color: var(--color-accent) !important;
+}
+
+.hero-services-peek-item img {
+    transition: filter 0.5s ease, opacity 0.5s ease, transform 0.8s ease;
+    filter: grayscale(1);
+}
+
+.hero-services-peek-item:hover img {
+    filter: grayscale(0);
+    opacity: 0.5 !important;
+    transform: scale(1.1);
+}
+
+.hero-services-peek-item span {
+    transition: transform 0.3s ease;
+}
+
+.hero-services-peek-item:hover span {
+    transform: translateY(-2px);
+    color: var(--color-accent) !important;
+}
+

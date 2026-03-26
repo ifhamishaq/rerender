@@ -56,7 +56,7 @@ const SlotMachineWidget = () => {
     }, []);
 
     const handleClaim = () => {
-        navigate('/services#inquiry');
+        navigate('/get-in-touch#inquiry');
     };
 
     return (

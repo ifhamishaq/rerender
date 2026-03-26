@@ -42,7 +42,8 @@ const Navbar = () => {
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
     const navLinks = [
-        { href: '/services', label: 'Services' },
+        { href: '/work', label: 'Work' },
+        { href: '/get-in-touch', label: 'Get In Touch' },
         { href: '/pricing', label: 'Pricing' },
         { href: '/shop', label: 'Shop' },
         { href: '/careers', label: 'Careers' },

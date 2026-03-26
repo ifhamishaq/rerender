@@ -7,6 +7,7 @@ const Services = () => {
     const { isDarkMode } = useTheme();
     const [appliedDiscount, setAppliedDiscount] = useState(null);
     const [hasWon, setHasWon] = useState(false);
+    const [selectedService, setSelectedService] = useState('');
 
     useEffect(() => {
         const discount = localStorage.getItem('re_render_discount');
@@ -30,7 +31,17 @@ const Services = () => {
         }
     };
 
-
+    const handleServiceClick = (serviceTitle) => {
+        // Map pretty title to form value if needed, or just use title
+        const serviceMap = {
+            'VIDEO EDITING': 'video-editing',
+            'GRAPHIC DESIGN': 'graphic-design',
+            '3D ANIMATION': '3d-art',
+            'WEB DEVELOPMENT': 'web-development'
+        };
+        setSelectedService(serviceMap[serviceTitle.toUpperCase()] || 'other');
+        document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     return (
         <main style={{
@@ -45,8 +56,8 @@ const Services = () => {
                 margin: '0 auto',
                 padding: '0 2rem'
             }}>
-                <header style={{ marginBottom: '6rem', borderBottom: '2px solid var(--color-border)', paddingBottom: '2rem' }}>
-                    <div className="section-label" style={{ marginBottom: '2rem' }}>01 — WHAT WE DO</div>
+                <header style={{ marginBottom: '4rem' }}>
+                    <div className="section-label" style={{ marginBottom: '2rem' }}>01 &#8212; GET IN TOUCH</div>
                     <h1 style={{
                         fontSize: 'clamp(3rem, 10vw, 7rem)',
                         margin: 0,
@@ -55,94 +66,79 @@ const Services = () => {
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '-0.02em'
                     }}>
-                        OUR<br />
-                        <span style={{ color: 'var(--color-accent)' }}>SERVICES</span>
+                        GET IN<br />
+                        <span style={{ color: 'var(--color-accent)' }}>TOUCH</span>
                     </h1>
                 </header>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '4rem 2rem'
-                }}>
-                    {servicesList.map((service, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}
-                        >
-                            <h2 style={{
-                                fontSize: '2rem',
-                                marginBottom: '1rem',
-                                fontFamily: 'var(--font-sans)',
-                                fontWeight: 900
-                            }}>
-                                {service.title}
-                            </h2>
-                            <div style={{
-                                width: '100%',
-                                aspectRatio: '4/5',
-                                border: '1px solid var(--color-border)',
-                                backgroundColor: 'var(--color-bg)',
-                                overflow: 'hidden',
-                                position: 'relative',
-                                marginBottom: '1rem'
-                            }}>
-                                <img
-                                    src={service.gif}
-                                    alt={service.title}
+                {/* Compact Service Selector Buttons */}
+                <div style={{ marginBottom: '6rem' }}>
+                    <div style={{ 
+                        fontFamily: 'var(--font-mono)', 
+                        fontSize: '0.7rem', 
+                        letterSpacing: '0.2em', 
+                        marginBottom: '1.5rem',
+                        opacity: 0.6
+                    }}>
+                        SELECT A CATEGORY &darr;
+                    </div>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '1rem'
+                    }}>
+                        {servicesList.map((service, index) => (
+                            <motion.button
+                                key={index}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleServiceClick(service.title)}
+                                style={{
+                                    position: 'relative',
+                                    height: '100px',
+                                    backgroundColor: 'var(--color-surface)',
+                                    border: selectedService === (service.title.toLowerCase().replace(' ', '-')) ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+                                    color: 'var(--color-text)',
+                                    cursor: 'pointer',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    padding: '1rem'
+                                }}
+                            >
+                                <img 
+                                    src={service.gif} 
+                                    alt="" 
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
+                                        position: 'absolute',
+                                        top: 0, left: 0, width: '100%', height: '100%',
                                         objectFit: 'cover',
-                                        display: 'block',
-                                        transition: 'transform 0.6s ease',
+                                        opacity: 0.15,
+                                        filter: 'grayscale(1)',
+                                        zIndex: 0
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                 />
-                            </div>
-                            <p style={{
-                                color: 'var(--color-text-secondary)',
-                                fontSize: '1.1rem',
-                                lineHeight: 1.6,
-                                marginBottom: '2rem',
-                                flexGrow: 1
-                            }}>
-                                {service.desc}
-                            </p>
-                            <div style={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: '0.5rem'
-                            }}>
-                                {service.tags.map(tag => (
-                                    <span key={tag} style={{
-                                        fontSize: '0.75rem',
-                                        fontFamily: 'var(--font-mono)',
-                                        padding: '0.3rem 0.6rem',
-                                        backgroundColor: 'var(--color-surface)',
-                                        color: 'var(--color-text)',
-                                        fontWeight: 'bold',
-                                        border: '1px solid var(--color-border)'
-                                    }}>
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </motion.div>
-                    ))}
+                                <span style={{
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.1em'
+                                }}>
+                                    {service.title}
+                                </span>
+                            </motion.button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* ===== INQUIRY FORM ===== */}
-                <div id="inquiry" style={{ marginTop: '8rem', paddingTop: '4rem', borderTop: '1px solid var(--color-border)' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'start' }}>
+                {/* ===== INQUIRY FORM (Primary Focus) ===== */}
+                <div id="inquiry" style={{ paddingTop: '4rem', borderTop: '2px solid var(--color-border)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', alignItems: 'start' }}>
                         {/* Left: Copy */}
                         <motion.div
                             onViewportEnter={triggerRandomWin}
@@ -320,6 +316,8 @@ const Services = () => {
                                 <select
                                     name="service"
                                     required
+                                    value={selectedService}
+                                    onChange={(e) => setSelectedService(e.target.value)}
                                     style={{
                                         width: '100%',
                                         padding: '0.85rem 1rem',
@@ -335,7 +333,7 @@ const Services = () => {
                                     <option value="">Select a service...</option>
                                     <option value="video-editing">VIDEO EDITING</option>
                                     <option value="graphic-design">GRAPHIC DESIGN</option>
-                                    <option value="3d-art">3D ART</option>
+                                    <option value="3d-art">3D ANIMATION</option>
                                     <option value="web-development">WEB DEVELOPMENT</option>
                                     <option value="full-package">FULL PACKAGE</option>
                                     <option value="other">OTHER / UNSURE</option>
@@ -432,7 +430,7 @@ const Services = () => {
                                 onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
                                 onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                             >
-                                SEND PROJECT BRIEF →
+                                GET A QUOTE →
                             </motion.button>
                         </form>
                     </div>

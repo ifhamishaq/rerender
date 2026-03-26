@@ -40,22 +40,36 @@ const GlitchText = ({ text }) => {
     return <span onClick={trigger} style={{ cursor: 'pointer', userSelect: 'none' }}>{display}</span>;
 };
 
-const ToolCard = ({ title, desc, icon, link, tag = "UTILITY" }) => (
+const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false }) => (
     <Link to={link || "#"} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <motion.div
             whileHover={{ backgroundColor: 'var(--color-surface)', y: -4 }}
             transition={{ duration: 0.2 }}
             style={{
-                border: '1px solid var(--color-border)',
+                border: isHot ? `1px solid ${ACCENT}` : '1px solid var(--color-border)',
                 padding: '2.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1.5rem',
                 backgroundColor: 'var(--color-bg)',
                 position: 'relative', overflow: 'hidden',
                 height: '100%',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                boxShadow: isHot ? `0 0 20px rgba(232,17,26,0.05)` : 'none'
             }}
         >
             <div style={{ position: 'absolute', top: 0, right: 0, width: '4px', height: '60px', backgroundColor: ACCENT }} />
+            
+            {isHot && (
+                <div style={{
+                    position: 'absolute', top: '1.5rem', right: '-2.5rem',
+                    backgroundColor: ACCENT, color: '#000', padding: '0.25rem 3rem',
+                    fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900,
+                    transform: 'rotate(45deg)', letterSpacing: '0.1em', boxShadow: '0 0 10px rgba(232,17,26,0.3)',
+                    zIndex: 10
+                }}>
+                    HOT
+                </div>
+            )}
+
             <div style={{ fontSize: '3rem' }}>{icon}</div>
             <div style={{ flex: 1 }}>
                 <div style={{
@@ -131,25 +145,57 @@ const ToolsSection = () => {
                         gap: '2.5rem'
                     }}>
                         <ToolCard
+                            icon="🔮"
+                            title="AESTHETIC ORACLE"
+                            desc="GEMMA-3 powered Creative Director. Engineered to generate high-fidelity scripts and visual directives."
+                            link="/lab/ai-agent"
+                            tag="AI_CORE"
+                            isHot={true}
+                        />
+                        <ToolCard
                             icon="🌌"
                             title="WALLPAPER LAB"
-                            desc="Harness the power of Flux-1 Schnell to render custom digital backdrops. Infinite variations, zero compromise."
+                            desc="Harness Flux-1 Schnell to render custom digital backdrops. Infinite variations, zero compromise."
                             link="/arcade/wallpaper-lab"
                             tag="AI_RENDERER"
+                            isHot={true}
+                        />
+                        <ToolCard
+                            icon="✍️"
+                            title="CAPTION WRITER"
+                            desc="Describe your post. AI generates platform-specific captions for IG, TikTok, X, YouTube, LinkedIn & Facebook."
+                            link="/lab/caption-writer"
+                            tag="AI_TEXT"
+                            isHot={true}
+                        />
+                        <ToolCard
+                            icon="🖼️"
+                            title="THUMBNAIL ANALYSER"
+                            desc="Upload any thumbnail — AI Vision scores click-through potential, analyzes composition, and gives 3 improvements."
+                            link="/lab/thumbnail-analyser"
+                            tag="AI_VISION"
+                            isHot={true}
                         />
                         <ToolCard
                             icon="🗒️"
                             title="PROMPT LAB"
-                            desc="A centralized repository of engineered visual directives. Optimized for generative workflows and aesthetic consistency."
+                            desc="A centralized repository of engineered visual directives for generative workflows."
                             link="/prompts"
                             tag="KNOWLEDGE_BASE"
                         />
                         <ToolCard
+                            icon="📱"
+                            title="SAFE ZONE PREVIEW"
+                            desc="Upload 9:16 frames and toggle TikTok/Reels UI overlays. Avoid 'Dead Zones' automatically."
+                            link="/lab/safe-zone"
+                            tag="UX_UTILITY"
+                        />
+                        <ToolCard
                             icon="📊"
-                            title="COMPUTE TRACKER"
-                            desc="[COMING SOON] Monitor system efficiency and asset allocation. Engineered for peak productivity."
-                            link="#"
-                            tag="SYSTEM_MONITOR"
+                            title="PROJECT ESTIMATOR"
+                            desc="Calculate your investment in real-time. Lock in professional quotes for video, 3D, and design."
+                            link="/estimate"
+                            tag="FINANCE_TOOL"
                         />
                     </div>
                 </div>

@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import ProjectEstimator from '../components/ProjectEstimator';
+import PricingFAQ from '../components/PricingFAQ';
+import StickySidebar from '../components/StickySidebar';
 
 const PricingPage = () => {
     const { isDarkMode } = useTheme();
@@ -19,7 +22,7 @@ const PricingPage = () => {
                 padding: '0 2rem'
             }}>
                 <header style={{ marginBottom: '6rem', borderBottom: '2px solid var(--color-border)', paddingBottom: '2rem' }}>
-                    <div className="section-label" style={{ marginBottom: '2rem' }}>02 — PRICING</div>
+                    <div className="section-label" style={{ marginBottom: '2rem' }}>02 &#8212; OUR PRICES</div>
                     <h1 style={{
                         fontSize: 'clamp(3rem, 10vw, 7rem)',
                         margin: 0,
@@ -43,7 +46,7 @@ const PricingPage = () => {
                             maxWidth: '600px',
                             lineHeight: 1.6
                         }}>
-                            Transparent starting rates. Every project is custom — use these as a baseline and reach out via the Services page for a tailored quote. We do not use cheap templates. We build custom websites and designs.
+                            Transparent starting rates. Every project is custom — use these as a baseline and reach out via the Get In Touch page for a tailored quote. We do not use cheap templates. We build custom websites and designs.
                         </p>
                     </div>
 
@@ -152,7 +155,7 @@ const PricingPage = () => {
                                     ))}
                                 </ul>
                                 <a
-                                    href="/services#inquiry"
+                                    href="/get-in-touch#inquiry"
                                     style={{
                                         display: 'block',
                                         textAlign: 'center',
@@ -186,6 +189,27 @@ const PricingPage = () => {
                         ))}
                     </div>
                 </div>
+
+            <StickySidebar items={[
+                { label: 'TOP', targetId: 'pricing-top' },
+                { label: 'TIERS', targetId: 'pricing-tiers' },
+                { label: 'ESTIMATOR', targetId: 'estimator' },
+                { label: 'FAQ', targetId: 'faq' }
+            ]} />
+
+            <div id="pricing-top" />
+            
+            <section id="pricing-tiers" style={{ padding: '6rem 2rem' }}>
+                {/* ... existing tiers section ... */}
+            </section>
+
+            <div id="estimator">
+                <ProjectEstimator />
+            </div>
+
+            <div id="faq">
+                <PricingFAQ />
+            </div>
 
                 {/* ===== CTA BANNER ===== */}
                 <div style={{
@@ -228,7 +252,7 @@ const PricingPage = () => {
                         }}>
                             LET'S BUILD SOMETHING GREAT TOGETHER.
                         </p>
-                        <a href="/services#inquiry" style={{
+                        <a href="/get-in-touch#inquiry" style={{
                             display: 'inline-block',
                             padding: '1.5rem 4rem',
                             backgroundColor: 'var(--color-text)',

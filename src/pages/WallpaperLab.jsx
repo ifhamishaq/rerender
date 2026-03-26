@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-    Sparkles, ArrowLeft, RefreshCw, Download, Layout, X, Settings2, Image as ImageIcon
+    Sparkles, ArrowLeft, RefreshCw, Download, Layout, X, Settings2, Image as ImageIcon, Zap, Wand2
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -125,6 +125,54 @@ const WallpaperLab = () => {
     const [resultUrl, setResultUrl] = useState(null);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('genre'); // genre, style, modifiers
+    const [isEnhancing, setIsEnhancing] = useState(false);
+
+    // Live prompt that auto-builds from selections
+    const buildLivePrompt = () => {
+        const selectedGenre = GENRES.find(g => g.id === genre);
+        const selectedStyle = STYLES.find(s => s.id === style);
+        let prompt = `${selectedGenre?.prompt || ''}, ${selectedStyle?.prompt || ''}, cinematic lighting, highly detailed`;
+        if (customSupplement) prompt += `, ${customSupplement}`;
+        return prompt;
+    };
+
+    const livePrompt = buildLivePrompt();
+
+    // AI Enhance: silently sends the prompt to OpenRouter and returns only the enhanced version
+    const handleEnhancePrompt = async () => {
+        if (isEnhancing) return;
+        setIsEnhancing(true);
+        try {
+            const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'HTTP-Referer': 'http://localhost:5173',
+                    'X-Title': 'RE-RENDER Wallpaper Lab',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'stepfun/step-3.5-flash:free',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are an expert AI image prompt engineer. The user will give you a wallpaper generation prompt. Your ONLY job is to enhance it — make it more vivid, detailed, and optimized for AI image generation. Reply with ONLY the enhanced prompt text. No explanations, no headers, no bullet points, no markdown. Just the raw enhanced prompt.'
+                        },
+                        { role: 'user', content: livePrompt }
+                    ],
+                    temperature: 0.7
+                })
+            });
+            const data = await response.json();
+            const enhanced = data.choices?.[0]?.message?.content?.trim();
+            if (enhanced) setCustomSupplement(enhanced);
+        } catch (err) {
+            console.error('AI Enhance failed:', err);
+        } finally {
+            setIsEnhancing(false);
+        }
+    };
 
     // Init storage
     useEffect(() => {
@@ -209,18 +257,9 @@ const WallpaperLab = () => {
 
         const selectedGenre = GENRES.find(g => g.id === genre);
         const selectedStyle = STYLES.find(s => s.id === style);
-        const template = PROMPT_TEMPLATES[Math.floor(Math.random() * PROMPT_TEMPLATES.length)];
-        
-        // Simplified orchestration for maximum speed
-        let compositePrompt = template
-            .replace('{style_prompt}', selectedStyle.prompt)
-            .replace('{genre_prompt}', selectedGenre.prompt)
-            .replace('{style_keywords}', selectedStyle.keywords || '')
-            .replace('{color}', 'natural')
-            .replace('{random_modifier}', 'cinematic lighting, crisp, highly detailed')
-            .replace('{style_tag}', selectedStyle.name.toUpperCase());
 
-        if (customSupplement) compositePrompt += `, ${customSupplement}`;
+        // Use the live prompt directly
+        const compositePrompt = livePrompt;
 
         try {
             const selectedRatio = RATIOS.find(r => r.id === ratio);
@@ -291,6 +330,8 @@ const WallpaperLab = () => {
                     CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{credits}</span>
                 </div>
             </header>
+
+
 
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '3rem' }}>
                 
@@ -431,6 +472,39 @@ const WallpaperLab = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* Live Prompt Preview */}
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <div style={{ fontSize: '0.7rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>LIVE_PROMPT</div>
+                            <button
+                                onClick={handleEnhancePrompt}
+                                disabled={isEnhancing}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                                    padding: '0.4rem 0.8rem', border: '1px solid var(--color-accent)',
+                                    backgroundColor: isEnhancing ? 'var(--color-accent)' : 'transparent',
+                                    color: isEnhancing ? '#000' : 'var(--color-accent)',
+                                    borderRadius: '8px', fontFamily: COLORS.mono, fontSize: '0.65rem', fontWeight: 900,
+                                    cursor: isEnhancing ? 'wait' : 'pointer', letterSpacing: '0.05em',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {isEnhancing ? <RefreshCw size={12} className="spin" /> : <Wand2 size={12} />}
+                                <span>{isEnhancing ? 'ENHANCING...' : 'AI ENHANCE'}</span>
+                            </button>
+                        </div>
+                        <div style={{
+                            width: '100%', padding: '1rem',
+                            backgroundColor: 'var(--theme-surface)', color: 'var(--theme-text)',
+                            border: '1px solid var(--theme-border)', borderRadius: '12px',
+                            fontFamily: COLORS.mono, fontSize: '0.75rem', lineHeight: 1.6,
+                            maxHeight: '120px', overflowY: 'auto', opacity: 0.8,
+                            wordBreak: 'break-word'
+                        }}>
+                            {livePrompt}
+                        </div>
                     </div>
 
                     {/* Generate Button */}

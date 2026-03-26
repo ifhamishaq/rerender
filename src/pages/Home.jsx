@@ -2,47 +2,30 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import Marquee from '../components/Marquee';
-import PromptPreview from '../components/PromptPreview';
 import { Link } from 'react-router-dom';
 import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
 import { useTheme } from '../context/ThemeContext';
 import Testimonials from '../components/Testimonials';
+import PricingFAQ from '../components/PricingFAQ';
+import StickySidebar from '../components/StickySidebar';
+import servicesData from '../data/services.json';
 
 const Home = () => {
     const { isDarkMode } = useTheme();
 
-    const servicesList = [
-        {
-            title: 'VIDEO EDITING',
-            desc: 'We make videos that keep people watching. From ads to social media, we handle everything from cutting to color.',
-            tags: ['PREMIERE PRO', 'AFTER EFFECTS', 'DAVINCI RESOLVE']
-        },
-        {
-            title: 'GRAPHIC DESIGN',
-            desc: 'We create unique logos, fonts, and posters. We help your brand look different and get noticed.',
-            tags: ['PHOTOSHOP', 'ILLUSTRATOR', 'FIGMA']
-        },
-        {
-            title: '3D ART',
-            desc: 'We create realistic 3D models and cool animations for your products or ideas.',
-            tags: ['BLENDER', 'CINEMA 4D', 'UNREAL ENGINE']
-        },
-        {
-            title: 'WEB DEVELOPMENT',
-            desc: 'We build fast, modern websites that look great on any device.',
-            tags: ['REACT', 'THREE.JS', 'NEXT.JS']
-        }
-    ];
-
-
-
     return (
-        <main>
+        <main style={{ backgroundColor: 'var(--color-bg)', position: 'relative' }}>
+            <StickySidebar items={[
+                { label: 'START', targetId: 'top' },
+                { label: 'SERVICES', targetId: 'services' },
+                { label: 'WORK', targetId: 'work' },
+                { label: 'FAQ', targetId: 'faq' }
+            ]} />
+
+            <div id="top" />
             <Hero />
             <Marquee />
-
-            {/* Removed SlotMachineWidget as per request to move it to a random banner */}
 
             {/* ===== STATS BAR ===== */}
             <section style={{
@@ -90,13 +73,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Added Testimonials for Customer Impression */}
-            <Testimonials />
-
-            {/* <section style={{ padding: '3rem 2rem' }}> 
-                (Removed fake logo strip for maximum credibility) 
-            </section> */}
-
             {/* Our Approach Section */}
             <section id="approach" style={{
                 padding: '8rem 2rem',
@@ -105,7 +81,7 @@ const Home = () => {
                 borderBottom: '1px solid var(--color-border)'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div className="section-label">01 &#8212; OUR APPROACH</div>
+                    <div className="section-label">01 &#8212; HOW WE WORK</div>
                     <FadeUp blur>
                         <motion.h2
                             style={{
@@ -117,9 +93,8 @@ const Home = () => {
                                 textTransform: 'uppercase'
                             }}
                         >
-                            WE DON'T JUST <br />
-                            <span style={{ color: 'var(--color-accent)' }}>FOLLOW TRENDS.</span><br />
-                            WE SET THEM.
+                            WE BUILD <br />
+                            <span style={{ color: 'var(--color-accent)' }}>WHAT'S NEXT.</span>
                         </motion.h2>
                     </FadeUp>
                     <FadeUp delay={0.15}>
@@ -132,7 +107,7 @@ const Home = () => {
                                 color: 'var(--color-text-secondary)'
                             }}
                         >
-                            In a world of templates and drag-and-drop aesthetics, RE-RENDER builds custom, high-retention digital experiences for brands that want to stand out. Our studio combines raw creativity with technical precision.
+                            We don't use templates. We build custom, high-quality digital experiences that help your brand stand out.
                         </motion.p>
                     </FadeUp>
                 </div>
@@ -146,21 +121,14 @@ const Home = () => {
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ marginBottom: '4rem' }}>
-                        <div style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.2em',
-                            textTransform: 'uppercase',
-                            color: 'var(--color-text-secondary)',
-                            opacity: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
+                        <div className="section-label" style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '1rem',
                             marginBottom: '2rem'
                         }}>
                             <span style={{ color: 'var(--color-accent)', opacity: 1 }}>02</span>
-                            &#8212; OUR EXPERTISE
+                            &#8212; SERVICES
                             <span style={{ flex: 1, height: '1px', backgroundColor: 'currentColor', opacity: 0.3, display: 'block' }} />
                         </div>
                         <h2 style={{
@@ -171,7 +139,7 @@ const Home = () => {
                             textTransform: 'uppercase',
                             color: 'var(--color-text)'
                         }}>
-                            OUR EXPERTISE
+                            OUR SERVICES
                         </h2>
                         <p style={{
                             color: 'var(--color-text-secondary)',
@@ -179,77 +147,93 @@ const Home = () => {
                             fontSize: '1.1rem',
                             lineHeight: 1.6
                         }}>
-                            Elevating brands through high-end digital architecture.
+                            We build premium websites and videos for modern brands.
                         </p>
                     </div>
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                         gap: '2rem',
                         textAlign: 'left'
                     }}>
-                        {servicesList.map((service, index) => (
+                        {servicesData.map((service, index) => (
                             <motion.div
                                 key={index}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="hero-services-peek-item"
                                 style={{
                                     backgroundColor: 'var(--color-surface)',
                                     border: '1px solid var(--color-border)',
-                                    padding: '2rem',
+                                    padding: '2.5rem 2rem',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    transition: 'transform 0.3s ease',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    minHeight: '280px',
                                     cursor: 'default'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-10px)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                             >
-                                <h3 style={{
-                                    fontSize: '1.3rem',
-                                    marginBottom: '1rem',
-                                    fontFamily: 'var(--font-display)',
-                                    fontWeight: 900,
-                                    color: 'var(--color-accent)'
-                                }}>
-                                    {service.title}
-                                </h3>
-                                <p style={{
-                                    color: 'var(--color-text-secondary)',
-                                    fontSize: '1rem',
-                                    lineHeight: 1.6,
-                                    marginBottom: '1.5rem',
-                                    flexGrow: 1
-                                }}>
-                                    {service.desc}
-                                </p>
-                                <div style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '0.5rem'
-                                }}>
-                                    {service.tags.map(tag => (
-                                        <span key={tag} style={{
-                                            fontSize: '0.7rem',
-                                            fontFamily: 'var(--font-mono)',
-                                            padding: '0.25rem 0.5rem',
-                                            backgroundColor: 'var(--color-border)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {tag}
-                                        </span>
-                                    ))}
+                                <img 
+                                    src={service.gif} 
+                                    alt="" 
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0, left: 0, width: '100%', height: '100%',
+                                        objectFit: 'cover',
+                                        opacity: 0.1,
+                                        zIndex: 0
+                                    }}
+                                />
+                                <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <h3 style={{
+                                        fontSize: '1.5rem',
+                                        marginBottom: '1rem',
+                                        fontFamily: 'var(--font-display)',
+                                        fontWeight: 900,
+                                        color: 'var(--color-accent)',
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        {service.title}
+                                    </h3>
+                                    <p style={{
+                                        color: 'var(--color-text-secondary)',
+                                        fontSize: '1rem',
+                                        lineHeight: 1.6,
+                                        marginBottom: '2rem',
+                                        flexGrow: 1
+                                    }}>
+                                        {service.desc}
+                                    </p>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '0.5rem'
+                                    }}>
+                                        {service.tags.map(tag => (
+                                            <span key={tag} style={{
+                                                fontSize: '0.65rem',
+                                                fontFamily: 'var(--font-mono)',
+                                                padding: '0.3rem 0.6rem',
+                                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                                color: 'var(--color-text)',
+                                                fontWeight: 'bold',
+                                                border: '1px solid var(--color-border)'
+                                            }}>
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                            <Link to="/services" style={{
+                            <Link to="/get-in-touch" style={{
                                 display: 'inline-block',
                                 padding: '1rem 2.5rem',
                                 backgroundColor: 'transparent',
@@ -269,22 +253,106 @@ const Home = () => {
                                 onMouseLeave={(e) => {
                                     e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
                                 }}>
-                                VIEW FULL SERVICES
+                                GET IN TOUCH
                             </Link>
                     </div>
                 </div>
             </section>
 
-
-            {/* ===== SHOP PREVIEW ===== */}
-            <section style={{
+            {/* ===== WORK SHOWCASE PREVIEW ===== */}
+            <section id="work" style={{
                 padding: '8rem 2rem',
                 backgroundColor: 'var(--color-bg)',
                 borderBottom: '1px solid var(--color-border)',
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <FadeUp>
-                        <div className="section-label">03 — FROM THE SHOP</div>
+                    <div className="section-label" style={{ marginBottom: '2rem' }}>
+                        <span style={{ color: 'var(--color-accent)' }}>03</span> &#8212; OUR BEST WORK
+                    </div>
+                                       <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '6rem',
+                        alignItems: 'center',
+                        marginBottom: '6rem'
+                    }}>
+                        <div>
+                            <h2 style={{
+                                fontSize: 'clamp(3rem, 8vw, 6rem)',
+                                fontFamily: 'var(--font-display)',
+                                margin: '0 0 2rem 0',
+                                textTransform: 'uppercase',
+                                lineHeight: 0.8,
+                                letterSpacing: '-0.06em'
+                            }}>
+                                THE PROJECT<br />
+                                <span style={{ color: 'var(--color-accent)' }}>FOLDER</span>
+                            </h2>
+                            <p style={{
+                                fontFamily: 'var(--font-mono)',
+                                color: 'var(--color-text-secondary)',
+                                lineHeight: 1.8,
+                                marginBottom: '2.5rem',
+                                maxWidth: '400px',
+                                fontSize: '0.9rem'
+                            }}>
+                                Here is the best stuff we have made for our customers. We make things that look great and work well.
+                            </p>
+                            <Link to="/work" style={{
+                                display: 'inline-block',
+                                padding: '1rem 0',
+                                color: 'var(--color-text)',
+                                fontFamily: 'var(--font-mono)',
+                                textDecoration: 'none',
+                                textTransform: 'uppercase',
+                                fontWeight: 900,
+                                fontSize: '0.8rem',
+                                letterSpacing: '0.2em',
+                                borderBottom: '2px solid var(--color-accent)'
+                            }}>
+                                SEE MORE &rarr;
+                            </Link>
+                        </div>
+                        
+                        <div style={{ position: 'relative' }}>
+                            <div style={{
+                                width: '100%',
+                                aspectRatio: '16/9',
+                                backgroundColor: 'var(--color-surface)',
+                                border: '1px solid var(--color-border)',
+                                backgroundImage: 'url(/hero.gif)',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                filter: 'grayscale(1) contrast(1.1)'
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                top: '-1rem',
+                                right: '2rem',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: 'var(--color-bg)',
+                                border: '1px solid var(--color-border)',
+                                fontFamily: 'var(--font-mono)',
+                                color: 'var(--color-accent)',
+                                fontWeight: 900,
+                                fontSize: '0.6rem'
+                            }}>
+                                CURRENT_FEATURE // 001
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== SHOP PREVIEW ===== */}
+            <section id="shop" style={{
+                padding: '8rem 2rem',
+                backgroundColor: 'var(--color-surface)',
+                borderBottom: '1px solid var(--color-border)',
+            }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ marginBottom: '4rem' }}>
+                        <div className="section-label">04 &#8212; FROM THE SHOP</div>
                         <div style={{
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -328,7 +396,7 @@ const Home = () => {
                                 VIEW ALL &rarr;
                             </Link>
                         </div>
-                    </FadeUp>
+                    </div>
 
                     <div className="responsive-shop-grid" style={{
                         display: 'grid',
@@ -358,7 +426,6 @@ const Home = () => {
                                             overflow: 'hidden',
                                         }}
                                     >
-                                        {/* Product Image */}
                                         <div style={{
                                             width: '100%',
                                             aspectRatio: '1 / 1',
@@ -382,7 +449,6 @@ const Home = () => {
                                             )}
                                         </div>
 
-                                        {/* Product Info */}
                                         <div style={{ padding: '1.25rem' }}>
                                             <div style={{
                                                 display: 'flex',
@@ -441,7 +507,11 @@ const Home = () => {
                 </div>
             </section>
 
-            <PromptPreview />
+            <Testimonials />
+            
+            <div id="faq">
+                <PricingFAQ />
+            </div>
 
             {/* Massive CTA Section */}
             <section style={{
@@ -453,16 +523,7 @@ const Home = () => {
                 overflow: 'hidden',
                 borderTop: '1px solid var(--color-border)'
             }}>
-                <div style={{
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundImage: 'url(/cta-bg.gif)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: isDarkMode ? 'none' : 'invert(1)',
-                    opacity: 0.6,
-                    zIndex: 1
-                }} />
+                {/* ... existing CTA ... */}
                 <div style={{ position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '0 auto' }}>
                     <motion.h2
                         initial={{ opacity: 0, y: 50 }}
@@ -478,7 +539,7 @@ const Home = () => {
                             textTransform: 'uppercase'
                         }}
                     >
-                        READY TO DISRUPT?
+                        READY TO START?
                     </motion.h2>
                     <p style={{
                         fontSize: 'clamp(1rem, 3vw, 1.5rem)',
@@ -486,32 +547,31 @@ const Home = () => {
                         fontWeight: 'bold',
                         marginBottom: '4rem'
                     }}>
-                        STOP BLENDING IN. LET'S BUILD SOMETHING UNFORGETTABLE.
+                        LET'S BUILD SOMETHING GREAT TOGETHER.
                     </p>
-                        <a href="/services#inquiry" style={{
-                            display: 'inline-block',
-                            padding: '1.5rem 4rem',
-                            backgroundColor: 'var(--color-text)',
-                            color: 'var(--color-accent)',
-                            fontFamily: 'var(--font-mono)',
-                            fontWeight: 900,
-                            fontSize: '1.5rem',
-                            textDecoration: 'none',
-                            textTransform: 'uppercase',
-                            boxShadow: '8px 8px 0px #121212',
-                            transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                    <a href="/services#inquiry" style={{
+                        display: 'inline-block',
+                        padding: '1.5rem 4rem',
+                        backgroundColor: 'var(--color-text)',
+                        color: 'var(--color-accent)',
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: 900,
+                        fontSize: '1.5rem',
+                        textDecoration: 'none',
+                        textTransform: 'uppercase',
+                        boxShadow: '8px 8px 0px #121212',
+                        transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                    }}
+                        onMouseEnter={(e) => {
+                            e.target.style.boxShadow = '12px 12px 0px #121212';
                         }}
-                            onMouseEnter={(e) => {
-                                e.target.style.boxShadow = '12px 12px 0px #121212';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.boxShadow = '8px 8px 0px #121212';
-                            }}>
-                            CONTACT US TODAY
-                        </a>
+                        onMouseLeave={(e) => {
+                            e.target.style.boxShadow = '8px 8px 0px #121212';
+                        }}>
+                        CONTACT US TODAY
+                    </a>
                 </div>
             </section>
-
         </main>
     );
 };

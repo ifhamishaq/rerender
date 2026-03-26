@@ -1,0 +1,46 @@
+/* Portfolio Finder Simplified Grid Styles */
+
+.portfolio-finder {
+    min-height: 100vh;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+/* Breadcrumb Styling */
+.finder-path {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 900;
+}
+
+/* Modal Scroll Lock / Prevent background interaction */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 992px) {
+    .portfolio-finder .folder-grid {
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .portfolio-finder .project-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .portfolio-finder h3 {
+        font-size: 2rem !important;
+    }
+}
+
+/* Glass Detail for Modal */
+.modal-glass {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}

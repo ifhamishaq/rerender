@@ -1,0 +1,80 @@
+[
+    {
+        "id": "motion-01",
+        "title": "VFX_REEL_01",
+        "client": "STUDIO_X",
+        "year": "2025",
+        "category": "MOTION",
+        "thumbnail": "https://img.youtube.com/vi/yqEUTfKfZiE/maxresdefault.jpg",
+        "youtubeId": "yqEUTfKfZiE",
+        "aspectRatio": "9/16",
+        "tags": ["VFX", "Compositing", "Editing"],
+        "description": "High-impact visual effects and professional video editing for dynamic short-form content.",
+        "gdriveImages": []
+    },
+    {
+        "id": "motion-02",
+        "title": "VFX_REEL_02",
+        "client": "CREATIVE_LABS",
+        "year": "2025",
+        "category": "MOTION",
+        "thumbnail": "https://img.youtube.com/vi/m_9K2XZNlPA/maxresdefault.jpg",
+        "youtubeId": "m_9K2XZNlPA",
+        "aspectRatio": "9/16",
+        "tags": ["Motion Graphics", "VFX", "Shorts"],
+        "description": "Advanced motion graphics and visual storytelling for social media platforms.",
+        "gdriveImages": []
+    },
+    {
+        "id": "3d-01",
+        "title": "3D_SHOWCASE_01",
+        "client": "ARCH_VIZ",
+        "year": "2025",
+        "category": "3D",
+        "thumbnail": "https://img.youtube.com/vi/uV0d5oyFk88/maxresdefault.jpg",
+        "youtubeId": "uV0d5oyFk88",
+        "aspectRatio": "16/9",
+        "tags": ["3D Modeling", "Rendering", "Animation"],
+        "description": "Photorealistic 3D rendering and environmental storytelling.",
+        "gdriveImages": []
+    },
+    {
+        "id": "3d-02",
+        "title": "3D_SHOWCASE_02",
+        "client": "PRODUCT_DESIGN",
+        "year": "2025",
+        "category": "3D",
+        "thumbnail": "https://img.youtube.com/vi/tqi4oQ4N9KY/maxresdefault.jpg",
+        "youtubeId": "tqi4oQ4N9KY",
+        "aspectRatio": "16/9",
+        "tags": ["CGI", "Product Viz", "3D"],
+        "description": "Detailed 3D product visualization and cinematic lighting.",
+        "gdriveImages": []
+    },
+    {
+        "id": "3d-03",
+        "title": "3D_SHOWCASE_03",
+        "client": "DIGITAL_ART",
+        "year": "2025",
+        "category": "3D",
+        "thumbnail": "https://img.youtube.com/vi/7o4JCAJXM4A/maxresdefault.jpg",
+        "youtubeId": "7o4JCAJXM4A",
+        "aspectRatio": "16/9",
+        "tags": ["Abstract 3D", "Loops", "C4D"],
+        "description": "Abstract 3D loops and experimental visual art.",
+        "gdriveImages": []
+    },
+    {
+        "id": "talking-head-01",
+        "title": "TALKING_HEAD_EDIT",
+        "client": "INFLUENCER_GROWTH",
+        "year": "2025",
+        "category": "TALKING HEAD",
+        "thumbnail": "https://img.youtube.com/vi/bgKmMJys1C4/maxresdefault.jpg",
+        "youtubeId": "bgKmMJys1C4",
+        "aspectRatio": "9/16",
+        "tags": ["Talking Head", "Subtitles", "Engagement"],
+        "description": "Professional talking head editing with dynamic subtitles and high engagement hooks.",
+        "gdriveImages": []
+    }
+]

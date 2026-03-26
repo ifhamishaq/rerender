@@ -92,17 +92,25 @@ export default async (request, context) => {
 
 function getApiKeys() {
     const keys = [];
-    // Accessing environment variables in Netlify Functions V2
-    // Process.env is used for standard functions, Netlify.env.get for Edge
-    // Since this looks like a standard function (V2), let's check the context or just use process.env if it's node.
-    // Actually the user used Netlify.env.get, so this is an EDGE function.
     
-    const primary = Netlify.env.get("PIXAZO_API_KEY");
-    if (primary) keys.push(primary);
+    // Check for comma-separated list in primary key
+    const primaryStr = Netlify.env.get("PIXAZO_API_KEY") || "";
+    if (primaryStr.includes(',')) {
+        keys.push(...primaryStr.split(',').map(k => k.trim()).filter(Boolean));
+    } else if (primaryStr) {
+        keys.push(primaryStr);
+    }
 
+    // Check for numbered fallback keys (PIXAZO_API_KEY_2, etc)
     for (let i = 2; i <= 10; i++) {
         const key = Netlify.env.get(`PIXAZO_API_KEY_${i}`);
-        if (key) keys.push(key);
+        if (key) {
+            if (key.includes(',')) {
+                keys.push(...key.split(',').map(k => k.trim()).filter(Boolean));
+            } else {
+                keys.push(key);
+            }
+        }
     }
     return keys;
 }

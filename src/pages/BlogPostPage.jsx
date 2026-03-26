@@ -56,8 +56,8 @@ const BlogPostPage = () => {
                             <p className="cta-sub">
                                 Make your content look great and get better results. We are taking new projects now.
                             </p>
-                            <Link to="/services#inquiry" className="hero-cta editorial-cta">
-                                START A PROJECT
+                            <Link to="/get-in-touch#inquiry" className="hero-cta editorial-cta">
+                                GET IN TOUCH
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                 </svg>
