@@ -50,6 +50,7 @@ const EstimatePage = React.lazy(() => import('./pages/EstimatePage'));
 const CaptionWriterPage = React.lazy(() => import('./pages/CaptionWriterPage'));
 const ThumbnailAnalyserPage = React.lazy(() => import('./pages/ThumbnailAnalyserPage'));
 const ArchivePage = React.lazy(() => import('./pages/ArchivePage'));
+const ThreadDetailPage = React.lazy(() => import('./pages/ThreadDetailPage'));
 
 // Standalone AI Tools Section
 import SlotMachineWidget from './components/SlotMachineWidget';
@@ -231,6 +232,7 @@ const AnimatedRoutes = () => {
         <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
         <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
         <Route path="/archive" element={<TransitionWipe><ArchivePage /></TransitionWipe>} />
+        <Route path="/community/:id" element={<TransitionWipe><ThreadDetailPage /></TransitionWipe>} />
         <Route path="/dossier" element={<TransitionWipe><DossierPage /></TransitionWipe>} />
         <Route path="/services" element={<Navigate to="/get-in-touch" replace />} />
         <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />

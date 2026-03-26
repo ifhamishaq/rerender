@@ -1,294 +1,297 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+    Search, Filter, Plus, MessageSquare, ArrowBigUp, ArrowBigDown, 
+    Share2, MoreVertical, TrendingUp, Clock, Award, Shield, Zap,
+    ImageIcon, FileText, Globe, Bot, ArrowLeft, RefreshCw, X
+} from 'lucide-react';
 import { supabase } from '../utils/supabase';
-import { Filter, Eye, Copy, Heart, Share2, ArrowLeft, RefreshCw, MessageSquare } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-const TYPE_FILTERS = [
-    { id: 'all', label: 'ALL_ASSETS' },
-    { id: 'wallpaper', label: 'WALLPAPERS' },
-    { id: 'thumbnail', label: 'ANALYSES' },
-    { id: 'caption', label: 'CAPTIONS' }
-];
+const RED = '#E8111A';
 
 const ArchivePage = () => {
-    const [assets, setAssets] = useState([]);
-    const [filter, setFilter] = useState('all');
-    const [isLoading, setIsLoading] = useState(true);
+    const { user, profile, setIsAuthModalOpen } = useAuth();
+    const navigate = useNavigate();
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [category, setCategory] = useState('hot');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newThread, setNewThread] = useState({ title: '', content: '', type: 'discussion' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const CATEGORIES = [
+        { id: 'hot', label: 'HOT', icon: <TrendingUp size={14} /> },
+        { id: 'new', label: 'NEW', icon: <Clock size={14} /> },
+        { id: 'top', label: 'TOP', icon: <Award size={14} /> },
+    ];
 
     useEffect(() => {
-        fetchArchive();
-    }, [filter]);
+        fetchPosts();
+    }, [category]);
 
-    const fetchArchive = async () => {
-        setIsLoading(true);
-        try {
-            let query = supabase
-                .from('community_archive')
-                .select('*')
-                .order('created_at', { ascending: false });
+    const fetchPosts = async () => {
+        setLoading(true);
+        let query = supabase
+            .from('community_archive')
+            .select('*');
 
-            if (filter !== 'all') {
-                query = query.eq('type', filter);
-            }
+        if (category === 'new') query = query.order('created_at', { ascending: false });
+        else if (category === 'top') query = query.order('upvotes', { ascending: false });
+        else query = query.order('created_at', { ascending: false }); 
 
-            const { data, error } = await query;
-            if (error) throw error;
-            setAssets(data || []);
-        } catch (err) {
-            console.error('Error fetching archive:', err);
-        } finally {
-            setIsLoading(false);
-        }
+        const { data, error } = await query;
+        if (data) setPosts(data);
+        if (error) console.error('Error fetching posts:', error);
+        setLoading(false);
     };
 
-    const handleLike = async (id, currentLikes) => {
-        const { error } = await supabase
-            .from('community_archive')
-            .update({ likes_count: (currentLikes || 0) + 1 })
-            .eq('id', id);
-        
-        if (!error) {
-            setAssets(prev => prev.map(a => 
-                a.id === id ? { ...a, likes_count: (a.likes_count || 0) + 1 } : a
-            ));
+    const handleVote = async (postId, amount, type) => {
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
         }
+
+        const post = posts.find(p => p.id === postId);
+        const newUpvotes = type === 'up' ? post.upvotes + amount : post.upvotes;
+        const newDownvotes = type === 'down' ? post.downvotes + amount : post.downvotes;
+
+        setPosts(posts.map(p => p.id === postId ? { ...p, upvotes: newUpvotes, downvotes: newDownvotes } : p));
+
+        await supabase
+            .from('community_archive')
+            .update({ upvotes: newUpvotes, downvotes: newDownvotes })
+            .eq('id', postId);
+    };
+
+    const createThread = async () => {
+        if (!newThread.title.trim() || isSubmitting) return;
+        setIsSubmitting(true);
+
+        const { data, error } = await supabase
+            .from('community_archive')
+            .insert({
+                user_id: user.id,
+                user_name: profile?.full_name || user.email?.split('@')[0] || 'ANON_CREATOR',
+                title: newThread.title,
+                content: newThread.content,
+                type: 'discussion',
+                upvotes: 1
+            })
+            .select()
+            .single();
+
+        if (data) {
+            setPosts([data, ...posts]);
+            setShowCreateModal(false);
+            setNewThread({ title: '', content: '', type: 'discussion' });
+        }
+        setIsSubmitting(false);
     };
 
     return (
-        <div style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', minHeight: '100vh', paddingTop: '120px', paddingBottom: '100px' }}>
-            <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
+        <div style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', minHeight: '100vh', paddingTop: '100px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem', display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
                 
-                {/* Header Section */}
-                <header style={{ borderBottom: '4px solid var(--color-text)', paddingBottom: '2.5rem', marginBottom: '4rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <Link to="/tools" style={{ color: 'var(--color-text)', opacity: 0.5 }}><ArrowLeft size={20} /></Link>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', opacity: 0.5, letterSpacing: '0.2em' }}>VOL. 09 // GLOBAL_CURATION // PUBLIC_GALLERY</span>
-                    </div>
-                    <h1 style={{ 
-                        fontSize: 'clamp(3rem, 10vw, 7rem)', 
-                        fontWeight: 900, margin: 0, 
-                        letterSpacing: '-0.04em', lineHeight: 0.85, 
-                        fontFamily: 'var(--font-display)',
-                        textTransform: 'uppercase'
-                    }}>
-                        THE<br/>
-                        <span style={{ color: 'var(--color-accent)', fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400, textTransform: 'none' }}>Community</span>
-                    </h1>
-                </header>
-
-                {/* Filter & Search Bar */}
-                <div style={{ 
-                    display: 'flex', flexWrap: 'wrap', 
-                    gap: '1rem', marginBottom: '5rem', 
-                    justifyContent: 'space-between', alignItems: 'center',
-                    borderBottom: '1px solid var(--color-border)',
-                    paddingBottom: '1.5rem'
-                }}>
-                    <div style={{ display: 'flex', overflowX: 'auto', gap: '0.75rem' }} className="no-scrollbar">
-                        {TYPE_FILTERS.map(f => (
-                            <button
-                                key={f.id}
-                                onClick={() => setFilter(f.id)}
+                {/* Main Feed */}
+                <main>
+                    {/* Header */}
+                    <header style={{ marginBottom: '3rem', borderBottom: '4px solid var(--color-text)', paddingBottom: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                            <div>
+                                <h1 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-0.02em', textTransform: 'uppercase', fontFamily: 'var(--font-display)' }}>
+                                    THE<br/><span style={{ color: RED }}>COMMUNITY</span>
+                                </h1>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', opacity: 0.5, marginTop: '0.5rem' }}>
+                                    VOL. 26 // AGENCY_FORUM // COLLABORATIVE_INTELLIGENCE
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => user ? setShowCreateModal(true) : setIsAuthModalOpen(true)}
                                 style={{
-                                    padding: '0.8rem 1.75rem',
-                                    border: '1.5px solid var(--color-text)',
-                                    backgroundColor: filter === f.id ? 'var(--color-text)' : 'transparent',
-                                    color: filter === f.id ? 'var(--color-bg)' : 'var(--color-text)',
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
-                                    cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                                    borderRadius: '0px'
+                                    backgroundColor: 'var(--color-text)', color: 'var(--color-bg)',
+                                    border: 'none', padding: '1rem 2rem', fontFamily: 'var(--font-mono)',
+                                    fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '0.75rem'
                                 }}
                             >
-                                {f.label}
+                                <Plus size={18} /> START_THREAD
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Sorting Tabs */}
+                    <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
+                        {CATEGORIES.map(c => (
+                            <button
+                                key={c.id}
+                                onClick={() => setCategory(c.id)}
+                                style={{
+                                    background: 'none', border: 'none', color: category === c.id ? RED : 'var(--color-text)',
+                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.75rem',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    opacity: category === c.id ? 1 : 0.4, transition: 'all 0.2s'
+                                }}
+                            >
+                                {c.icon} {c.label}
                             </button>
                         ))}
                     </div>
-                    
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', opacity: 0.4 }}>
-                        {assets.length} ENTRIES_LOADED
-                    </div>
-                </div>
 
-                {/* Grid */}
-                {isLoading ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '15vh 0', gap: '2rem' }}>
-                        <RefreshCw size={40} className="spin" style={{ color: 'var(--color-accent)' }} />
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.2em' }}>SYNCHRONIZING_DATABASE...</span>
-                    </div>
-                ) : assets.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '10vh 0', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>
-                        <Filter size={48} style={{ marginBottom: '1.5rem' }} />
-                        <div>NO_ASSETS_FOUND_IN_THIS_SECTOR</div>
-                    </div>
-                ) : (
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
-                        gap: '3rem' 
-                    }}>
-                        {assets.map((asset) => (
-                            <AssetCard 
-                                key={asset.id} 
-                                asset={asset} 
-                                onLike={() => handleLike(asset.id, asset.likes_count)} 
-                            />
+                    {/* Posts List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {loading ? (
+                            <div style={{ padding: '5rem', textAlign: 'center' }}>
+                                <RefreshCw className="spin" size={32} />
+                            </div>
+                        ) : posts.map(post => (
+                            <ThreadCard key={post.id} post={post} onVote={handleVote} />
                         ))}
                     </div>
+                </main>
+
+                {/* Sidebar */}
+                <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{ padding: '2rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+                        <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1rem 0', fontSize: '1.2rem' }}>AGENCY_RULES</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', opacity: 0.7, fontSize: '0.8rem', lineHeight: 1.5 }}>
+                            <div>1. No low-effort prompts.</div>
+                            <div>2. Critique with technical merit.</div>
+                            <div>3. AI Oracle has final say in all disputes.</div>
+                            <div>4. Share resources, build momentum.</div>
+                        </div>
+                    </div>
+
+                    <div style={{ padding: '2rem', backgroundColor: RED, color: '#fff' }}>
+                        <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 0.5rem 0' }}>COMMUNITY_ORACLE</h3>
+                        <p style={{ fontSize: '0.75rem', opacity: 0.9, lineHeight: 1.4, margin: '0 0 1.5rem 0' }}>
+                            Currently analyzing 1,240 assets. Cyberpunk-Brutalism is trending with a +24% CTR projection.
+                        </p>
+                        <button style={{ width: '100%', padding: '0.75rem', backgroundColor: '#fff', color: '#000', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem' }}>
+                            VIEW_TREND_REPORT
+                        </button>
+                    </div>
+                </aside>
+            </div>
+
+            {/* Create Thread Modal */}
+            <AnimatePresence>
+                {showCreateModal && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', backdropFilter: 'blur(10px)' }}
+                    >
+                        <motion.div 
+                            initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }}
+                            style={{ backgroundColor: 'var(--color-bg)', width: '100%', maxWidth: '700px', border: '4px solid var(--color-text)', padding: '3rem' }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                                <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', textTransform: 'uppercase' }}>INITIALIZE_THREAD</h2>
+                                <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer' }}><X /></button>
+                            </div>
+
+                            <input 
+                                placeholder="THREAD_TITLE..."
+                                value={newThread.title}
+                                onChange={(e) => setNewThread({ ...newThread, title: e.target.value })}
+                                style={{ width: '100%', background: 'none', border: 'none', borderBottom: '2px solid var(--color-border)', color: 'var(--color-text)', padding: '1rem 0', fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: '2rem', outline: 'none' }}
+                            />
+
+                            <textarea 
+                                placeholder="SYSTEM_MESSAGE: Share your resources or discuss agency problems..."
+                                value={newThread.content}
+                                onChange={(e) => setNewThread({ ...newThread, content: e.target.value })}
+                                style={{ width: '100%', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: '1.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', marginBottom: '2rem', outline: 'none', minHeight: '200px', resize: 'vertical' }}
+                            />
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button 
+                                    onClick={createThread}
+                                    disabled={isSubmitting}
+                                    style={{ flex: 1, padding: '1.25rem', backgroundColor: RED, color: '#fff', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                    {isSubmitting ? '[ PUBLISHING... ]' : '[ DEPLOY_THREAD ]'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
                 )}
-            </main>
+            </AnimatePresence>
 
             <style>{`
-                .no-scrollbar::-webkit-scrollbar { display: none; }
                 .spin { animation: spin 2s linear infinite; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
-                
-                @media (max-width: 768px) {
-                    main { padding: 0 1.5rem; }
+                @media (max-width: 900px) {
+                    div[style*="gridTemplateColumns"] { grid-template-columns: 1fr !important; }
+                    aside { display: none !important; }
                 }
             `}</style>
         </div>
     );
 };
 
-const AssetCard = ({ asset, onLike }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [copying, setCopying] = useState(false);
-
-    const handleCopy = (e) => {
-        e.stopPropagation();
-        const textToCopy = asset.data.prompt || asset.data.content || '';
-        navigator.clipboard.writeText(textToCopy);
-        setCopying(true);
-        setTimeout(() => setCopying(false), 2000);
-    };
-
+const ThreadCard = ({ post, onVote }) => {
+    const isAsset = post.type !== 'discussion';
+    
     return (
-        <motion.div
-            layout
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1.5px solid var(--color-border)',
-                position: 'relative',
-                display: 'flex', flexDirection: 'column',
-                boxShadow: isHovered ? '20px 20px 0px rgba(0,0,0,0.08)' : '0px 0px 0px rgba(0,0,0,0)',
-                transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
-                borderColor: isHovered ? 'var(--color-text)' : 'var(--color-border)',
+        <motion.div 
+            whileHover={{ x: 5 }}
+            style={{ 
+                display: 'flex', gap: '0', backgroundColor: 'var(--color-surface)', 
+                border: '1px solid var(--color-border)', transition: 'border-color 0.2s',
                 overflow: 'hidden'
             }}
         >
-            {/* Type Indicator Tag */}
-            <div style={{
-                position: 'absolute', top: '1.25rem', left: '1.25rem', zIndex: 10,
-                backgroundColor: 'var(--color-bg)', color: 'var(--color-text)',
-                padding: '0.4rem 0.8rem', fontSize: '0.55rem', fontWeight: 900,
-                fontFamily: 'var(--font-mono)', border: '1px solid var(--color-text)',
-                textTransform: 'uppercase'
-            }}>
-                {asset.type}
+            {/* Vote Sidebar */}
+            <div style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', borderRight: '1px solid var(--color-border)' }}>
+                <button onClick={() => onVote(post.id, 1, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)', opacity: 0.5 }}><ArrowBigUp size={24} /></button>
+                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.8rem' }}>{post.upvotes - post.downvotes}</div>
+                <button onClick={() => onVote(post.id, 1, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)', opacity: 0.5 }}><ArrowBigDown size={24} /></button>
             </div>
 
-            {/* Visual Media */}
-            {asset.image_url ? (
-                <div style={{ position: 'relative', aspectRatio: '4/5', overflow: 'hidden', backgroundColor: '#000' }}>
-                    <img 
-                        src={asset.image_url} 
-                        alt="Archive Asset" 
-                        loading="lazy"
-                        style={{ 
-                            width: '100%', height: '100%', objectFit: 'cover', 
-                            filter: isHovered ? 'grayscale(0)' : 'grayscale(0.2)',
-                            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-                            transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                        }} 
-                    />
-                    <AnimatePresence>
-                        {isHovered && (
-                            <motion.div 
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                style={{ 
-                                    position: 'absolute', inset: 0, 
-                                    backgroundColor: 'rgba(0,0,0,0.4)', 
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                    gap: '1.5rem', backdropFilter: 'blur(8px)' 
-                                }}
-                            >
-                                <button title="Copy Directive" onClick={handleCopy} style={cardBtnStyle}>
-                                    {copying ? 'COPIED' : <Copy size={20} />}
-                                </button>
-                                <button title="View Details" style={cardBtnStyle}><Eye size={20} /></button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            ) : (
-                <div style={{ 
-                    padding: '3rem 2rem', flex: 1, minHeight: '280px',
-                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.02)'
-                }}>
-                    <div style={{ 
-                        fontSize: '1rem', lineHeight: 1.6, fontStyle: 'italic', 
-                        opacity: 0.9, color: 'var(--color-text)' 
-                    }}>
-                        "{asset.data.content || asset.data.prompt || 'No description provided'}"
-                    </div>
-                </div>
-            )}
-
-            {/* Content Preview (Short description if image exists) */}
-            {asset.image_url && asset.data.prompt && (
-                <div style={{ padding: '1rem 1.25rem', fontSize: '0.7rem', opacity: 0.6, borderTop: '1px solid var(--color-border)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {asset.data.prompt}
-                </div>
-            )}
-
-            {/* Metrics & Info */}
-            <div style={{ 
-                padding: '1.25rem', borderTop: '1.5px solid var(--color-border)', 
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                backgroundColor: 'var(--color-bg)'
-            }}>
+            {/* Post Content */}
+            <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '24px', height: '24px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.6rem' }}>
-                        {asset.user_name?.charAt(0).toUpperCase() || 'A'}
+                    <div style={{ padding: '0.2rem 0.5rem', backgroundColor: isAsset ? RED : 'var(--color-text)', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
+                        {isAsset ? <ImageIcon size={10} /> : <FileText size={10} />} {post.type.toUpperCase()}
                     </div>
-                    <div>
-                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>{asset.user_name || 'ANON_CREATOR'}</div>
-                        <div style={{ fontSize: '0.5rem', opacity: 0.5 }}>{new Date(asset.created_at).toLocaleDateString()}</div>
-                    </div>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.4 }}>POSTED_BY @{post.user_name} // {new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
-                
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button 
-                        onClick={onLike}
-                        style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-text)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900 }}
-                    >
-                        <Heart size={16} fill={asset.likes_count > 0 ? 'var(--color-accent)' : 'none'} color={asset.likes_count > 0 ? 'var(--color-accent)' : 'currentColor'} />
-                        {asset.likes_count || 0}
+
+                <Link to={`/community/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 900, lineHeight: 1.2 }}>
+                        {post.title || post.data?.prompt?.slice(0, 50) + '...'}
+                    </h2>
+                </Link>
+
+                {isAsset && post.image_url && (
+                    <div style={{ width: '100%', maxHeight: '400px', overflow: 'hidden', border: '1px solid var(--color-border)', cursor: 'zoom-in' }}>
+                        <img src={post.image_url} style={{ width: '100%', height: 'auto', display: 'block' }} alt="Asset" />
+                    </div>
+                )}
+
+                {!isAsset && post.content && (
+                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.5, opacity: 0.8, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {post.content}
+                    </p>
+                )}
+
+                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+                    <Link to={`/community/${post.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-text)', opacity: 0.6, textDecoration: 'none', fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>
+                        <MessageSquare size={14} /> 24 COMMENTS
+                    </Link>
+                    <button style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-text)', opacity: 0.6, fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                        <Share2 size={14} /> SHARE
                     </button>
-                    <button style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', opacity: 0.5 }}>
-                        <Share2 size={16} />
+                    <button style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.3, marginLeft: 'auto' }}>
+                        <MoreVertical size={14} />
                     </button>
                 </div>
             </div>
         </motion.div>
     );
-};
-
-const cardBtnStyle = {
-    padding: '1.25rem',
-    backgroundColor: 'var(--color-accent)',
-    color: '#000',
-    border: 'none',
-    borderRadius: '0px',
-    cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.7rem'
 };
 
 export default ArchivePage;
