@@ -250,7 +250,7 @@ const DotGrid = ({
       }
     };
 
-    const throttledMove = throttle(onMove, 50);
+    const throttledMove = throttle(onMove, 100); // Throttled to 100ms for smoother overall site feel
     window.addEventListener('mousemove', throttledMove, { passive: true });
     window.addEventListener('click', onClick);
 

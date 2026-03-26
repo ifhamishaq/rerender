@@ -1,0 +1,54 @@
+[
+    {
+        "id": "001",
+        "sidemark": "001/INT",
+        "type": "INTERNSHIP",
+        "status": "AVAILABLE",
+        "title": "INTERNSHIP",
+        "serifTitle": "The",
+        "description": "A 3-month program for video editors and designers. You will work on real projects and learn how to make great visuals from our team.",
+        "specs": [
+            "[01] FULL ACCESS TO ASSETS",
+            "[02] DIRECT MENTORSHIP",
+            "[03] REMOTE WORKFLOW"
+        ],
+        "link": "mailto:re.render.original@gmail.com?subject=Internship Application",
+        "buttonLabel": "APPLY_NOW",
+        "style": "premium"
+    },
+    {
+        "id": "002",
+        "sidemark": "002/COMP",
+        "type": "COMPETITIONS",
+        "status": "COMING_SOON",
+        "title": "COMPETITION",
+        "serifTitle": "The",
+        "description": "Monthly editing challenges. Download the files, show your skills, and win prizes or even a spot on our team.",
+        "specs": [
+            "[01] $500+ PRIZE POOLS",
+            "[02] SOCIAL FEATURES",
+            "[03] TEAM SCOUTING"
+        ],
+        "link": "#",
+        "buttonLabel": "LOCKED",
+        "style": "inverted",
+        "disabled": true
+    },
+    {
+        "id": "003",
+        "sidemark": "003/PRO",
+        "type": "FREELANCE",
+        "status": "SCOUTING",
+        "title": "ROSTER",
+        "serifTitle": "The",
+        "description": "We look for top-level freelancers to help us with our biggest projects. High pay, great work, and no stress.",
+        "specs": [
+            "[01] TOP DAY RATES",
+            "[02] BIG CLIENT PROJECTS",
+            "[03] REMOTE WORK"
+        ],
+        "link": "mailto:re.render.original@gmail.com?subject=Freelance Roster Pitch",
+        "buttonLabel": "JOIN_US",
+        "style": "accent"
+    }
+]

@@ -36,7 +36,10 @@ const PalettePickerPage = React.lazy(() => import('./pages/PalettePickerPage'));
 const ReflexGamePage = React.lazy(() => import('./pages/ReflexGamePage'));
 const WallpaperLab = React.lazy(() => import('./pages/WallpaperLab'));
 const ToolsPage = React.lazy(() => import('./pages/ToolsPage'));
-const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
+const CareersPage = React.lazy(() => import('./pages/CareersPage'));
+const BlogPage = React.lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = React.lazy(() => import('./pages/BlogPostPage'));
+
 
 import SlotMachineWidget from './components/SlotMachineWidget';
 import TransitionWipe from './components/Animations/TransitionWipe';
@@ -59,8 +62,8 @@ const TitleManager = () => {
 
   useEffect(() => {
     const titleMap = {
-      '/': 'RE-RENDER | Digital Agency & Assets',
-      '/journey': 'My Journey | RE-RENDER',
+      '/': 'RE-RENDER | Creative Agency',
+      '/careers': 'Join the Team | RE-RENDER',
       '/about': 'About | RE-RENDER',
       '/shop': 'Shop | RE-RENDER',
       '/services': 'Services | RE-RENDER',
@@ -78,8 +81,11 @@ const TitleManager = () => {
       '/admin': 'Admin Panel | RE-RENDER',
       '/privacy': 'Privacy Policy | RE-RENDER',
       '/terms': 'Terms of Service | RE-RENDER',
-      '/license': 'License Agreement | RE-RENDER',
       '/refund': 'Refund Policy | RE-RENDER',
+      '/blog': 'RE-RENDER Blog',
+      '/blog/:slug': 'Article | RE-RENDER',
+      '/license': 'License Agreement | RE-RENDER',
+
     };
 
     document.title = titleMap[location.pathname] || 'RE-RENDER | Digital Agency & Assets';
@@ -117,12 +123,15 @@ const AnimatedRoutes = () => {
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
         <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />
-        <Route path="/journey" element={<TransitionWipe><PortfolioPage /></TransitionWipe>} />
+        <Route path="/careers" element={<TransitionWipe><CareersPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
         <Route path="/license" element={<TransitionWipe><LicenseAgreement /></TransitionWipe>} />
         <Route path="/refund" element={<TransitionWipe><RefundPolicy /></TransitionWipe>} />
+        <Route path="/blog" element={<TransitionWipe><BlogPage /></TransitionWipe>} />
+        <Route path="/blog/:slug" element={<TransitionWipe><BlogPostPage /></TransitionWipe>} />
         <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />
+
       </Routes>
       </React.Suspense>
     </AnimatePresence>
@@ -142,6 +151,8 @@ function App() {
       touchMultiplier: 2,
     });
 
+    window.lenis = lenis;
+
     function raf(time) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -151,6 +162,7 @@ function App() {
 
     return () => {
       lenis.destroy();
+      window.lenis = null;
     };
   }, []);
 

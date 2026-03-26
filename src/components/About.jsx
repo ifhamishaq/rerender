@@ -93,9 +93,9 @@ const About = () => {
                         marginBottom: '2rem',
                         color: 'var(--color-text-secondary)'
                     }}>
-                        Based at the intersection of high-fashion aesthetics and raw lo-fi digital culture.
-                        I build tools and assets that disrupt the mainstream frequency. RE-RENDER is my laboratory
-                        where I distill professional-grade workflows into accessible assets for the next generation of creators.
+                        I combine high-end design with modern digital style.
+                        I make tools and assets for creators. RE-RENDER is where I create
+                        professional resources that anyone can use to improve their work.
                     </p>
 
                     <p style={{
@@ -104,8 +104,8 @@ const About = () => {
                         marginBottom: '3rem',
                         color: 'var(--color-text-secondary)'
                     }}>
-                        My work is defined by a commitment to the 'Unseen' finding beauty in the glitch,
-                        the noise, and the raw digital texture that defines our post-internet era.
+                        I love finding beauty in the details—the glitches, the noise, and the 
+                        unique textures of the digital world.
                     </p>
 
                     <motion.a

@@ -56,6 +56,8 @@ const Footer = () => {
                         { to: '/about', label: 'About' },
                         { to: '/prompts', label: 'Prompts' },
                         { to: '/shop', label: 'Shop' },
+                        { to: '/careers', label: 'Careers' },
+                        { to: '/blog', label: 'Blog' },
                         { to: '/submit-prompt', label: 'Submit Prompt' },
                     ].map(({ to, label }) => (
                         <Link key={to} to={to} style={{

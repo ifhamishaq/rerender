@@ -27,7 +27,7 @@ const CTA = () => {
                     marginBottom: '2rem',
                     color: 'var(--color-accent)'
                 }}>
-                    CREATE.<br />DISRUPT.<br />REPEAT.
+                    CREATE.<br />GROW.<br />REPEAT.
                 </h2>
 
                 <p style={{
@@ -37,7 +37,7 @@ const CTA = () => {
                     maxWidth: '600px',
                     lineHeight: 1.6
                 }}>
-                    Join the underground. Get exclusive drops, tutorials, and early access to new tools.
+                    Join our community. Get exclusive drops, tutorials, and early access to new tools.
                 </p>
             </motion.div>
         </section>

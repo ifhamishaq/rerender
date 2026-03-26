@@ -1,45 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import SlotMachineWidget from '../components/SlotMachineWidget';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import servicesList from '../data/services.json';
 
 const Services = () => {
     const { isDarkMode } = useTheme();
     const [appliedDiscount, setAppliedDiscount] = useState(null);
+    const [hasWon, setHasWon] = useState(false);
 
     useEffect(() => {
         const discount = localStorage.getItem('re_render_discount');
         if (discount) {
             setAppliedDiscount(discount);
+            setHasWon(true);
         }
     }, []);
 
-    const servicesList = [
-        {
-            title: 'VIDEO EDITING',
-            desc: 'High-retention, brutalist-style edits for commercials, music videos, and social media. Precision pacing with aggressive aesthetic grading.',
-            tags: ['PREMIERE PRO', 'AFTER EFFECTS', 'DAVINCI RESOLVE'],
-            gif: '/service-video.gif'
-        },
-        {
-            title: 'GRAPHIC DESIGN',
-            desc: 'Post-internet brand identity, typography, and poster design. We break the rules to make you stand out.',
-            tags: ['PHOTOSHOP', 'ILLUSTRATOR', 'FIGMA'],
-            gif: '/service-design.gif'
-        },
-        {
-            title: '3D ART',
-            desc: 'Surreal environments, product renders, and abstract motion graphics that blur the line between digital and physical.',
-            tags: ['BLENDER', 'CINEMA 4D', 'UNREAL ENGINE'],
-            gif: '/service-3d.gif'
-        },
-        {
-            title: 'WEB DEVELOPMENT',
-            desc: 'Immersive, high-performance websites using modern frameworks. Not just templates—custom digital architecture.',
-            tags: ['REACT', 'THREE.JS', 'NEXT.JS'],
-            gif: '/service-web.gif'
+    const triggerRandomWin = () => {
+        if (hasWon) return; // Only win once per session/unit
+        
+        const r = Math.random();
+        // 80% chance to win something
+        if (r < 0.8) {
+            const prizes = [10, 15, 20, 25, 30, 50];
+            const win = prizes[Math.floor(Math.random() * prizes.length)];
+            setAppliedDiscount(win);
+            setHasWon(true);
+            localStorage.setItem('re_render_discount', win);
         }
-    ];
+    };
+
+
 
     return (
         <main style={{
@@ -153,7 +144,59 @@ const Services = () => {
                 <div id="inquiry" style={{ marginTop: '8rem', paddingTop: '4rem', borderTop: '1px solid var(--color-border)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'start' }}>
                         {/* Left: Copy */}
-                        <div>
+                        <motion.div
+                            onViewportEnter={triggerRandomWin}
+                            viewport={{ once: true, amount: 0.5 }}
+                        >
+                            <AnimatePresence>
+                                {hasWon && appliedDiscount && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                                        style={{
+                                            backgroundColor: 'var(--color-accent)',
+                                            color: '#000',
+                                            padding: '1.5rem',
+                                            marginBottom: '2rem',
+                                            border: '2px solid #000',
+                                            boxShadow: '8px 8px 0px #000',
+                                            position: 'relative',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 0, right: 0,
+                                            fontSize: '4rem',
+                                            opacity: 0.1,
+                                            fontWeight: 900,
+                                            pointerEvents: 'none',
+                                            lineHeight: 1
+                                        }}>
+                                            WINNER
+                                        </div>
+                                        <h3 style={{ 
+                                            margin: 0, 
+                                            fontFamily: 'var(--font-sans)', 
+                                            fontWeight: 900, 
+                                            fontSize: '1.2rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em'
+                                        }}>
+                                            Special Offer Unlocked! ⚡
+                                        </h3>
+                                        <p style={{ 
+                                            margin: '0.5rem 0 0', 
+                                            fontFamily: 'var(--font-mono)', 
+                                            fontSize: '0.9rem',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            YOU WON A {appliedDiscount}% DISCOUNT FOR THIS PROJECT.
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                             <h2 style={{
                                 fontSize: 'clamp(2rem, 5vw, 4rem)',
                                 margin: '0 0 1.5rem 0',
@@ -190,7 +233,7 @@ const Services = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Right: Form */}
                         <form
@@ -395,10 +438,7 @@ const Services = () => {
                     </div>
                 </div>
 
-                {/* ===== SLOT MACHINE WIDGET ===== */}
-                <div style={{ padding: '8rem 0 0' }}>
-                    <SlotMachineWidget />
-                </div>
+                {/* Removed SlotMachineWidget as per request to move it to a random banner in the inquiry section */}
 
                 {/* ===== CTA BANNER ===== */}
                 <div style={{
@@ -431,7 +471,7 @@ const Services = () => {
                             letterSpacing: '-0.02em',
                             color: 'var(--color-text)'
                         }}>
-                            READY TO DISRUPT?
+                            READY TO START?
                         </h3>
                         <p style={{
                             color: 'var(--color-text-secondary)',
@@ -439,7 +479,7 @@ const Services = () => {
                             fontSize: '1.2rem',
                             fontFamily: 'var(--font-mono)'
                         }}>
-                            LET'S BUILD SOMETHING THE INTERNET HASN'T SEEN BEFORE.
+                            LET'S BUILD SOMETHING GREAT TOGETHER.
                         </p>
                         <a href="#inquiry" style={{
                             display: 'inline-block',

@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "title": "VIDEO EDITING",
+        "desc": "We make videos that keep people watching. From ads to social media, we handle everything from cutting to color.",
+        "tags": ["PREMIERE PRO", "AFTER EFFECTS", "DAVINCI RESOLVE"],
+        "gif": "/service-video.gif"
+    },
+    {
+        "id": 2,
+        "title": "GRAPHIC DESIGN",
+        "desc": "We create unique logos, fonts, and posters. We help your brand look different and get noticed.",
+        "tags": ["PHOTOSHOP", "ILLUSTRATOR", "FIGMA"],
+        "gif": "/service-design.gif"
+    },
+    {
+        "id": 3,
+        "title": "3D ART",
+        "desc": "We create realistic 3D models and cool animations for your products or ideas.",
+        "tags": ["BLENDER", "CINEMA 4D", "UNREAL ENGINE"],
+        "gif": "/service-3d.gif"
+    },
+    {
+        "id": 4,
+        "title": "WEB DEVELOPMENT",
+        "desc": "We build fast, modern websites that look great on any device.",
+        "tags": ["REACT", "THREE.JS", "NEXT.JS"],
+        "gif": "/service-web.gif"
+    }
+]

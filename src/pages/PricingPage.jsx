@@ -19,7 +19,7 @@ const PricingPage = () => {
                 padding: '0 2rem'
             }}>
                 <header style={{ marginBottom: '6rem', borderBottom: '2px solid var(--color-border)', paddingBottom: '2rem' }}>
-                    <div className="section-label" style={{ marginBottom: '2rem' }}>02 — INVESTMENT</div>
+                    <div className="section-label" style={{ marginBottom: '2rem' }}>02 — PRICING</div>
                     <h1 style={{
                         fontSize: 'clamp(3rem, 10vw, 7rem)',
                         margin: 0,
@@ -43,7 +43,7 @@ const PricingPage = () => {
                             maxWidth: '600px',
                             lineHeight: 1.6
                         }}>
-                            Transparent starting rates. Every project is custom — use these as a baseline and reach out via the Services page for a tailored quote. We do not do cheap templates. We build bespoke digital architecture.
+                            Transparent starting rates. Every project is custom — use these as a baseline and reach out via the Services page for a tailored quote. We do not use cheap templates. We build custom websites and designs.
                         </p>
                     </div>
 
@@ -218,7 +218,7 @@ const PricingPage = () => {
                             letterSpacing: '-0.02em',
                             color: 'var(--color-text)'
                         }}>
-                            READY TO DISRUPT?
+                            READY TO START?
                         </h3>
                         <p style={{
                             color: 'var(--color-text-secondary)',
@@ -226,7 +226,7 @@ const PricingPage = () => {
                             fontSize: '1.2rem',
                             fontFamily: 'var(--font-mono)'
                         }}>
-                            LET'S BUILD SOMETHING THE INTERNET HASN'T SEEN BEFORE.
+                            LET'S BUILD SOMETHING GREAT TOGETHER.
                         </p>
                         <a href="/services#inquiry" style={{
                             display: 'inline-block',

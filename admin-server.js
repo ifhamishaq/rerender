@@ -92,6 +92,78 @@ app.post('/api/prompts', (req, res) => {
     });
 });
 
+// --- Blog ---
+const BLOG_FILE = path.join(__dirname, 'src', 'data', 'blog.json');
+
+app.get('/api/blog', (req, res) => {
+    fs.readFile(BLOG_FILE, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to read blog' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+app.post('/api/blog', (req, res) => {
+    const posts = req.body;
+    fs.writeFile(BLOG_FILE, JSON.stringify(posts, null, 4), (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to save blog' });
+        }
+        res.json({ success: true, message: 'Blog saved successfully' });
+    });
+});
+
+// --- Careers ---
+const CAREERS_FILE = path.join(__dirname, 'src', 'data', 'careers.json');
+
+app.get('/api/careers', (req, res) => {
+    fs.readFile(CAREERS_FILE, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to read careers' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+app.post('/api/careers', (req, res) => {
+    const list = req.body;
+    fs.writeFile(CAREERS_FILE, JSON.stringify(list, null, 4), (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to save careers' });
+        }
+        res.json({ success: true, message: 'Careers saved successfully' });
+    });
+});
+
+// --- Services ---
+const SERVICES_FILE = path.join(__dirname, 'src', 'data', 'services.json');
+
+app.get('/api/services', (req, res) => {
+    fs.readFile(SERVICES_FILE, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to read services' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+app.post('/api/services', (req, res) => {
+    const list = req.body;
+    fs.writeFile(SERVICES_FILE, JSON.stringify(list, null, 4), (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to save services' });
+        }
+        res.json({ success: true, message: 'Services saved successfully' });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Admin Server running on http://localhost:${PORT}`);
 });

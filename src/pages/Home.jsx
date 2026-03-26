@@ -6,7 +6,6 @@ import PromptPreview from '../components/PromptPreview';
 import { Link } from 'react-router-dom';
 import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
-import SlotMachineWidget from '../components/SlotMachineWidget';
 import { useTheme } from '../context/ThemeContext';
 
 const Home = () => {
@@ -15,22 +14,22 @@ const Home = () => {
     const servicesList = [
         {
             title: 'VIDEO EDITING',
-            desc: 'High-retention, brutalist-style edits for commercials, music videos, and social media. Precision pacing with aggressive aesthetic grading.',
+            desc: 'We make videos that keep people watching. From ads to social media, we handle everything from cutting to color.',
             tags: ['PREMIERE PRO', 'AFTER EFFECTS', 'DAVINCI RESOLVE']
         },
         {
             title: 'GRAPHIC DESIGN',
-            desc: 'Post-internet brand identity, typography, and poster design. We break the rules to make you stand out.',
+            desc: 'We create unique logos, fonts, and posters. We help your brand look different and get noticed.',
             tags: ['PHOTOSHOP', 'ILLUSTRATOR', 'FIGMA']
         },
         {
             title: '3D ART',
-            desc: 'Surreal environments, product renders, and abstract motion graphics that blur the line between digital and physical.',
+            desc: 'We create realistic 3D models and cool animations for your products or ideas.',
             tags: ['BLENDER', 'CINEMA 4D', 'UNREAL ENGINE']
         },
         {
             title: 'WEB DEVELOPMENT',
-            desc: 'Immersive, high-performance websites using modern frameworks. Not just templates—custom digital architecture.',
+            desc: 'We build fast, modern websites that look great on any device.',
             tags: ['REACT', 'THREE.JS', 'NEXT.JS']
         }
     ];
@@ -42,11 +41,7 @@ const Home = () => {
             <Hero />
             <Marquee />
 
-            <section style={{ padding: '6rem 2rem', backgroundColor: 'var(--color-bg)', borderBottom: '1px solid var(--color-border)' }}>
-                <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    <SlotMachineWidget />
-                </div>
-            </section>
+            {/* Removed SlotMachineWidget as per request to move it to a random banner */}
 
             {/* ===== STATS BAR ===== */}
             <section style={{
@@ -99,7 +94,7 @@ const Home = () => {
             </section> */}
 
             {/* Our Approach Section */}
-            <section style={{
+            <section id="approach" style={{
                 padding: '8rem 2rem',
                 backgroundColor: 'var(--color-bg)',
                 color: 'var(--color-text)',
@@ -140,7 +135,7 @@ const Home = () => {
             </section>
 
             {/* Services Section */}
-            <section style={{
+            <section id="services" style={{
                 padding: '8rem 2rem',
                 backgroundColor: 'var(--color-surface)',
                 borderBottom: '1px solid var(--color-border)'
