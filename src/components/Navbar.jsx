@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Sun, Moon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
+import { User, LogOut, Wallet } from 'lucide-react';
 
 const Navbar = () => {
+    const { user, profile, signOut, setIsAuthModalOpen } = useAuth();
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -155,7 +159,52 @@ const Navbar = () => {
                     </a>
 
                     {/* Controls */}
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                        {/* Credits Badge */}
+                        <AnimatePresence>
+                            {user && profile && (
+                                <motion.div 
+                                    initial={{ opacity: 0, x: 10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.65rem',
+                                        color: 'var(--color-accent)',
+                                        backgroundColor: 'rgba(57,255,20,0.05)',
+                                        padding: '0.3rem 0.6rem',
+                                        border: '1px solid var(--color-accent)',
+                                        borderRadius: '2px'
+                                    }}
+                                >
+                                    <Wallet size={12} />
+                                    <span>{profile.credits} <span style={{ opacity: 0.5 }}>COMPUTE</span></span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Auth Button */}
+                        <button
+                            onClick={user ? signOut : () => setIsAuthModalOpen(true)}
+                            title={user ? 'Sign Out' : 'Login'}
+                            style={{
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid var(--color-border)',
+                                width: '32px',
+                                height: '32px',
+                                color: user ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                                background: 'none',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {user ? <LogOut size={14} /> : <User size={14} />}
+                        </button>
+
                         <button
                             onClick={toggleAudio}
                             title={isPlaying ? 'Pause Music' : 'Play Music'}
@@ -177,7 +226,7 @@ const Navbar = () => {
 
                         <button
                             onClick={toggleTheme}
-                            title="Toggle Theme"
+                             title="Toggle Theme"
                             style={{
                                 cursor: 'pointer',
                                 display: 'flex',

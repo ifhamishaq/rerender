@@ -10,7 +10,8 @@ import {
     COLOR_BIASES, RATIOS, PROMPT_TEMPLATES,
     PROMPT_COLLECTIONS, FEATURED_TAGS, NEGATIVE_PROMPT
 } from '../data/wallpaperConfig';
-import { getSecureQuota, updateSecureQuota } from '../utils/QuotaManager';
+import { useAuth } from '../context/AuthContext';
+import { AI_COSTS } from '../utils/ai';
 
 const COLORS = {
     bgLight: '#FAFAFA',
@@ -98,6 +99,7 @@ const Pill = ({ active, onClick, children }) => (
 
 const WallpaperLab = () => {
     const { isDarkMode } = useTheme();
+    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
@@ -119,7 +121,6 @@ const WallpaperLab = () => {
     const [style, setStyle] = useState(STYLES[0].id);
     const [ratio, setRatio] = useState(RATIOS[1].id);
     const [customSupplement, setCustomSupplement] = useState('');
-    const [credits, setCredits] = useState(DAILY_LIMIT);
     const [archive, setArchive] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [resultUrl, setResultUrl] = useState(null);
@@ -174,24 +175,11 @@ const WallpaperLab = () => {
         }
     };
 
-    // Init storage
+    // Init storage (Local Archive Only)
     useEffect(() => {
-        const initQuota = async () => {
-            const quota = await getSecureQuota(STORAGE_KEY);
-            setCredits(Math.max(0, DAILY_LIMIT - quota.count));
-        };
-        initQuota();
-
         const rawArchive = localStorage.getItem(ARCHIVE_KEY);
         if (rawArchive) setArchive(JSON.parse(rawArchive));
     }, []);
-
-    const updateQuota = async () => {
-        const quota = await getSecureQuota(STORAGE_KEY);
-        const newCount = quota.count + 1;
-        await updateSecureQuota(STORAGE_KEY, newCount);
-        setCredits(Math.max(0, DAILY_LIMIT - newCount));
-    };
 
     const saveToArchive = (url, metadata) => {
         const newAsset = { id: Date.now(), url, date: new Date().toLocaleString(), ...metadata };
@@ -247,10 +235,24 @@ const WallpaperLab = () => {
     };
 
     const handleGenerate = async () => {
-        if (credits <= 0) {
-            setError("DAILY LIMIT REACHED");
+        if (isGenerating) return;
+
+        // AUTH CHECK
+        if (!user) {
+            setIsAuthModalOpen(true);
             return;
         }
+
+        // CREDIT CHECK
+        if (!profile || profile.credits < AI_COSTS.GEN_IMAGE) {
+            setError("📉 OUT_OF_COMPUTE: Insufficient credits. Costs 10 credits.");
+            return;
+        }
+
+        // SPEND CREDIT
+        const success = await spendCredits(AI_COSTS.GEN_IMAGE);
+        if (!success) return;
+
         setIsGenerating(true);
         setError(null);
         setResultUrl(null);
@@ -285,7 +287,6 @@ const WallpaperLab = () => {
             if (finalUrl) {
                 const watermarkedUrl = await applyWatermark(finalUrl);
                 setResultUrl(watermarkedUrl);
-                updateQuota();
                 saveToArchive(watermarkedUrl, { genre: selectedGenre.name, style: selectedStyle.name, prompt: compositePrompt });
             } else {
                 throw new Error("No payload generated.");
@@ -327,7 +328,7 @@ const WallpaperLab = () => {
                     RE-RENDER STUDIO
                 </div>
                 <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)' }}>
-                    CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{credits}</span>
+                    CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{profile?.credits ?? 0}</span>
                 </div>
             </header>
 
@@ -510,14 +511,14 @@ const WallpaperLab = () => {
                     {/* Generate Button */}
                     <button
                         onClick={handleGenerate}
-                        disabled={isGenerating || credits <= 0}
+                        disabled={isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)}
                         style={{
                             width: '100%', padding: '1.25rem',
-                            backgroundColor: (isGenerating || credits <= 0) ? 'var(--theme-border)' : 'var(--theme-text)',
-                            color: (isGenerating || credits <= 0) ? 'var(--theme-text-muted)' : 'var(--theme-bg)',
+                            backgroundColor: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--theme-border)' : 'var(--theme-text)',
+                            color: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--theme-text-muted)' : 'var(--theme-bg)',
                             border: 'none', borderRadius: '16px',
                             fontFamily: COLORS.sans, fontWeight: 700, fontSize: '1rem',
-                            cursor: (isGenerating || credits <= 0) ? 'not-allowed' : 'pointer',
+                            cursor: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'not-allowed' : 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
                             transition: 'all 0.2s ease'
                         }}
@@ -525,7 +526,7 @@ const WallpaperLab = () => {
                         {isGenerating ? <RefreshCw size={20} className="spin" /> : (
                             <>
                                 <Sparkles size={20} />
-                                {credits > 0 ? 'GENERATE WALLPAPER' : 'QUOTA EXHAUSTED'}
+                                {(profile?.credits >= AI_COSTS.GEN_IMAGE) ? 'GENERATE WALLPAPER' : 'INSUFFICIENT_CREDITS'}
                             </>
                         )}
                         <style>{`

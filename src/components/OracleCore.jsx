@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Send, RefreshCw, User, Bot, ChevronRight, X, Target, Palette, FileText, Zap, Image as ImageIcon, Wand2, Upload } from 'lucide-react';
 
-import { fetchOpenRouter } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
+import { useAuth } from '../context/AuthContext';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = 'stepfun/step-3.5-flash:free';
@@ -91,12 +92,37 @@ const OracleCore = ({
         localStorage.setItem(storageKey, JSON.stringify(fresh));
     };
 
+    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
+
     const handleSendMessage = async (text) => {
         const messageText = text || input;
         const hasImage = !!pendingImage;
 
         if (!messageText.trim() && !hasImage) return;
         if (isTyping) return;
+
+        // AUTH CHECK
+        if (!user) {
+            setMessages(prev => [...prev, { 
+                role: 'assistant', 
+                content: "🚨 **ACCESS_DENIED**: You must be logged in to use the Oracle. Credits are required for neural processing." 
+            }]);
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        // CREDIT CHECK
+        if (!profile || profile.credits < AI_COSTS.ORACLE) {
+            setMessages(prev => [...prev, { 
+                role: 'assistant', 
+                content: "📉 **OUT_OF_COMPUTE**: Insufficient credits. Please wait for the daily refill or contact support." 
+            }]);
+            return;
+        }
+
+        // SPEND CREDIT
+        const success = await spendCredits(AI_COSTS.ORACLE);
+        if (!success) return;
 
         // Build user message for chat display
         const userMessage = { 

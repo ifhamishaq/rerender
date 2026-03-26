@@ -3,7 +3,9 @@ import Lenis from 'lenis';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import AuthModal from './components/AuthModal';
 import GlobalOracle from './components/GlobalOracle';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
@@ -236,6 +238,31 @@ const AnimatedRoutes = () => {
   );
 };
 
+const MainApp = () => {
+    const { isAuthModalOpen, setIsAuthModalOpen } = useAuth();
+
+    return (
+        <ThemeProvider>
+            <Router>
+                <TitleManager />
+                <ScrollToTop />
+                <GlobalAudio />
+                <div className="app" style={{ position: 'relative' }}>
+                    <Cursor />
+                    <ScrollProgress />
+                    <Navbar />
+                    <GlobalOracle />
+
+                    <AnimatedRoutes />
+
+                    <Footer />
+                    <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+                </div>
+            </Router>
+        </ThemeProvider>
+    );
+};
+
 function App() {
   useEffect(() => {
     const lenis = new Lenis({
@@ -265,32 +292,9 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <Router>
-        <TitleManager />
-        <ScrollToTop />
-        <GlobalAudio />
-        <div className="app" style={{ position: 'relative' }}>
-          <Cursor />
-          <ScrollProgress />
-          <Navbar />
-          <GlobalOracle />
-
-          <AnimatedRoutes />
-
-          {/* The SlotMachineWidget is intended to be rendered within the Home component,
-              as indicated by the context of the provided Code Edit snippet.
-              The instruction "render the widget right above the CTA component on the main page"
-              implies a modification to the Home component's structure, not App.jsx directly.
-              Since the Home component's content is not provided, this change cannot be
-              applied here directly without breaking the App component's structure.
-              The "remove the Lucky Render route" instruction is also not applicable
-              as no such route exists in the provided AnimatedRoutes. */}
-
-          <Footer />
-        </div>
-      </Router>
-    </ThemeProvider>
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }
 

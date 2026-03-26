@@ -3,6 +3,12 @@
  * Handles multi-key rotation, exponential backoff, and 429 error resilience.
  */
 
+export const AI_COSTS = {
+    ORACLE: 1,
+    ANALYSER: 5,
+    GEN_IMAGE: 10
+};
+
 const getApiKeys = () => {
     const keysStr = import.meta.env.VITE_OPENROUTER_API_KEYS || import.meta.env.VITE_OPENROUTER_API_KEY || '';
     return keysStr.split(',').map(k => k.trim()).filter(Boolean);

@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Check, Cpu } from 'lucide-react';
-import { fetchOpenRouter } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
+import { useAuth } from '../context/AuthContext';
 
 const VISION_MODEL = 'nvidia/nemotron-nano-12b-v2-vl:free';
 
@@ -127,8 +128,27 @@ const ThumbnailAnalyserPage = () => {
         reader.readAsDataURL(file);
     };
 
+    const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
+
     const handleAnalyze = async () => {
         if (!image || isAnalyzing) return;
+
+        // AUTH CHECK
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        // CREDIT CHECK
+        if (!profile || profile.credits < AI_COSTS.ANALYSER) {
+            alert("📉 OUT_OF_COMPUTE: This operation costs 5 credits. Please wait for daily refill.");
+            return;
+        }
+
+        // SPEND CREDIT
+        const success = await spendCredits(AI_COSTS.ANALYSER);
+        if (!success) return;
+
         setIsAnalyzing(true);
         setAnalysis(null);
         setIsThermal(false);
