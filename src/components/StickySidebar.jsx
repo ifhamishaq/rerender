@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const StickySidebar = ({ items = [] }) => {
-    if (items.length === 0) return null;
+    if (items.length === 0 || window.innerWidth < 1200) return null;
 
     const scrollToSection = (id) => {
         const element = document.getElementById(id);

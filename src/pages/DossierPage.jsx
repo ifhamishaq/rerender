@@ -50,7 +50,11 @@ const DossierPage = () => {
                     </div>
                 </header>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: window.innerWidth < 900 ? '1fr' : '1.2fr 1fr', 
+                    gap: '3rem' 
+                }}>
                     
                     {/* Left: Support the Devs System */}
                     <section>
@@ -70,7 +74,7 @@ const DossierPage = () => {
                                 </a>
                             </div>
 
-                            <form onSubmit={handleSupportSubmit} style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1.5rem' }}>
+                            <form onSubmit={handleSubmit} style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1.5rem' }}>
                                 <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '1rem' }}>STEP_02: VERIFY_TRANSFER</div>
                                 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>

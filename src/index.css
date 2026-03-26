@@ -365,14 +365,14 @@ html.lenis body {
   padding-top: 6rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1100px) {
   .hero-section {
     grid-template-columns: 1fr 1fr;
     height: 100vh;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .desktop-menu {
     display: none !important;
   }
