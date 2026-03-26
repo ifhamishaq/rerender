@@ -6,7 +6,8 @@
 export const AI_COSTS = {
     ORACLE: 0,
     ANALYSER: 0,
-    GEN_IMAGE: 10
+    CAPTION: 0,
+    GEN_IMAGE: 0
 };
 
 const getApiKeys = () => {
@@ -49,20 +50,34 @@ export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1
             currentKeyIndex++; // Rotate key
             
             if (retries > 0) {
-                await new Promise(res => setTimeout(res, delay));
-                return fetchOpenRouter(body, options, retries - 1, delay * 2);
+                // Slower exponential backoff: 3s, 6s, 12s... for free models
+                const backoffDelay = delay * (keys.length > 1 ? 1.5 : 3);
+                await new Promise(res => setTimeout(res, backoffDelay));
+                return fetchOpenRouter(body, options, retries - 1, backoffDelay);
             }
         }
 
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error?.message || `HTTP_${response.status}`);
+            const errorMsg = errData.error?.message || `HTTP_${response.status}`;
+            
+            // Handle common OpenRouter errors
+            if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
+                if (retries > 0) {
+                    console.warn(`[AI_RETRY] Model congested. Waiting ${delay}ms...`);
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchOpenRouter(body, options, retries - 1, delay * 2);
+                }
+            }
+            
+            throw new Error(errorMsg);
         }
 
         return await response.json();
     } catch (err) {
-        if (retries > 0) {
-            console.warn(`[AI_RETRY] Attempt failed: ${err.message}. Retrying...`);
+        if (retries > 0 && !err.message.includes('MISSING_API_KEYS')) {
+            console.warn(`[AI_RETRY] Attempt failed: ${err.message}. Retrying in ${delay}ms...`);
+            await new Promise(res => setTimeout(res, delay));
             return fetchOpenRouter(body, options, retries - 1, delay * 2);
         }
         throw err;

@@ -85,9 +85,9 @@ CRITICAL RULES:
     };
 
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: '#F8F6F1', color: '#000', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
+        <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#000', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem', opacity: 0.5, fontWeight: 900 }}>
+                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem', opacity: 0.5, fontWeight: 900 }}>
                     <ArrowLeft size={14} /> BACK_TO_LAB
                 </Link>
 
@@ -102,8 +102,8 @@ CRITICAL RULES:
                 </div>
 
                 {/* Input Area */}
-                <div style={{ border: '4px solid #000', padding: '3rem', backgroundColor: '#fff', marginBottom: '3rem', position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '-1rem', left: '2rem', backgroundColor: '#000', color: '#fff', padding: '0.3rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>SOURCE_CONTEXT</div>
+                <div style={{ border: '4px solid var(--color-text)', padding: '3rem', backgroundColor: 'var(--color-surface)', marginBottom: '3rem', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '-1rem', left: '2rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', padding: '0.3rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>SOURCE_CONTEXT</div>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -111,7 +111,7 @@ CRITICAL RULES:
                         rows={5}
                         style={{
                             width: '100%', padding: '0', backgroundColor: 'transparent',
-                            border: 'none', color: '#000',
+                            border: 'none', color: 'var(--color-text)',
                             fontFamily: 'Playfair Display', fontSize: '1.75rem', fontStyle: 'italic',
                             resize: 'none', outline: 'none', lineHeight: 1.4
                         }}
@@ -125,9 +125,9 @@ CRITICAL RULES:
                                 key={t}
                                 onClick={() => setTone(t)}
                                 style={{
-                                    padding: '0.6rem 1.25rem', border: '2px solid #000',
-                                    backgroundColor: tone === t ? '#000' : 'transparent',
-                                    color: tone === t ? '#fff' : '#000',
+                                    padding: '0.6rem 1.25rem', border: '2px solid var(--color-text)',
+                                    backgroundColor: tone === t ? 'var(--color-text)' : 'transparent',
+                                    color: tone === t ? 'var(--color-bg)' : 'var(--color-text)',
                                     fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900,
                                     cursor: 'pointer', textTransform: 'uppercase'
                                 }}
@@ -138,7 +138,7 @@ CRITICAL RULES:
                     </div>
 
                     <button onClick={handleGenerate} disabled={isGenerating || !description.trim()} style={{
-                        padding: '1.25rem 3rem', backgroundColor: (isGenerating || !description.trim()) ? '#ccc' : RED,
+                        padding: '1.25rem 3rem', backgroundColor: (isGenerating || !description.trim()) ? 'var(--color-border)' : RED,
                         color: '#fff', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
                         fontWeight: 900, cursor: isGenerating ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
                         textTransform: 'uppercase'
@@ -154,23 +154,23 @@ CRITICAL RULES:
                             {captions.captions?.map((c, i) => {
                                 const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
                                 return (
-                                    <div key={i} style={{ border: '4px solid #000', backgroundColor: '#fff', position: 'relative' }}>
+                                    <div key={i} style={{ border: '4px solid var(--color-text)', backgroundColor: 'var(--color-surface)', position: 'relative' }}>
                                         <div style={{
-                                            padding: '1.5rem', borderBottom: '2.5px solid #000',
+                                            padding: '1.5rem', borderBottom: '2.5px solid var(--color-text)',
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            backgroundColor: '#F8F6F1'
+                                            backgroundColor: 'var(--color-bg)'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <span style={{ color: '#000' }}>{platform.icon}</span>
+                                                    <span style={{ color: 'var(--color-text)' }}>{platform.icon}</span>
                                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>
                                                         {platform.name}
                                                     </span>
                                                 </div>
                                                 {c.psychology && (
                                                     <div style={{
-                                                        padding: '0.2rem 0.6rem', backgroundColor: '#000',
-                                                        color: '#fff', fontSize: '0.6rem',
+                                                        padding: '0.2rem 0.6rem', backgroundColor: 'var(--color-text)',
+                                                        color: 'var(--color-bg)', fontSize: '0.6rem',
                                                         fontFamily: 'var(--font-mono)', fontWeight: 900,
                                                         letterSpacing: '0.05em'
                                                     }}>
@@ -180,14 +180,14 @@ CRITICAL RULES:
                                             </div>
                                             <button
                                                 onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
-                                                style={{ background: 'none', border: '1.5px solid #000', color: '#000', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                                                style={{ background: 'none', border: '1.5px solid var(--color-text)', color: 'var(--color-text)', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                                             >
                                                 {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? <Check size={12} /> : <Copy size={12} />}
                                                 {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
                                             </button>
                                         </div>
                                         <div style={{ padding: '2.5rem' }}>
-                                            <p style={{ fontSize: '1.1rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: '#333', fontWeight: 500 }}>{c.caption}</p>
+                                            <p style={{ fontSize: '1.1rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: 'var(--color-text)', fontWeight: 500 }}>{c.caption}</p>
                                             {c.hashtags && (
                                                 <p style={{ fontSize: '0.85rem', color: RED, marginTop: '2rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>{c.hashtags}</p>
                                             )}

@@ -165,9 +165,21 @@ const ThumbnailAnalyserPage = () => {
                 ]
             };
 
-            const visionRes = await fetchOpenRouter(visionBody, { title: 'RE-RENDER Vision Scan' });
+            let visionRes;
+            try {
+                visionRes = await fetchOpenRouter(visionBody, { title: 'RE-RENDER Vision Scan' });
+            } catch (err) {
+                // FALLBACK: Try Gemini Flash 2.0 Free if Nemotron fails
+                console.warn('Vision primary failed, trying Gemini fallback...');
+                visionBody.model = 'google/gemini-2.0-flash-exp:free';
+                visionRes = await fetchOpenRouter(visionBody, { title: 'RE-RENDER Vision Fallback' });
+            }
+
             const visionContent = (visionRes.choices?.[0]?.message?.content || '').replace(/```json|```/g, '').trim();
             const visionData = JSON.parse(visionContent);
+
+            // COOL DOWN: Small delay between vision and editorial to prevent 429 on single key
+            await new Promise(res => setTimeout(res, 1500));
 
             // STEP 2: EDITORIAL REFINEMENT (LLAMA 3.3 70B)
             const editorialBody = {
@@ -211,7 +223,16 @@ const ThumbnailAnalyserPage = () => {
                 temperature: 0.5
             };
 
-            const editorialRes = await fetchOpenRouter(editorialBody, { title: 'RE-RENDER Editorial Audit' });
+            let editorialRes;
+            try {
+                editorialRes = await fetchOpenRouter(editorialBody, { title: 'RE-RENDER Editorial Audit' });
+            } catch (err) {
+                // FALLBACK: Try DeepSeek R1 Free if Llama 3.3 fails
+                console.warn('Editorial primary failed, trying DeepSeek fallback...');
+                editorialBody.model = 'deepseek/deepseek-r1:free';
+                editorialRes = await fetchOpenRouter(editorialBody, { title: 'RE-RENDER Editorial Fallback' });
+            }
+
             let finalContent = (editorialRes.choices?.[0]?.message?.content || '');
             finalContent = finalContent.replace(/```json|```/g, '').trim();
             
@@ -226,7 +247,15 @@ const ThumbnailAnalyserPage = () => {
             }
         } catch (err) {
             console.error('ANALYSIS_FAIL:', err);
-            alert(`ANALYSIS_FAIL: ${err.message || 'Vision node congested. Please retry.'}`);
+            const isRateLimit = err.message.includes('429') || err.message.toLowerCase().includes('rate limit');
+            const isCongested = err.message.toLowerCase().includes('congested') || err.message.toLowerCase().includes('overloaded');
+            
+            let userMsg = `ANALYSIS_FAIL: ${err.message}`;
+            if (isRateLimit || isCongested) {
+                userMsg = "SYSTEM_CONGESTION: All free neural nodes are currently at capacity. Please wait 30 seconds and try again (No credits used).";
+            }
+            
+            alert(userMsg);
             setIsAnalyzing(false);
         }
     };
@@ -245,7 +274,7 @@ const ThumbnailAnalyserPage = () => {
                 <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-text)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
                 <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>{value}/10</span>
             </div>
-            <div style={{ height: '6px', backgroundColor: 'rgba(0,0,0,0.03)', position: 'relative', border: '1.5px solid var(--color-text)', padding: '1px' }}>
+            <div style={{ height: '6px', backgroundColor: 'var(--color-surface)', position: 'relative', border: '1.5px solid var(--color-text)', padding: '1px' }}>
                 <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${(value / 10) * 100}%` }}
