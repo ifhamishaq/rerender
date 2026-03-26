@@ -16,6 +16,13 @@ const ANALYSIS_PHASES = [
 ];
 
 const ThumbnailAnalyserPage = () => {
+    const [image, setImage] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [analysis, setAnalysis] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [currentPhase, setCurrentPhase] = useState(0);
+    const [fakeProgress, setFakeProgress] = useState(0);
+    const [isExporting, setIsExporting] = useState(false);
     const [isThermal, setIsThermal] = useState(false);
     
     const fileRef = useRef(null);
