@@ -146,7 +146,7 @@ const ThumbnailAnalyserPage = () => {
 
         try {
             const analysisBody = {
-                model: 'google/gemini-2.0-flash-exp:free',
+                model: 'nvidia/nemotron-nano-12b-v2-vl:free',
                 messages: [
                     {
                         role: 'system',
@@ -185,8 +185,7 @@ Return ONLY valid JSON.`
                         ]
                     }
                 ],
-                temperature: 0.3,
-                response_format: { type: 'json_object' }
+                temperature: 0.3
             };
 
             const response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });

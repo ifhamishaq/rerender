@@ -8,8 +8,8 @@ import { fetchOpenRouter } from '../utils/ai';
 const RED = '#E8111A';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const MODEL = 'stepfun/step-3.5-flash:free';
-const FALLBACK_MODEL = 'google/gemma-3-27b-it:free';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const FALLBACK_MODEL = 'nvidia/nemotron-4-340b-instruct:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
