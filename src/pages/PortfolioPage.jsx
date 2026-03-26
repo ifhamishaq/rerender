@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import portfolioData from '../data/portfolio.json';
+import { supabase } from '../utils/supabase';
 import FolderIcon from '../components/FolderIcon';
 import ProjectBox from '../components/ProjectBox';
 import VideoModal from '../components/VideoModal';
@@ -8,13 +8,31 @@ import StickySidebar from '../components/StickySidebar';
 import './Portfolio.css';
 
 const PortfolioPage = () => {
+    const [allProjects, setAllProjects] = useState([]);
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isIdModalOpen, setIsIdModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const categories = ['MOTION', '3D', 'TALKING HEAD', 'THUMBNAIL'];
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (data) setAllProjects(data);
+        if (error) console.error('Error fetching projects:', error);
+        setIsLoading(false);
+    };
     
-    const getProjectsByCategory = (cat) => portfolioData.filter(p => p.category === cat);
+    const getProjectsByCategory = (cat) => allProjects.filter(p => p.category === cat);
 
     const handleFolderClick = (cat) => {
         setSelectedFolder(cat);
@@ -26,7 +44,7 @@ const PortfolioPage = () => {
 
     const handleProjectClick = (project) => {
         setSelectedProject(project);
-        setIsModalOpen(true);
+        setIsIdModalOpen(true);
     };
 
     const containerVariants = {
@@ -81,7 +99,26 @@ const PortfolioPage = () => {
                 </header>
 
                 <AnimatePresence mode="wait">
-                    {!selectedFolder ? (
+                    {isLoading ? (
+                        <motion.div 
+                            key="loading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            style={{ 
+                                height: '400px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                fontFamily: 'var(--font-mono)',
+                                color: 'var(--color-accent)',
+                                fontSize: '0.8rem',
+                                letterSpacing: '0.5em'
+                            }}
+                        >
+                            LOADING_DATABASE...
+                        </motion.div>
+                    ) : !selectedFolder ? (
                         /* Root View: Folders Grid */
                         <motion.div 
                             key="root"
@@ -134,9 +171,9 @@ const PortfolioPage = () => {
 
                 {/* Video Modal (Quick Look) */}
                 <VideoModal 
-                    isOpen={isModalOpen} 
+                    isOpen={isIdModalOpen} 
                     project={selectedProject} 
-                    onClose={() => setIsModalOpen(false)} 
+                    onClose={() => setIsIdModalOpen(false)} 
                 />
 
                 {/* ===== CTA SECTION ===== */}

@@ -16,12 +16,12 @@ const VideoModal = ({ isOpen, project, onClose }) => {
                     style={{
                         position: 'fixed',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.95)',
+                        backgroundColor: 'rgba(0,0,0,0.97)',
                         zIndex: 1000,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backdropFilter: 'blur(10px)',
+                        backdropFilter: 'blur(4px)',
                         padding: '2rem'
                     }}
                 >
@@ -32,7 +32,7 @@ const VideoModal = ({ isOpen, project, onClose }) => {
                         onClick={(e) => e.stopPropagation()}
                         style={{
                             width: '100%',
-                            maxWidth: project.aspectRatio === "9/16" ? '450px' : '1000px',
+                            maxWidth: (project.aspectratio || project.aspectRatio) === "9/16" ? '450px' : '1000px',
                             backgroundColor: 'var(--color-bg)',
                             border: '1px solid var(--color-border)',
                             position: 'relative',
@@ -64,16 +64,32 @@ const VideoModal = ({ isOpen, project, onClose }) => {
                             </button>
                         </div>
 
-                        {/* Player */}
-                        <div style={{ padding: '0' }}>
-                            <PortfolioPlayer 
-                                videoId={project.youtubeId} 
-                                title={project.title} 
-                                client={project.client} 
-                                id={project.id}
-                                minimal={true}
-                                aspectRatio={project.aspectRatio}
-                            />
+                        {/* Player / Content / Image */}
+                        <div style={{ padding: '0', backgroundColor: '#000', minHeight: (project.aspectratio || project.aspectRatio) === "9/16" ? '600px' : 'auto' }}>
+                            {(project.youtubeid || project.youtubeId) ? (
+                                <PortfolioPlayer 
+                                    videoId={project.youtubeid || project.youtubeId} 
+                                    title={project.title} 
+                                    client={project.client} 
+                                    id={project.id}
+                                    minimal={true}
+                                    aspectRatio={project.aspectratio || project.aspectRatio}
+                                />
+                            ) : (
+                                <motion.img 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    src={project.thumbnail} 
+                                    alt={project.title}
+                                    style={{ 
+                                        width: '100%', 
+                                        height: 'auto', 
+                                        display: 'block',
+                                        maxHeight: '80vh',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            )}
                         </div>
 
                         {/* Modal Footer / Meta */}

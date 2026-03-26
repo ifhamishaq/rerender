@@ -1,23 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Magnetic from '../components/Animations/Magnetic';
-import careersData from '../data/careers.json';
+import { supabase } from '../utils/supabase';
 import './Careers.css';
 
 const CareersPage = () => {
-    const [selectedJob, setSelectedJob] = useState(careersData[0]);
+    const [allJobs, setAllJobs] = useState([]);
+    const [selectedJob, setSelectedJob] = useState(null);
     const [filter, setFilter] = useState('ALL');
+    const [isLoading, setIsLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
+        fetchJobs();
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const fetchJobs = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('careers')
+            .select('*')
+            .order('title', { ascending: true });
+        
+        if (data) {
+            setAllJobs(data);
+            if (data.length > 0) setSelectedJob(data[0]);
+        }
+        if (error) console.error('Error fetching jobs:', error);
+        setIsLoading(false);
+    };
+
     const filteredJobs = filter === 'ALL' 
-        ? careersData 
-        : careersData.filter(j => j.type === filter);
+        ? allJobs 
+        : allJobs.filter(j => j.type === filter);
 
     return (
         <div className="careers-portal-page">
@@ -42,7 +60,10 @@ const CareersPage = () => {
             </header>
 
             <main className="portal-container container">
-                <div className="portal-layout">
+                {isLoading ? (
+                    <div className="selection-empty" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>[LOADING_LIVE_DATA...]</div>
+                ) : (
+                    <div className="portal-layout">
                     {/* JOB LIST SIDEBAR */}
                     <aside className="job-list-sidebar">
                         {filteredJobs.length > 0 ? filteredJobs.map(job => (
@@ -53,7 +74,7 @@ const CareersPage = () => {
                             >
                                 <div className="card-mini-top">
                                     <span className="job-sidemark">{job.sidemark}</span>
-                                    <span className={`job-status-pip ${job.status.toLowerCase()}`}></span>
+                                    <span className={`job-status-pip ${job.status?.toLowerCase()}`}></span>
                                 </div>
                                 <h3 className="job-mini-title">{job.title}</h3>
                                 <div className="job-mini-meta">
@@ -92,7 +113,7 @@ const CareersPage = () => {
                                         <div className="details-header">
                                             <div className="job-badge">{selectedJob.type}</div>
                                             <h2 className="details-title">
-                                                <span className="serif-italic">{selectedJob.serifTitle}</span><br/>
+                                                <span className="serif-italic">{selectedJob.serif_title}</span><br/>
                                                 {selectedJob.title}
                                             </h2>
                                             <div className="details-meta-grid">
@@ -133,7 +154,8 @@ const CareersPage = () => {
                             </AnimatePresence>
                         </section>
                     )}
-                </div>
+                    </div>
+                )}
             </main>
 
             <footer className="portal-footer container">

@@ -50,12 +50,10 @@ const PortfolioPlayer = ({ videoId, title, client, id, minimal = false, aspectRa
                         position: 'absolute',
                         top: 0, left: 0, width: '100%', height: '100%',
                         border: 'none',
-                        filter: 'none',
-                        transform: isHovered ? 'scale(1)' : 'scale(1.02)',
-                        transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
                         zIndex: 1
                     }}
                     title={title}
+                    loading="lazy"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                 />
