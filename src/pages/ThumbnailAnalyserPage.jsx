@@ -145,95 +145,52 @@ const ThumbnailAnalyserPage = () => {
         setIsThermal(false);
 
         try {
-            // STEP 1: VISION SCAN (NEMOTRON)
-            const visionBody = {
-                model: 'nvidia/nemotron-nano-12b-v2-vl:free',
+            const analysisBody = {
+                model: 'google/gemini-2.0-flash-exp:free',
                 messages: [
                     {
                         role: 'system',
-                        content: `Extract raw visual data from this thumbnail. Focus on:
-                        1. heatmap: Array of high-interest focal points {"x": 0-100, "y": 0-100, "label": "FACE/TEXT/ETC", "intensity": 0.1-1.0}
-                        2. eyePathPoints: Sequence of 3-4 look-points.
-                        3. palette: 3-5 primary HEX colors.
-                        4. raw_observations: Contrast, saturation, face detection details.
-                        Return ONLY valid JSON.`
+                        content: `You are an elite YouTube Packaging Consultant and Visual Psychologist.
+Perform a brutal, high-stakes editorial audit of the provided thumbnail.
+
+STRICT CTR RULES:
+- Be extremely PESSIMISTIC. Most thumbnails get 1-3%. Only viral ones get >7%.
+- Never suggest impractical results like 20% or 30%.
+
+YOUR OUTPUT MUST BE A SINGLE JSON OBJECT WITH THESE FIELDS:
+{
+  "ctrScore": 0-10 (professional quality rating),
+  "predictedCTR": "string (e.g. 2.4%)",
+  "composition": "Short professional analysis of layout...",
+  "metrics": {"faceDetails": 1-10, "contrast": 1-10, "saturation": 1-10, "textEmphasis": 1-10},
+  "palette": ["#HEX1", "#HEX2", "#HEX3"],
+  "accessibility": {"score": 0-100, "notes": "..."},
+  "psychology": {"trigger": "CURIOSITY/FOMO/AUTHORITY", "notes": "..."},
+  "audience": {"score": 0-100, "profile": "..."},
+  "heuristics": {"hook": "...", "eyePath": "...", "niche": "..."},
+  "heatmap": [{"x": 0-100, "y": 0-100, "label": "FACE/TEXT/ETC", "intensity": 0.1-1.0}],
+  "eyePathPoints": [{"x": 10, "y": 20}, {"x": 50, "y": 50}, {"x": 80, "y": 80}],
+  "colorPsychology": "...",
+  "textReadability": "...",
+  "improvements": ["Specific technical fix 1", "Specific technical fix 2"],
+  "verdict": "Final editorial judgment (high impact)..."
+}
+Return ONLY valid JSON.`
                     },
                     {
                         role: 'user',
-                        content: [{ type: 'image_url', image_url: { url: image } }]
-                    }
-                ]
-            };
-
-            let visionRes;
-            try {
-                visionRes = await fetchOpenRouter(visionBody, { title: 'RE-RENDER Vision Scan' });
-            } catch (err) {
-                // FALLBACK: Try Gemini Flash 2.0 Free if Nemotron fails
-                console.warn('Vision primary failed, trying Gemini fallback...');
-                visionBody.model = 'google/gemini-2.0-flash-exp:free';
-                visionRes = await fetchOpenRouter(visionBody, { title: 'RE-RENDER Vision Fallback' });
-            }
-
-            const visionContent = (visionRes.choices?.[0]?.message?.content || '').replace(/```json|```/g, '').trim();
-            const visionData = JSON.parse(visionContent);
-
-            // COOL DOWN: Small delay between vision and editorial to prevent 429 on single key
-            await new Promise(res => setTimeout(res, 1500));
-
-            // STEP 2: EDITORIAL REFINEMENT (LLAMA 3.3 70B)
-            const editorialBody = {
-                model: 'meta-llama/llama-3.3-70b-instruct:free',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are an elite YouTube Growth Consultant and Editorial Auditor.
-                        Analyze the following raw visual data from a thumbnail and generate a high-fidelity "Editorial Audit Report".
-                        
-                        CRITICAL INSTRUCTIONS FOR CTR ESTIMATION:
-                        - Be VERY STRICT and PESSIMISTIC.
-                        - Most average thumbnails get 1-3%. Good ones 4-5%. Only ELITE/VIRAL ones exceed 7%.
-                        - Never suggest 20% or 30%. That is impossible in modern YouTube.
-                        - Your "ctrScore" (0-10) should be a professional quality rating.
-                        - Your "predictedCTR" should be a realistic percentage (e.g., "3.2%").
-                        
-                        RAW_DATA: ${JSON.stringify(visionData)}
- 
-                        YOUR OUTPUT MUST BE A SINGLE JSON OBJECT WITH THESE FIELDS:
-                        {
-                          "ctrScore": 0-10,
-                          "predictedCTR": "string (e.g. 2.4%)",
-                          "composition": "Professional analysis of balance and weights...",
-                          "metrics": {"faceDetails": 1-10, "contrast": 1-10, "saturation": 1-10, "textEmphasis": 1-10},
-                          "palette": ["#HEX1", "#HEX2", "#HEX3"],
-                          "accessibility": {"score": 0-100, "notes": "..."},
-                          "psychology": {"trigger": "CURIOSITY/FOMO/AUTHORITY", "notes": "..."},
-                          "audience": {"score": 0-100, "profile": "..."},
-                          "heuristics": {"hook": "...", "eyePath": "...", "niche": "..."},
-                          "heatmap": (passthrough from visionData),
-                          "eyePathPoints": (passthrough from visionData),
-                          "colorPsychology": "...",
-                          "textReadability": "...",
-                          "improvements": ["Specific technical fix 1", "Specific technical fix 2", "..."],
-                          "verdict": "Final editorial judgment (high impact)..."
-                        }
-                        Return ONLY valid JSON.`
+                        content: [
+                            { type: 'text', text: "Audit this thumbnail. Be strict and provide valid JSON." },
+                            { type: 'image_url', image_url: { url: image } }
+                        ]
                     }
                 ],
-                temperature: 0.5
+                temperature: 0.3,
+                response_format: { type: 'json_object' }
             };
 
-            let editorialRes;
-            try {
-                editorialRes = await fetchOpenRouter(editorialBody, { title: 'RE-RENDER Editorial Audit' });
-            } catch (err) {
-                // FALLBACK: Try DeepSeek R1 Free if Llama 3.3 fails
-                console.warn('Editorial primary failed, trying DeepSeek fallback...');
-                editorialBody.model = 'deepseek/deepseek-r1:free';
-                editorialRes = await fetchOpenRouter(editorialBody, { title: 'RE-RENDER Editorial Fallback' });
-            }
-
-            let finalContent = (editorialRes.choices?.[0]?.message?.content || '');
+            const response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });
+            let finalContent = (response.choices?.[0]?.message?.content || '');
             finalContent = finalContent.replace(/```json|```/g, '').trim();
             
             const jsonMatch = finalContent.match(/\{[\s\S]*\}/);
@@ -247,12 +204,13 @@ const ThumbnailAnalyserPage = () => {
             }
         } catch (err) {
             console.error('ANALYSIS_FAIL:', err);
-            const isRateLimit = err.message.includes('429') || err.message.toLowerCase().includes('rate limit');
-            const isCongested = err.message.toLowerCase().includes('congested') || err.message.toLowerCase().includes('overloaded');
+            const isRateLimit = err.message.includes('429');
             
             let userMsg = `ANALYSIS_FAIL: ${err.message}`;
-            if (isRateLimit || isCongested) {
-                userMsg = "SYSTEM_CONGESTION: All free neural nodes are currently at capacity. Please wait 30 seconds and try again (No credits used).";
+            if (isRateLimit) {
+                userMsg = "SYSTEM_CONGESTION: Free neural nodes are at capacity. Please wait 30 seconds and retry.";
+            } else if (err.message.includes('404') || err.message.includes('No endpoints')) {
+                userMsg = "MODEL_OFFLINE: The free multimodal endpoint is temporarily offline. Please try again later.";
             }
             
             alert(userMsg);
