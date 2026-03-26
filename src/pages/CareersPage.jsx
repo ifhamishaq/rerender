@@ -29,7 +29,7 @@ const CareersPage = () => {
                 <h1 className="portal-title">CAREERS</h1>
                 
                 <div className="filter-bar">
-                    {['ALL', 'INTERNSHIP', 'FREELANCE', 'COMPETITIONS'].map(f => (
+                    {['ALL', 'FREELANCE'].map(f => (
                         <button 
                             key={f}
                             className={`filter-btn ${filter === f ? 'active' : ''}`}

@@ -1,41 +1,5 @@
 [
     {
-        "id": "001",
-        "sidemark": "001/INT",
-        "type": "INTERNSHIP",
-        "status": "UNAVAILABLE",
-        "title": "INTERNSHIP",
-        "serifTitle": "The",
-        "description": "A 3-month program to help you learn video editing and design. You will work on real projects with our team. Currently closed.",
-        "specs": [
-            "[01] LEARN FROM PROS",
-            "[02] REAL PROJECTS",
-            "[03] REMOTE WORK"
-        ],
-        "link": "#",
-        "buttonLabel": "CLOSED",
-        "style": "premium",
-        "disabled": true
-    },
-    {
-        "id": "002",
-        "sidemark": "002/COMP",
-        "type": "COMPETITIONS",
-        "status": "COMING_SOON",
-        "title": "CHALLENGES",
-        "serifTitle": "The",
-        "description": "Monthly editing contests. Show your skills, win prizes, and maybe join our team. Starting soon.",
-        "specs": [
-            "[01] CASH PRIZES",
-            "[02] GET NOTICED",
-            "[03] FUN TASKS"
-        ],
-        "link": "#",
-        "buttonLabel": "LOCKED",
-        "style": "inverted",
-        "disabled": true
-    },
-    {
         "id": "003",
         "sidemark": "003/PRO",
         "type": "FREELANCE",
