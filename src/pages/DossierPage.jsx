@@ -1,292 +1,176 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Wallet, History, ExternalLink, Shield, Check, X, Clock, HelpCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Shield, Wallet, ExternalLink, Activity, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { Link } from 'react-router-dom';
 
 const DossierPage = () => {
     const { user, profile, signOut } = useAuth();
-    const [activeTab, setActiveTab] = useState('overview');
     const [requests, setRequests] = useState([]);
-    const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
-
-    // Manual Top-up Form State
-    const [topupAmount, setTopupAmount] = useState(10);
     const [txId, setTxId] = useState('');
+    const [amount, setAmount] = useState(10);
     const [submitting, setSubmitting] = useState(false);
 
     const PAYPAL_LINK = "https://www.paypal.com/paypalme/ImadWani96";
 
     useEffect(() => {
-        if (user) {
-            fetchUserData();
-        }
+        if (user) fetchRequests();
     }, [user]);
 
-    const fetchUserData = async () => {
+    const fetchRequests = async () => {
         setLoading(true);
-        // Fetch Top-up Requests
-        const { data: reqData } = await supabase
+        const { data } = await supabase
             .from('topup_requests')
             .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
-        
-        // Fetch Generation History (Assume we track this in a 'history' table later, for now empty)
-        // const { data: histData } = await supabase.from('history').select('*').eq('user_id', user.id);
-        
-        if (reqData) setRequests(reqData);
+        if (data) setRequests(data);
         setLoading(false);
     };
 
-    const handleTopUpSubmit = async (e) => {
+    const handleSupportSubmit = async (e) => {
         e.preventDefault();
+        if (!txId) return alert('Enter payment info/email');
         setSubmitting(true);
-        try {
-            const { error } = await supabase.from('topup_requests').insert([
-                { 
-                    user_id: user.id, 
-                    amount: parseInt(topupAmount), 
-                    transaction_id: txId,
-                    status: 'pending'
-                }
-            ]);
-            if (error) throw error;
-            alert('Request submitted! Admin will verify and add credits soon.');
-            setIsTopUpModalOpen(false);
-            fetchUserData();
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            setSubmitting(false);
+        const { error } = await supabase.from('topup_requests').insert([
+            { user_id: user.id, amount: parseInt(amount), transaction_id: txId }
+        ]);
+        if (!error) {
+            alert('Support Request Sent. Admin will verify shortly.');
+            setTxId('');
+            fetchRequests();
+        } else {
+            alert('Error: ' + error.message);
         }
+        setSubmitting(false);
     };
 
     if (!user) return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', gap: '2rem' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '3rem' }}>ACCESS_DENIED</h1>
-            <Link to="/" style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>← RETURN_TO_HOME</Link>
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff' }}>
+            <Link to="/" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>[UNAUTHORIZED_ACCESS_RETURN]</Link>
         </div>
     );
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', padding: '120px 2rem 4rem' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ minHeight: '100vh', background: '#000', color: '#fff', padding: '120px 2rem 4rem', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 
-                {/* Header */}
-                <header style={{ marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--color-border)', paddingBottom: '2rem' }}>
+                {/* Header Section */}
+                <header style={{ borderBottom: '2px solid #1a1a1a', paddingBottom: '2rem', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-accent)', marginBottom: '1rem' }}>USER_DOSSIER // CONFIDENTIAL</div>
-                        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', fontWeight: 900, lineHeight: 0.8, textTransform: 'uppercase' }}>
-                            {profile?.full_name?.split(' ')[0] || 'AGENT'}<br />
-                            <span style={{ color: 'var(--color-accent)' }}>OPERATIVE</span>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginBottom: '0.5rem' }}>// RE-RENDER_USER_OS_V2.5</div>
+                        <h1 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-0.02em', lineHeight: 0.9 }}>
+                            {profile?.full_name?.toUpperCase() || 'OPERATIVE'}<br/>
+                            <span style={{ color: '#333' }}>DOSSIER</span>
                         </h1>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', opacity: 0.5, marginBottom: '0.5rem' }}>COMPUTE_BALANCE</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>{profile?.credits || 0} <span style={{ fontSize: '1rem', color: 'var(--color-accent)' }}>CR</span></div>
+                        <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.3rem' }}>AVAILABLE_COMPUTE</div>
+                        <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)' }}>{profile?.credits || 0} <span style={{ fontSize: '0.8rem' }}>CR</span></div>
                     </div>
                 </header>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '4rem' }}>
-                    {/* Sidebar */}
-                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>[01] OVERVIEW</button>
-                        <button onClick={() => setActiveTab('billing')} style={tabStyle(activeTab === 'billing')}>[02] COMPUTE_HUB</button>
-                        <button onClick={() => setActiveTab('history')} style={tabStyle(activeTab === 'history')}>[03] OPERATION_LOGS</button>
-                        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--color-border)' }}>
-                            <button onClick={signOut} style={{ ...tabStyle(false), color: 'red', border: 'none' }}>TERMINATE_SESSION</button>
-                        </div>
-                    </aside>
-
-                    {/* Content Area */}
-                    <main>
-                        {activeTab === 'overview' && (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                                <div style={cardStyle}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                                        <Shield size={20} color="var(--color-accent)" />
-                                        <h3 style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>PROFILE_SECURITY</h3>
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)', lineHeight: 1.8 }}>
-                                        ID: {user.id.substring(0, 12)}...<br />
-                                        STATUS: ACTIVE<br />
-                                        CLEARANCE: LEVEL_1<br />
-                                        EMAIL: {user.email}
-                                    </div>
-                                </div>
-                                <div style={cardStyle}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                                        <Wallet size={20} color="var(--color-accent)" />
-                                        <h3 style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>WALLET_SUMMARY</h3>
-                                    </div>
-                                    <p style={{ fontSize: '0.75rem', opacity: 0.6, marginBottom: '1.5rem' }}>Top up your compute power to continue using neural processing tools.</p>
-                                    <button onClick={() => setIsTopUpModalOpen(true)} style={actionButtonStyle}>REQUEST_CREDITS</button>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {activeTab === 'billing' && (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                                <div style={{ ...cardStyle, marginBottom: '2rem' }}>
-                                    <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>ACTIVE_REQUESTS</h3>
-                                    {requests.length > 0 ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {requests.map(req => (
-                                                <div key={req.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-                                                    <div>
-                                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>{req.amount} CREDITS</div>
-                                                        <div style={{ fontSize: '0.6rem', opacity: 0.5 }}>{new Date(req.created_at).toLocaleDateString()} // {req.transaction_id}</div>
-                                                    </div>
-                                                    <div style={{ 
-                                                        fontSize: '0.6rem', padding: '0.3rem 0.6rem', 
-                                                        backgroundColor: req.status === 'pending' ? 'orange' : req.status === 'approved' ? 'var(--color-accent)' : 'red',
-                                                        color: '#000', fontWeight: 900
-                                                    }}>
-                                                        {req.status.toUpperCase()}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3, fontSize: '0.75rem' }}>NO_PENDING_REQUESTS</div>
-                                    )}
-                                </div>
-                                <button onClick={() => setIsTopUpModalOpen(true)} style={actionButtonStyle}>NEW_TOPUP_REQUEST</button>
-                            </motion.div>
-                        )}
-
-                        {activeTab === 'history' && (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                                <div style={cardStyle}>
-                                    <div style={{ textAlign: 'center', padding: '4rem', opacity: 0.3 }}>
-                                        <History size={48} style={{ marginBottom: '1rem' }} />
-                                        <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>LOGS_ENCRYPTED_OR_EMPTY</div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </main>
-                </div>
-            </div>
-
-            {/* Top-up Modal */}
-            <AnimatePresence>
-                {isTopUpModalOpen && (
-                    <div style={modalOverlayStyle} onClick={() => setIsTopUpModalOpen(false)}>
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-                            style={modalStyle} onClick={e => e.stopPropagation()}
-                        >
-                            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: '1.5rem' }}>CREDIT_REQUEST</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+                    
+                    {/* Left: Support the Devs System */}
+                    <section>
+                        <div style={{ border: '1px solid var(--color-accent)', padding: '2rem', background: 'rgba(57,255,20,0.02)', position: 'relative' }}>
+                            <div style={{ position: 'absolute', top: '-10px', left: '20px', background: '#000', padding: '0 10px', fontSize: '0.65rem', fontWeight: 900, color: 'var(--color-accent)' }}>
+                                SUPPORT_THE_DEVS
+                            </div>
                             
-                            <div style={{ backgroundColor: 'rgba(57,255,20,0.05)', border: '1px solid var(--color-accent)', padding: '1.5rem', marginBottom: '2rem' }}>
-                                <div style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>STEP_1: SEND_FUNDS</div>
-                                <div style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>Send your payment via PayPal to:</div>
-                                <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent)', fontWeight: 900, fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    PAYPAL.ME/ImadWani96 <ExternalLink size={16} />
+                            <p style={{ fontSize: '0.75rem', lineHeight: 1.6, opacity: 0.7, marginBottom: '1.5rem' }}>
+                                RE-RENDER is an independent studio. Support our work to gain priority compute power and higher generation limits.
+                            </p>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.5rem' }}>STEP_01: DIRECT_TRANSITION</div>
+                                <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'var(--color-accent)', color: '#000', padding: '1rem', textDecoration: 'none', fontWeight: 900, fontSize: '0.8rem', textAlign: 'center', justifyContent: 'center' }}>
+                                    OPEN_PAYPAL_GATEWAY <ExternalLink size={14} />
                                 </a>
                             </div>
 
-                            <form onSubmit={handleTopUpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div>
-                                    <label style={labelStyle}>SELECT_PACKAGE</label>
-                                    <select value={topupAmount} onChange={e => setTopupAmount(e.target.value)} style={inputStyle}>
-                                        <option value="10">10 CREDITS ($1)</option>
-                                        <option value="50">50 CREDITS ($5)</option>
-                                        <option value="120">120 CREDITS ($10) [BONUS]</option>
-                                        <option value="300">300 CREDITS ($25) [ELITE]</option>
-                                    </select>
+                            <form onSubmit={handleSupportSubmit} style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1.5rem' }}>
+                                <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '1rem' }}>STEP_02: VERIFY_TRANSFER</div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.55rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem' }}>TIER_SELECTION</label>
+                                        <select value={amount} onChange={(e) => setAmount(e.target.value)} style={minimalInputStyle}>
+                                            <option value="10">10 CR ($1)</option>
+                                            <option value="50">50 CR ($5)</option>
+                                            <option value="120">120 CR ($10)</option>
+                                            <option value="300">300 CR ($25)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.55rem', opacity: 0.5, display: 'block', marginBottom: '0.4rem' }}>TX_HASH / EMAIL</label>
+                                        <input type="text" placeholder="ID..." value={txId} onChange={(e) => setTxId(e.target.value)} style={minimalInputStyle} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={labelStyle}>TRANSACTION_ID / PAYPAL_EMAIL</label>
-                                    <input type="text" required value={txId} onChange={e => setTxId(e.target.value)} placeholder="Enter transaction info..." style={inputStyle} />
-                                </div>
-                                <div style={{ fontSize: '0.6rem', opacity: 0.5, lineHeight: 1.5 }}>
-                                    * Admin will verify the transaction and update your balance within 2-24 hours.
-                                </div>
-                                <button type="submit" disabled={submitting} style={actionButtonStyle}>
-                                    {submitting ? 'SUBMITTING...' : 'SUBMIT_REQUEST'}
+                                <button type="submit" disabled={submitting} style={{ width: '100%', background: '#fff', color: '#000', border: 'none', padding: '0.8rem', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer' }}>
+                                    {submitting ? 'PROCESSING...' : 'INITIALIZE_TOPUP'}
                                 </button>
                             </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                        </div>
+                    </section>
+
+                    {/* Right: Meta & Logs */}
+                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ padding: '1.5rem', border: '1px solid #1a1a1a' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '0.5rem' }}>
+                                <Shield size={14} color="var(--color-accent)" />
+                                <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>IDENTITY_PROTOCOL</span>
+                            </div>
+                            <div style={{ fontSize: '0.65rem', opacity: 0.6, lineHeight: 1.8 }}>
+                                UID: {user.id.toUpperCase()}<br/>
+                                STATUS: VERIFIED_OPERATIVE<br/>
+                                JOIN_DATE: {new Date(user.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '1.5rem', border: '1px solid #1a1a1a' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '0.5rem' }}>
+                                <Activity size={14} color="var(--color-accent)" />
+                                <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>RECENT_LOGS</span>
+                            </div>
+                            {requests.length > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {requests.slice(0, 3).map(req => (
+                                        <div key={req.id} style={{ fontSize: '0.6rem', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span style={{ opacity: 0.5 }}>{new Date(req.created_at).toLocaleDateString()}</span>
+                                            <span style={{ fontWeight: 900 }}>{req.amount}CR</span>
+                                            <span style={{ color: req.status === 'pending' ? 'orange' : 'var(--color-accent)' }}>[{req.status.toUpperCase()}]</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{ fontSize: '0.6rem', opacity: 0.3, textAlign: 'center', padding: '1rem' }}>NO_DATA_AVAILABLE</div>
+                            )}
+                        </div>
+
+                        <button onClick={signOut} style={{ background: 'none', border: '1px solid #ff000033', color: '#ff4444', padding: '0.8rem', fontSize: '0.6rem', fontWeight: 900, cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>
+                            TERMINATE_SESSION
+                        </button>
+                    </aside>
+                </div>
+            </div>
         </div>
     );
 };
 
-const tabStyle = (active) => ({
-    padding: '1rem',
-    textAlign: 'left',
-    backgroundColor: active ? 'var(--color-accent)' : 'transparent',
-    color: active ? '#000' : 'var(--color-text)',
-    border: '1px solid ' + (active ? 'var(--color-accent)' : 'var(--color-border)'),
-    fontFamily: 'var(--font-mono)',
-    fontSize: '0.75rem',
-    fontWeight: 900,
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-});
-
-const cardStyle = {
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    padding: '2rem',
-    transition: 'all 0.3s'
-};
-
-const actionButtonStyle = {
+const minimalInputStyle = {
     width: '100%',
-    padding: '1rem',
-    backgroundColor: 'var(--color-text)',
-    color: 'var(--color-bg)',
-    border: 'none',
+    background: '#050505',
+    border: '1px solid #1a1a1a',
+    color: '#fff',
+    padding: '0.6rem',
     fontFamily: 'var(--font-mono)',
-    fontWeight: 900,
-    fontSize: '0.8rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-};
-
-const modalOverlayStyle = {
-    position: 'fixed', inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    backdropFilter: 'blur(10px)',
-    zIndex: 20000,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    padding: '2rem'
-};
-
-const modalStyle = {
-    backgroundColor: 'var(--color-bg)',
-    border: '1px solid var(--color-border)',
-    padding: '3rem',
-    maxWidth: '500px', width: '100%',
-    position: 'relative',
-    boxShadow: '15px 15px 0px var(--color-accent)'
-};
-
-const inputStyle = {
-    width: '100%',
-    padding: '1rem',
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    color: 'var(--color-text)',
-    fontFamily: 'var(--font-mono)',
-    outline: 'none'
-};
-
-const labelStyle = {
-    display: 'block',
-    fontSize: '0.6rem',
-    fontFamily: 'var(--font-mono)',
-    marginBottom: '0.5rem',
-    opacity: 0.5
+    fontSize: '0.7rem',
+    outline: 'none',
+    boxSizing: 'border-box'
 };
 
 export default DossierPage;
