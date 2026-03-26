@@ -229,6 +229,7 @@ const AnimatedRoutes = () => {
         <Route path="/estimate" element={<TransitionWipe><EstimatePage /></TransitionWipe>} />
         <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
         <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
+        <Route path="/dossier" element={<TransitionWipe><DossierPage /></TransitionWipe>} />
         <Route path="/services" element={<Navigate to="/get-in-touch" replace />} />
         <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />
 
@@ -237,6 +238,8 @@ const AnimatedRoutes = () => {
     </AnimatePresence>
   );
 };
+
+import DossierPage from './pages/DossierPage';
 
 const MainApp = () => {
     const { isAuthModalOpen, setIsAuthModalOpen } = useAuth();

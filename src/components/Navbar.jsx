@@ -163,25 +163,28 @@ const Navbar = () => {
                         {/* Credits Badge */}
                         <AnimatePresence>
                             {user && profile && (
-                                <motion.div 
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.4rem',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.65rem',
-                                        color: 'var(--color-accent)',
-                                        backgroundColor: 'rgba(57,255,20,0.05)',
-                                        padding: '0.3rem 0.6rem',
-                                        border: '1px solid var(--color-accent)',
-                                        borderRadius: '2px'
-                                    }}
-                                >
-                                    <Wallet size={12} />
-                                    <span>{profile.credits} <span style={{ opacity: 0.5 }}>COMPUTE</span></span>
-                                </motion.div>
+                                <Link to="/dossier" style={{ textDecoration: 'none' }}>
+                                    <motion.div 
+                                        initial={{ opacity: 0, x: 10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.4rem',
+                                            fontFamily: 'var(--font-mono)',
+                                            fontSize: '0.65rem',
+                                            color: 'var(--color-accent)',
+                                            backgroundColor: 'rgba(57,255,20,0.05)',
+                                            padding: '0.3rem 0.6rem',
+                                            border: '1px solid var(--color-accent)',
+                                            borderRadius: '2px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <Wallet size={12} />
+                                        <span>{profile.credits} CR</span>
+                                    </motion.div>
+                                </Link>
                             )}
                         </AnimatePresence>
 

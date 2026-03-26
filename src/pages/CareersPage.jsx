@@ -133,9 +133,9 @@ const CareersPage = () => {
                                             <div className="specs-section">
                                                 <label className="mono-label">REQUIREMENTS</label>
                                                 <ul className="spec-list">
-                                                    {selectedJob.specs.map((s, i) => (
+                                                    {selectedJob.specs?.map((s, i) => (
                                                         <li key={i}>{s}</li>
-                                                    ))}
+                                                    )) || <li>[NO_SPECIFICATIONS_LISTED]</li>}
                                                 </ul>
                                             </div>
                                         </div>
