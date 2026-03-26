@@ -109,52 +109,51 @@ const HexCodeHero = () => {
     }, []);
 
     return (
-        <main style={{ paddingTop: 'calc(var(--nav-height) + 2rem)', minHeight: '100vh', backgroundColor: gameState === 'playing' ? targetColor : 'var(--color-bg)', transition: 'background-color 0.2s' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
+        <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: gameState === 'playing' ? targetColor : '#F8F6F1', transition: 'background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1)', color: '#000' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}>
                 <Link to="/arcade" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700,
-                    letterSpacing: '0.1em', color: gameState === 'playing' ? '#fff' : RED,
-                    textDecoration: 'none', textTransform: 'uppercase', marginBottom: '2rem',
-                    transition: 'opacity 0.2s', textShadow: gameState === 'playing' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none'
-                }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = 0.7}
-                    onMouseLeave={e => e.currentTarget.style.opacity = 1}>
-                    ← BACK TO ARCADE
+                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                    letterSpacing: '0.1em', color: gameState === 'playing' ? '#fff' : '#000',
+                    textDecoration: 'none', textTransform: 'uppercase', marginBottom: '3rem',
+                    transition: 'opacity 0.2s', textShadow: gameState === 'playing' ? '0 1px 10px rgba(0,0,0,0.3)' : 'none', opacity: 0.5
+                }}>
+                    ← RETURN_TO_ARCHIVE
                 </Link>
 
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '3rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '4rem', marginBottom: '4rem', alignItems: 'end' }}>
                     <div>
                         <div style={{
-                            fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.2em',
+                            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.25em',
                             color: gameState === 'playing' ? 'rgba(255,255,255,0.7)' : RED,
-                            textTransform: 'uppercase', marginBottom: '0.5rem',
-                            textShadow: gameState === 'playing' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none'
+                            textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 900,
+                            textShadow: gameState === 'playing' ? '0 1px 10px rgba(0,0,0,0.3)' : 'none'
                         }}>
-                            ARCADE // 03
+                            ISSUE_04 // CHROMATIC_RECALL
                         </div>
                         <h1 style={{
                             fontFamily: 'var(--font-display)', fontWeight: 900,
-                            fontSize: 'clamp(3rem, 6vw, 5rem)', lineHeight: 0.9, margin: 0,
-                            textTransform: 'uppercase', letterSpacing: '-0.02em',
-                            color: gameState === 'playing' ? '#fff' : 'var(--color-text)',
-                            textShadow: gameState === 'playing' ? '0 2px 10px rgba(0,0,0,0.3)' : 'none'
+                            fontSize: 'clamp(4rem, 10vw, 7rem)', lineHeight: 0.8, margin: 0,
+                            letterSpacing: '-0.06em',
+                            color: gameState === 'playing' ? '#fff' : '#000',
+                            textShadow: gameState === 'playing' ? '0 2px 20px rgba(0,0,0,0.2)' : 'none'
                         }}>
-                            HEX CODE<br />HERO
+                            HEX CODE<br />
+                            <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>HERO.</span>
                         </h1>
                     </div>
 
                     {gameState === 'playing' && (
-                        <div style={{ display: 'flex', gap: '2rem', textAlign: 'right', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.15em', opacity: 0.7 }}>LIVES</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', lineHeight: 1 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', border: '4px solid #fff', backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                            <div style={{ padding: '1.5rem', borderRight: '2px solid #fff' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.7)', fontWeight: 900 }}>LIVES</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '2.5rem', color: '#fff', lineHeight: 1 }}>
                                     {Array(lives).fill('♥').join('')}
                                 </div>
                             </div>
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.15em', opacity: 0.7 }}>SCORE</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', lineHeight: 1 }}>{score}</div>
+                            <div style={{ padding: '1.5rem' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.7)', fontWeight: 900 }}>SCORE</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '2.5rem', color: '#fff', lineHeight: 1 }}>{score}</div>
                             </div>
                         </div>
                     )}
@@ -164,60 +163,61 @@ const HexCodeHero = () => {
                     {gameState === 'menu' && (
                         <motion.div
                             key="menu"
-                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                            style={{ border: '1px solid var(--color-border)', padding: '4rem', textAlign: 'center', backgroundColor: 'var(--color-surface)' }}
+                            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }}
+                            style={{ border: '8px solid #000', padding: '5rem', textAlign: 'left', backgroundColor: '#fff', position: 'relative' }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                                <div style={{ width: '40px', height: '40px', backgroundColor: '#E8111A' }} />
-                                <div style={{ width: '40px', height: '40px', backgroundColor: '#00FF00' }} />
-                                <div style={{ width: '40px', height: '40px', backgroundColor: '#0000FF' }} />
+                            <div style={{ position: 'absolute', top: '2rem', right: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>SYSTEM_CALIB_v0.4</div>
+                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                                <div style={{ width: '60px', height: '60px', border: '4px solid #000', backgroundColor: '#E8111A' }} />
+                                <div style={{ width: '60px', height: '60px', border: '4px solid #000', backgroundColor: '#34A853' }} />
+                                <div style={{ width: '60px', height: '60px', border: '4px solid #000', backgroundColor: '#4285F4' }} />
                             </div>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: '2rem', margin: '0 0 1rem', color: 'var(--color-text)' }}>
-                                READ THE MATRIX
+                            <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '3rem', margin: '0 0 2rem', color: '#000', lineHeight: 1 }}>
+                                THE CHROMATIC<br />TURING TEST.
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-                                The background changes color. You get 3 hex codes. Pick the one that matches. The colors get closer and the timer gets faster entirely based on your level. 3 lives.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.1rem', color: '#333', maxWidth: '600px', margin: '0 0 4rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                Can you read the matrix? The environment shifts color; you must identify the precise hexadecimal value in under ten seconds. 03 lives. Precision is binary.
                             </p>
                             <button onClick={startGame} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.1em',
-                                padding: '1rem 3rem', backgroundColor: RED, color: '#fff', border: 'none', cursor: 'pointer',
-                                textTransform: 'uppercase', transition: 'transform 0.15s'
+                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                textTransform: 'uppercase', transition: 'all 0.2s'
                             }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                START MISSION →
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                START_CALIBRATION →
                             </button>
                         </motion.div>
                     )}
 
                     {gameState === 'playing' && (
-                        <motion.div key="playing" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}>
+                        <motion.div key="playing" initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
 
-                            <div style={{ textAlign: 'center', marginBottom: '3rem', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>
-                                    LEVEL {level}
+                            <div style={{ textAlign: 'center', marginBottom: '4rem', color: '#fff', textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', letterSpacing: '0.3em', marginBottom: '1rem', fontWeight: 900 }}>
+                                    STAGE_{level.toString().padStart(2, '0')}
                                 </div>
                                 <div style={{
-                                    fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900,
-                                    fontSize: '5rem', lineHeight: 1,
-                                    color: timeLeft <= 3 ? '#ff0000' : '#fff'
+                                    fontFamily: 'var(--font-display)', fontWeight: 900,
+                                    fontSize: '8rem', lineHeight: 0.8,
+                                    letterSpacing: '-0.05em'
                                 }}>
-                                    {timeLeft}s
+                                    {timeLeft}<span style={{ fontSize: '3rem' }}>S</span>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
                                 {options.map(option => (
                                     <button
                                         key={option}
                                         onClick={() => handleGuess(option)}
                                         style={{
-                                            padding: '2rem', backgroundColor: 'rgba(255,255,255,0.9)',
-                                            border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)',
-                                            fontSize: '1.25rem', fontWeight: 700, color: '#000',
-                                            transition: 'transform 0.1s', boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                                            padding: '2.5rem', backgroundColor: '#fff',
+                                            border: '6px solid #000', cursor: 'pointer', fontFamily: 'var(--font-mono)',
+                                            fontSize: '1.5rem', fontWeight: 900, color: '#000',
+                                            transition: 'transform 0.1s', boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
                                         }}
-                                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-8px)'}
                                         onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                                     >
                                         {option}
@@ -231,27 +231,27 @@ const HexCodeHero = () => {
                         <motion.div
                             key="gameover"
                             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                            style={{ border: `2px solid ${RED}`, padding: '4rem', textAlign: 'center', backgroundColor: 'var(--color-surface)', position: 'relative', overflow: 'hidden' }}
+                            style={{ border: `12px solid #000`, padding: '6rem', textAlign: 'center', backgroundColor: '#fff', position: 'relative', overflow: 'hidden' }}
                         >
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', backgroundColor: RED }} />
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.3em', color: RED, marginBottom: '1rem' }}>
-                                MISSION FAILED
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', backgroundColor: RED }} />
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', letterSpacing: '0.4em', color: RED, marginBottom: '2rem', fontWeight: 900 }}>
+                                SIGNAL_LOST // TERMINATED
                             </div>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '4rem', margin: '0 0 1rem', color: 'var(--color-text)', lineHeight: 1 }}>
-                                SCORE <span style={{ color: RED }}>{score}</span>
+                            <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '5rem', margin: '0 0 1rem', color: '#000', lineHeight: 0.9, letterSpacing: '-0.04em' }}>
+                                SCORE: {score}
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--color-text-secondary)', marginBottom: '3rem' }}>
-                                You survived until Level {level}.
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#666', marginBottom: '4rem', fontWeight: 900 }}>
+                                PERSISTED UNTIL STAGE {level}.
                             </p>
 
                             <button onClick={startGame} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                                padding: '1rem 3rem', backgroundColor: 'transparent', color: RED, border: `1px solid ${RED}`, cursor: 'pointer',
-                                textTransform: 'uppercase', transition: 'all 0.15s'
+                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                textTransform: 'uppercase', transition: 'all 0.2s'
                             }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; e.currentTarget.style.color = '#fff'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = RED; }}>
-                                TRY AGAIN ↺
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                REBOOT_SESSION ↺
                             </button>
                         </motion.div>
                     )}

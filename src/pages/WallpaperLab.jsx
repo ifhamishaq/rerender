@@ -33,42 +33,42 @@ const COLORS = {
 // --- LIGHTWEIGHT Sub-Components ---
 
 const Loader = () => {
-    const pixels = Array.from({ length: 36 }); 
+    const pixels = Array.from({ length: 16 }); 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2.5rem' }}>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(6, 1fr)',
-                gap: '4px',
-                width: '40px',
-                height: '40px'
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '8px',
+                width: '60px',
+                height: '60px'
             }}>
-                {pixels.map((_, i) => {
-                    const delay = (i % 3) * 0.2 + (i % 5) * 0.15 + (i % 4) * 0.1;
-                    return (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0.1, scale: 0.8 }}
-                            animate={{ opacity: [0.1, 1, 0.1], scale: [0.8, 1, 0.8] }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: delay,
-                                ease: "easeInOut"
-                            }}
-                            style={{
-                                backgroundColor: 'var(--theme-text)',
-                                borderRadius: '1px',
-                                willChange: 'opacity, transform'
-                            }}
-                        />
-                    );
-                })}
+                {pixels.map((_, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0.1 }}
+                        animate={{ opacity: [0.1, 1, 0.1] }}
+                        transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            delay: i * 0.1,
+                            ease: "easeInOut"
+                        }}
+                        style={{
+                            backgroundColor: 'var(--color-text)',
+                            borderRadius: '0px',
+                        }}
+                    />
+                ))}
             </div>
-            <div style={{ fontSize: '0.7rem', fontFamily: COLORS.mono, letterSpacing: '0.2em', color: 'var(--theme-text-muted)', display: 'flex', gap: '0.2rem' }}>
-                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 2, repeat: Infinity }}>
-                    SYNTHESIZING_PATTERN
-                </motion.span>
+            <div style={{ 
+                fontSize: '0.8rem', 
+                fontFamily: 'var(--font-mono)', 
+                letterSpacing: '0.2em', 
+                color: 'var(--color-text)', 
+                fontWeight: 900
+            }}>
+                [ SYNTHESIZING_ASSET_V1 ]
             </div>
         </div>
     );
@@ -76,24 +76,23 @@ const Loader = () => {
 
 const Pill = ({ active, onClick, children }) => (
     <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ backgroundColor: active ? 'var(--color-text)' : 'rgba(0,0,0,0.05)' }}
         onClick={onClick}
         style={{
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            backgroundColor: active ? 'var(--theme-text)' : 'transparent',
-            color: active ? 'var(--theme-bg)' : 'var(--theme-text-muted)',
-            border: `1px solid ${active ? 'var(--theme-text)' : 'var(--theme-border)'}`,
-            fontSize: '0.8rem',
-            fontFamily: COLORS.sans,
-            fontWeight: 500,
+            padding: '0.6rem 1.25rem',
+            borderRadius: '0px',
+            backgroundColor: active ? 'var(--color-text)' : 'transparent',
+            color: active ? 'var(--color-bg)' : 'var(--color-text)',
+            border: `1.5px solid var(--color-text)`,
+            fontSize: '0.7rem',
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 900,
             cursor: 'pointer',
-            transition: 'all 0.1s ease',
+            transition: 'all 0.15s',
             whiteSpace: 'nowrap'
         }}
     >
-        {children}
+        {children.toUpperCase()}
     </motion.button>
 );
 
@@ -307,47 +306,95 @@ const WallpaperLab = () => {
     };
 
     return (
-        <div style={{ ...themeVars, backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)', minHeight: '100vh', fontFamily: COLORS.sans, transition: 'background-color 0.2s', paddingBottom: isMobile ? '80px' : '0', paddingTop: '80px' }}>
+        <div style={{ 
+            backgroundColor: 'var(--color-bg)', 
+            color: 'var(--color-text)', 
+            minHeight: '100vh', 
+            fontFamily: 'var(--font-sans)', 
+            paddingBottom: isMobile ? '80px' : '0', 
+            paddingTop: '80px' 
+        }}>
             
-            {/* Top Navigation */}
-            <header style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--theme-border)' }}>
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--theme-text)', textDecoration: 'none' }}>
-                    <ArrowLeft size={20} />
-                    <span style={{ fontFamily: COLORS.mono, fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em' }}>BACK</span>
-                </Link>
-                <div style={{ fontFamily: COLORS.display, fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                    RE-RENDER STUDIO
+            {/* Masthead Header */}
+            <header style={{ 
+                padding: '2rem', 
+                borderBottom: '4px solid var(--color-text)', 
+                maxWidth: '1200px', 
+                margin: '0 auto',
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'baseline' 
+            }}>
+                <div>
+                    <div style={{ 
+                        fontFamily: 'var(--font-mono)', 
+                        fontSize: '0.65rem', 
+                        letterSpacing: '0.2em', 
+                        color: 'var(--color-text-secondary)',
+                        marginBottom: '0.5rem'
+                    }}>
+                        VOL. 01 // LAB_REPORTS // RE-RENDER_STUDIO
+                    </div>
+                    <h1 style={{ 
+                        fontSize: 'clamp(2.5rem, 8vw, 4rem)', 
+                        fontWeight: 900, 
+                        margin: 0, 
+                        letterSpacing: '-0.04em', 
+                        lineHeight: 0.9,
+                        fontFamily: 'var(--font-display)'
+                    }}>
+                        WALLPAPER<br/>
+                        <span style={{ 
+                            fontFamily: 'Playfair Display', 
+                            fontStyle: 'italic', 
+                            fontWeight: 400,
+                            color: 'var(--color-accent)'
+                        }}>LAB_ENHANCED</span>
+                    </h1>
                 </div>
-                <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.6 }}>COMPUTE_RESERVE</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>
+                        {profile?.credits ?? 0}<span style={{ fontSize: '0.8rem', marginLeft: '0.2rem' }}>CR</span>
+                    </div>
                     <Link to="/dossier" style={{ 
-                        textDecoration: 'none', color: COLORS.accent, 
-                        border: `1px solid ${COLORS.accent}`, padding: '0.3rem 0.6rem', 
-                        fontSize: '0.65rem', fontWeight: 900 
+                        textDecoration: 'none', 
+                        color: 'var(--color-text)', 
+                        border: '1px solid var(--color-text)', 
+                        padding: '0.4rem 0.8rem', 
+                        fontSize: '0.6rem', 
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-mono)',
+                        marginTop: '0.5rem'
                     }}>
                         BUY_CREDITS
                     </Link>
-                    <span>CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{profile?.credits ?? 0}</span></span>
                 </div>
             </header>
 
-
-
-            <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '3rem' }}>
+            <main style={{ 
+                maxWidth: '1200px', 
+                margin: '3rem auto', 
+                padding: '0 2rem', 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 400px', 
+                gap: '4rem' 
+            }}>
                 
-                {/* Canvas Area (Left side on Desktop, Top on Mobile) */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {/* Column 01: Visual Canvas */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{
                         width: '100%',
-                        maxWidth: ratio === '16:9' ? '800px' : (ratio === '9:16' ? '400px' : '600px'),
                         aspectRatio: ratio === '9:16' ? '9/16' : (ratio === '16:9' ? '16/9' : '1/1'),
-                        backgroundColor: 'var(--theme-surface)',
-                        border: '1px solid var(--theme-border)',
-                        borderRadius: '24px',
+                        backgroundColor: 'var(--color-surface)',
+                        border: '2px solid var(--color-text)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         overflow: 'hidden',
-                        position: 'relative'
+                        position: 'relative',
+                        boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
                     }}>
                         {isGenerating ? (
                             <Loader />
@@ -359,172 +406,172 @@ const WallpaperLab = () => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
                         ) : (
-                            <div style={{ color: 'var(--theme-text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                <ImageIcon size={32} opacity={0.5} />
-                                <span style={{ fontFamily: COLORS.mono, fontSize: '0.8rem' }}>AWAITING_PROMPT</span>
+                            <div style={{ color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                <ImageIcon size={48} opacity={0.2} />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>AWAITING_VISUAL_INPUT</span>
                             </div>
                         )}
                         
-                        {/* Download CTA on Render */}
                         {resultUrl && !isGenerating && (
-                            <button onClick={handleDownload} style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'var(--theme-text)', color: 'var(--theme-bg)', border: 'none', padding: '0.75rem', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
-                                <Download size={20} />
+                            <button onClick={handleDownload} style={{ 
+                                position: 'absolute', bottom: '1.5rem', right: '1.5rem', 
+                                background: 'var(--color-text)', color: 'var(--color-bg)', 
+                                border: 'none', padding: '1rem', cursor: 'pointer', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                            }}>
+                                <Download size={24} />
                             </button>
                         )}
                     </div>
 
+                    {/* Metadata Strip */}
+                    <div style={{ display: 'flex', gap: '2rem', padding: '1.5rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}>
+                        <div style={{ flex: 1 }}>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE_STATUS:</span> {isGenerating ? 'PROCESSING' : 'IDLE'}<br/>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ASPECT_RATIO:</span> {ratio}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> {resultUrl ? 'GEN_SUCCESS' : 'NULL'}<br/>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>TIMESTAMP:</span> {new Date().toLocaleTimeString()}
+                        </div>
+                    </div>
+
                     {error && (
-                        <div style={{ marginTop: '1rem', color: '#FF3333', fontSize: '0.8rem', fontFamily: COLORS.mono }}>
-                            ERROR: {error}
+                        <div style={{ color: '#FF0000', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', fontWeight: 900, border: '1px solid #FF0000', padding: '1rem' }}>
+                            CRITICAL_ERROR: {error.toUpperCase()}
                         </div>
                     )}
                 </div>
 
-                {/* Configuration Panel (Right side on Desktop, Bottom on Mobile) */}
-                <div style={{ width: isMobile ? '100%' : '400px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {/* Column 02: Editorial Controls */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                     
-                    {/* Aspect Ratio */}
+                    {/* Dimension Select */}
                     <div>
-                        <div style={{ fontSize: '0.7rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>DIMENSIONS</div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>DIMENSIONS</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
                             {RATIOS.map(r => (
                                 <button
                                     key={r.id}
                                     onClick={() => setRatio(r.id)}
                                     style={{
-                                        flex: 1, padding: '0.75rem 0',
-                                        backgroundColor: ratio === r.id ? 'var(--theme-text)' : 'transparent',
-                                        color: ratio === r.id ? 'var(--theme-bg)' : 'var(--theme-text)',
-                                        border: `1px solid ${ratio === r.id ? 'var(--theme-text)' : 'var(--theme-border)'}`,
-                                        borderRadius: '12px', cursor: 'pointer', fontFamily: COLORS.mono, fontSize: '0.8rem', fontWeight: 600
+                                        padding: '1rem 0',
+                                        backgroundColor: ratio === r.id ? 'var(--color-text)' : 'transparent',
+                                        color: ratio === r.id ? 'var(--color-bg)' : 'var(--color-text)',
+                                        border: '1.5px solid var(--color-text)',
+                                        cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                                        transition: 'all 0.1s'
                                     }}
                                 >
-                                    {r.id}
+                                    {r.id === '1:1' ? 'SQUARE' : (r.id === '16:9' ? 'DESKTOP' : 'MOBILE')}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Tab Navigation for Configuration */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem', gap: '1.5rem' }}>
-                        {['genre', 'style', 'modifiers'].map(tab => (
-                            <button 
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                style={{
-                                    background: 'none', border: 'none', padding: 0,
-                                    color: activeTab === tab ? 'var(--theme-text)' : 'var(--theme-text-muted)',
-                                    fontWeight: activeTab === tab ? 700 : 400,
-                                    fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer',
-                                    position: 'relative'
-                                }}
-                            >
-                                {tab}
-                                {activeTab === tab && <motion.div layoutId="underline" style={{ position: 'absolute', bottom: '-0.6rem', left: 0, right: 0, height: '2px', backgroundColor: 'var(--theme-text)' }} />}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Highly Optimized Scrollable Pill Lists */}
-                    <div style={{ flexGrow: 1, minHeight: '200px' }}>
-                        {activeTab === 'genre' && (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {GENRES.map(g => (
-                                    <Pill key={g.id} active={genre === g.id} onClick={() => setGenre(g.id)}>
-                                        {g.name}
-                                    </Pill>
-                                ))}
-                            </div>
-                        )}
-                        {activeTab === 'style' && (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {STYLES.map(s => (
-                                    <Pill key={s.id} active={style === s.id} onClick={() => setStyle(s.id)}>
-                                        {s.name}
-                                    </Pill>
-                                ))}
-                            </div>
-                        )}
-                        {activeTab === 'modifiers' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <textarea 
-                                    value={customSupplement}
-                                    onChange={(e) => setCustomSupplement(e.target.value)}
-                                    placeholder="Add custom keywords (e.g., neon lighting, misty, trending on artstation)"
+                    {/* Editor's Blocks */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                            {['genre', 'style', 'modifiers'].map(tab => (
+                                <button 
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
                                     style={{
-                                        width: '100%', height: '100px', padding: '1rem',
-                                        backgroundColor: 'var(--theme-surface)', color: 'var(--theme-text)',
-                                        border: '1px solid var(--theme-border)', borderRadius: '12px',
-                                        fontFamily: COLORS.sans, fontSize: '0.9rem', resize: 'none'
+                                        background: 'none', border: 'none', padding: 0,
+                                        color: activeTab === tab ? 'var(--color-text)' : 'var(--color-text-secondary)',
+                                        fontWeight: 900,
+                                        fontSize: '0.7rem', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer',
+                                        position: 'relative'
                                     }}
-                                />
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {FEATURED_TAGS.map(tag => (
-                                        <button 
-                                            key={tag}
-                                            onClick={() => setCustomSupplement(prev => prev ? `${prev}, ${tag}` : tag)}
-                                            style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.75rem', cursor: 'pointer' }}
-                                        >
-                                            + {tag}
-                                        </button>
-                                    ))}
-                                </div>
+                                >
+                                    {tab}
+                                    {activeTab === tab && <motion.div layoutId="underline" style={{ position: 'absolute', bottom: '-0.85rem', left: 0, right: 0, height: '3px', backgroundColor: 'var(--color-text)' }} />}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{ minHeight: '180px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                {activeTab === 'genre' && GENRES.map(g => (
+                                    <Pill key={g.id} active={genre === g.id} onClick={() => setGenre(g.id)}>{g.name}</Pill>
+                                ))}
+                                {activeTab === 'style' && STYLES.map(s => (
+                                    <Pill key={s.id} active={style === s.id} onClick={() => setStyle(s.id)}>{s.name}</Pill>
+                                ))}
+                                {activeTab === 'modifiers' && (
+                                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <textarea 
+                                            value={customSupplement}
+                                            onChange={(e) => setCustomSupplement(e.target.value)}
+                                            placeholder="KEYWORDS..."
+                                            style={minimalInputStyle}
+                                        />
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {FEATURED_TAGS.map(tag => (
+                                                <button 
+                                                    key={tag}
+                                                    onClick={() => setCustomSupplement(prev => prev ? `${prev}, ${tag}` : tag)}
+                                                    style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', padding: '0.4rem 0.8rem', fontSize: '0.6rem', fontFamily: 'var(--font-mono)', cursor: 'pointer', fontWeight: 900 }}
+                                                >
+                                                    + {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Live Prompt Preview */}
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <div style={{ fontSize: '0.7rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>LIVE_PROMPT</div>
+                    {/* Prompt Audit */}
+                    <div style={{ borderTop: '2.5px solid var(--color-text)', paddingTop: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>GENERATION_DIRECTIVE</div>
                             <button
                                 onClick={handleEnhancePrompt}
                                 disabled={isEnhancing}
                                 style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.4rem',
-                                    padding: '0.4rem 0.8rem', border: '1px solid var(--color-accent)',
-                                    backgroundColor: isEnhancing ? 'var(--color-accent)' : 'transparent',
-                                    color: isEnhancing ? '#000' : 'var(--color-accent)',
-                                    borderRadius: '8px', fontFamily: COLORS.mono, fontSize: '0.65rem', fontWeight: 900,
-                                    cursor: isEnhancing ? 'wait' : 'pointer', letterSpacing: '0.05em',
-                                    transition: 'all 0.2s'
+                                    display: 'flex', alignItems: 'center', gap: '0.6rem',
+                                    padding: '0.5rem 1rem', border: '1.5px solid var(--color-text)',
+                                    backgroundColor: isEnhancing ? 'var(--color-text)' : 'transparent',
+                                    color: isEnhancing ? 'var(--color-bg)' : 'var(--color-text)',
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
+                                    cursor: 'pointer', transition: 'all 0.2s'
                                 }}
                             >
                                 {isEnhancing ? <RefreshCw size={12} className="spin" /> : <Wand2 size={12} />}
-                                <span>{isEnhancing ? 'ENHANCING...' : 'AI ENHANCE'}</span>
+                                <span>{isEnhancing ? 'ENHANCING' : 'AI_ENHANCE'}</span>
                             </button>
                         </div>
                         <div style={{
-                            width: '100%', padding: '1rem',
-                            backgroundColor: 'var(--theme-surface)', color: 'var(--theme-text)',
-                            border: '1px solid var(--theme-border)', borderRadius: '12px',
-                            fontFamily: COLORS.mono, fontSize: '0.75rem', lineHeight: 1.6,
-                            maxHeight: '120px', overflowY: 'auto', opacity: 0.8,
-                            wordBreak: 'break-word'
+                            width: '100%', padding: '1.5rem',
+                            backgroundColor: 'rgba(0,0,0,0.02)', color: 'var(--color-text)',
+                            border: '1px solid var(--color-border)',
+                            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.6,
+                            maxHeight: '150px', overflowY: 'auto', fontStyle: 'italic'
                         }}>
-                            {livePrompt}
+                            "{livePrompt}"
                         </div>
                     </div>
 
-                    {/* Generate Button */}
+                    {/* Execute Button */}
                     <button
                         onClick={handleGenerate}
                         disabled={isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)}
                         style={{
-                            width: '100%', padding: '1.25rem',
-                            backgroundColor: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--theme-border)' : 'var(--theme-text)',
-                            color: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--theme-text-muted)' : 'var(--theme-bg)',
-                            border: 'none', borderRadius: '16px',
-                            fontFamily: COLORS.sans, fontWeight: 700, fontSize: '1rem',
-                            cursor: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'not-allowed' : 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                            transition: 'all 0.2s ease'
+                            width: '100%', padding: '1.5rem',
+                            backgroundColor: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--color-border)' : 'var(--color-text)',
+                            color: (isGenerating || (profile?.credits < AI_COSTS.GEN_IMAGE)) ? 'var(--color-text-secondary)' : 'var(--color-bg)',
+                            border: 'none',
+                            fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.9rem',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
+                            letterSpacing: '0.1em'
                         }}
                     >
                         {isGenerating ? <RefreshCw size={20} className="spin" /> : (
                             <>
-                                <Sparkles size={20} />
-                                {(profile?.credits >= AI_COSTS.GEN_IMAGE) ? 'GENERATE WALLPAPER' : 'INSUFFICIENT_CREDITS'}
+                                <Sparkles size={18} />
+                                {(profile?.credits >= AI_COSTS.GEN_IMAGE) ? 'EXECUTE_GEN_COMMAND' : 'INSUFFICIENT_FUNDS'}
                             </>
                         )}
                         <style>{`
@@ -535,28 +582,32 @@ const WallpaperLab = () => {
                 </div>
             </main>
 
-            {/* Archive Section - Minimal List */}
+            {/* Local Archive List */}
             {archive.length > 0 && (
-                <section style={{ maxWidth: '1200px', margin: '4rem auto 0', padding: '0 2rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--theme-border)', paddingBottom: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>
-                            LOCAL_ARCHIVE ({archive.length}/12)
+                <section style={{ maxWidth: '1200px', margin: '6rem auto 0', padding: '0 2rem 6rem' }}>
+                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid var(--color-text)', paddingBottom: '1rem', marginBottom: '3rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+                            <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)', margin: 0 }}>LOCAL_ARCHIVE</h2>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>// {archive.length} ENTRIES</span>
                         </div>
                         <button 
                             onClick={clearArchive}
                             style={{ 
-                                background: 'none', border: '1px solid #FF3333', color: '#FF3333', 
-                                padding: '0.3rem 0.8rem', borderRadius: '4px', fontSize: '0.6rem', 
-                                fontFamily: COLORS.mono, cursor: 'pointer' 
+                                background: 'none', border: '1px solid var(--color-border)', 
+                                padding: '0.5rem 1rem', fontSize: '0.6rem', 
+                                fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer' 
                             }}
                         >
-                            CLEAR_ALL
+                            PURGE_ARCHIVE
                         </button>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                    </header>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem' }}>
                         {archive.map(item => (
-                            <div key={item.id} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--theme-border)' }}>
+                            <div key={item.id} style={{ border: '1px solid var(--color-border)', padding: '0.5rem', backgroundColor: 'var(--color-surface)' }}>
                                 <img src={item.url} alt="Archive" style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover' }} />
+                                <div style={{ padding: '1rem 0', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', opacity: 0.6 }}>
+                                    {item.genre} // {item.style}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -564,6 +615,19 @@ const WallpaperLab = () => {
             )}
         </div>
     );
+};
+
+const minimalInputStyle = {
+    width: '100%',
+    background: 'transparent',
+    border: '1.5px solid var(--color-text)',
+    color: 'var(--color-text)',
+    padding: '1rem',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '0.8rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+    minHeight: '120px'
 };
 
 export default WallpaperLab;

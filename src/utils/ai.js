@@ -4,8 +4,8 @@
  */
 
 export const AI_COSTS = {
-    ORACLE: 1,
-    ANALYSER: 5,
+    ORACLE: 0,
+    ANALYSER: 0,
     GEN_IMAGE: 10
 };
 

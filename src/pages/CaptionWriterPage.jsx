@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Copy, Check, Instagram, Twitter, Video } from 'lucide-react';
 
 import { fetchOpenRouter } from '../utils/ai';
+
+const RED = '#E8111A';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = 'stepfun/step-3.5-flash:free';
@@ -30,7 +32,7 @@ const CaptionWriterPage = () => {
     const handleGenerate = async () => {
         if (!description.trim() || isGenerating) return;
         setIsGenerating(true);
-        
+
         try {
             const body = {
                 model: MODEL,
@@ -83,115 +85,121 @@ CRITICAL RULES:
     };
 
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'var(--nav-height)' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-secondary)', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem' }}>
-                    <ArrowLeft size={14} /> BACK_TO_TOOLS
+        <main style={{ minHeight: '100vh', backgroundColor: '#F8F6F1', color: '#000', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
+                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#000', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem', opacity: 0.5, fontWeight: 900 }}>
+                    <ArrowLeft size={14} /> BACK_TO_LAB
                 </Link>
 
-                <div style={{ marginBottom: '3rem' }}>
-                    <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                        AI_TEXT // MULTI_PLATFORM
+                <div style={{ marginBottom: '5rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: RED, marginBottom: '1.5rem', letterSpacing: '0.3em', fontWeight: 900 }}>
+                        VOL_02 // NEURAL_COPY
                     </div>
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.9, textTransform: 'uppercase', margin: 0 }}>
-                        CAPTION<br /><span style={{ color: 'var(--color-accent)' }}>WRITER</span>
+                    <h1 style={{ fontSize: 'clamp(4rem, 10vw, 7rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.8, textTransform: 'uppercase', margin: 0, letterSpacing: '-0.06em' }}>
+                        CAPTION<br />
+                        <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>WRITER.</span>
                     </h1>
                 </div>
 
-                {/* Input */}
-                <div style={{ marginBottom: '2rem' }}>
+                {/* Input Area */}
+                <div style={{ border: '4px solid #000', padding: '3rem', backgroundColor: '#fff', marginBottom: '3rem', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '-1rem', left: '2rem', backgroundColor: '#000', color: '#fff', padding: '0.3rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>SOURCE_CONTEXT</div>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Describe your post... (e.g., 'Launching our new brutalist website redesign for a tech startup')"
-                        rows={4}
+                        placeholder="Provide subject matter or creative direction..."
+                        rows={5}
                         style={{
-                            width: '100%', padding: '1.5rem', backgroundColor: 'transparent',
-                            border: '1px solid var(--color-border)', color: 'var(--color-text)',
-                            fontFamily: 'var(--font-sans)', fontSize: '1rem', resize: 'none', outline: 'none'
+                            width: '100%', padding: '0', backgroundColor: 'transparent',
+                            border: 'none', color: '#000',
+                            fontFamily: 'Playfair Display', fontSize: '1.75rem', fontStyle: 'italic',
+                            resize: 'none', outline: 'none', lineHeight: 1.4
                         }}
                     />
                 </div>
 
-                {/* Tone Selector */}
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-                    {TONES.map(t => (
-                        <button
-                            key={t}
-                            onClick={() => setTone(t)}
-                            style={{
-                                padding: '0.5rem 1rem', border: '1px solid',
-                                borderColor: tone === t ? 'var(--color-accent)' : 'var(--color-border)',
-                                backgroundColor: tone === t ? 'var(--color-accent)' : 'transparent',
-                                color: tone === t ? '#000' : 'var(--color-text-secondary)',
-                                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
-                                cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em'
-                            }}
-                        >
-                            {t}
-                        </button>
-                    ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', marginBottom: '4rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {TONES.map(t => (
+                            <button
+                                key={t}
+                                onClick={() => setTone(t)}
+                                style={{
+                                    padding: '0.6rem 1.25rem', border: '2px solid #000',
+                                    backgroundColor: tone === t ? '#000' : 'transparent',
+                                    color: tone === t ? '#fff' : '#000',
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900,
+                                    cursor: 'pointer', textTransform: 'uppercase'
+                                }}
+                            >
+                                {t}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button onClick={handleGenerate} disabled={isGenerating || !description.trim()} style={{
+                        padding: '1.25rem 3rem', backgroundColor: (isGenerating || !description.trim()) ? '#ccc' : RED,
+                        color: '#fff', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
+                        fontWeight: 900, cursor: isGenerating ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
+                        textTransform: 'uppercase'
+                    }}>
+                        {isGenerating ? <><RefreshCw size={18} className="spin" /> [ PROCESSING ]</> : '[ INITIALIZE_GEN ]'}
+                    </button>
                 </div>
 
-                <button onClick={handleGenerate} disabled={isGenerating || !description.trim()} style={{
-                    padding: '1rem 2.5rem', backgroundColor: (isGenerating || !description.trim()) ? 'var(--color-border)' : 'var(--color-accent)',
-                    color: '#000', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-                    fontWeight: 900, cursor: isGenerating ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    marginBottom: '3rem'
-                }}>
-                    {isGenerating ? <><RefreshCw size={14} className="spin" /> GENERATING...</> : 'GENERATE_CAPTIONS'}
-                </button>
-
-                {/* Results */}
-                {captions && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {captions.captions?.map((c, i) => {
-                            const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
-                            return (
-                                <div key={i} style={{ border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-                                    <div style={{
-                                        padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--color-border)',
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        backgroundColor: 'rgba(255,255,255,0.02)'
-                                    }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span style={{ color: platform.color }}>{platform.icon}</span>
-                                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.1em' }}>
-                                                    {platform.name}
-                                                </span>
-                                            </div>
-                                            {c.psychology && (
-                                                <div style={{ 
-                                                    padding: '0.1rem 0.5rem', border: '1px solid var(--color-accent)', 
-                                                    color: 'var(--color-accent)', fontSize: '0.5rem', 
-                                                    fontFamily: 'var(--font-mono)', fontWeight: 900,
-                                                    letterSpacing: '0.05em', opacity: 0.8
-                                                }}>
-                                                    {c.psychology.toUpperCase()}
+                {/* Results Section */}
+                <AnimatePresence>
+                    {captions && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+                            {captions.captions?.map((c, i) => {
+                                const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
+                                return (
+                                    <div key={i} style={{ border: '4px solid #000', backgroundColor: '#fff', position: 'relative' }}>
+                                        <div style={{
+                                            padding: '1.5rem', borderBottom: '2.5px solid #000',
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            backgroundColor: '#F8F6F1'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span style={{ color: '#000' }}>{platform.icon}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>
+                                                        {platform.name}
+                                                    </span>
                                                 </div>
+                                                {c.psychology && (
+                                                    <div style={{
+                                                        padding: '0.2rem 0.6rem', backgroundColor: '#000',
+                                                        color: '#fff', fontSize: '0.6rem',
+                                                        fontFamily: 'var(--font-mono)', fontWeight: 900,
+                                                        letterSpacing: '0.05em'
+                                                    }}>
+                                                        {c.psychology.toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
+                                                style={{ background: 'none', border: '1.5px solid #000', color: '#000', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                                            >
+                                                {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? <Check size={12} /> : <Copy size={12} />}
+                                                {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
+                                            </button>
+                                        </div>
+                                        <div style={{ padding: '2.5rem' }}>
+                                            <p style={{ fontSize: '1.1rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: '#333', fontWeight: 500 }}>{c.caption}</p>
+                                            {c.hashtags && (
+                                                <p style={{ fontSize: '0.85rem', color: RED, marginTop: '2rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>{c.hashtags}</p>
                                             )}
                                         </div>
-                                        <button
-                                            onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
-                                            style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: '0.3rem 0.75rem', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                                        >
-                                            {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? <><Check size={10} /> COPIED</> : <><Copy size={10} /> COPY</>}
-                                        </button>
                                     </div>
-                                    <div style={{ padding: '1.5rem' }}>
-                                        <p style={{ fontSize: '0.95rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>{c.caption}</p>
-                                        {c.hashtags && (
-                                            <p style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginTop: '1rem', opacity: 0.7 }}>{c.hashtags}</p>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </motion.div>
-                )}
+                                );
+                            })}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
-            <style>{`.spin { animation: spin 1.5s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+            <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
         </main>
     );
 };

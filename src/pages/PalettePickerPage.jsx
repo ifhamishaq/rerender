@@ -62,48 +62,46 @@ const PalettePickerPage = () => {
     };
 
     return (
-        <main style={{ paddingTop: 'calc(var(--nav-height) + 2rem)', minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
+        <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: '#F8F6F1', display: 'flex', flexDirection: 'column', color: '#000' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '0 2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Link to="/arcade" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700,
-                    letterSpacing: '0.1em', color: RED, textDecoration: 'none',
-                    textTransform: 'uppercase', marginBottom: '2rem',
-                    transition: 'opacity 0.2s'
-                }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = 0.7}
-                    onMouseLeave={e => e.currentTarget.style.opacity = 1}>
-                    ← BACK TO ARCADE
+                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                    letterSpacing: '0.1em', color: '#000', textDecoration: 'none',
+                    textTransform: 'uppercase', marginBottom: '3rem', opacity: 0.5
+                }}>
+                    ← RETURN_TO_ARCHIVE
                 </Link>
 
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '4rem' }}>
                     <div>
                         <div style={{
-                            fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.2em',
-                            color: RED, textTransform: 'uppercase', marginBottom: '0.5rem'
+                            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.25em',
+                            color: RED, textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 900
                         }}>
-                            ARCADE // 04
+                            ISSUE_04 // COLOR_EXTRACTION
                         </div>
                         <h1 style={{
                             fontFamily: 'var(--font-display)', fontWeight: 900,
-                            fontSize: 'clamp(3rem, 6vw, 5rem)', lineHeight: 0.9, margin: 0,
-                            textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--color-text)'
+                            fontSize: 'clamp(4rem, 10vw, 7rem)', lineHeight: 0.8, margin: 0,
+                            letterSpacing: '-0.06em', color: '#000'
                         }}>
-                            PALETTE<br />THIEF
+                            PALETTE<br />
+                            <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>THIEF.</span>
                         </h1>
                     </div>
 
                     {gameState === 'playing' && (
-                        <div style={{ display: 'flex', gap: '2rem', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '4rem', textAlign: 'right' }}>
                             <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', letterSpacing: '0.15em' }}>LIVES</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: lives <= 1 ? RED : 'var(--color-text)', lineHeight: 1 }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#999', letterSpacing: '0.2em', marginBottom: '0.5rem', fontWeight: 900 }}>REMAINING_LIVES</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '3rem', color: lives <= 1 ? RED : '#000', lineHeight: 1 }}>
                                     {Array(lives).fill('♥').join('')}
                                 </div>
                             </div>
                             <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', letterSpacing: '0.15em' }}>SCORE</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: 'var(--color-text)', lineHeight: 1 }}>{score}</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#999', letterSpacing: '0.2em', marginBottom: '0.5rem', fontWeight: 900 }}>CAPITAL_SCORE</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '3rem', color: '#000', lineHeight: 1 }}>{score}</div>
                             </div>
                         </div>
                     )}
@@ -113,63 +111,60 @@ const PalettePickerPage = () => {
                     {gameState === 'menu' && (
                         <motion.div
                             key="menu"
-                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                            style={{ border: '1px solid var(--color-border)', padding: '4rem', textAlign: 'center', backgroundColor: 'var(--color-surface)' }}
+                            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }}
+                            style={{ border: '8px solid #000', padding: '5rem', textAlign: 'left', backgroundColor: '#fff', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '3rem' }}>
                                 {['#FF0055', '#4D148C', '#00F0FF', '#0D0822'].map(c => (
-                                    <div key={c} style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: c }} />
+                                    <div key={c} style={{ width: '45px', height: '45px', backgroundColor: c, border: '4px solid #000' }} />
                                 ))}
                             </div>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: '2rem', margin: '0 0 1rem', color: 'var(--color-text)' }}>
-                                STEAL THE AESTHETIC
+                            <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '3.5rem', margin: '0 0 2rem', color: '#000', lineHeight: 1 }}>
+                                STEAL THE<br />AESTHETIC.
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-                                You are shown an image. Three color palettes are provided. Only one has the correct dominant colors extracted from the image. Identify the true palette.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.1rem', color: '#333', maxWidth: '600px', margin: '0 0 4rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                An image is presented. Three distinct palettes are offered. Only one contains the authentic DNA extracted from the source. Identify the core spectrum or face exclusion.
                             </p>
                             <button onClick={startGame} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.1em',
-                                padding: '1rem 3rem', backgroundColor: RED, color: '#fff', border: 'none', cursor: 'pointer',
-                                textTransform: 'uppercase', transition: 'transform 0.15s'
+                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                textTransform: 'uppercase', transition: 'all 0.2s', width: 'fit-content'
                             }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                START MISSION →
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                COMMENCE_EXTRACTION →
                             </button>
                         </motion.div>
                     )}
 
                     {gameState === 'playing' && (
-                        <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <div style={{
-                                width: '100%', height: '400px', backgroundColor: 'var(--color-surface)',
-                                border: '1px solid var(--color-border)', marginBottom: '2rem',
+                                width: '100%', height: '450px', backgroundColor: '#fff',
+                                border: '8px solid #000', marginBottom: '3rem',
                                 backgroundImage: `url(${shuffledRounds[currentRound]?.image || ''})`,
-                                backgroundSize: 'cover', backgroundPosition: 'center'
+                                backgroundSize: 'cover', backgroundPosition: 'center', boxShadow: '20px 20px 0px rgba(0,0,0,0.05)'
                             }} />
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
                                 {options.map((palette, i) => (
                                     <button
                                         key={i}
                                         onClick={() => handleGuess(palette)}
                                         style={{
-                                            border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)',
-                                            padding: '2rem 1rem', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s',
-                                            display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '120px',
-                                            borderRadius: '8px'
+                                            border: '4px solid #000', backgroundColor: '#fff',
+                                            padding: '2.5rem 1rem', cursor: 'pointer', transition: 'all 0.2s',
+                                            display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '140px'
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F8F6F1'; e.currentTarget.style.transform = 'translateY(-5px)'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                     >
                                         {palette.map(color => (
-                                            <motion.div
+                                            <div
                                                 key={color}
-                                                initial={{ scale: 0.8 }} animate={{ scale: 1 }}
                                                 style={{
-                                                    width: '40px', height: '40px', borderRadius: '50%',
-                                                    backgroundColor: color, boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                                    border: '2px solid rgba(255,255,255,0.1)'
+                                                    width: '45px', height: '45px',
+                                                    backgroundColor: color, border: '3px solid #000'
                                                 }}
                                             />
                                         ))}
@@ -182,29 +177,40 @@ const PalettePickerPage = () => {
                     {(gameState === 'gameover' || gameState === 'victory') && (
                         <motion.div
                             key="ending"
-                            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                            style={{ border: `2px solid ${RED}`, padding: '4rem', textAlign: 'center', backgroundColor: 'var(--color-surface)', position: 'relative', overflow: 'hidden' }}
+                            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+                            style={{ border: `12px solid #000`, padding: '6rem 4rem', textAlign: 'center', backgroundColor: '#fff', position: 'relative', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                         >
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', backgroundColor: RED }} />
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.3em', color: RED, marginBottom: '1rem' }}>
-                                {gameState === 'victory' ? 'GALLERY CONQUERED' : 'MISSION FAILED'}
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', backgroundColor: gameState === 'victory' ? '#000' : RED }} />
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', letterSpacing: '0.4em', color: '#999', marginBottom: '1.5rem', fontWeight: 900 }}>
+                                {gameState === 'victory' ? 'ANALYSIS_COMPLETE' : 'SYSTEM_REJECTION'}
                             </div>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '4rem', margin: '0 0 1rem', color: 'var(--color-text)', lineHeight: 1 }}>
-                                SCORE <span style={{ color: RED }}>{score}</span>
+                            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '8rem', margin: '0 0 1rem', color: '#000', lineHeight: 1, letterSpacing: '-0.05em' }}>
+                                {score} <span style={{ fontSize: '2rem', color: '#999' }}>POINTS</span>
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--color-text-secondary)', marginBottom: '3rem' }}>
-                                {gameState === 'victory' ? 'You have a perfect eye for color.' : 'Your color theory needs some work.'}
+                            <p style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontSize: '1.5rem', color: '#000', marginBottom: '4rem', fontWeight: 600 }}>
+                                {gameState === 'victory' ? 'Your aesthetic perception is absolute.' : 'Chromatic sync failure detected.'}
                             </p>
 
-                            <button onClick={startGame} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                                padding: '1rem 3rem', backgroundColor: 'transparent', color: RED, border: `1px solid ${RED}`, cursor: 'pointer',
-                                textTransform: 'uppercase', transition: 'all 0.15s'
-                            }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; e.currentTarget.style.color = '#fff'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = RED; }}>
-                                PLAY AGAIN ↺
-                            </button>
+                            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+                                <button onClick={startGame} style={{
+                                    fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                    textTransform: 'uppercase', transition: 'all 0.2s'
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                    RETRY_MISSION ↺
+                                </button>
+                                <button onClick={() => setGameState('menu')} style={{
+                                    fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 3rem', backgroundColor: 'transparent', color: '#000', border: '4px solid #000', cursor: 'pointer',
+                                    textTransform: 'uppercase', transition: 'all 0.2s'
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#fff'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000'; }}>
+                                    DEBRIEFING
+                                </button>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

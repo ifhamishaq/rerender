@@ -10,39 +10,40 @@ const SafeZonePage = () => {
     }, []);
 
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}>
+        <main style={{ minHeight: '100vh', backgroundColor: '#F8F6F1', color: '#000', paddingTop: 'calc(var(--nav-height) + 4rem)' }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 2rem' }}>
                 
                 {/* Back Nav */}
                 <Link to="/tools" style={{ 
                     display: 'flex', alignItems: 'center', gap: '0.5rem', 
-                    color: 'var(--color-accent)', textDecoration: 'none', 
-                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700,
-                    textTransform: 'uppercase', marginBottom: '3rem'
+                    color: '#000', textDecoration: 'none', 
+                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                    textTransform: 'uppercase', marginBottom: '4rem', opacity: 0.5
                 }}>
-                    <ArrowLeft size={16} />
-                    <span>BACK_TO_LABS</span>
+                    <ArrowLeft size={14} />
+                    <span>RETURN_TO_ARCHIVE</span>
                 </Link>
 
                 {/* Header Section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', flexWrap: 'wrap', gap: '2rem' }}>
-                    <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-accent)', marginBottom: '1rem' }}>
-                            <Smartphone size={20} />
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.3em', fontWeight: 900 }}>RE-RENDER_SYSTEMS // UX_UNIT_02</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '4rem', marginBottom: '6rem', alignItems: 'start' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#E8111A', marginBottom: '1.5rem' }}>
+                            <Smartphone size={18} />
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.2em', fontWeight: 900 }}>ISSUE_02 // VISUAL_INTEGRITY</span>
                         </div>
                         <h1 style={{ 
                             fontFamily: 'var(--font-display)', fontWeight: 900, 
-                            fontSize: 'clamp(3rem, 8vw, 6rem)', lineHeight: 0.85, margin: 0,
-                            textTransform: 'uppercase', letterSpacing: '-0.04em'
+                            fontSize: 'clamp(4rem, 10vw, 7rem)', lineHeight: 0.8, margin: 0,
+                            letterSpacing: '-0.06em'
                         }}>
-                            SAFE ZONE<br />
-                            <span style={{ color: 'var(--color-accent)' }}>PREVIEWER.</span>
+                            SAFE<br />
+                            <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>ZONE_LAB.</span>
                         </h1>
                     </div>
-                    <div style={{ maxWidth: '300px', borderLeft: '1px solid var(--color-border)', paddingLeft: '1.5rem' }}>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                            Stop getting your text cut off. Upload your 9:16 frame and toggle UI overlays for TikTok and Reels. Engineered for editors who demand precision.
+                    <div style={{ padding: '2rem', border: '4px solid #000', backgroundColor: '#fff', marginTop: '2rem' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', opacity: 0.5 }}>EDITORIAL_NOTE</div>
+                        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#333', lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
+                            Stop getting your text cut off by UI elements. Upload your 9:16 frame and toggle overlays for TikTok and Reels. Engineered for editors who demand absolute precision.
                         </p>
                     </div>
                 </div>
@@ -53,24 +54,24 @@ const SafeZonePage = () => {
                 </div>
 
                 {/* FAQ Section */}
-                <section style={{ borderTop: '1px solid var(--color-border)', paddingTop: '4rem', marginBottom: '6rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '4rem' }}>
+                <section style={{ borderTop: '8px solid #000', paddingTop: '5rem', marginBottom: '8rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem' }}>
                         <div>
-                            <div style={{ color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                <HelpCircle size={16} />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>WHY_USE_THIS?</span>
+                            <div style={{ color: '#000', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                <HelpCircle size={18} />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>THE_RATIONALE</span>
                             </div>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                                Social media platforms place interactive elements (likes, share, caption) differently. If your key action or text is in these "Dead Zones", your engagement will drop. This tool ensures your edit is ALWAYS safe.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.05rem', color: '#333', lineHeight: 1.6, fontWeight: 500 }}>
+                                Social media platforms place interactive elements—likes, shares, captions—differently across devices. If your key action or text is in these "Dead Zones," your engagement will drop. This tool ensures your edit is ALWAYS safe.
                             </p>
                         </div>
                         <div>
-                            <div style={{ color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                <Info size={16} />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>THE_RULE_OF_THUMB</span>
+                            <div style={{ color: '#000', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                <Info size={18} />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>PRO_PRACTICE</span>
                             </div>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                                Keep your main subject between the 20% and 80% marks horizontally, and avoid the bottom 25% of the screen. Our overlays simulate the average UI layout of modern mobile apps.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.05rem', color: '#333', lineHeight: 1.6, fontWeight: 500 }}>
+                                Keep your main subject between the 20% and 80% marks horizontally, and avoid the bottom 25% of the screen where captions reside. Our overlays simulate the average UI layout of modern mobile ecosystems.
                             </p>
                         </div>
                     </div>

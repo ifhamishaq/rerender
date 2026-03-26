@@ -239,50 +239,48 @@ const TypeRacer = () => {
     };
 
     return (
-        <main style={{ paddingTop: 'calc(var(--nav-height) + 2rem)', minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
+        <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: '#F8F6F1', color: '#000' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}>
                 <Link to="/arcade" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700,
-                    letterSpacing: '0.1em', color: RED, textDecoration: 'none',
-                    textTransform: 'uppercase', marginBottom: '2rem',
-                    transition: 'opacity 0.2s'
-                }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = 0.7}
-                    onMouseLeave={e => e.currentTarget.style.opacity = 1}>
-                    ← BACK TO ARCADE
+                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                    letterSpacing: '0.1em', color: '#000', textDecoration: 'none',
+                    textTransform: 'uppercase', marginBottom: '3rem', opacity: 0.5
+                }}>
+                    ← RETURN_TO_ARCHIVE
                 </Link>
 
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '3rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '4rem', marginBottom: '4rem', alignItems: 'end' }}>
                     <div>
                         <div style={{
-                            fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.2em',
-                            color: RED, textTransform: 'uppercase', marginBottom: '0.5rem'
+                            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.25em',
+                            color: RED, textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 900
                         }}>
-                            ARCADE // 02
+                            ISSUE_03 // KINETIC_LITERACY
                         </div>
                         <h1 style={{
                             fontFamily: 'var(--font-display)', fontWeight: 900,
-                            fontSize: 'clamp(3rem, 6vw, 5rem)', lineHeight: 0.9, margin: 0,
-                            textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--color-text)'
+                            fontSize: 'clamp(4rem, 10vw, 7rem)', lineHeight: 0.8, margin: 0,
+                            letterSpacing: '-0.06em', color: '#000'
                         }}>
-                            TYPE<br />RACER
+                            TYPE<br />
+                            <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>RACER.</span>
                         </h1>
                     </div>
 
                     {gameState === 'playing' && (
-                        <div style={{ display: 'flex', gap: '2rem', textAlign: 'right' }}>
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', letterSpacing: '0.15em' }}>TIME</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: timeLeft <= 10 ? RED : 'var(--color-text)', lineHeight: 1 }}>{timeLeft}s</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', border: '4px solid #000', backgroundColor: '#fff' }}>
+                            <div style={{ padding: '1.5rem', borderRight: '2px solid #000' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#666', fontWeight: 900 }}>TIME</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '2.5rem', color: timeLeft <= 10 ? RED : '#000', lineHeight: 1 }}>{timeLeft}</div>
                             </div>
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', letterSpacing: '0.15em' }}>NET WPM</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: 'var(--color-text)', lineHeight: 1 }}>{netWpm}</div>
+                            <div style={{ padding: '1.5rem', borderRight: '2px solid #000' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#666', fontWeight: 900 }}>NET_WPM</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '2.5rem', color: '#000', lineHeight: 1 }}>{netWpm}</div>
                             </div>
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', letterSpacing: '0.15em' }}>COMBO</div>
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: currentCombo > 20 ? '#34A853' : (currentCombo > 50 ? '#FFD700' : 'var(--color-text)'), lineHeight: 1 }}>{currentCombo}</div>
+                            <div style={{ padding: '1.5rem' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#666', fontWeight: 900 }}>COMBO</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '2.5rem', color: currentCombo > 20 ? '#34A853' : '#000', lineHeight: 1 }}>{currentCombo}</div>
                             </div>
                         </div>
                     )}
@@ -292,24 +290,24 @@ const TypeRacer = () => {
                     {gameState === 'menu' && (
                         <motion.div
                             key="menu"
-                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                            style={{ border: '1px solid var(--color-border)', padding: '4rem', textAlign: 'center', backgroundColor: 'var(--color-surface)' }}
+                            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }}
+                            style={{ border: '8px solid #000', padding: '5rem', textAlign: 'left', backgroundColor: '#fff', position: 'relative' }}
                         >
-                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⌨️</div>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: '2rem', margin: '0 0 1rem', color: 'var(--color-text)' }}>
-                                YOUR KEYBOARD IS THE WEAPON
+                            <div style={{ position: 'absolute', top: '2rem', right: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>060_SECONDS_LIMIT</div>
+                            <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '3rem', margin: '0 0 2rem', color: '#000', lineHeight: 1 }}>
+                                YOUR KEYBOARD<br />AS A PRECISION INSTRUMENT.
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-                                You have 60 seconds to clear as many levels as possible. Clearing a level adds +15s. Type the manifests and code exactly. Speed earns glory.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.1rem', color: '#333', maxWidth: '600px', margin: '0 0 4rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                Speed is a deliverable. You have sixty seconds to transcribe the manifesto with absolute fidelity. Accuracy earns the certificate; speed earns the legacy.
                             </p>
                             <button onClick={startGame} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.1em',
-                                padding: '1rem 3rem', backgroundColor: RED, color: '#fff', border: 'none', cursor: 'pointer',
-                                textTransform: 'uppercase', transition: 'transform 0.15s'
+                                fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                textTransform: 'uppercase', transition: 'all 0.2s'
                             }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                START MISSION →
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                INITIATE_TRIAL →
                             </button>
                         </motion.div>
                     )}
@@ -317,66 +315,61 @@ const TypeRacer = () => {
                     {gameState === 'playing' && (
                         <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             {renderPrompt()}
-                            {/* Visible input field so they know exactly where to type */}
                             <input
                                 ref={inputRef}
                                 type="text"
                                 value={input}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                placeholder={hasStartedTyping ? "KEEP TYPING..." : "TYPE FIRST WORD TO START TIMER..."}
+                                placeholder={hasStartedTyping ? "CONTINUE..." : "TYPE TO COMMENCE..."}
                                 autoFocus
                                 style={{
                                     width: '100%',
-                                    marginTop: '1.5rem',
-                                    padding: '1.5rem',
+                                    marginTop: '2rem',
+                                    padding: '2rem',
                                     fontFamily: 'var(--font-mono)',
-                                    fontSize: '1.25rem',
-                                    backgroundColor: 'var(--color-bg)',
-                                    color: 'var(--color-text)',
-                                    border: `2px solid ${RED}`,
+                                    fontSize: '1.5rem',
+                                    backgroundColor: '#fff',
+                                    color: '#000',
+                                    border: `8px solid #000`,
                                     outline: 'none',
-                                    letterSpacing: '0.05em'
+                                    fontWeight: 900
                                 }}
                             />
-
-                            <div style={{ marginTop: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'center', letterSpacing: '0.1em' }}>
-                                TYPE THE TEXT ABOVE EXACTLY (MATCH CASE AND PUNCTUATION)
-                            </div>
                         </motion.div>
                     )}
 
                     {gameState === 'name_input' && (
-                        <motion.div key="name_input" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '3rem', margin: '0 0 1rem', color: 'var(--color-text)', textTransform: 'uppercase' }}>
-                                ENTER YOUR NAME
+                        <motion.div key="name_input" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', backgroundColor: '#fff', border: '8px solid #000', padding: '5rem' }}>
+                            <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '3.5rem', margin: '0 0 1rem', color: '#000' }}>
+                                ARCHIVE YOUR SCORE.
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
-                                For your official typist certificate.
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: '#666', marginBottom: '3rem', fontWeight: 900 }}>
+                                IDENTIFICATION REQUIRED FOR LOGGING.
                             </p>
-                            <form onSubmit={handleNameSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                            <form onSubmit={handleNameSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
                                 <input
                                     type="text"
                                     value={playerName}
                                     onChange={(e) => setPlayerName(e.target.value)}
-                                    placeholder="YOUR NAME"
+                                    placeholder="DESIGNER_NAME"
                                     required
                                     autoFocus
                                     maxLength={25}
                                     style={{
-                                        width: '100%', maxWidth: '400px', padding: '1.25rem', fontFamily: 'var(--font-mono)', fontSize: '1.2rem',
-                                        backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', border: `2px solid ${RED}`, outline: 'none',
-                                        textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.1em'
+                                        width: '100%', maxWidth: '500px', padding: '1.5rem', fontFamily: 'var(--font-mono)', fontSize: '1.5rem',
+                                        backgroundColor: '#fff', color: '#000', border: `4px solid #000`, outline: 'none',
+                                        textAlign: 'center', textTransform: 'uppercase', fontWeight: 900
                                     }}
                                 />
                                 <button type="submit" style={{
-                                    fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.1em',
-                                    padding: '1.25rem 3rem', backgroundColor: RED, color: '#fff', border: 'none', cursor: 'pointer',
-                                    textTransform: 'uppercase', width: '100%', maxWidth: '400px', transition: 'transform 0.15s'
+                                    fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 4rem', backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer',
+                                    textTransform: 'uppercase', width: '100%', maxWidth: '500px', transition: 'all 0.2s'
                                 }}
-                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                    GENERATE CERTIFICATE →
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000'; }}>
+                                    ISSUE_CERTIFICATE →
                                 </button>
                             </form>
                         </motion.div>
@@ -385,110 +378,100 @@ const TypeRacer = () => {
                     {gameState === 'gameover' && (
                         <motion.div key="gameover" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
 
-                            <div ref={certRef} style={{ border: `2px solid ${RED}`, padding: '4rem 3rem', textAlign: 'center', backgroundColor: '#F8F6F1', position: 'relative', overflow: 'hidden', marginBottom: '3rem', color: '#080808' }}>
+                            <div ref={certRef} style={{ border: `8px solid #000`, padding: '5rem 4rem', textAlign: 'center', backgroundColor: '#F8F6F1', position: 'relative', overflow: 'hidden', marginBottom: '4rem', color: '#000' }}>
                                 {/* Background texture/pattern */}
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.03, pointerEvents: 'none', backgroundImage: 'radial-gradient(#080808 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, pointerEvents: 'none', backgroundImage: 'radial-gradient(#000 1.5px, transparent 1.5px)', backgroundSize: '30px 30px' }} />
 
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', backgroundColor: RED }} />
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', backgroundColor: '#000' }} />
 
-                                <div style={{ marginBottom: '3rem' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.4em', color: RED, marginBottom: '0.5rem', fontWeight: 700 }}>
-                                        CERTIFICATE OF PROFICIENCY
+                                <div style={{ marginBottom: '4rem' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', letterSpacing: '0.5em', color: RED, marginBottom: '1rem', fontWeight: 900 }}>
+                                        EDITORIAL_CERTIFICATION
                                     </div>
-                                    <h2 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 400, fontSize: '2.5rem', margin: '0', color: '#080808' }}>
-                                        Typing Master
+                                    <h2 style={{ fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '3.5rem', margin: '0', color: '#000', textTransform: 'uppercase', letterSpacing: '-0.04em' }}>
+                                        Master of Type
                                     </h2>
                                 </div>
 
-                                <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '0.9rem', color: '#444', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                                    THIS CERTIFIES THAT
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: '#666', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 900 }}>
+                                    THIS_CERTIFIES_THAT
                                 </div>
                                 <div style={{
-                                    fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '3rem', margin: '0 0 2rem',
-                                    color: '#080808', textTransform: 'uppercase', borderBottom: '2px solid #ccc', paddingBottom: '0.5rem', display: 'inline-block', minWidth: '300px'
+                                    fontFamily: 'Playfair Display', fontWeight: 900, fontSize: '4.5rem', margin: '0 0 3rem',
+                                    color: '#000', textTransform: 'uppercase', borderBottom: '6px solid #000', paddingBottom: '0.5rem', display: 'inline-block', minWidth: '400px', letterSpacing: '-0.06em'
                                 }}>
                                     {playerName.trim() || 'ANONYMOUS'}
                                 </div>
 
-                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: '#333', marginBottom: '3rem', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-                                    has successfully completed the RE-RENDER Type Racer simulation, demonstrating exceptional keyboard dexterity and accuracy under pressure.
+                                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.2rem', color: '#333', marginBottom: '4rem', maxWidth: '600px', margin: '0 auto 4rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                    has successfully completed the RE-RENDER kinetic literacy simulation, demonstrating extraordinary cognitive-manual synchronization.
                                 </p>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '4rem' }}>
-                                    <div style={{ border: '1px solid #ccc', padding: '1rem' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#666', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>NET WPM</div>
-                                        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: '#080808', lineHeight: 1 }}>{netWpm}</div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888', marginTop: '0.5rem' }}>RAW WPM: {rawWpm}</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '5rem' }}>
+                                    <div style={{ border: '4px solid #000', padding: '2rem', backgroundColor: '#fff' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#666', letterSpacing: '0.2em', marginBottom: '0.5rem', fontWeight: 900 }}>NET_WPM</div>
+                                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '3.5rem', color: '#000', lineHeight: 1 }}>{netWpm}</div>
                                     </div>
 
-                                    <div style={{ border: '1px solid #ccc', padding: '1rem' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#666', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>ACCURACY</div>
-                                        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: '#080808', lineHeight: 1 }}>{accuracy}%</div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: RED, marginTop: '0.5rem' }}>ERRORS: {errors}</div>
+                                    <div style={{ border: '4px solid #000', padding: '2rem', backgroundColor: '#fff' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#666', letterSpacing: '0.2em', marginBottom: '0.5rem', fontWeight: 900 }}>ACCURACY</div>
+                                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '3.5rem', color: '#000', lineHeight: 1 }}>{accuracy}%</div>
                                     </div>
 
-                                    <div style={{ border: '1px solid #ccc', padding: '1rem', backgroundColor: '#080808', color: '#fff' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#999', letterSpacing: '0.15em', marginBottom: '0.5rem' }}>MAX COMBO</div>
-                                        <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 900, fontSize: '2.5rem', color: '#fff', lineHeight: 1 }}>{maxCombo}</div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#999', marginTop: '0.5rem' }}>BACKSPACES: {backspaceCount}</div>
+                                    <div style={{ border: '4px solid #000', padding: '2rem', backgroundColor: '#000', color: '#fff' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#999', letterSpacing: '0.2em', marginBottom: '0.5rem', fontWeight: 900 }}>EFFICIENCY</div>
+                                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '3.5rem', color: '#fff', lineHeight: 1 }}>{maxCombo}</div>
                                     </div>
                                 </div>
 
-                                {/* Signatures Area */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '2rem', padding: '0 2rem' }}>
-                                    {/* Date */}
-                                    <div style={{ textAlign: 'left', width: '200px' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#080808', borderBottom: '1px solid #ccc', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>
-                                            {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '3rem', padding: '0 2rem' }}>
+                                    <div style={{ textAlign: 'left', width: '250px' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: '#000', borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '0.5rem', fontWeight: 900 }}>
+                                            {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}
                                         </div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#666', letterSpacing: '0.15em' }}>DATE OF ISSUE</div>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#999', letterSpacing: '0.2em', fontWeight: 900 }}>ISSUE_DATE_STAMP</div>
                                     </div>
 
-                                    {/* Digital Seal */}
-                                    <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <img src="/Purple Neon Green  Modern Shape Logo.png" alt="RE-RENDER Seal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                    </div>
-
-                                    {/* Signature */}
-                                    <div style={{ textAlign: 'right', width: '200px' }}>
+                                    <div style={{ textAlign: 'right', width: '250px' }}>
                                         <div style={{
-                                            fontFamily: '"Brush Script MT", "Loved by the King", cursive, serif',
-                                            fontSize: '2.5rem', color: '#080808', lineHeight: 0.8, borderBottom: '1px solid #ccc', paddingBottom: '0.5rem', marginBottom: '0.25rem'
+                                            fontFamily: 'Playfair Display',
+                                            fontStyle: 'italic',
+                                            fontSize: '2.5rem', color: '#000', lineHeight: 0.8, borderBottom: '2px solid #000', paddingBottom: '1rem', marginBottom: '0.5rem'
                                         }}>
                                             Ifham Ishaq
                                         </div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#666', letterSpacing: '0.15em' }}>AUTHORIZED SIGNATURE</div>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#999', letterSpacing: '0.2em', fontWeight: 900 }}>EDITORIAL_DIRECTOR</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 <button onClick={startGame} style={{
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                                    padding: '1rem 3rem', backgroundColor: 'transparent', color: RED, border: `1px solid ${RED}`, cursor: 'pointer',
-                                    textTransform: 'uppercase', transition: 'all 0.15s'
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 4rem', backgroundColor: 'transparent', color: '#000', border: `4px solid #000`, cursor: 'pointer',
+                                    textTransform: 'uppercase', transition: 'all 0.2s'
                                 }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = RED; e.currentTarget.style.color = '#fff'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = RED; }}>
-                                    PLAY AGAIN ↺
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#fff'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#000'; }}>
+                                    RETRY_TRIAL ↺
                                 </button>
 
                                 <button onClick={downloadCertificate} style={{
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                                    padding: '1rem 2rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: `1px solid var(--color-border)`, cursor: 'pointer',
-                                    textTransform: 'uppercase', transition: 'all 0.15s'
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 3rem', backgroundColor: '#fff', color: '#000', border: `4px solid #000`, cursor: 'pointer',
+                                    textTransform: 'uppercase', transition: 'all 0.2s'
                                 }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg)'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--color-surface)'; }}>
-                                    SAVE CERTIFICATE ⬇
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f0f0f0'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; }}>
+                                    SAVE_DOCUMENT ⬇
                                 </button>
 
                                 <button onClick={shareWordle} style={{
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                                    padding: '1rem 2rem', backgroundColor: isCopied ? '#34A853' : RED, color: '#fff', border: 'none', cursor: 'pointer',
-                                    textTransform: 'uppercase', transition: 'all 0.15s'
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900, letterSpacing: '0.1em',
+                                    padding: '1.5rem 3rem', backgroundColor: isCopied ? '#34A853' : RED, color: '#fff', border: 'none', cursor: 'pointer',
+                                    textTransform: 'uppercase', transition: 'all 0.2s'
                                 }}>
-                                    {isCopied ? 'COPIED TO CLIPBOARD' : 'SHARE RESULTS 🟩'}
+                                    {isCopied ? 'STAMPED_&_COPIED' : 'SHARE_RESULTS 🟩'}
                                 </button>
                             </div>
 
