@@ -293,7 +293,7 @@ const WallpaperLab = () => {
         }
 
         // SPEND CREDIT
-        const success = await spendCredits(AI_COSTS.GEN_IMAGE);
+        const success = await spendCredits(AI_COSTS.GEN_IMAGE, 'WALLPAPER_GEN');
         if (!success) return;
 
         setIsGenerating(true);

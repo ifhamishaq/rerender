@@ -199,7 +199,7 @@ const ThumbnailAnalyserPage = () => {
         }
 
         // SPEND CREDIT
-        const success = await spendCredits(AI_COSTS.ANALYSER);
+        const success = await spendCredits(AI_COSTS.ANALYSER, 'THUMBNAIL_ANALYSIS');
         if (!success) return;
 
         setIsAnalyzing(true);

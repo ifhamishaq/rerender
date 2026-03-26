@@ -46,7 +46,7 @@ const CaptionWriterPage = () => {
         }
 
         // SPEND CREDIT
-        const success = await spendCredits(AI_COSTS.CAPTION);
+        const success = await spendCredits(AI_COSTS.CAPTION, 'CAPTION_GENERATION');
         if (!success) return;
 
         setIsGenerating(true);

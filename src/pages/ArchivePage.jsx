@@ -129,6 +129,9 @@ const ArchivePage = () => {
             setPosts([data, ...posts]);
             setShowCreateModal(false);
             setNewThread({ title: '', content: '', type: 'discussion' });
+        } else if (error) {
+            console.error('Create Thread Error:', error);
+            alert(`POST_FAIL: ${error.message || 'Permission Denied or Server Error'}`);
         }
         setIsSubmitting(false);
     };
@@ -136,7 +139,12 @@ const ArchivePage = () => {
     const handleDelete = async (postId) => {
         if (!window.confirm('Are you sure you want to delete this intelligence thread?')) return;
         const { error } = await supabase.from('community_archive').delete().eq('id', postId);
-        if (!error) setPosts(posts.filter(p => p.id !== postId));
+        if (!error) {
+            setPosts(posts.filter(p => p.id !== postId));
+        } else {
+            console.error('Delete Error:', error);
+            alert(`DELETE_FAIL: ${error.message || 'Restricted Action'}`);
+        }
     };
 
     return (

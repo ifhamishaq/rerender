@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 const DossierPage = () => {
     const { user, profile, signOut } = useAuth();
-    const { requests, submitting, submitRequest } = useDossier();
+    const { requests, logs, loading, submitting, submitRequest } = useDossier();
     
     const [txId, setTxId] = useState('');
     const [amount, setAmount] = useState(10);
@@ -231,7 +231,39 @@ const DossierPage = () => {
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                                 <Activity size={16} />
-                                <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>TRANSFER_LOGS</span>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>CREDIT_AUDIT_LOG</span>
+                            </div>
+                            {logs.length > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {logs.slice(0, 10).map(log => (
+                                        <div key={log.id} style={{ 
+                                            fontSize: '0.65rem', 
+                                            fontFamily: 'var(--font-mono)',
+                                            borderLeft: `2px solid ${log.amount > 0 ? 'var(--color-accent)' : '#ff4444'}`,
+                                            padding: '0.5rem 0.8rem',
+                                            backgroundColor: 'rgba(255,255,255,0.02)'
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                                                <span style={{ fontWeight: 900, color: log.amount > 0 ? 'var(--color-accent)' : '#ff4444' }}>
+                                                    {log.amount > 0 ? '+' : ''}{log.amount} CR
+                                                </span>
+                                                <span style={{ opacity: 0.3 }}>{new Date(log.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                            <div style={{ opacity: 0.6, fontSize: '0.6rem', textTransform: 'uppercase' }}>
+                                                {log.reason || 'SYSTEM_USAGE'}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{ fontSize: '0.7rem', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>NO_TRANSACTIONS_RECORDED</div>
+                            )}
+                        </div>
+
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                <ExternalLink size={16} />
+                                <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>TRANSFER_VERIFICATION</span>
                             </div>
                             {requests.length > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -254,7 +286,7 @@ const DossierPage = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div style={{ fontSize: '0.7rem', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>NO_ACTIVITY_LOGGED</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>NO_REQUESTS_LOGGED</div>
                             )}
                         </div>
 

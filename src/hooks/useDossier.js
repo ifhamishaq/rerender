@@ -5,19 +5,33 @@ import { useAuth } from '../context/AuthContext';
 export const useDossier = () => {
     const { user, refreshProfile } = useAuth();
     const [requests, setRequests] = useState([]);
+    const [logs, setLogs] = useState([]); // New Transaction Logs
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
     // 1. Fetch Requests
     const fetchRequests = useCallback(async () => {
         if (!user) return;
-        const { data, error } = await supabase
+        
+        // 1. Fetch Topup Requests
+        const { data: requestData } = await supabase
             .from('topup_requests')
             .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
         
-        if (!error && data) setRequests(data);
+        if (requestData) setRequests(requestData);
+
+        // 2. Fetch Transaction Logs
+        const { data: logData } = await supabase
+            .from('credit_logs')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(20);
+        
+        if (logData) setLogs(logData);
+
         setLoading(false);
     }, [user]);
 
@@ -34,8 +48,12 @@ export const useDossier = () => {
                 { event: '*', schema: 'public', table: 'topup_requests', filter: `user_id=eq.${user.id}` }, 
                 () => {
                     fetchRequests();
-                    refreshProfile(); // Also refresh profile because a request being approved might update credits
+                    refreshProfile();
                 }
+            )
+            .on('postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'credit_logs', filter: `user_id=eq.${user.id}` },
+                () => fetchRequests() // Re-fetch logs when new entry added
             )
             .subscribe();
 
@@ -74,6 +92,7 @@ export const useDossier = () => {
 
     return {
         requests,
+        logs,
         loading,
         submitting,
         submitRequest,

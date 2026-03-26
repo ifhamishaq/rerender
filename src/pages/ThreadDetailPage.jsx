@@ -139,9 +139,14 @@ const ThreadDetailPage = () => {
     };
 
     const deleteThread = async () => {
-        if (!window.confirm('Permanently delete this thread?')) return;
+        if (!window.confirm('TERMINATE_THREAD: Are you sure? This cannot be undone.')) return;
         const { error } = await supabase.from('community_archive').delete().eq('id', id);
-        if (!error) navigate('/archive');
+        if (!error) {
+            navigate('/community');
+        } else {
+            console.error('Delete Error:', error);
+            alert(`DELETE_FAIL: ${error.message || 'Restricted Action'}`);
+        }
     };
 
     // Helper to build recursive comment tree

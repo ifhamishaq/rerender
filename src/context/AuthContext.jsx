@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         if (error) console.error('Error fetching profile:', error);
     };
 
-    const spendCredits = async (amount) => {
+    const spendCredits = async (amount, reason = 'SYSTEM_USAGE') => {
         if (!profile || profile.credits < amount) return false;
 
         const newCredits = profile.credits - amount;
@@ -50,17 +50,57 @@ export const AuthProvider = ({ children }) => {
         // Optimistic Update
         setProfile(prev => ({ ...prev, credits: newCredits }));
 
-        const { error } = await supabase
+        // 1. Update Credits
+        const { error: profileError } = await supabase
             .from('profiles')
             .update({ credits: newCredits })
             .eq('id', user.id);
 
-        if (error) {
-            console.error('Error spending credits:', error);
-            // Rollback on error
+        if (profileError) {
+            console.error('Error spending credits:', profileError);
             fetchProfile(user.id);
             return false;
         }
+
+        // 2. Log Transaction
+        await supabase
+            .from('credit_logs')
+            .insert({
+                user_id: user.id,
+                amount: -amount,
+                type: 'spend',
+                reason: reason
+            });
+
+        return true;
+    };
+
+    const rewardCredits = async (amount, reason = 'REWARD') => {
+        if (!profile) return false;
+
+        const newCredits = profile.credits + amount;
+        setProfile(prev => ({ ...prev, credits: newCredits }));
+
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ credits: newCredits })
+            .eq('id', user.id);
+
+        if (profileError) {
+            console.error('Error rewarding credits:', profileError);
+            fetchProfile(user.id);
+            return false;
+        }
+
+        await supabase
+            .from('credit_logs')
+            .insert({
+                user_id: user.id,
+                amount: amount,
+                type: 'reward',
+                reason: reason
+            });
+
         return true;
     };
 
@@ -69,6 +109,7 @@ export const AuthProvider = ({ children }) => {
         profile,
         loading,
         spendCredits,
+        rewardCredits,
         isAuthModalOpen,
         setIsAuthModalOpen,
         signInWithGoogle: () => supabase.auth.signInWithOAuth({

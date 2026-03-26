@@ -121,7 +121,7 @@ const OracleCore = ({
         }
 
         // SPEND CREDIT
-        const success = await spendCredits(AI_COSTS.ORACLE);
+        const success = await spendCredits(AI_COSTS.ORACLE, 'ORACLE_SUMMON');
         if (!success) return;
 
         // Build user message for chat display
