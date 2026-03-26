@@ -3,31 +3,32 @@
         "id": "001",
         "sidemark": "001/INT",
         "type": "INTERNSHIP",
-        "status": "AVAILABLE",
+        "status": "UNAVAILABLE",
         "title": "INTERNSHIP",
         "serifTitle": "The",
-        "description": "A 3-month program for video editors and designers. You will work on real projects and learn how to make great visuals from our team.",
+        "description": "A 3-month program to help you learn video editing and design. You will work on real projects with our team. Currently closed.",
         "specs": [
-            "[01] FULL ACCESS TO ASSETS",
-            "[02] DIRECT MENTORSHIP",
-            "[03] REMOTE WORKFLOW"
+            "[01] LEARN FROM PROS",
+            "[02] REAL PROJECTS",
+            "[03] REMOTE WORK"
         ],
-        "link": "mailto:re.render.original@gmail.com?subject=Internship Application",
-        "buttonLabel": "APPLY_NOW",
-        "style": "premium"
+        "link": "#",
+        "buttonLabel": "CLOSED",
+        "style": "premium",
+        "disabled": true
     },
     {
         "id": "002",
         "sidemark": "002/COMP",
         "type": "COMPETITIONS",
         "status": "COMING_SOON",
-        "title": "COMPETITION",
+        "title": "CHALLENGES",
         "serifTitle": "The",
-        "description": "Monthly editing challenges. Download the files, show your skills, and win prizes or even a spot on our team.",
+        "description": "Monthly editing contests. Show your skills, win prizes, and maybe join our team. Starting soon.",
         "specs": [
-            "[01] $500+ PRIZE POOLS",
-            "[02] SOCIAL FEATURES",
-            "[03] TEAM SCOUTING"
+            "[01] CASH PRIZES",
+            "[02] GET NOTICED",
+            "[03] FUN TASKS"
         ],
         "link": "#",
         "buttonLabel": "LOCKED",
@@ -39,16 +40,16 @@
         "sidemark": "003/PRO",
         "type": "FREELANCE",
         "status": "SCOUTING",
-        "title": "ROSTER",
-        "serifTitle": "The",
-        "description": "We look for top-level freelancers to help us with our biggest projects. High pay, great work, and no stress.",
+        "title": "FREELANCE",
+        "serifTitle": "Our",
+        "description": "We are looking for skilled freelancers to help us with work when we are busy. Good pay, cool projects, and flexible hours.",
         "specs": [
-            "[01] TOP DAY RATES",
-            "[02] BIG CLIENT PROJECTS",
-            "[03] REMOTE WORK"
+            "[01] GOOD PAY",
+            "[02] BIG PROJECTS",
+            "[03] WORK FROM HOME"
         ],
-        "link": "mailto:re.render.original@gmail.com?subject=Freelance Roster Pitch",
-        "buttonLabel": "JOIN_US",
+        "link": "https://docs.google.com/forms/d/e/1FAIpQLSeIsWJod_v0nN-kToKseZTa6vxGi9YLnb6Fvwofy_7xwUu7yg/viewform?usp=sf_link",
+        "buttonLabel": "APPLY_NOW",
         "style": "accent"
     }
 ]

@@ -147,9 +147,30 @@ const WallpaperLab = () => {
 
     const saveToArchive = (url, metadata) => {
         const newAsset = { id: Date.now(), url, date: new Date().toLocaleString(), ...metadata };
-        const updatedArchive = [newAsset, ...archive].slice(0, 50);
-        setArchive(updatedArchive);
-        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedArchive));
+        // Base64 images are large. Limit archive to 10-15 items to stay under 5MB localStorage quota.
+        let updatedArchive = [newAsset, ...archive].slice(0, 12); 
+        
+        try {
+            setArchive(updatedArchive);
+            localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedArchive));
+        } catch (e) {
+            console.error('Storage Quota Exceeded. Purging old assets...', e);
+            // If still failing, keep only the most recent 5
+            updatedArchive = updatedArchive.slice(0, 5);
+            setArchive(updatedArchive);
+            try {
+                localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedArchive));
+            } catch (innerError) {
+                // Last resort: clear all
+                localStorage.removeItem(ARCHIVE_KEY);
+                setArchive([]);
+            }
+        }
+    };
+
+    const clearArchive = () => {
+        localStorage.removeItem(ARCHIVE_KEY);
+        setArchive([]);
     };
 
     const applyWatermark = async (imageUrl) => {
@@ -444,8 +465,20 @@ const WallpaperLab = () => {
             {/* Archive Section - Minimal List */}
             {archive.length > 0 && (
                 <section style={{ maxWidth: '1200px', margin: '4rem auto 0', padding: '0 2rem' }}>
-                    <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '1rem', marginBottom: '2rem' }}>
-                        LOCAL ARCHIVE ({archive.length})
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--theme-border)', paddingBottom: '1rem', marginBottom: '2rem' }}>
+                        <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>
+                            LOCAL_ARCHIVE ({archive.length}/12)
+                        </div>
+                        <button 
+                            onClick={clearArchive}
+                            style={{ 
+                                background: 'none', border: '1px solid #FF3333', color: '#FF3333', 
+                                padding: '0.3rem 0.8rem', borderRadius: '4px', fontSize: '0.6rem', 
+                                fontFamily: COLORS.mono, cursor: 'pointer' 
+                            }}
+                        >
+                            CLEAR_ALL
+                        </button>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
                         {archive.map(item => (
