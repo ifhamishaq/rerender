@@ -1,3 +1,7 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Check, Cpu } from 'lucide-react';
 import { fetchOpenRouter } from '../utils/ai';
 
 const VISION_MODEL = 'nvidia/nemotron-nano-12b-v2-vl:free';
