@@ -144,28 +144,18 @@ const WallpaperLab = () => {
         if (isEnhancing) return;
         setIsEnhancing(true);
         try {
-            const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'HTTP-Referer': 'http://localhost:5173',
-                    'X-Title': 'RE-RENDER Wallpaper Lab',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'stepfun/step-3.5-flash:free',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'You are an expert AI image prompt engineer. The user will give you a wallpaper generation prompt. Your ONLY job is to enhance it — make it more vivid, detailed, and optimized for AI image generation. Reply with ONLY the enhanced prompt text. No explanations, no headers, no bullet points, no markdown. Just the raw enhanced prompt.'
-                        },
-                        { role: 'user', content: livePrompt }
-                    ],
-                    temperature: 0.7
-                })
-            });
-            const data = await response.json();
+            const data = await fetchOpenRouter({
+                model: 'stepfun/step-3.5-flash:free',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an expert AI image prompt engineer. The user will give you a wallpaper generation prompt. Your ONLY job is to enhance it — make it more vivid, detailed, and optimized for AI image generation. Reply with ONLY the enhanced prompt text. No explanations, no headers, no bullet points, no markdown. Just the raw enhanced prompt.'
+                    },
+                    { role: 'user', content: livePrompt }
+                ],
+                temperature: 0.7
+            }, { title: 'RE-RENDER Wallpaper Lab' });
+
             const enhanced = data.choices?.[0]?.message?.content?.trim();
             if (enhanced) setCustomSupplement(enhanced);
         } catch (err) {
