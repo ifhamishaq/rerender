@@ -12,16 +12,70 @@ const ANALYSIS_PHASES = [
 ];
 
 const ThumbnailAnalyserPage = () => {
-    const [image, setImage] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const [analysis, setAnalysis] = useState(null);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [currentPhase, setCurrentPhase] = useState(0);
-    const [fakeProgress, setFakeProgress] = useState(0);
-    const [isExporting, setIsExporting] = useState(false);
+    const [isThermal, setIsThermal] = useState(false);
     
     const fileRef = useRef(null);
     const progressInterval = useRef(null);
+
+    // Sub-component for Thermal Visuals
+    const ThermalOverlay = ({ heatmap, active }) => {
+        if (!active || !heatmap) return null;
+        return (
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5, overflow: 'visible' }}>
+                <defs>
+                    <filter id="thermal-glow">
+                        <feGaussianBlur stdDeviation="15" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+                {heatmap.map((point, i) => (
+                    <motion.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: point.intensity || 0.8, scale: 1 }} transition={{ delay: i * 0.2 }}>
+                        <circle 
+                            cx={`${point.x}%`} 
+                            cy={`${point.y}%`} 
+                            r={40 + (point.intensity * 20)} 
+                            fill="url(#thermal-gradient)"
+                            filter="url(#thermal-glow)"
+                            style={{ opacity: 0.6 }}
+                        />
+                        <text 
+                            x={`${point.x}%`} 
+                            y={`${point.y - 5}%`} 
+                            textAnchor="middle" 
+                            style={{ fill: '#fff', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 900, textShadow: '0 0 10px #f00' }}
+                        >
+                            {point.label}
+                        </text>
+                    </motion.g>
+                ))}
+                <linearGradient id="thermal-gradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#ff0000" />
+                    <stop offset="50%" stopColor="#ffae00" />
+                    <stop offset="100%" stopColor="#fffb00" />
+                </linearGradient>
+
+                {/* Draw Eye Path Arrows */}
+                {analysis?.eyePathPoints?.length > 1 && (
+                    <motion.path
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, delay: 1 }}
+                        d={`M ${analysis.eyePathPoints.map(p => `${p.x}% ${p.y}%`).join(' L ')}`}
+                        fill="none"
+                        stroke="var(--color-accent)"
+                        strokeWidth="2"
+                        strokeDasharray="5,5"
+                        markerEnd="url(#arrowhead)"
+                    />
+                )}
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-accent)" />
+                    </marker>
+                </defs>
+            </svg>
+        );
+    };
 
     // Psychological trick: Cycle through technical phases to make the wait feel productive
     useEffect(() => {
@@ -56,15 +110,17 @@ const ThumbnailAnalyserPage = () => {
             setImage(reader.result);
             setPreview(reader.result);
             setAnalysis(null);
+            setIsThermal(false);
+            setIsThermal(false);
         };
         reader.readAsDataURL(file);
     };
 
     const handleAnalyze = async () => {
         if (!image || isAnalyzing) return;
-        setIsGenerating(true); // Ensure consistency with other components if needed, or stick to isAnalyzing
         setIsAnalyzing(true);
         setAnalysis(null);
+        setIsThermal(false);
 
         try {
             const body = {
@@ -72,26 +128,36 @@ const ThumbnailAnalyserPage = () => {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are a YouTube thumbnail expert. Analyze this thumbnail.
-YouTube CTR ranges 2-30%. Score 0-10: Face Details, Contrast, Saturation, Text Emphasis.
+                        content: `You are a YouTube thumbnail expert and visual psychologist.
+Analyze this thumbnail for conversion and attention flow.
 
-NEW ANALYSIS FIELDS REQUIRED:
-- audienceFit: 0-100 score + profile description.
-- hookType: Identify the primary driver (Curiosity, Authority, Fear, Desire, Logic).
-- eyePath: Where does the eye go first, second, and third?
-- nicheContext: How it compares to its intended industry/niche.
+NEW VISUAL SCAN REQUIREMENTS:
+1. heatmap: Array of high-interest focal points. Each point needs {"x": 0-100, "y": 0-100, "label": "FACE/TEXT/EYE_CATCH", "intensity": 0.1-1.0}
+2. eyePathPoints: Array of 3 key look-points in sequence: [{"x": 0-100, "y": 0-100}, ...] where index 0 is first look.
 
 IMPORTANT: Your response MUST be a single, valid JSON object. 
 - DO NOT use any markdown formatting.
 - ESCAPE all double quotes within strings.
 
 JSON STRUCTURE:
-{"ctrScore":85, "composition":"...", "metrics":{"faceDetails":8, "contrast":9, "saturation":7, "textEmphasis":6}, "audience":{"score":92, "profile":"..."}, "heuristics":{"hook":"...", "eyePath":"1. ... 2. ... 3. ...", "niche":"..."}, "colorPsychology":"...", "textReadability":"...", "improvements":["..."], "verdict":"..."}`
+{
+  "ctrScore": 85, 
+  "composition": "...", 
+  "metrics": {"faceDetails": 8, "contrast": 9, "saturation": 7, "textEmphasis": 6}, 
+  "audience": {"score": 92, "profile": "..."}, 
+  "heuristics": {"hook": "...", "eyePath": "...", "niche": "..."},
+  "heatmap": [{"x": 20, "y": 45, "label": "FACE", "intensity": 0.9}, ...],
+  "eyePathPoints": [{"x": 20, "y": 45}, {"x": 70, "y": 30}, {"x": 50, "y": 80}],
+  "colorPsychology": "...", 
+  "textReadability": "...", 
+  "improvements": ["..."], 
+  "verdict": "..."
+}`
                     },
                     {
                         role: 'user',
                         content: [
-                            { type: 'text', text: 'Analyze this thumbnail in depth. Provide audience fit, hook type, and strategic eye-paths. Return ONLY the JSON object.' },
+                            { type: 'text', text: 'Analyze this thumbnail. Provide precise X/Y coordinates for the heatmap and eye-tracking path. Return ONLY JSON.' },
                             { type: 'image_url', image_url: { url: image } }
                         ]
                     }
@@ -206,8 +272,21 @@ JSON STRUCTURE:
                 ) : (
                     <div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', marginBottom: '4rem' }}>
-                            <div style={{ border: '1px solid var(--color-border)', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', position: 'relative' }}>
-                                <img src={preview} alt="Thumbnail preview" style={{ width: '100%', display: 'block', opacity: isAnalyzing ? 0.3 : 1, transition: 'opacity 0.5s' }} />
+                        <div style={{ border: '1px solid var(--color-border)', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', position: 'relative' }}>
+                                <img 
+                                    src={preview} 
+                                    alt="Thumbnail preview" 
+                                    style={{ 
+                                        width: '100%', 
+                                        display: 'block', 
+                                        opacity: isAnalyzing ? 0.3 : 1, 
+                                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        filter: isThermal ? 'contrast(1.5) saturate(1.5) hue-rotate(-10deg) brightness(0.8)' : 'none'
+                                    }} 
+                                />
+                                
+                                <ThermalOverlay heatmap={analysis?.heatmap} active={isThermal && !isAnalyzing} />
+
                                 {isAnalyzing && (
                                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', zIndex: 10 }}>
                                         <Cpu size={32} className="spin" style={{ color: 'var(--color-accent)' }} />
@@ -225,6 +304,30 @@ JSON STRUCTURE:
                             </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {analysis && (
+                                    <button 
+                                        onClick={() => setIsThermal(!isThermal)}
+                                        style={{
+                                            padding: '1rem',
+                                            backgroundColor: isThermal ? 'var(--color-accent)' : 'transparent',
+                                            color: isThermal ? '#000' : 'var(--color-text)',
+                                            border: '1px solid var(--color-accent)',
+                                            fontFamily: 'var(--font-mono)',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 900,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.75rem',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Zap size={16} fill={isThermal ? 'currentColor' : 'none'} />
+                                        {isThermal ? 'DISABLE_THERMAL_SCAN' : 'ACTIVATE_THERMAL_SCAN'}
+                                    </button>
+                                )}
+
                                 <button onClick={handleAnalyze} disabled={isAnalyzing} style={{
                                     padding: '1.25rem', backgroundColor: isAnalyzing ? 'var(--color-border)' : 'var(--color-accent)',
                                     color: '#000', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
