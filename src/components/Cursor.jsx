@@ -64,8 +64,8 @@ const Cursor = () => {
                     position: 'fixed',
                     top: 0,
                     left: 0,
-                    width: '20px',
-                    height: '20px',
+                    width: '8px',
+                    height: '8px',
                     borderRadius: '50%',
                     backgroundColor: 'var(--color-accent)',
                     pointerEvents: 'none',
@@ -75,22 +75,11 @@ const Cursor = () => {
                     y: springY,
                     translateX: '-50%',
                     translateY: '-50%',
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    transformStyle: 'preserve-3d'
-                }}
-                animate={{
-                    scale: isHovering ? 2.5 : 1,
-                }}
-                transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 28,
-                    mass: 0.5
+                    willChange: 'transform'
                 }}
             />
 
-            {/* Outer Ring */}
+            {/* Outer Ring / Interaction Feedback */}
             <motion.div
                 style={{
                     position: 'fixed',
@@ -99,7 +88,7 @@ const Cursor = () => {
                     width: '40px',
                     height: '40px',
                     border: '1px solid var(--color-accent)',
-                    borderRadius: '50%',
+                    borderRadius: isHovering ? '4px' : '50%',
                     pointerEvents: 'none',
                     zIndex: 9998,
                     mixBlendMode: 'difference',
@@ -107,21 +96,39 @@ const Cursor = () => {
                     y: outerY,
                     translateX: '-50%',
                     translateY: '-50%',
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    transformStyle: 'preserve-3d'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    willChange: 'transform'
                 }}
                 animate={{
-                    scale: isHovering ? 1.5 : 1,
-                    opacity: isHovering ? 0.5 : 1,
+                    width: isHovering ? 80 : 40,
+                    height: isHovering ? 30 : 40,
+                    opacity: 1,
+                    rotate: isHovering ? 0 : 45
                 }}
                 transition={{
                     type: "spring",
-                    stiffness: 550,
-                    damping: 35,
-                    mass: 0.3
+                    stiffness: 400,
+                    damping: 30
                 }}
-            />
+            >
+                {isHovering && (
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.5rem',
+                            fontWeight: 900,
+                            color: 'var(--color-accent)',
+                            letterSpacing: '0.1em'
+                        }}
+                    >
+                        [ VIEW ]
+                    </motion.span>
+                )}
+            </motion.div>
         </>
     );
 };

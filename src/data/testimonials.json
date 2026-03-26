@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "name": "ALEX RIVERA",
+        "role": "Creative Director @ VOLT",
+        "content": "RE-RENDER transformed our digital presence. Their attention to detail in motion design is second to none.",
+        "avatar": "https://i.pravatar.cc/150?u=alex"
+    },
+    {
+        "id": 2,
+        "name": "SARAH CHEN",
+        "role": "Founder, Studio Bloom",
+        "content": "The brutalist aesthetic they brought to our brand was exactly what we needed to stand out in a crowded market.",
+        "avatar": "https://i.pravatar.cc/150?u=sarah"
+    },
+    {
+        "id": 3,
+        "name": "MARCUS VOGUE",
+        "role": "Lead Editor, NEXUS",
+        "content": "Professional, fast, and technically superior. The assets from the RE-RENDER shop are now a staple in my workflow.",
+        "avatar": "https://i.pravatar.cc/150?u=marcus"
+    },
+    {
+        "id": 4,
+        "name": "ELENA ROSSI",
+        "role": "Independent Filmmaker",
+        "content": "Finally an agency that understands the 'lo-fi' luxury vibe. Their custom transitions saved me weeks of work.",
+        "avatar": "https://i.pravatar.cc/150?u=elena"
+    }
+]

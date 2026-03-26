@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
 import { useTheme } from '../context/ThemeContext';
+import Testimonials from '../components/Testimonials';
 
 const Home = () => {
     const { isDarkMode } = useTheme();
@@ -88,6 +89,9 @@ const Home = () => {
                     ))}
                 </div>
             </section>
+
+            {/* Added Testimonials for Customer Impression */}
+            <Testimonials />
 
             {/* <section style={{ padding: '3rem 2rem' }}> 
                 (Removed fake logo strip for maximum credibility) 
