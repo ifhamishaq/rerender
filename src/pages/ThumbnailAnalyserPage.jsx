@@ -245,11 +245,11 @@ JSON STRUCTURE:
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'var(--nav-height)' }}>
             <div className="no-print" style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-secondary)', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem' }}>
+                <Link to="/tools" className="no-print" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-secondary)', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem' }}>
                     <ArrowLeft size={14} /> BACK_TO_TOOLS
                 </Link>
 
-                <div style={{ marginBottom: '4rem' }}>
+                <div className="no-print" style={{ marginBottom: '4rem' }}>
                     <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1rem', letterSpacing: '0.2em', fontWeight: 900 }}>
                         AI_VISION_MODULE // V2.0.4
                     </div>
@@ -561,10 +561,33 @@ JSON STRUCTURE:
                 @keyframes spin { 100% { transform: rotate(360deg); } }
                 
                 @media print {
+                    /* Hide site-wide globals */
+                    nav, footer, .cursor, .scroll-progress, .global-oracle-container, .sticky-sidebar, #scroll-to-top { 
+                        display: none !important; 
+                    }
+                    
                     .no-print { display: none !important; }
-                    .print-only { display: block !important; }
-                    body { background: white !important; }
-                    @page { margin: 1cm; }
+                    .print-only { 
+                        display: block !important; 
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                    }
+                    
+                    body { 
+                        background: white !important; 
+                        color: black !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    
+                    @page { 
+                        margin: 1.5cm; 
+                        size: portrait;
+                    }
+
+                    main { padding-top: 0 !important; }
                 }
                 
                 @media screen {
