@@ -1,50 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Wallet, ExternalLink, Activity, Info } from 'lucide-react';
+import { Shield, Wallet, ExternalLink, Activity, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../utils/supabase';
+import { useDossier } from '../hooks/useDossier';
 import { Link } from 'react-router-dom';
 
 const DossierPage = () => {
     const { user, profile, signOut } = useAuth();
-    const [requests, setRequests] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { requests, submitting, submitRequest } = useDossier();
+    
     const [txId, setTxId] = useState('');
     const [amount, setAmount] = useState(10);
-    const [submitting, setSubmitting] = useState(false);
 
     const PAYPAL_LINK = "https://www.paypal.com/paypalme/ImadWani96";
 
-    useEffect(() => {
-        if (user) fetchRequests();
-    }, [user]);
-
-    const fetchRequests = async () => {
-        setLoading(true);
-        const { data } = await supabase
-            .from('topup_requests')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-        if (data) setRequests(data);
-        setLoading(false);
-    };
-
-    const handleSupportSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!txId) return alert('Enter payment info/email');
-        setSubmitting(true);
-        const { error } = await supabase.from('topup_requests').insert([
-            { user_id: user.id, amount: parseInt(amount), transaction_id: txId }
-        ]);
-        if (!error) {
-            alert('Support Request Sent. Admin will verify shortly.');
+        try {
+            await submitRequest(amount, txId);
             setTxId('');
-            fetchRequests();
-        } else {
-            alert('Error: ' + error.message);
+            alert('Support Request Delivered. Verifying...');
+        } catch (err) {
+            alert('Transmission Failed: ' + err.message);
         }
-        setSubmitting(false);
     };
 
     if (!user) return (
@@ -102,6 +80,7 @@ const DossierPage = () => {
                                             <option value="10">10 CR ($1)</option>
                                             <option value="50">50 CR ($5)</option>
                                             <option value="120">120 CR ($10)</option>
+                                            <option value="999">PRO_ACCESS ($10) [NO_WATERMARK]</option>
                                             <option value="300">300 CR ($25)</option>
                                         </select>
                                     </div>
@@ -119,14 +98,22 @@ const DossierPage = () => {
 
                     {/* Right: Meta & Logs */}
                     <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        <div style={{ padding: '1.5rem', border: '1px solid #1a1a1a' }}>
+                        <div style={{ padding: '1.5rem', border: '1px solid #1a1a1a', position: 'relative' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '0.5rem' }}>
                                 <Shield size={14} color="var(--color-accent)" />
                                 <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>IDENTITY_PROTOCOL</span>
                             </div>
+                            
+                            {profile?.is_pro && (
+                                <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-accent)', animation: 'pulse 2s infinite' }}>
+                                    <Award size={14} />
+                                    <span style={{ fontSize: '0.6rem', fontWeight: 900 }}>PRO_STATUS</span>
+                                </div>
+                            )}
+
                             <div style={{ fontSize: '0.65rem', opacity: 0.6, lineHeight: 1.8 }}>
                                 UID: {user.id.toUpperCase()}<br/>
-                                STATUS: VERIFIED_OPERATIVE<br/>
+                                STATUS: {profile?.is_pro ? 'UNRESTRICTED_ACCESS' : 'STANDARD_OPERATIVE'}<br/>
                                 JOIN_DATE: {new Date(user.created_at).toLocaleDateString()}
                             </div>
                         </div>

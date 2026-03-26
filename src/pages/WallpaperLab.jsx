@@ -285,7 +285,8 @@ const WallpaperLab = () => {
             }
 
             if (finalUrl) {
-                const watermarkedUrl = await applyWatermark(finalUrl);
+                // Remove watermark if user is PRO
+                const watermarkedUrl = profile?.is_pro ? finalUrl : await applyWatermark(finalUrl);
                 setResultUrl(watermarkedUrl);
                 saveToArchive(watermarkedUrl, { genre: selectedGenre.name, style: selectedStyle.name, prompt: compositePrompt });
             } else {
@@ -327,8 +328,15 @@ const WallpaperLab = () => {
                 <div style={{ fontFamily: COLORS.display, fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
                     RE-RENDER STUDIO
                 </div>
-                <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)' }}>
-                    CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{profile?.credits ?? 0}</span>
+                <div style={{ fontSize: '0.8rem', fontFamily: COLORS.mono, color: 'var(--theme-text-muted)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Link to="/dossier" style={{ 
+                        textDecoration: 'none', color: COLORS.accent, 
+                        border: `1px solid ${COLORS.accent}`, padding: '0.3rem 0.6rem', 
+                        fontSize: '0.65rem', fontWeight: 900 
+                    }}>
+                        BUY_CREDITS
+                    </Link>
+                    <span>CREDITS: <span style={{ color: COLORS.accent, fontWeight: 'bold' }}>{profile?.credits ?? 0}</span></span>
                 </div>
             </header>
 
