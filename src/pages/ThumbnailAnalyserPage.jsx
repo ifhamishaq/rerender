@@ -174,7 +174,10 @@ const ThumbnailAnalyserPage = () => {
             setIsPublished(true);
         } catch (err) {
             console.error('Publish failed:', err);
-            // Non-blocking error for user
+            const isBucketError = err.message?.toLowerCase().includes('bucket not found') || err.error === 'Bucket not found';
+            if (isBucketError) {
+                alert("STORAGE_LINK_FAILURE: The 'archive' bucket was not found in Supabase Storage. Please ensure it is created and public in your Supabase Dashboard.");
+            }
         } finally {
             setIsPublishing(false);
         }

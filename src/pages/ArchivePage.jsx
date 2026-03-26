@@ -73,7 +73,7 @@ const ArchivePage = () => {
                         textTransform: 'uppercase'
                     }}>
                         THE<br/>
-                        <span style={{ color: 'var(--color-accent)', fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400, textTransform: 'none' }}>Archive</span>
+                        <span style={{ color: 'var(--color-accent)', fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400, textTransform: 'none' }}>Community</span>
                     </h1>
                 </header>
 

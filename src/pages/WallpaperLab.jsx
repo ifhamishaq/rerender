@@ -171,7 +171,11 @@ const WallpaperLab = () => {
             setIsPublished(true);
         } catch (err) {
             console.error('Publish failed:', err);
-            setError(`PUBLISH_FAIL: ${err.message}`);
+            const isBucketError = err.message?.toLowerCase().includes('bucket not found') || err.error === 'Bucket not found';
+            const msg = isBucketError 
+                ? "STORAGE_LINK_FAILURE: The 'archive' bucket was not found in Supabase Storage. Please create it in the dashboard."
+                : `PUBLISH_FAIL: ${err.message}`;
+            setError(msg);
         } finally {
             setIsPublishing(false);
         }

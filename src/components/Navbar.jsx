@@ -50,7 +50,7 @@ const Navbar = () => {
         { href: '/get-in-touch', label: 'Get In Touch' },
         { href: '/pricing', label: 'Pricing' },
         { href: '/shop', label: 'Shop' },
-        { href: '/careers', label: 'Careers' },
+        { href: '/archive', label: 'Community' },
         { href: '/tools', label: 'Tools' },
         { href: '/arcade', label: 'Arcade' },
         { href: '/blog', label: 'Blog' },
