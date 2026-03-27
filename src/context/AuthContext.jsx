@@ -48,14 +48,32 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const fetchProfile = async (userId) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-        
-        if (data) setProfile(data);
-        if (error) console.error('Error fetching profile:', error);
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+            
+            if (data) {
+                setProfile(data);
+            } else if (error && error.code === 'PGRST116') {
+                // Profile missing - Create it (Fallback)
+                console.log('Profile missing for UID, creating fallback dossier...');
+                const { data: newData, error: createError } = await supabase
+                    .from('profiles')
+                    .insert([{ id: userId, credits: 50, role: 'user' }])
+                    .select()
+                    .single();
+                
+                if (newData) setProfile(newData);
+                if (createError) console.error('Failed to create fallback profile:', createError);
+            } else if (error) {
+                console.error('Error fetching profile:', error);
+            }
+        } catch (err) {
+            console.error('Profile Fetch Protocol Failure:', err);
+        }
     };
 
     const spendCredits = async (amount, reason = 'SYSTEM_USAGE') => {
