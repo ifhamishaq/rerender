@@ -450,10 +450,17 @@ const Admin = () => {
         }
     };
  
-    const handlePinVerify = (e) => {
+    const handlePinVerify = async (e) => {
         e.preventDefault();
-        // PIN restricted to 8989 based on user context or default
-        if (adminPin === '8989') {
+        setStatus('VERIFYING_PROTOCOL...');
+        
+        const { data: isValid, error } = await supabase.rpc('verify_admin_pin', { 
+            input_pin: adminPin 
+        });
+
+        if (error) {
+            setStatus('ACCESS_DENIED: Protocol Error (' + error.message + ')');
+        } else if (isValid) {
             setIsPinAuthorized(true);
             sessionStorage.setItem('ADMIN_AUTH_L5', 'granted');
             setStatus('Level 5 Clearance Granted.');
