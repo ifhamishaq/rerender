@@ -291,18 +291,20 @@ const WallpaperLab = () => {
         }
     };
 
-    const handleDownload = async () => {
-        if (!resultUrl) return;
+    const handleDownload = async (url) => {
+        const downloadUrl = url || resultUrl;
+        if (!downloadUrl) return;
         try {
-            const response = await fetch(resultUrl);
+            const response = await fetch(downloadUrl);
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = blobUrl;
             link.download = `rerender-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
             console.error('Download failed', err);
         }
@@ -414,14 +416,17 @@ const WallpaperLab = () => {
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>AWAITING_VISUAL_INPUT</span>
                             </div>
                         )}
-                        
-                                <button onClick={handleDownload} style={{ 
+                        {resultUrl && !isGenerating && (
+                            <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', gap: '0.75rem' }}>
+                                <button onClick={() => handleDownload(resultUrl)} style={{ 
                                     background: 'var(--color-text)', color: 'var(--color-bg)', 
                                     border: 'none', padding: '1rem', cursor: 'pointer', 
                                     display: 'flex', alignItems: 'center', justifyContent: 'center' 
                                 }}>
                                     <Download size={24} />
                                 </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Metadata Strip */}
@@ -603,10 +608,19 @@ const WallpaperLab = () => {
                     </header>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem' }}>
                         {archive.map(item => (
-                            <div key={item.id} style={{ border: '1px solid var(--color-border)', padding: '0.5rem', backgroundColor: 'var(--color-surface)' }}>
+                            <div key={item.id} style={{ border: '1px solid var(--color-border)', padding: '0.5rem', backgroundColor: 'var(--color-surface)', position: 'relative' }}>
                                 <img src={item.url} alt="Archive" style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover' }} />
-                                <div style={{ padding: '1rem 0', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', opacity: 0.6 }}>
-                                    {item.genre} // {item.style}
+                                <div style={{ 
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                                    padding: '1rem 0', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', opacity: 0.6 
+                                }}>
+                                    <div>{item.genre} // {item.style}</div>
+                                    <button 
+                                        onClick={() => handleDownload(item.url)}
+                                        style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', padding: '0 0.5rem' }}
+                                    >
+                                        <Download size={14} />
+                                    </button>
                                 </div>
                             </div>
                         ))}
