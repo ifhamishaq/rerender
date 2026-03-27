@@ -10,14 +10,12 @@ export const AuthProvider = ({ children }) => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     useEffect(() => {
-        console.log('AUTH_TRACE: Auth Engine Started');
         
         let mounted = true;
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!mounted) return;
             
-            console.log(`AUTH_TRACE: Event [${event}] | Session Object [${!!session}]`);
             
             try {
                 if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
@@ -34,7 +32,7 @@ export const AuthProvider = ({ children }) => {
                     setProfile(null);
                 }
             } catch (err) {
-                console.error('AUTH_TRACE: Protocol Sync Error:', err);
+                console.error('Auth Protocol Sync Error:', err);
             } finally {
                 // Ensure loading is false as soon as we have the USER object
                 setLoading(false);
@@ -48,7 +46,6 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const fetchProfile = async (userId) => {
-        console.log('AUTH_TRACE: Fetching dossier for UID:', userId);
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -57,10 +54,8 @@ export const AuthProvider = ({ children }) => {
                 .single();
             
             if (data) {
-                console.log('AUTH_TRACE: Dossier resolved for', data.full_name);
                 setProfile(data);
             } else if (error && error.code === 'PGRST116') {
-                console.log('AUTH_TRACE: Dossier missing, initiating creation...');
                 const { data: newData, error: createError } = await supabase
                     .from('profiles')
                     .insert([{ id: userId, credits: 50, role: 'user' }])
@@ -68,12 +63,12 @@ export const AuthProvider = ({ children }) => {
                     .single();
                 
                 if (newData) setProfile(newData);
-                if (createError) console.error('AUTH_TRACE: Creation failed:', createError);
+                if (createError) console.error('Failed to create fallback profile:', createError);
             } else if (error) {
-                console.error('AUTH_TRACE: Query Error:', error.message);
+                console.error('Dossier Query Error:', error.message);
             }
         } catch (err) {
-            console.error('AUTH_TRACE: Network/Protocol Error:', err);
+            console.error('Dossier Network Error:', err);
         }
     };
 
