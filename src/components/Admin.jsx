@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
+    const { user } = useAuth(); // Get user for email check
     const [activeTab, setActiveTab] = useState('products');
 
     // --- Products State ---
@@ -39,11 +42,27 @@ const Admin = () => {
     const [serviceForm, setServiceForm] = useState({
         title: '', desc: '', tags: '', gif: ''
     });
-
+ 
+    // --- Credit Requests State ---
+    const [topupRequests, setTopupRequests] = useState([]);
+ 
+    // --- Phase 6: All Users State ---
+    const [allUsers, setAllUsers] = useState([]);
+    const [userSearch, setUserSearch] = useState('');
+ 
+    // --- Phase 6: Moderation State ---
+    const [allThreads, setAllThreads] = useState([]);
+ 
+    // --- Phase 6: Metrics State ---
+    const [metrics, setMetrics] = useState({ users: 0, threads: 0, totalCredits: 0 });
+ 
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isOwner = user?.email === 'ifham.wani89@gmail.com';
+
+        if (!isLocal && !isOwner) {
             window.location.href = '/';
             return;
         }
@@ -52,6 +71,10 @@ const Admin = () => {
         fetchBlog();
         fetchCareers();
         fetchServices();
+        fetchTopupRequests();
+        fetchAllUsers();
+        fetchAllThreads();
+        fetchMetrics();
     }, []);
 
     // --- Products CRUD ---
@@ -307,6 +330,107 @@ const Admin = () => {
             setServices(updated); setStatus('Service deleted!');
         } catch (err) { setStatus('Error deleting service.'); }
     };
+ 
+    // --- Credit Management CRUD ---
+    const fetchTopupRequests = async () => {
+        const { data, error } = await supabase
+            .from('topup_requests')
+            .select(`
+                *,
+                profiles:user_id ( full_name, credits )
+            `)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+        
+        if (error) console.error('Error fetching topups:', error);
+        else setTopupRequests(data);
+    };
+ 
+    const handleApproveTopup = async (reqId) => {
+        setStatus('Processing Approval...');
+        const { error } = await supabase.rpc('approve_topup', { req_id: reqId });
+        
+        if (error) {
+            setStatus('Error: ' + error.message);
+        } else {
+            setStatus('Credit Top-up Approved!');
+            fetchTopupRequests();
+        }
+    };
+ 
+    const handleRejectTopup = async (reqId) => {
+        setStatus('Processing Rejection...');
+        const { error } = await supabase.rpc('reject_topup', { req_id: reqId });
+        
+        if (error) {
+            setStatus('Error: ' + error.message);
+        } else {
+            setStatus('Request Rejected.');
+            fetchTopupRequests();
+        }
+    };
+ 
+    // --- Phase 6: God Mode CRUD ---
+    const fetchAllUsers = async () => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('credits', { ascending: false });
+        if (data) setAllUsers(data);
+    };
+ 
+    const fetchAllThreads = async () => {
+        const { data, error } = await supabase
+            .from('community_archive')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setAllThreads(data);
+    };
+ 
+    const fetchMetrics = async () => {
+        const { count: userCount } = await supabase.from('profiles', { count: 'exact', head: true }).select('*');
+        const { count: threadCount } = await supabase.from('community_archive', { count: 'exact', head: true }).select('*');
+        const { data: creditData } = await supabase.from('profiles').select('credits');
+        const totalCredits = creditData?.reduce((acc, curr) => acc + (curr.credits || 0), 0) || 0;
+        
+        setMetrics({ users: userCount, threads: threadCount, totalCredits });
+    };
+ 
+    const handleAdjustCredits = async (userId, amount, reason) => {
+        const { error } = await supabase.rpc('admin_adjust_credits', { 
+            target_user_id: userId, 
+            adjustment_amount: amount,
+            adj_reason: reason
+        });
+        if (!error) {
+            setStatus(`Adjusted balance for user.`);
+            fetchAllUsers();
+            fetchMetrics();
+        } else {
+            setStatus('Credit Adjustment Failed: ' + error.message);
+        }
+    };
+ 
+    const handleTogglePro = async (userId, proStatus) => {
+        const { error } = await supabase.rpc('admin_toggle_pro', { 
+            target_user_id: userId, 
+            pro_status: proStatus 
+        });
+        if (!error) {
+            setStatus(`User Pro-status updated.`);
+            fetchAllUsers();
+        }
+    };
+ 
+    const handleAdminDeleteThread = async (id) => {
+        if (!window.confirm('GOD_MODE_DELETE: Permanent termination?')) return;
+        const { error } = await supabase.from('community_archive').delete().eq('id', id);
+        if (!error) {
+            setStatus('Thread Terminated.');
+            fetchAllThreads();
+            fetchMetrics();
+        }
+    };
 
     // --- Tab Style ---
     const tabStyle = (tab) => ({
@@ -382,6 +506,10 @@ const Admin = () => {
                     <button onClick={() => setActiveTab('blog')} style={tabStyle('blog')}>BLOG</button>
                     <button onClick={() => setActiveTab('careers')} style={tabStyle('careers')}>CAREERS</button>
                     <button onClick={() => setActiveTab('prompts')} style={tabStyle('prompts')}>PROMPTS</button>
+                    <button onClick={() => setActiveTab('credits')} style={tabStyle('credits')}>CREDITS</button>
+                    <button onClick={() => setActiveTab('users')} style={tabStyle('users')}>USERS</button>
+                    <button onClick={() => setActiveTab('moderation')} style={tabStyle('moderation')}>MOD</button>
+                    <button onClick={() => setActiveTab('metrics')} style={tabStyle('metrics')}>STATS</button>
                 </div>
 
                 {/* ===== PRODUCTS TAB ===== */}
@@ -535,6 +663,139 @@ const Admin = () => {
                             </div>
                         ))}
                     </>
+                )}
+ 
+                {/* ===== CREDITS TAB ===== */}
+                {activeTab === 'credits' && (
+                    <>
+                        <div style={sectionBox}>
+                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                                PENDING_TOPUP_REQUESTS
+                                <button onClick={fetchTopupRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
+                            </h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {topupRequests.length > 0 ? topupRequests.map(req => (
+                                    <div key={req.id} style={{ 
+                                        padding: '1.5rem', 
+                                        border: '1px solid var(--color-border)', 
+                                        backgroundColor: '#111', 
+                                        display: 'flex', 
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <div>
+                                            <div style={{ fontWeight: 900, marginBottom: '0.3rem' }}>
+                                                {req.profiles?.full_name || 'USER_ID: ' + req.user_id.slice(0, 8)} 
+                                                <span style={{ color: 'var(--color-accent)', marginLeft: '1rem' }}>+{req.amount} CR</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
+                                                TX_ID: <span style={{ color: '#fff' }}>{req.transaction_id}</span> | 
+                                                DATE: {new Date(req.created_at).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.3rem' }}>
+                                                CURRENT_BALANCE: {req.profiles?.credits || 0} CR
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button 
+                                                onClick={() => handleApproveTopup(req.id)}
+                                                style={{ ...buttonStyle, padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
+                                            >
+                                                APPROVE
+                                            </button>
+                                            <button 
+                                                onClick={() => handleRejectTopup(req.id)}
+                                                style={{ ...buttonStyle, backgroundColor: '#333', color: '#ff4444', padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
+                                            >
+                                                REJECT
+                                            </button>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_PENDING_REQUESTS</div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+ 
+                {/* ===== USERS TAB (PHASE 6) ===== */}
+                {activeTab === 'users' && (
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '1.5rem' }}>USER_CONTROL_HUB</h2>
+                        <input 
+                            placeholder="SEARCH_BY_EMAIL_OR_NAME" 
+                            value={userSearch} 
+                            onChange={e => setUserSearch(e.target.value)} 
+                            style={{ ...inputStyle, marginBottom: '1.5rem' }} 
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {allUsers
+                                .filter(u => u.email?.toLowerCase().includes(userSearch.toLowerCase()) || u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
+                                .map(u => (
+                                <div key={u.id} style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#111', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 900, marginBottom: '0.2rem' }}>
+                                            {u.full_name || 'NO_NAME'} {u.is_pro && <span style={{ color: 'var(--color-accent)', fontSize: '0.6rem' }}>[PRO]</span>}
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{u.email}</div>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 900, marginTop: '0.5rem' }}>BALANCE: {u.credits || 0} CR</div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end', maxWidth: '300px' }}>
+                                        <button onClick={() => handleAdjustCredits(u.id, 50, 'ADMIN_GRANT')} style={{ ...buttonStyle, padding: '0.5rem', fontSize: '0.6rem' }}>+50 CR</button>
+                                        <button onClick={() => handleAdjustCredits(u.id, -50, 'ADMIN_REVOKE')} style={{ ...buttonStyle, backgroundColor: '#333', color: '#fff', padding: '0.5rem', fontSize: '0.6rem' }}>-50 CR</button>
+                                        <button onClick={() => handleTogglePro(u.id, !u.is_pro)} style={{ ...buttonStyle, backgroundColor: u.is_pro ? '#ff4444' : 'var(--color-accent)', padding: '0.5rem', fontSize: '0.6rem' }}>
+                                            {u.is_pro ? 'STRIP_PRO' : 'GRANT_PRO'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+ 
+                {/* ===== MODERATION TAB (PHASE 6) ===== */}
+                {activeTab === 'moderation' && (
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '1.5rem' }}>GLOBAL_MODERATION</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {allThreads.map(thread => (
+                                <div key={thread.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', backgroundColor: '#111', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>{thread.title}</div>
+                                        <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>BY: {thread.user_name} | {new Date(thread.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleAdminDeleteThread(thread.id)}
+                                        style={{ ...buttonStyle, backgroundColor: '#333', color: '#ff4444', padding: '0.5rem 1rem', fontSize: '0.65rem' }}
+                                    >
+                                        GOD_DELETE
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+ 
+                {/* ===== METRICS TAB (PHASE 6) ===== */}
+                {activeTab === 'metrics' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+                        <div style={sectionBox}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>USER_BASE_SYNC</div>
+                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.users}</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_REGISTERED_OPERATIVES</div>
+                        </div>
+                        <div style={sectionBox}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>INTELLIGENCE_VOLUME</div>
+                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.threads}</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_COMMUNITY_THREADS</div>
+                        </div>
+                        <div style={sectionBox}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>CREDIT_CIRCULATION</div>
+                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.totalCredits}</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_ACTIVE_COMPUTE_POWER</div>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
