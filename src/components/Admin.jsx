@@ -5,6 +5,10 @@ import { useAuth } from '../context/AuthContext';
 const Admin = () => {
     const { user, profile, loading: authLoading } = useAuth(); // Get profile for role check
     const [activeTab, setActiveTab] = useState('products');
+    const [adminPin, setAdminPin] = useState('');
+    const [isPinAuthorized, setIsPinAuthorized] = useState(() => {
+        return sessionStorage.getItem('ADMIN_AUTH_L5') === 'granted';
+    });
 
     // --- Products State ---
     const [products, setProducts] = useState([]);
@@ -443,6 +447,19 @@ const Admin = () => {
             setStatus('Thread Terminated.');
             fetchAllThreads();
             fetchMetrics();
+        }
+    };
+ 
+    const handlePinVerify = (e) => {
+        e.preventDefault();
+        // PIN restricted to 8989 based on user context or default
+        if (adminPin === '8989') {
+            setIsPinAuthorized(true);
+            sessionStorage.setItem('ADMIN_AUTH_L5', 'granted');
+            setStatus('Level 5 Clearance Granted.');
+        } else {
+            setStatus('ACCESS_DENIED: Invalid PIN Syntax.');
+            setAdminPin('');
         }
     };
 
