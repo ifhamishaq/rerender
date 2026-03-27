@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
-    const { user } = useAuth(); // Get user for email check
+    const { user, loading: authLoading } = useAuth(); // Get user and loading state
     const [activeTab, setActiveTab] = useState('products');
 
     // --- Products State ---
@@ -59,6 +59,8 @@ const Admin = () => {
     const [status, setStatus] = useState('');
 
     useEffect(() => {
+        if (authLoading) return; // Wait for auth to settle
+
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const isOwner = user?.email === 'ifham.wani89@gmail.com';
 
@@ -66,6 +68,7 @@ const Admin = () => {
             window.location.href = '/';
             return;
         }
+        
         fetchProducts();
         fetchPrompts();
         fetchBlog();
@@ -75,7 +78,7 @@ const Admin = () => {
         fetchAllUsers();
         fetchAllThreads();
         fetchMetrics();
-    }, []);
+    }, [user, authLoading]);
 
     // --- Products CRUD ---
     const fetchProducts = async () => {
