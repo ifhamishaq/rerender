@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             try {
-                setLoading(true);
+                // DON'T set loading(true) here - it prevents loops if fetchProfile triggers re-render
                 setUser(session?.user ?? null);
                 if (session?.user) {
                     await fetchProfile(session.user.id);
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
                     setProfile(null);
                 }
             } catch (err) {
-                console.error('Auth Change Error:', err);
+                console.error('Auth Protocol Sync Failure:', err);
             } finally {
                 setLoading(false);
             }
