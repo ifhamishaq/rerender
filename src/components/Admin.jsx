@@ -65,6 +65,10 @@ const Admin = () => {
         const isOwner = profile?.role === 'admin';
 
         if (!isLocal && !isOwner) {
+            console.log('--- ADMIN_ACCESS_DENIED ---');
+            console.log('Current UID:', user?.id);
+            console.log('Current Role:', profile?.role || 'user');
+            console.log('To promote, run: UPDATE profiles SET role = "admin" WHERE id = "' + user?.id + '";');
             window.location.href = '/';
             return;
         }
