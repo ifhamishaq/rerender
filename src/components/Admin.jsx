@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
-    const { user, loading: authLoading } = useAuth(); // Get user and loading state
+    const { user, profile, loading: authLoading } = useAuth(); // Get profile for role check
     const [activeTab, setActiveTab] = useState('products');
 
     // --- Products State ---
@@ -62,7 +62,7 @@ const Admin = () => {
         if (authLoading) return; // Wait for auth to settle
 
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const isOwner = user?.email === 'ifham.wani89@gmail.com';
+        const isOwner = profile?.role === 'admin';
 
         if (!isLocal && !isOwner) {
             window.location.href = '/';
@@ -84,10 +84,11 @@ const Admin = () => {
     const fetchProducts = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/products');
+            if (!res.ok) throw new Error('OFFLINE');
             const data = await res.json();
             setProducts(data);
         } catch (err) {
-            setStatus('Error fetching products. Is the admin-server running?');
+            console.log('Local CMS server is offline. (Safe to ignore on Production)');
         }
     };
 
@@ -181,11 +182,11 @@ const Admin = () => {
     const fetchPrompts = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/prompts');
-            const data = await res.json();
-            setPrompts(data);
-        } catch (err) {
-            setStatus('Error fetching prompts. Is the admin-server running?');
-        }
+            if (res.ok) {
+                const data = await res.json();
+                setPrompts(data);
+            }
+        } catch (err) {}
     };
 
     const handleSavePrompt = async () => {
@@ -240,9 +241,11 @@ const Admin = () => {
     const fetchBlog = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/blog');
-            const data = await res.json();
-            setBlogPosts(data);
-        } catch (err) { setStatus('Error fetching blog.'); }
+            if (res.ok) {
+                const data = await res.json();
+                setBlogPosts(data);
+            }
+        } catch (err) {}
     };
 
     const handleSaveBlog = async () => {
@@ -270,9 +273,11 @@ const Admin = () => {
     const fetchCareers = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/careers');
-            const data = await res.json();
-            setCareers(data);
-        } catch (err) { setStatus('Error fetching careers.'); }
+            if (res.ok) {
+                const data = await res.json();
+                setCareers(data);
+            }
+        } catch (err) {}
     };
 
     const handleSaveCareer = async () => {
@@ -304,9 +309,11 @@ const Admin = () => {
     const fetchServices = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/services');
-            const data = await res.json();
-            setServices(data);
-        } catch (err) { setStatus('Error fetching services.'); }
+            if (res.ok) {
+                const data = await res.json();
+                setServices(data);
+            }
+        } catch (err) {}
     };
 
     const handleSaveService = async () => {
