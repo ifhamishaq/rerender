@@ -397,21 +397,16 @@ const Admin = () => {
         if (data) setAllUsers(data);
     };
  
-    const fetchAllThreads = async () => {
-        const { data, error } = await supabase
-            .from('community_archive')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (data) setAllThreads(data);
-    };
- 
     const fetchMetrics = async () => {
         const { count: userCount } = await supabase.from('profiles', { count: 'exact', head: true }).select('*');
-        const { count: threadCount } = await supabase.from('community_archive', { count: 'exact', head: true }).select('*');
         const { data: creditData } = await supabase.from('profiles').select('credits');
         const totalCredits = creditData?.reduce((acc, curr) => acc + (curr.credits || 0), 0) || 0;
         
-        setMetrics({ users: userCount, threads: threadCount, totalCredits });
+        setMetrics({
+            users: userCount || 0,
+            threads: 0,
+            totalCredits
+        });
     };
  
     const handleAdjustCredits = async (userId, amount, reason) => {
@@ -440,15 +435,6 @@ const Admin = () => {
         }
     };
  
-    const handleAdminDeleteThread = async (id) => {
-        if (!window.confirm('GOD_MODE_DELETE: Permanent termination?')) return;
-        const { error } = await supabase.from('community_archive').delete().eq('id', id);
-        if (!error) {
-            setStatus('Thread Terminated.');
-            fetchAllThreads();
-            fetchMetrics();
-        }
-    };
  
     const handlePinVerify = async (e) => {
         e.preventDefault();
@@ -546,7 +532,6 @@ const Admin = () => {
                     <button onClick={() => setActiveTab('prompts')} style={tabStyle('prompts')}>PROMPTS</button>
                     <button onClick={() => setActiveTab('credits')} style={tabStyle('credits')}>CREDITS</button>
                     <button onClick={() => setActiveTab('users')} style={tabStyle('users')}>USERS</button>
-                    <button onClick={() => setActiveTab('moderation')} style={tabStyle('moderation')}>MOD</button>
                     <button onClick={() => setActiveTab('metrics')} style={tabStyle('metrics')}>STATS</button>
                 </div>
 
@@ -792,29 +777,6 @@ const Admin = () => {
                     </div>
                 )}
  
-                {/* ===== MODERATION TAB (PHASE 6) ===== */}
-                {activeTab === 'moderation' && (
-                    <div style={sectionBox}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>GLOBAL_MODERATION</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {allThreads.map(thread => (
-                                <div key={thread.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', backgroundColor: '#111', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>{thread.title}</div>
-                                        <div style={{ fontSize: '0.65rem', opacity: 0.5 }}>BY: {thread.user_name} | {new Date(thread.created_at).toLocaleDateString()}</div>
-                                    </div>
-                                    <button 
-                                        onClick={() => handleAdminDeleteThread(thread.id)}
-                                        style={{ ...buttonStyle, backgroundColor: '#333', color: '#ff4444', padding: '0.5rem 1rem', fontSize: '0.65rem' }}
-                                    >
-                                        GOD_DELETE
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
- 
                 {/* ===== METRICS TAB (PHASE 6) ===== */}
                 {activeTab === 'metrics' && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
@@ -822,11 +784,6 @@ const Admin = () => {
                             <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>USER_BASE_SYNC</div>
                             <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.users}</div>
                             <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_REGISTERED_OPERATIVES</div>
-                        </div>
-                        <div style={sectionBox}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>INTELLIGENCE_VOLUME</div>
-                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.threads}</div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_COMMUNITY_THREADS</div>
                         </div>
                         <div style={sectionBox}>
                             <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>CREDIT_CIRCULATION</div>
