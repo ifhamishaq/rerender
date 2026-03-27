@@ -195,7 +195,8 @@ const DigitalLoader = () => {
 
 const AnimatedRoutes = () => {
   const location = useLocation();
-
+  const isAdminLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+ 
   return (
     <AnimatePresence mode="wait">
       <React.Suspense fallback={<DigitalLoader />}>
@@ -216,6 +217,9 @@ const AnimatedRoutes = () => {
         <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
+        
+        {isAdminLocal && <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />}
+        
         <Route path="/careers" element={<TransitionWipe><CareersPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
