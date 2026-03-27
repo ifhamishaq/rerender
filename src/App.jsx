@@ -216,7 +216,6 @@ const AnimatedRoutes = () => {
         <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
         <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
         <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
-        <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />
         <Route path="/careers" element={<TransitionWipe><CareersPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
