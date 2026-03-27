@@ -24,13 +24,7 @@ const Admin = () => {
         title: '', prompt: '', category: 'PORTRAIT', image: ''
     });
 
-    // --- Blog State ---
-    const [blogPosts, setBlogPosts] = useState([]);
-    const [editingBlogId, setEditingBlogId] = useState(null);
-    const [blogForm, setBlogForm] = useState({
-        title: '', slug: '', excerpt: '', date: new Date().toISOString().split('T')[0],
-        author: 'ADMIN', category: 'NEWS', image: '', content: ''
-    });
+    // --- Blog State Removed ---
 
     // --- Careers State ---
     const [careers, setCareers] = useState([]);
@@ -60,6 +54,9 @@ const Admin = () => {
     // --- Phase 6: Metrics State ---
     const [metrics, setMetrics] = useState({ users: 0, threads: 0, totalCredits: 0 });
  
+    // --- Applicants State ---
+    const [applicants, setApplicants] = useState([]);
+ 
     const [status, setStatus] = useState('');
 
     useEffect(() => {
@@ -79,13 +76,13 @@ const Admin = () => {
         
         fetchProducts();
         fetchPrompts();
-        fetchBlog();
         fetchCareers();
         fetchServices();
         fetchTopupRequests();
         fetchAllUsers();
         fetchAllThreads();
         fetchMetrics();
+        fetchApplicants();
     }, [user, authLoading]);
 
     // --- Products CRUD ---
@@ -116,7 +113,6 @@ const Admin = () => {
             if (result.url) {
                 if (target === 'product') setFormData(prev => ({ ...prev, image: result.url }));
                 else if (target === 'prompt') setPromptForm(prev => ({ ...prev, image: result.url }));
-                else if (target === 'blog') setBlogForm(prev => ({ ...prev, image: result.url }));
                 setStatus('Image uploaded successfully');
             }
         } catch (err) {
@@ -217,11 +213,52 @@ const Admin = () => {
                 body: JSON.stringify(updatedPrompts)
             });
             setPrompts(updatedPrompts);
-            setStatus('Prompt saved successfully!');
+            setStatus('Prompt saved!');
             setEditingPromptId(null);
             setPromptForm({ title: '', prompt: '', category: 'PORTRAIT', image: '' });
         } catch (err) {
             setStatus('Error saving prompt.');
+        }
+    };
+
+    // --- Applicants CRUD ---
+    const fetchApplicants = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('career_applications')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (data) setApplicants(data);
+            if (error) throw error;
+        } catch (err) {
+            console.error('Fetch error:', err);
+        }
+    };
+
+    const handleUpdateApplicantStatus = async (id, newStatus) => {
+        try {
+            const { error } = await supabase
+                .from('career_applications')
+                .update({ status: newStatus })
+                .eq('id', id);
+            
+            if (error) throw error;
+            setApplicants(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
+            setStatus(`Applicant updated to ${newStatus}`);
+        } catch (err) {
+            setStatus('Error updating applicant');
+        }
+    };
+
+    const handleDeleteApplicant = async (id) => {
+        if (!window.confirm('Wipe record?')) return;
+        try {
+            const { error } = await supabase.from('career_applications').delete().eq('id', id);
+            if (error) throw error;
+            setApplicants(prev => prev.filter(a => a.id !== id));
+            setStatus('Record deleted');
+        } catch (err) {
+            setStatus('Error deleting record');
         }
     };
 
@@ -245,37 +282,7 @@ const Admin = () => {
         }
     };
 
-    // --- Blog CRUD ---
-    const fetchBlog = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/blog');
-            if (res.ok) {
-                const data = await res.json();
-                setBlogPosts(data);
-            }
-        } catch (err) {}
-    };
-
-    const handleSaveBlog = async () => {
-        const postToSave = { ...blogForm, id: editingBlogId || Date.now() };
-        let updated = editingBlogId ? blogPosts.map(p => p.id === editingBlogId ? postToSave : p) : [...blogPosts, postToSave];
-        try {
-            await fetch('http://localhost:3001/api/blog', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updated)
-            });
-            setBlogPosts(updated); setStatus('Blog saved!'); setEditingBlogId(null);
-            setBlogForm({ title: '', slug: '', excerpt: '', date: new Date().toISOString().split('T')[0], author: 'ADMIN', category: 'NEWS', image: '', content: '' });
-        } catch (err) { setStatus('Error saving blog.'); }
-    };
-
-    const handleDeleteBlog = async (id) => {
-        const updated = blogPosts.filter(p => p.id !== id);
-        try {
-            await fetch('http://localhost:3001/api/blog', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
-            setBlogPosts(updated); setStatus('Post deleted!');
-        } catch (err) { setStatus('Error deleting post.'); }
-    };
+    // --- Blog CRUD Removed ---
 
     // --- Careers CRUD ---
     const fetchCareers = async () => {
@@ -527,8 +534,8 @@ const Admin = () => {
                 <div style={{ display: 'flex', gap: '2px', marginBottom: '2rem', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-border)' }}>
                     <button onClick={() => setActiveTab('products')} style={tabStyle('products')}>SHOP</button>
                     <button onClick={() => setActiveTab('services')} style={tabStyle('services')}>SERVICES</button>
-                    <button onClick={() => setActiveTab('blog')} style={tabStyle('blog')}>BLOG</button>
                     <button onClick={() => setActiveTab('careers')} style={tabStyle('careers')}>CAREERS</button>
+                    <button onClick={() => setActiveTab('applicants')} style={tabStyle('applicants')}>APPLICANTS</button>
                     <button onClick={() => setActiveTab('prompts')} style={tabStyle('prompts')}>PROMPTS</button>
                     <button onClick={() => setActiveTab('credits')} style={tabStyle('credits')}>CREDITS</button>
                     <button onClick={() => setActiveTab('users')} style={tabStyle('users')}>USERS</button>
@@ -577,33 +584,7 @@ const Admin = () => {
                     </>
                 )}
 
-                {/* ===== BLOG TAB ===== */}
-                {activeTab === 'blog' && (
-                    <>
-                        <div style={sectionBox}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>{editingBlogId ? 'EDIT_POST' : 'WRITE_POST'}</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="TITLE" value={blogForm.title} onChange={e => setBlogForm({...blogForm, title: e.target.value})} style={inputStyle} />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <input placeholder="SLUG" value={blogForm.slug} onChange={e => setBlogForm({...blogForm, slug: e.target.value})} style={inputStyle} />
-                                    <input placeholder="CATEGORY" value={blogForm.category} onChange={e => setBlogForm({...blogForm, category: e.target.value})} style={inputStyle} />
-                                </div>
-                                <textarea placeholder="EXCERPT" value={blogForm.excerpt} onChange={e => setBlogForm({...blogForm, excerpt: e.target.value})} style={{...inputStyle, minHeight: '60px'}} />
-                                <textarea placeholder="CONTENT (HTML)" value={blogForm.content} onChange={e => setBlogForm({...blogForm, content: e.target.value})} style={{...inputStyle, minHeight: '200px', fontSize: '0.8rem'}} />
-                                <button onClick={handleSaveBlog} style={buttonStyle}>PUBLISH</button>
-                            </div>
-                        </div>
-                        {blogPosts.map(post => (
-                            <div key={post.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>
-                                <strong>{post.title}</strong>
-                                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => { setEditingBlogId(post.id); setBlogForm(post); }} style={{ color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>[EDIT]</button>
-                                    <button onClick={() => handleDeleteBlog(post.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>[DEL]</button>
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                )}
+                {/* ===== BLOG TAB REMOVED ===== */}
 
                 {/* ===== CAREERS TAB ===== */}
                 {activeTab === 'careers' && (
@@ -790,6 +771,66 @@ const Admin = () => {
                             <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.totalCredits}</div>
                             <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_ACTIVE_COMPUTE_POWER</div>
                         </div>
+                    </div>
+                )}
+                {/* ===== APPLICANTS TAB ===== */}
+                {activeTab === 'applicants' && (
+                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h2 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>Incoming Dossiers</h2>
+                            <button onClick={fetchApplicants} style={{ ...buttonStyle, padding: '0.5rem 1rem', fontSize: '0.7rem' }}>REFRESH</button>
+                        </div>
+                        {applicants.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '4rem', border: '1px dashed var(--color-border)', opacity: 0.5 }}>[NO_APPLICATIONS_IN_ARCHIVE]</div>
+                        ) : (
+                            applicants.map(app => (
+                                <div key={app.id} style={{ ...sectionBox, marginBottom: '0' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                <h3 style={{ fontSize: '1.3rem', margin: 0 }}>{app.full_name}</h3>
+                                                <span style={{ 
+                                                    fontSize: '0.6rem', padding: '2px 8px', borderRadius: '100px',
+                                                    backgroundColor: app.status === 'NEW' ? 'var(--color-accent)' : '#222',
+                                                    color: app.status === 'NEW' ? '#000' : '#fff',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {app.status}
+                                                </span>
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{app.email} | Applying for: <span style={{ color: 'var(--color-accent)' }}>{app.role_title}</span></div>
+                                        </div>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.3 }}>{new Date(app.created_at).toLocaleDateString()}</div>
+                                    </div>
+
+                                    <div style={{ backgroundColor: '#111', padding: '1rem', border: '1px solid #222', marginBottom: '1.5rem' }}>
+                                        <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>PORTFOLIO_DOCKET</label>
+                                        <a href={app.portfolio_url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', textDecoration: 'underline', fontSize: '0.9rem' }}>{app.portfolio_url}</a>
+                                    </div>
+
+                                    {app.message && (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>COVER_NOTE</label>
+                                            <p style={{ fontSize: '0.85rem', lineHeight: 1.5, opacity: 0.8 }}>{app.message}</p>
+                                        </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
+                                        <select 
+                                            value={app.status} 
+                                            onChange={(e) => handleUpdateApplicantStatus(app.id, e.target.value)}
+                                            style={{ ...inputStyle, width: 'auto', flex: 1, padding: '0.5rem' }}
+                                        >
+                                            <option value="NEW">MARK_NEW</option>
+                                            <option value="REVIEWING">REVIEWING</option>
+                                            <option value="ACCEPTED">ACCEPTED</option>
+                                            <option value="REJECTED">REJECTED</option>
+                                        </select>
+                                        <button onClick={() => handleDeleteApplicant(app.id)} style={{ padding: '0.5rem 1.5rem', backgroundColor: '#333', color: '#ff4444', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>WIPE_RECORD</button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
             </div>

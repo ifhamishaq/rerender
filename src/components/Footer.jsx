@@ -24,7 +24,7 @@ const Footer = () => {
                 textTransform: 'uppercase',
                 opacity: 0.45,
             }}>
-                <span>STUDIO — DIGITAL EDITORIAL</span>
+                <span>MODERN WEBSITE & VIDEO STUDIO</span>
                 <span style={{ color: 'var(--color-accent)', opacity: 1 }}>●</span>
                 <span>REMOTE FIRST — WORLDWIDE</span>
             </div>
@@ -53,12 +53,9 @@ const Footer = () => {
                     }}>Sitemap</h4>
                     {[
                         { to: '/work', label: 'Work' },
-                        { to: '/get-in-touch', label: 'Get In Touch' },
+                        { to: '/get-in-touch', label: 'Contact' },
                         { to: '/about', label: 'About' },
-                        { to: '/prompts', label: 'Prompts' },
-                        { to: '/shop', label: 'Shop' },
                         { to: '/careers', label: 'Careers' },
-                        { to: '/blog', label: 'Blog' },
                         { to: '/submit-prompt', label: 'Submit Prompt' },
                     ].map(({ to, label }) => (
                         <Link key={to} to={to} style={{
@@ -161,7 +158,7 @@ const Footer = () => {
                         letterSpacing: '0.15em',
                         fontSize: '0.65rem',
                         marginBottom: '0.5rem'
-                    }}>Get In Touch</h4>
+                    }}>Contact Us</h4>
                     <p style={{ fontSize: '0.82rem', color: 'var(--color-text)', opacity: 0.6, lineHeight: 1.6, marginBottom: '1rem' }}>
                         Have a project in mind? We respond within 24 hours.
                     </p>

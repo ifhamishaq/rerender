@@ -8,10 +8,10 @@ import {
 } from 'lucide-react';
 
 const STATS = [
-    { value: '50+', label: 'PROJECTS_DELIVERED' },
-    { value: '10K+', label: 'ASSETS_CREATED' },
-    { value: '24/7', label: 'CREATIVE_OUTPUT' },
-    { value: '∞', label: 'ITERATIONS' }
+    { value: '50+', label: 'PROJECTS FINISHED' },
+    { value: '10K+', label: 'DESIGNS CREATED' },
+    { value: '24/7', label: 'ALWAYS WORKING' },
+    { value: '∞', label: 'NEW IDEAS' }
 ];
 
 const ROLES = [
@@ -94,7 +94,7 @@ const About = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '2rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                            001 — IDENTITY
+                            01 — ABOUT ME
                         </div>
                         <h1 style={{
                             fontSize: 'clamp(3.5rem, 7vw, 7rem)',
@@ -141,14 +141,14 @@ const About = () => {
                         style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                     >
                         <p style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)', lineHeight: 1.7, marginBottom: '2rem', color: 'var(--color-text-secondary)' }}>
-                            I combine high-end design with modern digital aesthetics.
-                            RE-RENDER is where I build <strong style={{ color: 'var(--color-accent)' }}>tools, assets, and experiences</strong> for creators who refuse to settle for mediocre.
+                            I make high-quality designs and modern websites.
+                            RE-RENDER is where I build <strong style={{ color: 'var(--color-accent)' }}>websites, videos, and tools</strong> for brands that want the best.
                         </p>
 
                         <p style={{ fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '3rem', color: 'var(--color-text-secondary)' }}>
-                            I find beauty in the glitches, the noise, the raw textures of the digital world.
-                            Every pixel is intentional. Every interaction is engineered.
-                            This isn't just a portfolio — it's a <strong style={{ color: 'var(--color-text)' }}>creative operating system</strong>.
+                            I like to build things that look different and work perfectly.
+                            Every pixel is important. Every project is unique.
+                            This is more than a portfolio — it's a <strong style={{ color: 'var(--color-text)' }}>creative studio</strong>.
                         </p>
 
                         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -176,7 +176,7 @@ const About = () => {
                                     border: '1px solid var(--color-border)', letterSpacing: '0.05em'
                                 }}
                             >
-                                GET IN TOUCH
+                                CONTACT
                             </Link>
                         </div>
                     </motion.div>
@@ -216,7 +216,7 @@ const About = () => {
                         style={{ marginBottom: '5rem' }}
                     >
                         <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1.5rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                            002 — ARSENAL
+                            02 — MY TOOLS
                         </div>
                         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.9, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
                             TOOLS I'VE<br />

@@ -54,12 +54,11 @@ const Navbar = () => {
 
     const navLinks = [
         { href: '/work', label: 'Work' },
-        { href: '/get-in-touch', label: 'Get In Touch' },
+        { href: '/get-in-touch', label: 'Contact' },
         { href: '/pricing', label: 'Pricing' },
-        { href: '/shop', label: 'Shop' },
         { href: '/tools', label: 'Tools' },
+        { href: '/careers', label: 'Careers' },
         { href: '/arcade', label: 'Arcade' },
-        { href: '/blog', label: 'Blog' },
         { href: '/about', label: 'About' },
     ];
 

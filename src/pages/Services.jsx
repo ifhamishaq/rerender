@@ -66,8 +66,8 @@ const Services = () => {
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '-0.02em'
                     }}>
-                        GET IN<br />
-                        <span style={{ color: 'var(--color-accent)' }}>TOUCH</span>
+                        CONTACT<br />
+                        <span style={{ color: 'var(--color-accent)' }}>US</span>
                     </h1>
                 </header>
 
@@ -80,7 +80,7 @@ const Services = () => {
                         marginBottom: '1.5rem',
                         opacity: 0.6
                     }}>
-                        SELECT A CATEGORY &darr;
+                        CHOOSE A SERVICE &darr;
                     </div>
                     <div style={{
                         display: 'grid',
@@ -179,7 +179,7 @@ const Services = () => {
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.05em'
                                         }}>
-                                            Special Offer Unlocked! ⚡
+                                            You Got a Discount! ⚡
                                         </h3>
                                         <p style={{ 
                                             margin: '0.5rem 0 0', 
@@ -208,7 +208,7 @@ const Services = () => {
                                 fontSize: '0.95rem',
                                 marginBottom: '2rem'
                             }}>
-                                Tell us about your project. We'll get back within 24 hours with a tailored proposal (no generic templates — ever).
+                                Tell us about your project. We'll get back to you within 24 hours with a clear price and plan for your project.
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {[

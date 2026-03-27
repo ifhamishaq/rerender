@@ -12,23 +12,24 @@ const VideoModal = ({ isOpen, project, onClose }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
                     onClick={onClose}
                     style={{
                         position: 'fixed',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.97)',
+                        backgroundColor: 'rgba(0,0,0,0.98)',
                         zIndex: 1000,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backdropFilter: 'blur(4px)',
-                        padding: '2rem'
+                        padding: '1rem'
                     }}
                 >
                     <motion.div
-                        initial={{ scale: 0.9, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.9, y: 20 }}
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                         onClick={(e) => e.stopPropagation()}
                         style={{
                             width: '100%',

@@ -104,7 +104,7 @@ export default function Hero() {
                             transition={{ duration: 1, delay: 1.0 }}
                             className="sans-outline"
                         >
-                            & VIDEO
+                            & WEBSITES
                         </motion.span>
                     </h1>
 
@@ -117,7 +117,7 @@ export default function Hero() {
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 1, delay: 1.2 }}
                             >
-                                We are a creative studio that helps your brand grow. We make high-quality videos and modern designs that get results.
+                                We make high-quality videos and modern websites that help your brand grow. Simple, effective, and results-driven.
                             </motion.p>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -129,7 +129,7 @@ export default function Hero() {
                                         className="hero-cta editorial-cta"
                                         onClick={routeToServices}
                                     >
-                                        Get In Touch
+                                        Work With Us
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M5 12h14M12 5l7 7-7 7" />
                                         </svg>
@@ -148,7 +148,7 @@ export default function Hero() {
                             transition={{ delay: 1.6 }}
                         >
                             <div className="hero-stat-number">5+</div>
-                            <div className="hero-stat-label">Years Experience</div>
+                            <div className="hero-stat-label">Years of Experience</div>
                         </motion.div>
                         <motion.div
                             className="hero-stat"
@@ -156,8 +156,8 @@ export default function Hero() {
                             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                             transition={{ delay: 1.8 }}
                         >
-                            <div className="hero-stat-number">20+</div>
-                            <div className="hero-stat-label">Clients</div>
+                            <div className="hero-stat-number">30+</div>
+                            <div className="hero-stat-label">Happy Clients</div>
                         </motion.div>
                         <motion.div
                             className="hero-stat"
@@ -165,8 +165,8 @@ export default function Hero() {
                             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                             transition={{ delay: 2.0 }}
                         >
-                            <div className="hero-stat-number">100+</div>
-                            <div className="hero-stat-label">Digital Assets</div>
+                            <div className="hero-stat-number">100%</div>
+                            <div className="hero-stat-label">Client Satisfaction</div>
                         </motion.div>
                     </div>
                 </motion.div>

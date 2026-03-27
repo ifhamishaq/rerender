@@ -10,7 +10,6 @@ import GlobalOracle from './components/GlobalOracle';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
 
-import Shop from './components/Shop';
 import Footer from './components/Footer';
 import Marquee from './components/Marquee';
 import Cursor from './components/Cursor';
@@ -30,7 +29,6 @@ import SubmitPrompt from './components/SubmitPrompt';
 // Lazy Loaded Pages
 const Home = React.lazy(() => import('./pages/Home'));
 const Services = React.lazy(() => import('./pages/Services'));
-const ShopPage = React.lazy(() => import('./pages/ShopPage'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage'));
 const PricingPage = React.lazy(() => import('./pages/PricingPage'));
 const ArcadePage = React.lazy(() => import('./pages/ArcadePage'));
@@ -41,8 +39,8 @@ const ReflexGamePage = React.lazy(() => import('./pages/ReflexGamePage'));
 const WallpaperLab = React.lazy(() => import('./pages/WallpaperLab'));
 const ToolsPage = React.lazy(() => import('./pages/ToolsPage'));
 const CareersPage = React.lazy(() => import('./pages/CareersPage'));
-const BlogPage = React.lazy(() => import('./pages/BlogPage'));
-const BlogPostPage = React.lazy(() => import('./pages/BlogPostPage'));
+const ApplyPage = React.lazy(() => import('./pages/ApplyPage'));
+const ContractPage = React.lazy(() => import('./pages/ContractPage'));
 const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
 const AILabPage = React.lazy(() => import('./pages/AILabPage'));
 const SafeZonePage = React.lazy(() => import('./pages/SafeZonePage'));
@@ -75,8 +73,7 @@ const TitleManager = () => {
       '/': 'RE-RENDER | Creative Agency',
       '/careers': 'Join the Team | RE-RENDER',
       '/about': 'About | RE-RENDER',
-      '/shop': 'Shop | RE-RENDER',
-      '/get-in-touch': 'Get In Touch | RE-RENDER',
+      '/get-in-touch': 'Contact Us | RE-RENDER',
       '/features': 'Features | RE-RENDER',
       '/prompts': 'Prompt Lab | RE-RENDER',
       '/submit-prompt': 'Submit Prompt | RE-RENDER',
@@ -92,15 +89,13 @@ const TitleManager = () => {
       '/privacy': 'Privacy Policy | RE-RENDER',
       '/terms': 'Terms of Service | RE-RENDER',
       '/refund': 'Refund Policy | RE-RENDER',
-      '/blog': 'RE-RENDER Blog',
-      '/blog/:slug': 'Article | RE-RENDER',
       '/license': 'License Agreement | RE-RENDER',
       '/lab/caption-writer': 'Caption Writer | RE-RENDER',
       '/lab/thumbnail-analyser': 'Thumbnail Analyser | RE-RENDER',
 
     };
 
-    document.title = titleMap[location.pathname] || 'RE-RENDER | Digital Agency & Assets';
+    document.title = titleMap[location.pathname] || 'RE-RENDER | Elite Creative Agency';
   }, [location]);
 
   return null;
@@ -111,7 +106,7 @@ const DigitalLoader = () => {
     const [status, setStatus] = React.useState('SYS_BOOT');
 
     React.useEffect(() => {
-        const statuses = ['SUBSYSTEM_SYNC', 'CORE_INIT', 'RE-RENDER_LOAD', 'ALGORITHMIC_BIAS', 'READY'];
+        const statuses = ['SYNCING', 'LOADING', 'RE-RENDER', 'DESIGNING', 'READY'];
         let statusIdx = 0;
 
         const interval = setInterval(() => {
@@ -179,7 +174,7 @@ const DigitalLoader = () => {
                 </div>
 
                 <div style={{ marginTop: '1.5rem', fontSize: '0.5rem', opacity: 0.4, maxWidth: '200px', marginInline: 'auto' }}>
-                    RE-RENDER CREATIVE AGENCY // DATA_STREAM_STABLE
+                    RE-RENDER CREATIVE AGENCY // QUALITY DESIGN
                 </div>
             </div>
 
@@ -204,7 +199,6 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<TransitionWipe><Home /></TransitionWipe>} />
         <Route path="/work" element={<TransitionWipe><PortfolioPage /></TransitionWipe>} />
         <Route path="/get-in-touch" element={<TransitionWipe><Services /></TransitionWipe>} />
-        <Route path="/shop" element={<TransitionWipe><ShopPage /></TransitionWipe>} />
         <Route path="/pricing" element={<TransitionWipe><PricingPage /></TransitionWipe>} />
         <Route path="/about" element={<TransitionWipe><AboutPage /></TransitionWipe>} />
         <Route path="/arcade" element={<TransitionWipe><ArcadePage /></TransitionWipe>} />
@@ -221,12 +215,13 @@ const AnimatedRoutes = () => {
         {isAdminLocal && <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />}
         
         <Route path="/careers" element={<TransitionWipe><CareersPage /></TransitionWipe>} />
+        <Route path="/apply" element={<TransitionWipe><ApplyPage /></TransitionWipe>} />
+        <Route path="/apply/:jobId" element={<TransitionWipe><ApplyPage /></TransitionWipe>} />
+        <Route path="/legal/portfolio-agreement" element={<TransitionWipe><ContractPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
         <Route path="/license" element={<TransitionWipe><LicenseAgreement /></TransitionWipe>} />
         <Route path="/refund" element={<TransitionWipe><RefundPolicy /></TransitionWipe>} />
-        <Route path="/blog" element={<TransitionWipe><BlogPage /></TransitionWipe>} />
-        <Route path="/blog/:slug" element={<TransitionWipe><BlogPostPage /></TransitionWipe>} />
         <Route path="/lab/ai-agent" element={<TransitionWipe><AILabPage /></TransitionWipe>} />
         <Route path="/lab/safe-zone" element={<TransitionWipe><SafeZonePage /></TransitionWipe>} />
         <Route path="/estimate" element={<TransitionWipe><EstimatePage /></TransitionWipe>} />

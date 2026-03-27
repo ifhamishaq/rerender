@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import Magnetic from '../components/Animations/Magnetic';
 import { supabase } from '../utils/supabase';
 import './Careers.css';
@@ -89,7 +90,7 @@ const CareersPage = () => {
                                         className="mobile-details-preview"
                                     >
                                         <p>{job.description}</p>
-                                        <a href={job.link} className="apply-btn-mini">QUICK_APPLY</a>
+                                        <Link to={`/apply/${job.id}`} className="apply-btn-mini">QUICK_APPLY</Link>
                                     </motion.div>
                                 )}
                             </div>
@@ -142,9 +143,9 @@ const CareersPage = () => {
 
                                         <div className="details-footer">
                                             <Magnetic strength={0.2}>
-                                                <a href={selectedJob.link} className="main-apply-btn">
+                                                <Link to={`/apply/${selectedJob.id}`} className="main-apply-btn">
                                                     APPLY NOW
-                                                </a>
+                                                </Link>
                                             </Magnetic>
                                         </div>
                                     </motion.div>

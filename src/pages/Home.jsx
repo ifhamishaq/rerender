@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import Marquee from '../components/Marquee';
+import ProjectMarquee from '../components/ProjectMarquee';
 import { Link } from 'react-router-dom';
 import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
@@ -19,6 +20,7 @@ const Home = () => {
             <StickySidebar items={[
                 { label: 'START', targetId: 'top' },
                 { label: 'SERVICES', targetId: 'services' },
+                { label: 'PROCESS', targetId: 'process' },
                 { label: 'WORK', targetId: 'work' },
                 { label: 'FAQ', targetId: 'faq' }
             ]} />
@@ -73,44 +75,9 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Our Approach Section */}
-            <section id="approach" style={{
-                padding: '8rem 2rem',
-                backgroundColor: 'var(--color-bg)',
-                color: 'var(--color-text)',
-                borderBottom: '1px solid var(--color-border)'
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div className="section-label">01 &#8212; HOW WE WORK</div>
-                    <FadeUp blur>
-                        <motion.h2
-                            style={{
-                                fontSize: 'clamp(2.5rem, 8vw, 6rem)',
-                                lineHeight: 0.9,
-                                fontFamily: 'var(--font-sans)',
-                                fontWeight: 900,
-                                margin: 0,
-                                textTransform: 'uppercase'
-                            }}
-                        >
-                            WE BUILD <br />
-                            <span style={{ color: 'var(--color-accent)' }}>WHAT'S NEXT.</span>
-                        </motion.h2>
-                    </FadeUp>
-                    <FadeUp delay={0.15}>
-                        <motion.p
-                            style={{
-                                marginTop: '3rem',
-                                fontSize: '1.25rem',
-                                maxWidth: '600px',
-                                lineHeight: 1.6,
-                                color: 'var(--color-text-secondary)'
-                            }}
-                        >
-                            We don't use templates. We build custom, high-quality digital experiences that help your brand stand out.
-                        </motion.p>
-                    </FadeUp>
-                </div>
+            {/* Project Showcase Marquee (Replaces 01 - HOW WE WORK) */}
+            <section id="work">
+                <ProjectMarquee />
             </section>
 
             {/* Services Section */}
@@ -259,251 +226,96 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* ===== WORK SHOWCASE PREVIEW ===== */}
-            <section id="work" style={{
-                padding: '8rem 2rem',
+
+            {/* ===== AGENCY PROCESS SECTION ===== */}
+            <section id="process" style={{
+                padding: '10rem 2rem',
                 backgroundColor: 'var(--color-bg)',
-                borderBottom: '1px solid var(--color-border)',
+                borderBottom: '1px solid var(--color-border)'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div className="section-label" style={{ marginBottom: '2rem' }}>
-                        <span style={{ color: 'var(--color-accent)' }}>03</span> &#8212; OUR BEST WORK
+                    <div style={{ marginBottom: '6rem', textAlign: 'center' }}>
+                        <div className="section-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                            <span style={{ color: 'var(--color-accent)' }}>03</span>
+                            &#8212; HOW WE WORK
+                        </div>
+                        <h2 style={{
+                            fontSize: 'clamp(3rem, 10vw, 7rem)',
+                            fontFamily: 'var(--font-display)',
+                            textTransform: 'uppercase',
+                            lineHeight: 0.85,
+                            marginTop: '2rem',
+                            letterSpacing: '-0.04em'
+                        }}>
+                            WE HELP YOU <span className="serif-italic" style={{ color: 'var(--color-accent)', textTransform: 'lowercase', fontWeight: 400 }}>grow</span> FAST
+                        </h2>
                     </div>
-                                       <div style={{
+
+                    <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '6rem',
-                        alignItems: 'center',
-                        marginBottom: '6rem'
+                        gap: '4rem',
+                        position: 'relative'
                     }}>
-                        <div>
-                            <h2 style={{
-                                fontSize: 'clamp(3rem, 8vw, 6rem)',
-                                fontFamily: 'var(--font-display)',
-                                margin: '0 0 2rem 0',
-                                textTransform: 'uppercase',
-                                lineHeight: 0.8,
-                                letterSpacing: '-0.06em'
-                            }}>
-                                THE PROJECT<br />
-                                <span style={{ color: 'var(--color-accent)' }}>FOLDER</span>
-                            </h2>
-                            <p style={{
-                                fontFamily: 'var(--font-mono)',
-                                color: 'var(--color-text-secondary)',
-                                lineHeight: 1.8,
-                                marginBottom: '2.5rem',
-                                maxWidth: '400px',
-                                fontSize: '0.9rem'
-                            }}>
-                                Here is the best stuff we have made for our customers. We make things that look great and work well.
-                            </p>
-                            <Link to="/work" style={{
-                                display: 'inline-block',
-                                padding: '1rem 0',
-                                color: 'var(--color-text)',
-                                fontFamily: 'var(--font-mono)',
-                                textDecoration: 'none',
-                                textTransform: 'uppercase',
-                                fontWeight: 900,
-                                fontSize: '0.8rem',
-                                letterSpacing: '0.2em',
-                                borderBottom: '2px solid var(--color-accent)'
-                            }}>
-                                SEE MORE &rarr;
-                            </Link>
-                        </div>
-                        
-                        <div style={{ position: 'relative' }}>
-                            <div style={{
-                                width: '100%',
-                                aspectRatio: '16/9',
-                                backgroundColor: 'var(--color-surface)',
-                                border: '1px solid var(--color-border)',
-                                backgroundImage: 'url(/hero.gif)',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                filter: 'grayscale(1) contrast(1.1)'
-                            }} />
-                            <div style={{
-                                position: 'absolute',
-                                top: '-1rem',
-                                right: '2rem',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: 'var(--color-bg)',
-                                border: '1px solid var(--color-border)',
-                                fontFamily: 'var(--font-mono)',
-                                color: 'var(--color-accent)',
-                                fontWeight: 900,
-                                fontSize: '0.6rem'
-                            }}>
-                                CURRENT_FEATURE // 001
+                        {[
+                            { step: '01', title: 'PLAN', desc: 'We talk about your goals and create a clear plan for your project.' },
+                            { step: '02', title: 'BUILD', desc: 'Our team makes your videos and website with the best tools.' },
+                            { step: '03', title: 'LAUNCH', desc: 'We help you launch your project so you can start seeing results.' }
+                        ].map((item, i) => (
+                            <div key={item.step} style={{ position: 'relative' }}>
+                                <div style={{
+                                    fontSize: '6rem',
+                                    fontFamily: 'var(--font-display)',
+                                    opacity: 0.05,
+                                    position: 'absolute',
+                                    top: '-2rem',
+                                    left: '-1rem',
+                                    lineHeight: 1
+                                }}>{item.step}</div>
+                                <h3 style={{
+                                    fontSize: '1.5rem',
+                                    fontFamily: 'var(--font-mono)',
+                                    color: 'var(--color-accent)',
+                                    marginBottom: '1.5rem',
+                                    fontWeight: 900
+                                }}>{item.title}</h3>
+                                <p style={{
+                                    color: 'var(--color-text-secondary)',
+                                    fontSize: '1.1rem',
+                                    lineHeight: 1.6
+                                }}>{item.desc}</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== SHOP PREVIEW ===== */}
-            <section id="shop" style={{
-                padding: '8rem 2rem',
-                backgroundColor: 'var(--color-surface)',
-                borderBottom: '1px solid var(--color-border)',
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ marginBottom: '4rem' }}>
-                        <div className="section-label">04 &#8212; FROM THE SHOP</div>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-end',
-                            marginBottom: '3rem',
-                            flexWrap: 'wrap',
-                            gap: '1rem',
-                        }} className="responsive-shop-header">
-                            <h2 style={{
-                                fontFamily: 'var(--font-display)',
-                                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                                fontWeight: 900,
-                                lineHeight: 1,
-                                letterSpacing: '-0.02em',
-                                margin: 0,
-                            }}>
-                                DIGITAL
-                                <span style={{ color: 'var(--color-accent)' }}>ASSETS</span>
-                            </h2>
-                            <Link to="/shop" style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.78rem',
-                                fontWeight: 700,
-                                letterSpacing: '0.1em',
-                                color: 'var(--color-text-secondary)',
-                                textDecoration: 'none',
-                                textTransform: 'uppercase',
-                                borderBottom: '1px solid var(--color-border)',
-                                paddingBottom: '2px',
-                                transition: 'color 0.2s, border-color 0.2s',
-                            }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.color = 'var(--color-text)';
-                                    e.currentTarget.style.borderColor = 'var(--color-text)';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.color = 'var(--color-text-secondary)';
-                                    e.currentTarget.style.borderColor = 'var(--color-border)';
-                                }}
-                            >
-                                VIEW ALL &rarr;
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="responsive-shop-grid" style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                        gap: '1.5px',
-                        border: '1px solid var(--color-border)',
-                        overflow: 'hidden',
-                    }}>
-                        {products.slice(0, 4).map((product, i) => (
-                            <FadeUp key={product.id} delay={i * 0.08}>
-                                <a
-                                    href={product.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ textDecoration: 'none', display: 'block', height: '100%' }}
-                                >
-                                    <motion.div
-                                        whileHover={{ backgroundColor: 'var(--color-surface)' }}
-                                        style={{
-                                            backgroundColor: 'var(--color-bg)',
-                                            border: '1px solid var(--color-border)',
-                                            padding: '0',
-                                            cursor: 'pointer',
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        <div style={{
-                                            width: '100%',
-                                            aspectRatio: '1 / 1',
-                                            overflow: 'hidden',
-                                            borderBottom: '1px solid var(--color-border)',
-                                            backgroundColor: product.color || 'var(--color-surface)',
-                                        }}>
-                                            {product.image && (
-                                                <motion.img
-                                                    src={product.image}
-                                                    alt={product.title}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    transition={{ duration: 0.4 }}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover',
-                                                        display: 'block',
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div style={{ padding: '1.25rem' }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                marginBottom: '0.5rem',
-                                            }}>
-                                                <span style={{
-                                                    fontFamily: 'var(--font-mono)',
-                                                    fontSize: '0.65rem',
-                                                    letterSpacing: '0.15em',
-                                                    color: 'var(--color-text-secondary)',
-                                                    textTransform: 'uppercase',
-                                                }}>
-                                                    {product.category}
-                                                </span>
-                                                <span style={{
-                                                    fontFamily: 'var(--font-mono)',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 700,
-                                                    color: product.price === 'FREE' ? 'var(--color-accent)' : 'var(--color-text)',
-                                                    letterSpacing: '0.05em',
-                                                }}>
-                                                    {product.price}
-                                                </span>
-                                            </div>
-                                            <h3 style={{
-                                                fontFamily: 'var(--font-display)',
-                                                fontSize: '1rem',
-                                                fontWeight: 700,
-                                                color: 'var(--color-text)',
-                                                margin: '0 0 0.4rem',
-                                                lineHeight: 1.3,
-                                            }}>
-                                                {product.title}
-                                            </h3>
-                                            <p style={{
-                                                fontFamily: 'var(--font-mono)',
-                                                fontSize: '0.75rem',
-                                                color: 'var(--color-text-secondary)',
-                                                lineHeight: 1.5,
-                                                margin: 0,
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden',
-                                            }}>
-                                                {product.desc}
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </a>
-                            </FadeUp>
                         ))}
                     </div>
+
+                        <div style={{
+                            display: 'inline-block',
+                            padding: '1rem 2rem',
+                            border: '1px solid var(--color-accent)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.8rem',
+                            color: 'var(--color-accent)',
+                            textTransform: 'uppercase',
+                            marginBottom: '2rem',
+                            letterSpacing: '0.2em'
+                        }}>
+                            WE ARE TAKING 2 MORE PROJECTS
+                        </div>
+                        <br />
+                        <Link to="/get-in-touch" style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+                            fontWeight: 900,
+                            color: 'var(--color-text)',
+                            textDecoration: 'none',
+                            borderBottom: '2px solid var(--color-accent)',
+                            transition: 'opacity 0.2s',
+                            letterSpacing: '-0.02em'
+                        }}
+                        onMouseEnter={(e) => e.target.style.opacity = '0.7'}
+                        onMouseLeave={(e) => e.target.style.opacity = '1'}>
+                            START YOUR PROJECT &rarr;
+                        </Link>
                 </div>
             </section>
 
