@@ -47,8 +47,10 @@ const DossierPage = () => {
                     paddingBottom: '2rem', 
                     marginBottom: '3rem', 
                     display: 'flex', 
+                    flexDirection: window.innerWidth < 600 ? 'column' : 'row',
                     justifyContent: 'space-between', 
-                    alignItems: 'baseline' 
+                    alignItems: window.innerWidth < 600 ? 'flex-start' : 'baseline',
+                    gap: window.innerWidth < 600 ? '1.5rem' : '0'
                 }}>
                     <div>
                         <div style={{ 
@@ -123,8 +125,8 @@ const DossierPage = () => {
                                 
                                 <div style={{ 
                                     display: 'grid', 
-                                    gridTemplateColumns: '1fr 1fr', 
-                                    gap: '3rem',
+                                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', 
+                                    gap: window.innerWidth < 768 ? '2rem' : '3rem',
                                     alignItems: 'start'
                                 }}>
                                     <div>
@@ -158,7 +160,12 @@ const DossierPage = () => {
                                         </div>
                                     </div>
 
-                                    <form onSubmit={handleSubmit} style={{ borderLeft: '1px solid var(--color-border)', paddingLeft: '2.5rem' }}>
+                                    <form onSubmit={handleSubmit} style={{ 
+                                        borderLeft: window.innerWidth < 768 ? 'none' : '1px solid var(--color-border)', 
+                                        paddingLeft: window.innerWidth < 768 ? '0' : '2.5rem',
+                                        borderTop: window.innerWidth < 768 ? '1px solid var(--color-border)' : 'none',
+                                        paddingTop: window.innerWidth < 768 ? '2.5rem' : '0'
+                                    }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.65rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.5, display: 'block', marginBottom: '0.5rem' }}>SELECT_TIER</label>

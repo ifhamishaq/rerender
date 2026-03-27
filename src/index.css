@@ -99,6 +99,22 @@ body {
   display: inline-block;
 }
 
+.desktop-only {
+  display: block !important;
+}
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
+}
+
 /* Nav link hover underline */
 .nav-link {
   position: relative;
@@ -424,16 +440,20 @@ html.lenis body {
 
   /* --- TYPOGRAPHY --- */
   h1 {
-    font-size: clamp(1.8rem, 10vw, 2.5rem) !important;
-    min-height: auto !important;
+    font-size: clamp(2.2rem, 12vw, 3.5rem) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.05em !important;
   }
 
   h2 {
-    font-size: clamp(1.4rem, 8vw, 2rem) !important;
+    font-size: clamp(1.6rem, 10vw, 2.8rem) !important;
+    line-height: 1.0 !important;
+    letter-spacing: -0.03em !important;
   }
 
   h3 {
-    font-size: 0.9rem !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.1em !important;
   }
 
   p {

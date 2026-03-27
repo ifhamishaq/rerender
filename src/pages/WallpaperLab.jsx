@@ -383,8 +383,8 @@ const WallpaperLab = () => {
                 margin: '3rem auto', 
                 padding: '0 2rem', 
                 display: 'grid', 
-                gridTemplateColumns: isMobile ? '1fr' : '1fr 400px', 
-                gap: '4rem' 
+                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px', 
+                gap: window.innerWidth < 1000 ? '2rem' : '4rem' 
             }}>
                 
                 {/* Column 01: Visual Canvas */}
@@ -429,8 +429,16 @@ const WallpaperLab = () => {
                         )}
                     </div>
 
-                    {/* Metadata Strip */}
-                    <div style={{ display: 'flex', gap: '2rem', padding: '1.5rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ 
+                        display: 'flex', 
+                        flexDirection: window.innerWidth < 600 ? 'column' : 'row',
+                        gap: '1.5rem', 
+                        padding: '1.5rem', 
+                        border: '1px solid var(--color-border)', 
+                        fontFamily: 'var(--font-mono)', 
+                        fontSize: '0.65rem', 
+                        color: 'var(--color-text-secondary)' 
+                    }}>
                         <div style={{ flex: 1 }}>
                             <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE_STATUS:</span> {isGenerating ? 'PROCESSING' : 'IDLE'}<br/>
                             <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ASPECT_RATIO:</span> {ratio}

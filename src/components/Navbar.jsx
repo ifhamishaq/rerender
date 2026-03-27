@@ -84,20 +84,49 @@ const Navbar = () => {
                 }}
             >
                 {/* Logo */}
-                <Link to="/" style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 900,
-                    fontSize: '1.2rem',
-                    letterSpacing: '-0.04em',
-                    textDecoration: 'none',
-                    color: 'var(--color-text)',
-                    zIndex: 102,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                }}>
-                    RE<span style={{ color: 'var(--color-accent)' }}>-</span>RENDER
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 102 }}>
+                    <Link to="/" style={{
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: 900,
+                        fontSize: '1.1rem',
+                        letterSpacing: '-0.04em',
+                        textDecoration: 'none',
+                        color: 'var(--color-text)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                    }}>
+                        RE<span style={{ color: 'var(--color-accent)' }}>-</span>RENDER
+                    </Link>
+
+                    {/* Mobile Credit Badge (Always Visible if logged in) */}
+                    <AnimatePresence>
+                        {user && profile && (
+                            <Link to="/dossier" className="mobile-only" style={{ textDecoration: 'none', display: 'none' }}>
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.55rem',
+                                        color: 'var(--color-accent)',
+                                        backgroundColor: 'rgba(57,255,20,0.05)',
+                                        padding: '0.2rem 0.4rem',
+                                        border: '1px solid var(--color-accent)',
+                                        borderRadius: '2px',
+                                        fontWeight: 700
+                                    }}
+                                >
+                                    <Wallet size={10} />
+                                    <span>{profile.credits}</span>
+                                </motion.div>
+                            </Link>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 {/* Desktop Nav Links */}
                 <div className="desktop-menu" style={{
@@ -312,18 +341,23 @@ const Navbar = () => {
                         {label}
                     </Link>
                 ))}
-                <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    {/* Mobile Audio / Theme / Auth */}
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                        <button onClick={user ? signOut : () => setIsAuthModalOpen(true)} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user ? 'var(--color-accent)' : 'var(--color-text)' }}>
+                            {user ? <LogOut size={16} /> : <User size={16} />}
+                        </button>
+                        <button onClick={toggleAudio} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isPlaying ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+                            {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                        </button>
+                        <button onClick={toggleTheme} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)' }}>
+                            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                        </button>
+                    </div>
+
                     <a href="mailto:real.re.render@gmail.com" onClick={toggleMenu}
-                        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-text-secondary)', textDecoration: 'underline' }}>
+                        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text)', textDecoration: 'underline', marginTop: '1rem' }}>
                         real.re.render@gmail.com
                     </a>
-                    <button onClick={toggleAudio} style={{ border: 'none', background: 'none', cursor: 'pointer', color: isPlaying ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
-                        {isPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
-                    </button>
-                    <button onClick={toggleTheme} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
-                        {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                    </button>
-                </div>
             </motion.div>
         </>
     );
