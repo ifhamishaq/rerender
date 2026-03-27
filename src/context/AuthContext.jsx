@@ -10,48 +10,44 @@ export const AuthProvider = ({ children }) => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     useEffect(() => {
-        // Check active sessions
-        const getSession = async () => {
-            try {
-                console.log('AUTH_TRACE: Initializing session check...');
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) console.error('AUTH_TRACE: Session check error:', error);
-                
-                console.log('AUTH_TRACE: Session found:', !!session);
-                setUser(session?.user ?? null);
-                if (session?.user) {
-                    await fetchProfile(session.user.id);
-                }
-            } catch (err) {
-                console.error('Session Init Error:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+        console.log('AUTH_TRACE: Auth Engine Started');
+        
+        let mounted = true;
 
-        getSession();
-
-        // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!mounted) return;
+            
+            console.log(`AUTH_TRACE: Event [${event}] | Session Object [${!!session}]`);
+            
             try {
-                console.log('AUTH_TRACE: Event detected:', event, '| Session:', !!session);
-                setUser(session?.user ?? null);
-                if (session?.user) {
-                    await fetchProfile(session.user.id);
-                } else {
+                // Initial load handling
+                if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+                    const currentUser = session?.user ?? null;
+                    setUser(currentUser);
+                    if (currentUser) {
+                        await fetchProfile(currentUser.id);
+                    } else {
+                        setProfile(null);
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null);
                     setProfile(null);
                 }
             } catch (err) {
-                console.error('Auth Protocol Sync Failure:', err);
+                console.error('AUTH_TRACE: Protocol Sync Error:', err);
             } finally {
                 setLoading(false);
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const fetchProfile = async (userId) => {
+        console.log('AUTH_TRACE: Fetching dossier for UID:', userId);
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -60,10 +56,10 @@ export const AuthProvider = ({ children }) => {
                 .single();
             
             if (data) {
+                console.log('AUTH_TRACE: Dossier resolved for', data.full_name);
                 setProfile(data);
             } else if (error && error.code === 'PGRST116') {
-                // Profile missing - Create it (Fallback)
-                console.log('Profile missing for UID, creating fallback dossier...');
+                console.log('AUTH_TRACE: Dossier missing, initiating creation...');
                 const { data: newData, error: createError } = await supabase
                     .from('profiles')
                     .insert([{ id: userId, credits: 50, role: 'user' }])
@@ -71,12 +67,12 @@ export const AuthProvider = ({ children }) => {
                     .single();
                 
                 if (newData) setProfile(newData);
-                if (createError) console.error('Failed to create fallback profile:', createError);
+                if (createError) console.error('AUTH_TRACE: Creation failed:', createError);
             } else if (error) {
-                console.error('Error fetching profile:', error);
+                console.error('AUTH_TRACE: Query Error:', error.message);
             }
         } catch (err) {
-            console.error('Profile Fetch Protocol Failure:', err);
+            console.error('AUTH_TRACE: Network/Protocol Error:', err);
         }
     };
 
