@@ -13,7 +13,11 @@ export const AuthProvider = ({ children }) => {
         // Check active sessions
         const getSession = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                console.log('AUTH_TRACE: Initializing session check...');
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) console.error('AUTH_TRACE: Session check error:', error);
+                
+                console.log('AUTH_TRACE: Session found:', !!session);
                 setUser(session?.user ?? null);
                 if (session?.user) {
                     await fetchProfile(session.user.id);
@@ -28,9 +32,9 @@ export const AuthProvider = ({ children }) => {
         getSession();
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             try {
-                // DON'T set loading(true) here - it prevents loops if fetchProfile triggers re-render
+                console.log('AUTH_TRACE: Event detected:', event, '| Session:', !!session);
                 setUser(session?.user ?? null);
                 if (session?.user) {
                     await fetchProfile(session.user.id);
