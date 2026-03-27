@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Sun, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Sun, Moon, User, LogOut, Wallet, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
-import { User, LogOut, Wallet } from 'lucide-react';
 
 const Navbar = () => {
     const { user, profile, signOut, setIsAuthModalOpen } = useAuth();
@@ -15,6 +14,14 @@ const Navbar = () => {
     const { isDarkMode, toggleTheme } = useTheme();
     const [isPlaying, setIsPlaying] = useState(false);
     const location = useLocation();
+    const [lastPath, setLastPath] = useState(location.pathname);
+
+    useEffect(() => {
+        if (location.pathname !== lastPath) {
+            setIsMobileMenuOpen(false);
+            setLastPath(location.pathname);
+        }
+    }, [location.pathname, lastPath]);
 
     useEffect(() => {
         const audio = document.getElementById('bg-audio');
@@ -73,7 +80,7 @@ const Navbar = () => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    zIndex: 100,
+                    zIndex: isMobileMenuOpen ? 200 : 100,
                     backgroundColor: isScrolled || isMobileMenuOpen
                         ? isDarkMode ? 'rgba(8,8,8,0.97)' : 'rgba(248,246,241,0.97)'
                         : 'transparent',
@@ -310,14 +317,35 @@ const Navbar = () => {
                 }}
             >
                 <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.2em',
-                    color: 'var(--color-text-secondary)',
-                    marginBottom: '2rem',
-                    textTransform: 'uppercase'
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '3rem'
                 }}>
-                    Navigation
+                    <div style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.7rem',
+                        letterSpacing: '0.2em',
+                        color: 'var(--color-text-secondary)',
+                        textTransform: 'uppercase'
+                    }}>
+                        Navigation
+                    </div>
+                    <button 
+                        onClick={toggleMenu}
+                        style={{
+                            background: 'none',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                            padding: '0.5rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
                 {navLinks.map(({ href, label }, i) => (
                     <Link

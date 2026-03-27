@@ -13,7 +13,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { AI_COSTS } from '../utils/ai';
 import { supabase } from '../utils/supabase';
-import { Download } from 'lucide-react';
 
 const COLORS = {
     bgLight: '#FAFAFA',
@@ -327,8 +326,10 @@ const WallpaperLab = () => {
                 maxWidth: '1200px', 
                 margin: '0 auto',
                 display: 'flex', 
+                flexDirection: window.innerWidth < 600 ? 'column' : 'row',
                 justifyContent: 'space-between', 
-                alignItems: 'baseline' 
+                alignItems: window.innerWidth < 600 ? 'flex-start' : 'baseline',
+                gap: window.innerWidth < 600 ? '1.5rem' : '0'
             }}>
                 <div>
                     <div style={{ 
@@ -341,7 +342,7 @@ const WallpaperLab = () => {
                         VOL. 01 // LAB_REPORTS // RE-RENDER_STUDIO
                     </div>
                     <h1 style={{ 
-                        fontSize: 'clamp(2.5rem, 8vw, 4rem)', 
+                        fontSize: 'clamp(2.5rem, 15vw, 5rem)', 
                         fontWeight: 900, 
                         margin: 0, 
                         letterSpacing: '-0.04em', 
@@ -354,11 +355,17 @@ const WallpaperLab = () => {
                             fontStyle: 'italic', 
                             fontWeight: 400,
                             color: 'var(--color-accent)'
-                        }}>LAB_ENHANCED</span>
+                        }}>LAB</span>
                     </h1>
                 </div>
                 
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ 
+                    textAlign: window.innerWidth < 600 ? 'left' : 'right', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '0.5rem',
+                    width: window.innerWidth < 600 ? '100%' : 'auto'
+                }}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.6 }}>COMPUTE_RESERVE</div>
                     <div style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>
                         {profile?.credits ?? 0}<span style={{ fontSize: '0.8rem', marginLeft: '0.2rem' }}>CR</span>
@@ -371,7 +378,9 @@ const WallpaperLab = () => {
                         fontSize: '0.6rem', 
                         fontWeight: 900,
                         fontFamily: 'var(--font-mono)',
-                        marginTop: '0.5rem'
+                        marginTop: '0.5rem',
+                        display: 'inline-block',
+                        width: 'fit-content'
                     }}>
                         BUY_CREDITS
                     </Link>
