@@ -20,12 +20,12 @@ export const AuthProvider = ({ children }) => {
             console.log(`AUTH_TRACE: Event [${event}] | Session Object [${!!session}]`);
             
             try {
-                // Initial load handling
                 if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
                     const currentUser = session?.user ?? null;
                     setUser(currentUser);
                     if (currentUser) {
-                        await fetchProfile(currentUser.id);
+                        // FIRE AND FORGET: Don't block loading on the profile fetch
+                        fetchProfile(currentUser.id);
                     } else {
                         setProfile(null);
                     }
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
             } catch (err) {
                 console.error('AUTH_TRACE: Protocol Sync Error:', err);
             } finally {
+                // Ensure loading is false as soon as we have the USER object
                 setLoading(false);
             }
         });
