@@ -44,9 +44,13 @@ const Admin = () => {
     // --- Credit Requests State ---
     const [topupRequests, setTopupRequests] = useState([]);
  
+    // --- Payout Requests State ---
+    const [payoutRequests, setPayoutRequests] = useState([]);
+
     // --- Phase 6: All Users State ---
     const [allUsers, setAllUsers] = useState([]);
     const [userSearch, setUserSearch] = useState('');
+    const [freelancerFilter, setFreelancerFilter] = useState(false);
  
     // --- Phase 6: Moderation State ---
     const [allThreads, setAllThreads] = useState([]);
@@ -74,13 +78,17 @@ const Admin = () => {
             return;
         }
         
+        // IF we reach here, either we are LOCAL or we are an OWNER.
+        // We can safely fetch data.
+        
         fetchProducts();
         fetchPrompts();
         fetchCareers();
         fetchServices();
         fetchTopupRequests();
+        fetchPayoutRequests();
         fetchAllUsers();
-        fetchAllThreads();
+        // fetchAllThreads(); // Phase 6: Not yet implemented
         fetchMetrics();
         fetchApplicants();
     }, [user, authLoading]);
@@ -224,25 +232,46 @@ const Admin = () => {
     // --- Applicants CRUD ---
     const fetchApplicants = async () => {
         try {
+            console.log('--- ADMIN_FETCHING_APPLICANTS ---');
             const { data, error } = await supabase
                 .from('career_applications')
                 .select('*')
                 .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('SQL_ERROR_APPLICANTS:', error);
+                setStatus('Applicant Fetch Failed: ' + error.message);
+                throw error;
+            }
+            
+            console.log('APPLICANTS_RECEIVED:', data?.length || 0, 'records');
             if (data) setApplicants(data);
-            if (error) throw error;
         } catch (err) {
             console.error('Fetch error:', err);
         }
     };
 
-    const handleUpdateApplicantStatus = async (id, newStatus) => {
+    const handleUpdateApplicantStatus = async (id, newStatus, targetUserId) => {
         try {
-            const { error } = await supabase
+            // 1. Update Application Status
+            const { error: appError } = await supabase
                 .from('career_applications')
                 .update({ status: newStatus })
                 .eq('id', id);
             
-            if (error) throw error;
+            if (appError) throw appError;
+
+            // 2. Automate Role Promotion if Accepted
+            if (newStatus === 'ACCEPTED' && targetUserId) {
+                const { error: roleError } = await supabase
+                    .from('profiles')
+                    .update({ role: 'freelancer' })
+                    .eq('id', targetUserId);
+                
+                if (roleError) console.error('ROLE_PROMOTION_ERROR:', roleError);
+                else setStatus('Candidate Promoted to Freelancer.');
+            }
+
             setApplicants(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
             setStatus(`Applicant updated to ${newStatus}`);
         } catch (err) {
@@ -358,17 +387,28 @@ const Admin = () => {
  
     // --- Credit Management CRUD ---
     const fetchTopupRequests = async () => {
-        const { data, error } = await supabase
-            .from('topup_requests')
-            .select(`
-                *,
-                profiles:user_id ( full_name, credits )
-            `)
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false });
-        
-        if (error) console.error('Error fetching topups:', error);
-        else setTopupRequests(data);
+        try {
+            console.log('--- ADMIN_FETCHING_TOPUPS ---');
+            const { data, error } = await supabase
+                .from('topup_requests')
+                .select(`
+                    *,
+                    profiles ( full_name, credits )
+                `)
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('SQL_ERROR_TOPUPS:', error);
+                setStatus('Topup Fetch Failed: ' + error.message);
+                throw error;
+            }
+
+            console.log('TOPUPS_RECEIVED:', data?.length || 0, 'records');
+            if (data) setTopupRequests(data);
+        } catch (err) {
+            console.error('Error fetching topups:', err);
+        }
     };
  
     const handleApproveTopup = async (reqId) => {
@@ -430,6 +470,44 @@ const Admin = () => {
             setStatus('Credit Adjustment Failed: ' + error.message);
         }
     };
+
+    const fetchPayoutRequests = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('payout_requests')
+                .select(`
+                    *,
+                    profiles ( full_name, role, pay_balance )
+                `)
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            if (data) setPayoutRequests(data);
+        } catch (err) {
+            console.error('Error fetching payouts:', err);
+        }
+    };
+
+    const handleApprovePayout = async (id) => {
+        setStatus('Processing Payout...');
+        const { data, error } = await supabase.rpc('approve_payout', { payout_id: id });
+        if (error) {
+            setStatus('Payout Failed: ' + error.message);
+        } else if (data) {
+            setStatus('Payout Approved & Ledger Balanced.');
+            fetchPayoutRequests();
+            fetchAllUsers();
+        }
+    };
+
+    const handleRejectPayout = async (id) => {
+        const { error } = await supabase.rpc('reject_payout', { payout_id: id });
+        if (!error) {
+            setStatus('Payout Request Rejected.');
+            fetchPayoutRequests();
+        }
+    };
  
     const handleTogglePro = async (userId, proStatus) => {
         const { error } = await supabase.rpc('admin_toggle_pro', { 
@@ -439,6 +517,38 @@ const Admin = () => {
         if (!error) {
             setStatus(`User Pro-status updated.`);
             fetchAllUsers();
+        }
+    };
+
+    const handleAdjustPayBalance = async (userId, amount) => {
+        const currentVal = allUsers.find(u => u.id === userId)?.pay_balance || 0;
+        const newVal = parseFloat(currentVal) + parseFloat(amount);
+        
+        const { error } = await supabase
+            .from('profiles')
+            .update({ pay_balance: newVal })
+            .eq('id', userId);
+            
+        if (!error) {
+            setStatus(`Ledger adjusted: $${amount} USD.`);
+            fetchAllUsers();
+        } else {
+            setStatus('Ledger Update Failed: ' + error.message);
+        }
+    };
+
+    const handleToggleRole = async (userId, currentRole) => {
+        const newRole = currentRole === 'freelancer' ? 'user' : 'freelancer';
+        const { error } = await supabase
+            .from('profiles')
+            .update({ role: newRole })
+            .eq('id', userId);
+            
+        if (!error) {
+            setStatus(`ID_${userId.slice(0,4)} role set to ${newRole.toUpperCase()}.`);
+            fetchAllUsers();
+        } else {
+            setStatus('Role Shift Failed: ' + error.message);
         }
     };
  
@@ -538,6 +648,7 @@ const Admin = () => {
                     <button onClick={() => setActiveTab('applicants')} style={tabStyle('applicants')}>APPLICANTS</button>
                     <button onClick={() => setActiveTab('prompts')} style={tabStyle('prompts')}>PROMPTS</button>
                     <button onClick={() => setActiveTab('credits')} style={tabStyle('credits')}>CREDITS</button>
+                    <button onClick={() => setActiveTab('payouts')} style={tabStyle('payouts')}>PAYOUTS</button>
                     <button onClick={() => setActiveTab('users')} style={tabStyle('users')}>USERS</button>
                     <button onClick={() => setActiveTab('metrics')} style={tabStyle('metrics')}>STATS</button>
                 </div>
@@ -723,10 +834,79 @@ const Admin = () => {
                     </>
                 )}
  
+                {/* ===== PAYOUTS TAB ===== */}
+                {activeTab === 'payouts' && (
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                            PENDING_WITHDRAWAL_REQUESTS
+                            <button onClick={fetchPayoutRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
+                        </h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {payoutRequests.length > 0 ? payoutRequests.map(req => (
+                                <div key={req.id} style={{ 
+                                    padding: '1.5rem', 
+                                    border: '1px solid var(--color-border)', 
+                                    backgroundColor: '#111', 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <div style={{ fontWeight: 900, marginBottom: '0.3rem' }}>
+                                            {req.profiles?.full_name || 'FREELANCER_NODE'} 
+                                            <span style={{ color: 'var(--color-accent)', marginLeft: '1rem' }}>${req.amount} USD</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
+                                            GATEWAY: <span style={{ color: '#fff' }}>{req.payout_method}</span> | 
+                                            TARGET: <span style={{ color: '#fff' }}>{req.payout_address}</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.3rem' }}>
+                                            CURRENT_LEDGER_BALANCE: ${req.profiles?.pay_balance || '0.00'}
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button 
+                                            onClick={() => handleApprovePayout(req.id)}
+                                            style={{ ...buttonStyle, padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
+                                        >
+                                            APPROVE_TRANSFER
+                                        </button>
+                                        <button 
+                                            onClick={() => handleRejectPayout(req.id)}
+                                            style={{ ...buttonStyle, backgroundColor: '#333', color: '#ff4444', padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
+                                        >
+                                            REJECT
+                                        </button>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_PENDING_WITHDRAWALS</div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* ===== USERS TAB (PHASE 6) ===== */}
                 {activeTab === 'users' && (
                     <div style={sectionBox}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>USER_CONTROL_HUB</h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ margin: 0 }}>USER_CONTROL_HUB</h2>
+                            <button 
+                                onClick={() => setFreelancerFilter(!freelancerFilter)}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    backgroundColor: freelancerFilter ? 'var(--color-accent)' : 'transparent',
+                                    color: freelancerFilter ? '#000' : 'var(--color-accent)',
+                                    border: '1px solid var(--color-accent)',
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.6rem',
+                                    fontWeight: 900,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {freelancerFilter ? 'VIEW_ALL_USERS' : 'FREELANCERS_ONLY'}
+                            </button>
+                        </div>
                         <input 
                             placeholder="SEARCH_BY_EMAIL_OR_NAME" 
                             value={userSearch} 
@@ -736,21 +916,44 @@ const Admin = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {allUsers
                                 .filter(u => u.email?.toLowerCase().includes(userSearch.toLowerCase()) || u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
+                                .filter(u => freelancerFilter ? u.role === 'freelancer' : true)
                                 .map(u => (
                                 <div key={u.id} style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#111', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
                                         <div style={{ fontWeight: 900, marginBottom: '0.2rem' }}>
-                                            {u.full_name || 'NO_NAME'} {u.is_pro && <span style={{ color: 'var(--color-accent)', fontSize: '0.6rem' }}>[PRO]</span>}
+                                            {u.full_name || 'NO_NAME'} 
+                                            {u.is_pro && <span style={{ color: 'var(--color-accent)', fontSize: '0.6rem', marginLeft: '0.5rem' }}>[PRO]</span>}
+                                            {u.role === 'freelancer' && <span style={{ color: '#00ccff', fontSize: '0.6rem', marginLeft: '0.5rem' }}>[FREELANCER]</span>}
                                         </div>
                                         <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{u.email}</div>
-                                        <div style={{ fontSize: '0.8rem', fontWeight: 900, marginTop: '0.5rem' }}>BALANCE: {u.credits || 0} CR</div>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 900, marginTop: '0.5rem', display: 'flex', gap: '1.5rem' }}>
+                                            <span>COMPUTE: {u.credits || 0} CR</span>
+                                            {u.role === 'freelancer' && <span style={{ color: 'var(--color-accent)' }}>PAY_BAL: ${u.pay_balance || '0.00'}</span>}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end', maxWidth: '300px' }}>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end', maxWidth: '350px' }}>
                                         <button onClick={() => handleAdjustCredits(u.id, 50, 'ADMIN_GRANT')} style={{ ...buttonStyle, padding: '0.5rem', fontSize: '0.6rem' }}>+50 CR</button>
                                         <button onClick={() => handleAdjustCredits(u.id, -50, 'ADMIN_REVOKE')} style={{ ...buttonStyle, backgroundColor: '#333', color: '#fff', padding: '0.5rem', fontSize: '0.6rem' }}>-50 CR</button>
+                                        
                                         <button onClick={() => handleTogglePro(u.id, !u.is_pro)} style={{ ...buttonStyle, backgroundColor: u.is_pro ? '#ff4444' : 'var(--color-accent)', padding: '0.5rem', fontSize: '0.6rem' }}>
                                             {u.is_pro ? 'STRIP_PRO' : 'GRANT_PRO'}
                                         </button>
+
+                                        <button onClick={() => handleToggleRole(u.id, u.role)} style={{ ...buttonStyle, backgroundColor: u.role === 'freelancer' ? '#ff4444' : '#00ccff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}>
+                                            {u.role === 'freelancer' ? 'REVOKE_FREELANCER' : 'SET_FREELANCER'}
+                                        </button>
+
+                                        {u.role === 'freelancer' && (
+                                            <button 
+                                                onClick={() => {
+                                                    const amt = prompt('ENTER_PAYMENT_AMOUNT_($):', '100');
+                                                    if (amt) handleAdjustPayBalance(u.id, amt);
+                                                }}
+                                                style={{ ...buttonStyle, backgroundColor: '#fff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}
+                                            >
+                                                ADD_PAYMENT
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -798,7 +1001,12 @@ const Admin = () => {
                                                     {app.status}
                                                 </span>
                                             </div>
-                                            <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>{app.email} | Applying for: <span style={{ color: 'var(--color-accent)' }}>{app.role_title}</span></div>
+                                            <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+                                                {app.email} | <span style={{ color: 'var(--color-accent)' }}>{app.primary_role || app.role_title}</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.5rem', fontFamily: 'var(--font-mono)' }}>
+                                                LOCATION: {app.location_timezone || 'NOT_SPECIFIED'} | DISCORD: {app.discord_id || 'NONE'}
+                                            </div>
                                         </div>
                                         <div style={{ fontSize: '0.6rem', opacity: 0.3 }}>{new Date(app.created_at).toLocaleDateString()}</div>
                                     </div>
@@ -808,17 +1016,24 @@ const Admin = () => {
                                         <a href={app.portfolio_url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', textDecoration: 'underline', fontSize: '0.9rem' }}>{app.portfolio_url}</a>
                                     </div>
 
-                                    {app.message && (
+                                    {(app.software_proficiency) && (
                                         <div style={{ marginBottom: '1.5rem' }}>
-                                            <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>COVER_NOTE</label>
-                                            <p style={{ fontSize: '0.85rem', lineHeight: 1.5, opacity: 0.8 }}>{app.message}</p>
+                                            <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>TECH_STACK_/_PROFICIENCY</label>
+                                            <p style={{ fontSize: '0.85rem', lineHeight: 1.5, opacity: 0.8, color: 'var(--color-accent)' }}>{app.software_proficiency}</p>
+                                        </div>
+                                    )}
+
+                                    {(app.why_rerender || app.message) && (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>VIBE_CHECK_/_MOTIVATION</label>
+                                            <p style={{ fontSize: '0.85rem', lineHeight: 1.5, opacity: 0.8 }}>{app.why_rerender || app.message}</p>
                                         </div>
                                     )}
 
                                     <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
                                         <select 
                                             value={app.status} 
-                                            onChange={(e) => handleUpdateApplicantStatus(app.id, e.target.value)}
+                                            onChange={(e) => handleUpdateApplicantStatus(app.id, e.target.value, app.user_id)}
                                             style={{ ...inputStyle, width: 'auto', flex: 1, padding: '0.5rem' }}
                                         >
                                             <option value="NEW">MARK_NEW</option>

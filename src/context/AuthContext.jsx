@@ -58,7 +58,13 @@ export const AuthProvider = ({ children }) => {
             } else if (error && error.code === 'PGRST116') {
                 const { data: newData, error: createError } = await supabase
                     .from('profiles')
-                    .insert([{ id: userId, credits: 50, role: 'user' }])
+                    .insert([{ 
+                        id: userId, 
+                        credits: 50, 
+                        role: 'user', 
+                        pay_balance: 0.00,
+                        freelancer_info: {} 
+                    }])
                     .select()
                     .single();
                 

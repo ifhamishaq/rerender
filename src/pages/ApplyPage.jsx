@@ -1,34 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 import Magnetic from '../components/Animations/Magnetic';
 
 const ApplyPage = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
+    const { user, loading: authLoading } = useAuth();
+    const [existingApplication, setExistingApplication] = useState(null);
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState(null);
 
-    // Form state
+    // Broader Form state
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
-        portfolio_url: '',
-        message: ''
+        location_timezone: '',
+        discord_id: '',
+        primary_role: 'Video Editor',
+        other_role: '',
+        software_proficiency: '',
+        why_rerender: '',
+        portfolio_url: ''
     });
-    const [agreedToContract, setAgreedToContract] = useState(false);
 
     useEffect(() => {
-        if (jobId) {
+        if (user) {
+            setFormData(prev => ({ ...prev, email: user.email }));
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (jobId && jobId !== 'general') {
             fetchJobDetails();
         } else {
             setLoading(false);
         }
     }, [jobId]);
+
+    // Check for existing application
+    useEffect(() => {
+        if (user) {
+            checkExisting();
+        }
+    }, [user, jobId]);
+
+    const checkExisting = async () => {
+        const rid = jobId && jobId !== 'general' ? jobId : null;
+        
+        let query = supabase
+            .from('career_applications')
+            .select('status')
+            .eq('user_id', user.id);
+        
+        if (rid) {
+            query = query.eq('role_id', rid);
+        } else {
+            query = query.is('role_id', null);
+        }
+
+        const { data } = await query.maybeSingle();
+        if (data) setExistingApplication(data);
+    };
 
     const fetchJobDetails = async () => {
         const { data, error } = await supabase
@@ -37,23 +75,37 @@ const ApplyPage = () => {
             .eq('id', jobId)
             .single();
         
-        if (data) setJob(data);
+        if (data) {
+            setJob(data);
+            setFormData(prev => ({ ...prev, primary_role: data.title }));
+        }
         setLoading(false);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!user) return setError("Login required to submit dossiers.");
         setSubmitting(true);
         setError(null);
+
+        const finalRole = formData.primary_role === 'Other:' ? formData.other_role : formData.primary_role;
 
         try {
             const { error: submitError } = await supabase
                 .from('career_applications')
                 .insert([{
-                    ...formData,
-                    role_id: jobId,
+                    user_id: user.id,
+                    full_name: formData.full_name,
+                    email: user.email,
+                    location_timezone: formData.location_timezone,
+                    discord_id: formData.discord_id,
+                    primary_role: finalRole,
+                    software_proficiency: formData.software_proficiency,
+                    why_rerender: formData.why_rerender,
+                    portfolio_url: formData.portfolio_url,
+                    role_id: jobId && jobId !== 'general' ? jobId : null,
                     role_title: job ? job.title : 'General Application',
-                    agreed_to_contract: agreedToContract
+                    agreed_to_contract: true
                 }]);
 
             if (submitError) throw submitError;
@@ -65,137 +117,184 @@ const ApplyPage = () => {
         }
     };
 
-    if (loading) return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>
+    const roles = ['Video Editor', 'Graphic Designer', 'Motion Designer', 'Other:'];
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            setIsAuthModalOpen(true);
+        }
+    }, [user, authLoading, setIsAuthModalOpen]);
+
+    if (authLoading || loading) return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>
             [INITIALIZING_APPLICATION_PORTAL...]
         </div>
     );
 
+    if (!user) return <Navigate to="/" replace />;
+
+    if (existingApplication) return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', fontStyle: 'italic', marginBottom: '2rem', color: 'var(--color-accent)' }}>Dossier Exists</h1>
+            <p style={{ opacity: 0.6, marginBottom: '1rem', maxWidth: '400px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>You have already submitted an application for this role.</p>
+            <div style={{ padding: '0.5rem 1.5rem', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem' }}>
+                STATUS: {existingApplication.status.toUpperCase()}
+            </div>
+            <Link to="/dossier" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', border: '1px solid #333', padding: '1rem 2rem', color: '#fff', textDecoration: 'none' }}>
+                CHECK_FULL_STATUS
+            </Link>
+        </div>
+    );
+
     if (submitted) return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)', padding: '2rem', textAlign: 'center' }}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '4rem', fontStyle: 'italic', marginBottom: '1rem' }}>Application Sent</h1>
-                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '3rem', maxWidth: '400px' }}>Your dossier has been successfully submitted to the Re-Render archive. Our team will review your work shortly.</p>
-                <Link to="/careers" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', border: '1px solid var(--color-border)', padding: '1rem 2rem', color: 'var(--color-text)' }}>
-                    ← RETURN TO CAREERS
+        // ... (existing submitted UI)
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '4rem', fontStyle: 'italic', marginBottom: '1rem', color: 'var(--color-accent)' }}>Sent</h1>
+                <p style={{ opacity: 0.6, marginBottom: '3rem', maxWidth: '400px', fontSize: '0.9rem' }}>We review dossiers every Monday. If we like your vibe, we'll reach out via Discord/Email.</p>
+                <Link to="/careers" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', border: '1px solid #333', padding: '1rem 2rem', color: '#fff', textDecoration: 'none' }}>
+                    ← RETURN_TO_BASE
                 </Link>
             </motion.div>
         </div>
     );
 
-    return (
-        <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', padding: '8rem 2rem 4rem' }}>
-            <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <header style={{ marginBottom: '4rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', opacity: 0.5 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>[APPLY_SUBMISSION]</span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
-                        <Link to="/careers" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text)' }}>BACK</Link>
-                    </div>
+    const inputWrapperStyle = { marginBottom: '2.5rem', borderBottom: '1px solid #222', transition: 'border-color 0.3s' };
+    const labelStyle = { display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.3, letterSpacing: '2px' };
+    const inputStyle = { width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: '#fff', fontSize: '1.2rem', outline: 'none', fontFamily: 'var(--font-sans)' };
 
+    return (
+        <div style={{ backgroundColor: '#000', minHeight: '100vh', color: '#fff' }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '10rem 2rem 5rem' }}>
+                <header style={{ marginBottom: '5rem' }}>
                     <h1 style={{ 
                         fontFamily: 'var(--font-serif)', 
-                        fontSize: 'clamp(3rem, 8vw, 5rem)', 
+                        fontSize: 'clamp(4rem, 12vw, 8rem)', 
                         fontWeight: 400, 
                         fontStyle: 'italic',
-                        lineHeight: 0.9,
-                        marginBottom: '1rem'
+                        lineHeight: 0.8,
+                        marginBottom: '2rem',
+                        color: 'var(--color-accent)'
                     }}>
-                        {job ? job.title : 'Open Application'}
+                        {job ? job.title : 'RE-RENDER'}
                     </h1>
-                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem' }}>
-                        {job ? `Joining the studio as a ${job.type}.` : 'Tell us how you can help Re-Render scale.'}
+                    <p style={{ opacity: 0.6, fontSize: '0.85rem', maxWidth: '500px', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>
+                        We review applications every Monday. If we like your vibe, we'll reach out via Discord/Email. RE-RENDER Agency.
                     </p>
                 </header>
 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '3rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                        <div className="form-group" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                            <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.4 }}>FULL NAME</label>
+                <form onSubmit={handleSubmit}>
+                    {/* Basic Info */}
+                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: '3rem' }}>
+                        <div style={inputWrapperStyle}>
+                            <label style={labelStyle}>FULL_NAME *</label>
                             <input 
-                                type="text" 
-                                required
-                                value={formData.full_name}
-                                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                                placeholder="YOUR NAME"
-                                style={{ width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: 'var(--color-text)', fontSize: '1.2rem', fontFamily: 'var(--font-sans)', outline: 'none' }} 
+                                required type="text" placeholder="MIHIR_S..." value={formData.full_name}
+                                onChange={e => setFormData({...formData, full_name: e.target.value})} style={inputStyle}
                             />
                         </div>
-                        <div className="form-group" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                            <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.4 }}>EMAIL ADDRESS</label>
+                        <div style={inputWrapperStyle}>
+                            <label style={labelStyle}>EMAIL_ADDRESS (SESSION_LOCKED) *</label>
                             <input 
-                                type="email" 
-                                required
-                                value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                placeholder="NAME@EMAIL.COM"
-                                style={{ width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: 'var(--color-text)', fontSize: '1.2rem', fontFamily: 'var(--font-sans)', outline: 'none' }} 
+                                required type="email" placeholder="OPERATIVE@EMAIL.COM" value={formData.email}
+                                readOnly
+                                style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }}
                             />
                         </div>
                     </div>
 
-                    <div className="form-group" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.4 }}>PORTFOLIO / SHOWREEL LINK</label>
-                        <input 
-                            type="url" 
-                            required
-                            value={formData.portfolio_url}
-                            onChange={(e) => setFormData({...formData, portfolio_url: e.target.value})}
-                            placeholder="HTTPS://..."
-                            style={{ width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: 'var(--color-text)', fontSize: '1.2rem', fontFamily: 'var(--font-sans)', outline: 'none' }} 
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: '3rem' }}>
+                        <div style={inputWrapperStyle}>
+                            <label style={labelStyle}>LOCATION / TIMEZONE *</label>
+                            <input 
+                                required type="text" placeholder="EST / LONDON / DUB..." value={formData.location_timezone}
+                                onChange={e => setFormData({...formData, location_timezone: e.target.value})} style={inputStyle}
+                            />
+                        </div>
+                        <div style={inputWrapperStyle}>
+                            <label style={labelStyle}>DISCORD_ID (OPTIONAL)</label>
+                            <input 
+                                type="text" placeholder="MIHIR#0001" value={formData.discord_id}
+                                onChange={e => setFormData({...formData, discord_id: e.target.value})} style={inputStyle}
+                            />
+                        </div>
                     </div>
 
-                    <div className="form-group" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.4 }}>COVER NOTE (OPTIONAL)</label>
+                    {/* Role Selection */}
+                    <div style={{ marginBottom: '4rem' }}>
+                        <label style={labelStyle}>PRIMARY_ROLE *</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+                            {roles.map(role => (
+                                <button
+                                    key={role} type="button"
+                                    onClick={() => setFormData({...formData, primary_role: role})}
+                                    style={{
+                                        padding: '0.8rem 1.5rem',
+                                        backgroundColor: formData.primary_role === role ? 'var(--color-accent)' : 'transparent',
+                                        color: formData.primary_role === role ? '#000' : '#fff',
+                                        border: '1px solid ' + (formData.primary_role === role ? 'var(--color-accent)' : '#222'),
+                                        fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer'
+                                    }}
+                                >
+                                    {role.toUpperCase()}
+                                </button>
+                            ))}
+                        </div>
+                        {formData.primary_role === 'Other:' && (
+                            <motion.input 
+                                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                                required type="text" placeholder="SPECIFY ROLE..." 
+                                value={formData.other_role} onChange={e => setFormData({...formData, other_role: e.target.value})}
+                                style={{ ...inputStyle, borderBottom: '1px solid var(--color-accent)', marginTop: '1.5rem', fontSize: '1rem' }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Expertise */}
+                    <div style={inputWrapperStyle}>
+                        <label style={labelStyle}>SOFTWARE_PROFICIENCY *</label>
                         <textarea 
-                            rows="4"
-                            value={formData.message}
-                            onChange={(e) => setFormData({...formData, message: e.target.value})}
-                            placeholder="TELL US ABOUT YOUR BEST WORK..."
-                            style={{ width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: 'var(--color-text)', fontSize: '1.1rem', fontFamily: 'var(--font-sans)', outline: 'none', resize: 'none' }} 
+                            required rows="3" placeholder="PREMIERE, AE, BLENDER, DAVINCI..." 
+                            value={formData.software_proficiency} onChange={e => setFormData({...formData, software_proficiency: e.target.value})}
+                            style={{ ...inputStyle, resize: 'none', fontSize: '1rem' }}
                         />
                     </div>
 
-                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                        <input 
-                            type="checkbox" 
-                            id="agreement"
-                            required
-                            checked={agreedToContract}
-                            onChange={(e) => setAgreedToContract(e.target.checked)}
-                            style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-accent)' }} 
+                    <div style={inputWrapperStyle}>
+                        <label style={labelStyle}>WHY_RE-RENDER? *</label>
+                        <textarea 
+                            required rows="4" placeholder="TELL US ABOUT YOUR VIBE..." 
+                            value={formData.why_rerender} onChange={e => setFormData({...formData, why_rerender: e.target.value})}
+                            style={{ ...inputStyle, resize: 'none', fontSize: '1rem' }}
                         />
-                        <label htmlFor="agreement" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', cursor: 'pointer', opacity: 0.8 }}>
-                            I AGREE TO THE RE-RENDER <Link to="/legal/portfolio-agreement" target="_blank" style={{ color: 'var(--color-accent)', textDecoration: 'underline' }}>PORTFOLIO USAGE & MUTUAL GROWTH AGREEMENT</Link>
-                        </label>
+                    </div>
+
+                    <div style={inputWrapperStyle}>
+                        <label style={labelStyle}>LINK_TO_YOUR_PORTFOLIO *</label>
+                        <input 
+                            required type="url" placeholder="HTTPS://..." 
+                            value={formData.portfolio_url} onChange={e => setFormData({...formData, portfolio_url: e.target.value})}
+                            style={inputStyle}
+                        />
                     </div>
 
                     {error && (
-                        <p style={{ color: '#ff4444', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
-                            ERROR: {error}
+                        <p style={{ color: '#ff4444', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '2rem' }}>
+                            [ERROR: {error.toUpperCase()}]
                         </p>
                     )}
 
-                    <div style={{ marginTop: '2rem' }}>
+                    <div style={{ marginTop: '3rem' }}>
                         <Magnetic strength={0.1}>
                             <button 
-                                type="submit" 
-                                disabled={submitting}
+                                type="submit" disabled={submitting}
                                 style={{ 
-                                    backgroundColor: 'var(--color-text)', 
-                                    color: 'var(--color-bg)', 
-                                    padding: '1.5rem 4rem', 
-                                    fontFamily: 'var(--font-sans)', 
-                                    fontWeight: 700, 
-                                    fontSize: '1.1rem', 
-                                    cursor: 'pointer',
-                                    width: '100%',
-                                    border: 'none',
-                                    transition: 'opacity 0.2s ease'
+                                    backgroundColor: 'var(--color-accent)', color: '#000', padding: '1.5rem 0', 
+                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '1rem', width: '100%',
+                                    border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: submitting ? 0.5 : 1
                                 }}
                             >
-                                {submitting ? '[TRANSMITTING...]' : 'SUBMIT APPLICATION'}
+                                {submitting ? 'TRANSMITTING...' : 'SEND_DOSSIER'}
                             </button>
                         </Magnetic>
                     </div>
