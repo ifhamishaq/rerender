@@ -27,11 +27,15 @@ const DossierPage = () => {
         if (user) {
             fetchUserApplications();
             fetchUserPayouts();
+            fetchUserPayments();
         }
     }, [user]);
 
     const [userPayouts, setUserPayouts] = useState([]);
     const [payoutsLoading, setPayoutsLoading] = useState(true);
+
+    const [userPayments, setUserPayments] = useState([]);
+    const [paymentsLoading, setPaymentsLoading] = useState(true);
 
     const fetchUserApplications = async () => {
         const { data } = await supabase
@@ -54,6 +58,18 @@ const DossierPage = () => {
         
         if (data) setUserPayouts(data);
         setPayoutsLoading(false);
+    };
+
+    const fetchUserPayments = async () => {
+        if (!user) return;
+        const { data } = await supabase
+            .from('freelancer_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+        
+        if (data) setUserPayments(data);
+        setPaymentsLoading(false);
     };
 
     const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
@@ -156,6 +172,8 @@ const DossierPage = () => {
                                         style={minimalInputStyle}
                                     >
                                         <option value="PayPal">PayPal</option>
+                                        <option value="UPI">UPI (India / Global)</option>
+                                        <option value="Wise">Wise (Global)</option>
                                         <option value="Bank Transfer">Bank Transfer</option>
                                         <option value="Crypto (USDT)">Crypto (USDT)</option>
                                     </select>
@@ -163,7 +181,14 @@ const DossierPage = () => {
                                 <div>
                                     <label style={minimalLabelStyle}>PAYOUT_ADDRESS / ACCOUNT</label>
                                     <input 
-                                        type="text" placeholder="OPERATIVE@EMAIL.COM" 
+                                        type="text" 
+                                        placeholder={
+                                            setupData.payout_method === 'UPI' ? 'USERNAME@BANK' :
+                                            setupData.payout_method === 'Wise' ? 'WISE_EMAIL_OR_ID' :
+                                            setupData.payout_method === 'PayPal' ? 'PAYPAL_EMAIL' :
+                                            setupData.payout_method === 'Bank Transfer' ? 'IBAN_/_SWIFT_DETAILS' :
+                                            'WALLET_ADDRESS'
+                                        }
                                         value={setupData.payout_address} 
                                         onChange={e => setSetupData({...setupData, payout_address: e.target.value})}
                                         style={minimalInputStyle} 
@@ -217,13 +242,34 @@ const DossierPage = () => {
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={minimalLabelStyle}>WITHDRAWAL_AMOUNT ($)</label>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                        <label style={minimalLabelStyle}>WITHDRAWAL_AMOUNT ($)</label>
+                                        <button 
+                                            onClick={() => setPayoutAmount(profile?.pay_balance || 0)}
+                                            style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}
+                                        >
+                                            [SET_MAX]
+                                        </button>
+                                    </div>
                                     <input 
                                         type="number" min="150" step="10"
                                         value={payoutAmount} 
                                         onChange={e => setPayoutAmount(parseFloat(e.target.value))}
                                         style={minimalInputStyle} 
                                     />
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem', border: '1px solid #222', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.5rem', opacity: 0.4, marginBottom: '0.2rem', fontFamily: 'var(--font-mono)' }}>CURRENT_LEDGER</div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>${(profile?.pay_balance || 0).toFixed(2)}</div>
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '0.5rem', opacity: 0.4, marginBottom: '0.2rem', fontFamily: 'var(--font-mono)' }}>REMAINING_POST_TX</div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: 900, color: (profile?.pay_balance - payoutAmount) < 0 ? '#ff4444' : 'var(--color-accent)' }}>
+                                            ${((profile?.pay_balance || 0) - (payoutAmount || 0)).toFixed(2)}
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <div style={{ padding: '1rem', border: '1px solid #222', backgroundColor: 'rgba(255,255,255,0.02)' }}>
@@ -388,7 +434,6 @@ const DossierPage = () => {
                                     <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-accent)' }}>FREELANCER_NODE</h2>
                                     <div style={{ height: '2px', flex: 0.1, background: 'var(--color-accent)', opacity: 0.3 }}></div>
                                 </div>
-
                                 <div style={{ border: '1px solid var(--color-accent)', padding: '2.5rem', backgroundColor: 'rgba(0, 255, 157, 0.02)' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
                                         <div>
@@ -462,6 +507,43 @@ const DossierPage = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Earnings Ledger Node */}
+                                    <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(0, 255, 157, 0.1)', paddingTop: '2rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                            <Wallet size={16} color="var(--color-accent)" />
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>EARNINGS_LEDGER</span>
+                                        </div>
+                                        
+                                        {paymentsLoading ? (
+                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.3 }}>DECRYPTING_TRANSACTION_VOLUMES...</div>
+                                        ) : userPayments.length > 0 ? (
+                                            <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                                {userPayments.map(pay => (
+                                                    <div key={pay.id} style={{ 
+                                                        padding: '1rem', 
+                                                        border: '1px solid rgba(0, 255, 157, 0.05)', 
+                                                        backgroundColor: 'rgba(255,255,255,0.01)',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center'
+                                                    }}>
+                                                        <div>
+                                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>{pay.project_name}</div>
+                                                            <div style={{ fontSize: '0.6rem', opacity: 0.4, marginTop: '0.2rem' }}>{new Date(pay.created_at).toLocaleString()} // SEQ_{pay.id.slice(0,4)}</div>
+                                                        </div>
+                                                        <div style={{ color: 'var(--color-accent)', fontWeight: 900, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>
+                                                            +${pay.amount}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.3, border: '1px dashed #222', padding: '1.5rem', textAlign: 'center' }}>
+                                                NO_COMPLETED_PROJECTS_INDEXED
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </section>

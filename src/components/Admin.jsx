@@ -61,6 +61,11 @@ const Admin = () => {
     // --- Applicants State ---
     const [applicants, setApplicants] = useState([]);
  
+    // --- Payout Ledger State ---
+    const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+    const [payData, setPayData] = useState({ userId: '', amount: '', project: '' });
+    const [globalPayments, setGlobalPayments] = useState([]);
+ 
     const [status, setStatus] = useState('');
 
     useEffect(() => {
@@ -91,6 +96,7 @@ const Admin = () => {
         // fetchAllThreads(); // Phase 6: Not yet implemented
         fetchMetrics();
         fetchApplicants();
+        fetchGlobalPayments();
     }, [user, authLoading]);
 
     // --- Products CRUD ---
@@ -479,13 +485,47 @@ const Admin = () => {
                     *,
                     profiles ( full_name, role, pay_balance )
                 `)
-                .eq('status', 'pending')
                 .order('created_at', { ascending: false });
             
             if (error) throw error;
             if (data) setPayoutRequests(data);
         } catch (err) {
             console.error('Error fetching payouts:', err);
+        }
+    };
+
+    const fetchGlobalPayments = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('freelancer_payments')
+                .select('*, profiles(full_name, email)')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            if (data) setGlobalPayments(data);
+        } catch (err) {
+            console.error('Error fetching global payments:', err);
+        }
+    };
+
+
+    const handleRecordProjectPayment = async (e) => {
+        e.preventDefault();
+        const { error } = await supabase.rpc('record_project_payment', { 
+            target_user_id: payData.userId, 
+            payment_amount: parseFloat(payData.amount),
+            proj_name: payData.project
+        });
+        
+        if (!error) {
+            setStatus(`Payment Recorded: $${payData.amount} for ${payData.project}.`);
+            setIsPayModalOpen(false);
+            setPayData({ userId: '', amount: '', project: '' });
+            fetchAllUsers();
+            fetchGlobalPayments();
+        } else {
+            console.error('PAYMENT_LEDGER_ERROR:', error);
+            setStatus('Payment Failed: ' + error.message);
         }
     };
 
@@ -520,22 +560,6 @@ const Admin = () => {
         }
     };
 
-    const handleAdjustPayBalance = async (userId, amount) => {
-        const currentVal = allUsers.find(u => u.id === userId)?.pay_balance || 0;
-        const newVal = parseFloat(currentVal) + parseFloat(amount);
-        
-        const { error } = await supabase
-            .from('profiles')
-            .update({ pay_balance: newVal })
-            .eq('id', userId);
-            
-        if (!error) {
-            setStatus(`Ledger adjusted: $${amount} USD.`);
-            fetchAllUsers();
-        } else {
-            setStatus('Ledger Update Failed: ' + error.message);
-        }
-    };
 
     const handleToggleRole = async (userId, currentRole) => {
         const newRole = currentRole === 'freelancer' ? 'user' : 'freelancer';
@@ -600,6 +624,16 @@ const Admin = () => {
         outline: 'none'
     };
 
+    const modalOverlayStyle = {
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', 
+        zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+    };
+
+    const modalContentStyle = {
+        background: '#111', border: '1px solid var(--color-accent)', 
+        padding: '3rem', width: '100%', maxWidth: '500px', boxShadow: '0 0 50px rgba(0,255,157,0.1)'
+    };
+
     const sectionBox = {
         padding: '2rem',
         backgroundColor: '#0a0a0a',
@@ -625,6 +659,41 @@ const Admin = () => {
                     <h1 style={{ margin: 0, fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.05em' }}>ADMIN_CMS</h1>
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)' }}>[SYSTEM_CONNECTED] [MODE: PORTAL]</div>
                 </div>
+
+                {/* ===== RECORD COMPLETION MODAL ===== */}
+                {isPayModalOpen && (
+                    <div style={modalOverlayStyle}>
+                        <div style={modalContentStyle}>
+                            <h2 style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--color-accent)', marginBottom: '1.5rem', fontSize: '2rem' }}>Record_Completion</h2>
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.5, marginBottom: '2rem' }}>
+                                INJECTING_USD_INTO_LEDGER // ID: {payData.userId.slice(0,8)}
+                            </p>
+                            
+                            <form onSubmit={handleRecordProjectPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)' }}>PROJECT_NAME / ID</label>
+                                    <input 
+                                        required placeholder="VFX_SCENE_01_FINAL" 
+                                        value={payData.project} onChange={e => setPayData({...payData, project: e.target.value})}
+                                        style={inputStyle} 
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)' }}>PAYMENT_AMOUNT_($USD)</label>
+                                    <input 
+                                        required type="number" step="0.01" placeholder="100.00" 
+                                        value={payData.amount} onChange={e => setPayData({...payData, amount: e.target.value})}
+                                        style={inputStyle} 
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="submit" style={{ ...buttonStyle, flex: 1, padding: '1rem' }}>TRANSMIT_PAYMENT</button>
+                                    <button type="button" onClick={() => setIsPayModalOpen(false)} style={{ ...buttonStyle, backgroundColor: '#444', padding: '1rem' }}>ABORT</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {status && (
                     <div style={{ 
@@ -842,7 +911,7 @@ const Admin = () => {
                             <button onClick={fetchPayoutRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {payoutRequests.length > 0 ? payoutRequests.map(req => (
+                            {payoutRequests.filter(r => r.status === 'pending').length > 0 ? payoutRequests.filter(r => r.status === 'pending').map(req => (
                                 <div key={req.id} style={{ 
                                     padding: '1.5rem', 
                                     border: '1px solid var(--color-border)', 
@@ -881,6 +950,80 @@ const Admin = () => {
                                 </div>
                             )) : (
                                 <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_PENDING_WITHDRAWALS</div>
+                            )}
+                        </div>
+
+                        {/* WITHDRAWAL_HISTORY */}
+                        <div style={{ marginTop: '4rem', borderTop: '2px solid var(--color-border)', paddingTop: '2rem' }}>
+                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
+                                Withdrawal_History
+                                <button onClick={fetchPayoutRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
+                            </h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {payoutRequests.filter(r => r.status !== 'pending').length > 0 ? payoutRequests.filter(r => r.status !== 'pending').map(req => (
+                                    <div key={req.id} style={{ 
+                                        padding: '1.5rem', 
+                                        border: '1px solid #222', 
+                                        backgroundColor: '#0a0a0a',
+                                        display: 'flex', 
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        opacity: 0.7
+                                    }}>
+                                        <div>
+                                            <div style={{ fontWeight: 900, marginBottom: '0.3rem' }}>
+                                                {req.profiles?.full_name || 'ID: ' + req.user_id.slice(0,8)} 
+                                                <span style={{ color: 'var(--color-accent)', marginLeft: '1rem' }}>${req.amount} USD</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
+                                                DATE: {new Date(req.created_at).toLocaleString()} | 
+                                                TO: {req.payout_address}
+                                            </div>
+                                        </div>
+                                        <div style={{ 
+                                            fontSize: '0.6rem', padding: '4px 10px', fontWeight: 900, 
+                                            backgroundColor: req.status === 'approved' ? '#00ccff' : '#ff4444', 
+                                            color: '#000', textTransform: 'uppercase' 
+                                        }}>
+                                            {req.status}
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_HISTORY_AVAILABLE</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* PROJECT_PAYMENT_AUDIT_TRAIL */}
+                        <div style={{ marginTop: '4rem', borderTop: '2px solid var(--color-border)', paddingTop: '2rem' }}>
+                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
+                                Project_Payment_Audit_Trail
+                                <button onClick={fetchGlobalPayments} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
+                            </h2>
+                            {globalPayments.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>[NO_PAYMENTS_RECORDED_IN_LEDGER]</div>
+                            ) : (
+                                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                    {globalPayments.slice(0, 10).map(pay => (
+                                        <div key={pay.id} style={{ 
+                                            padding: '1.25rem', 
+                                            border: '1px solid #222', 
+                                            backgroundColor: '#0a0a0a',
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            alignItems: 'center' 
+                                        }}>
+                                            <div>
+                                                <div style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '0.2rem' }}>{pay.project_name}</div>
+                                                <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>
+                                                    RECIPIENT: <span style={{ color: '#fff' }}>{pay.profiles?.full_name || 'ID: ' + pay.user_id.slice(0, 8)}</span> | 
+                                                    DATE: {new Date(pay.created_at).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            <div style={{ color: 'var(--color-accent)', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>+${pay.amount} USD</div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -944,15 +1087,17 @@ const Admin = () => {
                                         </button>
 
                                         {u.role === 'freelancer' && (
-                                            <button 
-                                                onClick={() => {
-                                                    const amt = prompt('ENTER_PAYMENT_AMOUNT_($):', '100');
-                                                    if (amt) handleAdjustPayBalance(u.id, amt);
-                                                }}
-                                                style={{ ...buttonStyle, backgroundColor: '#fff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}
-                                            >
-                                                ADD_PAYMENT
-                                            </button>
+                                            <>
+                                                <button 
+                                                    onClick={() => {
+                                                        setPayData({ ...payData, userId: u.id });
+                                                        setIsPayModalOpen(true);
+                                                    }}
+                                                    style={{ ...buttonStyle, backgroundColor: '#fff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}
+                                                >
+                                                    RECORD_COMPLETION
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -1048,6 +1193,7 @@ const Admin = () => {
                         )}
                     </div>
                 )}
+
             </div>
         </div>
     );
