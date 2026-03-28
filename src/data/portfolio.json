@@ -4,8 +4,7 @@
         "title": "VFX_REEL_01",
         "client": "STUDIO_X",
         "year": "2025",
-        "category": "MOTION",
-        "thumbnail": "https://img.youtube.com/vi/yqEUTfKfZiE/maxresdefault.jpg",
+        "category": "3D",
         "youtubeId": "yqEUTfKfZiE",
         "aspectRatio": "9/16",
         "tags": [
@@ -21,8 +20,7 @@
         "title": "VFX_REEL_02",
         "client": "CREATIVE_LABS",
         "year": "2025",
-        "category": "MOTION",
-        "thumbnail": "https://img.youtube.com/vi/m_9K2XZNlPA/maxresdefault.jpg",
+        "category": "3D",
         "youtubeId": "m_9K2XZNlPA",
         "aspectRatio": "9/16",
         "tags": [
@@ -39,7 +37,6 @@
         "client": "ARCH_VIZ",
         "year": "2025",
         "category": "3D",
-        "thumbnail": "https://img.youtube.com/vi/uV0d5oyFk88/maxresdefault.jpg",
         "youtubeId": "uV0d5oyFk88",
         "aspectRatio": "16/9",
         "tags": [
@@ -56,7 +53,6 @@
         "client": "PRODUCT_DESIGN",
         "year": "2025",
         "category": "3D",
-        "thumbnail": "https://img.youtube.com/vi/tqi4oQ4N9KY/maxresdefault.jpg",
         "youtubeId": "tqi4oQ4N9KY",
         "aspectRatio": "16/9",
         "tags": [
@@ -73,7 +69,6 @@
         "client": "DIGITAL_ART",
         "year": "2025",
         "category": "3D",
-        "thumbnail": "https://img.youtube.com/vi/7o4JCAJXM4A/maxresdefault.jpg",
         "youtubeId": "7o4JCAJXM4A",
         "aspectRatio": "16/9",
         "tags": [
@@ -90,7 +85,6 @@
         "client": "INFLUENCER_GROWTH",
         "year": "2025",
         "category": "TALKING HEAD",
-        "thumbnail": "https://img.youtube.com/vi/bgKmMJys1C4/maxresdefault.jpg",
         "youtubeId": "bgKmMJys1C4",
         "aspectRatio": "9/16",
         "tags": [
@@ -195,6 +189,78 @@
             "Visual"
         ],
         "description": "Artistic creative thumbnail showcasing modern design and branding principles.",
+        "gdriveImages": []
+    },
+    {
+        "id": "th-02",
+        "title": "TALKING_HEAD_SHOWCASE_02",
+        "client": "STUDIO_MAHIR",
+        "year": "2026",
+        "category": "TALKING HEAD",
+        "videoUrl": "https://framerusercontent.com/assets/V8wNvIrQdEga2TdN5fVsX5JEY.mp4",
+        "aspectRatio": "9/16",
+        "tags": ["Short-Form", "Engagement", "Talking Head"],
+        "description": "High-impact talking head edit with cinematic color grading and dynamic subtitles.",
+        "gdriveImages": []
+    },
+    {
+        "id": "th-03",
+        "title": "TALKING_HEAD_SHOWCASE_03",
+        "client": "STUDIO_MAHIR",
+        "year": "2026",
+        "category": "TALKING HEAD",
+        "videoUrl": "https://framerusercontent.com/assets/bQEG5R1zB7T5cz5zfNcEIXs8zi8.mp4",
+        "aspectRatio": "9/16",
+        "tags": ["Influence", "B-Roll", "Editing"],
+        "description": "Professional influencer-grade editing for maximum audience retention.",
+        "gdriveImages": []
+    },
+    {
+        "id": "mg-03",
+        "title": "MOTION_GRAPHICS_V3",
+        "client": "TECH_CORP",
+        "year": "2026",
+        "category": "MOTION DESIGN",
+        "videoUrl": "https://framerusercontent.com/assets/LczYTZL5VSg3FTvtJc3vNuoOg0.mp4",
+        "aspectRatio": "9/16",
+        "tags": ["Motion", "Brutalism", "Graphics"],
+        "description": "Aggressive motion design for high-energy brand campaigns.",
+        "gdriveImages": []
+    },
+    {
+        "id": "mg-04",
+        "title": "MOTION_GRAPHICS_V4",
+        "client": "VISION_MEDIA",
+        "year": "2026",
+        "category": "MOTION DESIGN",
+        "videoUrl": "https://framerusercontent.com/assets/ZnsQDGMZ9Pp5avxmTabW9LJUAY.mp4",
+        "aspectRatio": "9/16",
+        "tags": ["Abstract", "VFX", "Cinematic"],
+        "description": "Complex VFX integration for futuristic social media identities.",
+        "gdriveImages": []
+    },
+    {
+        "id": "mg-05",
+        "title": "MOTION_GRAPHICS_V5",
+        "client": "DIGITAL_NOMADS",
+        "year": "2026",
+        "category": "MOTION",
+        "videoUrl": "https://framerusercontent.com/assets/S0Gi3NDp8rtAEpFkOIGuciuJT24.mp4",
+        "aspectRatio": "9/16",
+        "tags": ["Dynamics", "Typography", "Speed"],
+        "description": "Kinetic typography and high-speed motion design.",
+        "gdriveImages": []
+    },
+    {
+        "id": "lf-01",
+        "title": "LONG_FORM_CINEMATIC_01",
+        "client": "AGENCY_REVERSE",
+        "year": "2026",
+        "category": "LONG FORM",
+        "videoUrl": "https://framerusercontent.com/assets/GSIqzO4NGupvkJwEcoMv4diVz8s.mp4",
+        "aspectRatio": "16/9",
+        "tags": ["Long Form", "Documentary", "Cinematic"],
+        "description": "High-fidelity cinematic long-form production, optimized for YouTube and OTT.",
         "gdriveImages": []
     }
 ]

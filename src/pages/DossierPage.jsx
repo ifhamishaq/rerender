@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const DossierPage = () => {
     const { user, profile, signOut } = useAuth();
     const { requests, logs, loading, submitting, submitRequest } = useDossier();
-    
+
     const [txId, setTxId] = useState('');
     const [amount, setAmount] = useState(10);
 
@@ -32,65 +32,65 @@ const DossierPage = () => {
     );
 
     return (
-        <div style={{ 
-            minHeight: '100vh', 
-            background: 'var(--color-bg)', 
-            color: 'var(--color-text)', 
-            padding: '120px 2rem 4rem', 
-            fontFamily: 'var(--font-sans)' 
+        <div style={{
+            minHeight: '100vh',
+            background: 'var(--color-bg)',
+            color: 'var(--color-text)',
+            padding: '120px 2rem 4rem',
+            fontFamily: 'var(--font-sans)'
         }}>
             <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-                
+
                 {/* Header Section / Masthead */}
-                <header style={{ 
-                    borderBottom: '4px solid var(--color-text)', 
-                    paddingBottom: '2rem', 
-                    marginBottom: '3rem', 
-                    display: 'flex', 
+                <header style={{
+                    borderBottom: '4px solid var(--color-text)',
+                    paddingBottom: '2rem',
+                    marginBottom: '3rem',
+                    display: 'flex',
                     flexDirection: window.innerWidth < 600 ? 'column' : 'row',
-                    justifyContent: 'space-between', 
+                    justifyContent: 'space-between',
                     alignItems: window.innerWidth < 600 ? 'flex-start' : 'baseline',
                     gap: window.innerWidth < 600 ? '1.5rem' : '0'
                 }}>
                     <div>
-                        <div style={{ 
-                            fontFamily: 'var(--font-mono)', 
-                            fontSize: '0.65rem', 
-                            letterSpacing: '0.2em', 
-                            color: 'var(--color-text-secondary)', 
-                            marginBottom: '1rem' 
+                        <div style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.65rem',
+                            letterSpacing: '0.2em',
+                            color: 'var(--color-text-secondary)',
+                            marginBottom: '1rem'
                         }}>
                             VOL. 03 // ISSUE 2026 // RE-RENDER_EDITORIAL
                         </div>
-                        <h1 style={{ 
-                            fontSize: 'clamp(3rem, 10vw, 6rem)', 
-                            fontWeight: 900, 
-                            margin: 0, 
-                            letterSpacing: '-0.05em', 
+                        <h1 style={{
+                            fontSize: 'clamp(3rem, 10vw, 6rem)',
+                            fontWeight: 900,
+                            margin: 0,
+                            letterSpacing: '-0.05em',
                             lineHeight: 0.8,
                             fontFamily: 'var(--font-display)'
                         }}>
-                            {profile?.full_name?.toUpperCase() || 'OPERATIVE'}<br/>
-                            <span style={{ 
-                                fontFamily: 'Playfair Display', 
-                                fontStyle: 'italic', 
+                            {profile?.full_name?.toUpperCase() || 'OPERATIVE'}<br />
+                            <span style={{
+                                fontFamily: 'Playfair Display',
+                                fontStyle: 'italic',
                                 fontWeight: 400,
                                 color: 'var(--color-accent)'
                             }}>DOSSIER</span>
                         </h1>
                     </div>
                     <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <div style={{ 
-                            fontFamily: 'var(--font-mono)', 
-                            fontSize: '0.7rem', 
-                            fontWeight: 700, 
-                            letterSpacing: '0.1em' 
+                        <div style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em'
                         }}>
                             AVAILABLE_COMPUTE
                         </div>
-                        <div style={{ 
-                            fontSize: '3.5rem', 
-                            fontWeight: 900, 
+                        <div style={{
+                            fontSize: '3.5rem',
+                            fontWeight: 900,
                             lineHeight: 1,
                             fontFamily: 'var(--font-display)'
                         }}>
@@ -99,40 +99,40 @@ const DossierPage = () => {
                     </div>
                 </header>
 
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: window.innerWidth < 900 ? '1fr' : '1fr 350px', 
-                    gap: '4rem' 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: window.innerWidth < 900 ? '1fr' : '1fr 350px',
+                    gap: '4rem'
                 }}>
-                    
+
                     {/* Left: Content Area */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                         {/* Support Section */}
                         <section>
                             <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', position: 'relative' }}>
-                                <div style={{ 
-                                    position: 'absolute', 
-                                    top: '-15px', 
-                                    left: '30px', 
-                                    background: 'var(--color-bg)', 
-                                    padding: '0 15px', 
-                                    fontFamily: 'var(--font-mono)', 
-                                    fontSize: '0.75rem', 
-                                    fontWeight: 900 
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-15px',
+                                    left: '30px',
+                                    background: 'var(--color-bg)',
+                                    padding: '0 15px',
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 900
                                 }}>
                                     SUPPORT_THE_WORKSPACE
                                 </div>
-                                
-                                <div style={{ 
-                                    display: 'grid', 
-                                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', 
+
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
                                     gap: window.innerWidth < 768 ? '2rem' : '3rem',
                                     alignItems: 'start'
                                 }}>
                                     <div>
-                                        <p style={{ 
-                                            fontSize: '1.1rem', 
-                                            lineHeight: 1.5, 
+                                        <p style={{
+                                            fontSize: '1.1rem',
+                                            lineHeight: 1.5,
                                             margin: 0,
                                             fontFamily: 'var(--font-sans)',
                                             fontWeight: 500
@@ -140,17 +140,17 @@ const DossierPage = () => {
                                             Maintain the engine. Support the developers to gain priority access, higher generation limits, and exclusive features.
                                         </p>
                                         <div style={{ marginTop: '2.5rem' }}>
-                                            <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{ 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
-                                                gap: '1rem', 
-                                                backgroundColor: 'var(--color-text)', 
-                                                color: 'var(--color-bg)', 
-                                                padding: '1.25rem', 
-                                                textDecoration: 'none', 
-                                                fontWeight: 900, 
-                                                fontSize: '0.9rem', 
-                                                textAlign: 'center', 
+                                            <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '1rem',
+                                                backgroundColor: 'var(--color-text)',
+                                                color: 'var(--color-bg)',
+                                                padding: '1.25rem',
+                                                textDecoration: 'none',
+                                                fontWeight: 900,
+                                                fontSize: '0.9rem',
+                                                textAlign: 'center',
                                                 justifyContent: 'center',
                                                 fontFamily: 'var(--font-mono)',
                                                 letterSpacing: '0.1em'
@@ -160,8 +160,8 @@ const DossierPage = () => {
                                         </div>
                                     </div>
 
-                                    <form onSubmit={handleSubmit} style={{ 
-                                        borderLeft: window.innerWidth < 768 ? 'none' : '1px solid var(--color-border)', 
+                                    <form onSubmit={handleSubmit} style={{
+                                        borderLeft: window.innerWidth < 768 ? 'none' : '1px solid var(--color-border)',
                                         paddingLeft: window.innerWidth < 768 ? '0' : '2.5rem',
                                         borderTop: window.innerWidth < 768 ? '1px solid var(--color-border)' : 'none',
                                         paddingTop: window.innerWidth < 768 ? '2.5rem' : '0'
@@ -181,15 +181,15 @@ const DossierPage = () => {
                                                 <label style={{ fontSize: '0.65rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.5, display: 'block', marginBottom: '0.5rem' }}>TX_ID / EMAIL</label>
                                                 <input type="text" placeholder="REQUIRED_FOR_VERIFICATION" value={txId} onChange={(e) => setTxId(e.target.value)} style={minimalInputStyle} />
                                             </div>
-                                            <button type="submit" disabled={submitting} style={{ 
-                                                width: '100%', 
-                                                background: 'var(--color-accent)', 
-                                                color: '#000', 
+                                            <button type="submit" disabled={submitting} style={{
+                                                width: '100%',
+                                                background: 'var(--color-accent)',
+                                                color: '#000',
                                                 outline: '2px solid #000',
-                                                border: 'none', 
-                                                padding: '1rem', 
-                                                fontWeight: 900, 
-                                                fontSize: '0.8rem', 
+                                                border: 'none',
+                                                padding: '1rem',
+                                                fontWeight: 900,
+                                                fontSize: '0.8rem',
                                                 cursor: 'pointer',
                                                 fontFamily: 'var(--font-mono)',
                                                 letterSpacing: '0.05em'
@@ -210,14 +210,14 @@ const DossierPage = () => {
                                 <Shield size={16} />
                                 <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>USER_PROFILE_META</span>
                             </div>
-                            
+
                             {profile?.is_pro && (
-                                <div style={{ 
-                                    backgroundColor: 'var(--color-accent)', 
-                                    color: '#000', 
-                                    padding: '0.5rem 1rem', 
-                                    display: 'inline-flex', 
-                                    alignItems: 'center', 
+                                <div style={{
+                                    backgroundColor: 'var(--color-accent)',
+                                    color: '#000',
+                                    padding: '0.5rem 1rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
                                     gap: '0.5rem',
                                     marginBottom: '1.5rem',
                                     fontWeight: 900,
@@ -229,8 +229,8 @@ const DossierPage = () => {
                             )}
 
                             <div style={{ fontSize: '0.75rem', lineHeight: 2, fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
-                                <span style={{ color: 'var(--color-text)' }}>UID:</span> {user.id.toUpperCase()}<br/>
-                                <span style={{ color: 'var(--color-text)' }}>RANK:</span> {profile?.is_pro ? 'PRO_ACCESS' : 'STANDARD'}<br/>
+                                <span style={{ color: 'var(--color-text)' }}>UID:</span> {user.id.toUpperCase()}<br />
+                                <span style={{ color: 'var(--color-text)' }}>RANK:</span> {profile?.is_pro ? 'PRO_ACCESS' : 'STANDARD'}<br />
                                 <span style={{ color: 'var(--color-text)' }}>JOIN_DATE:</span> {new Date(user.created_at).toLocaleDateString()}
                             </div>
                         </div>
@@ -243,8 +243,8 @@ const DossierPage = () => {
                             {logs.length > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                     {logs.slice(0, 10).map(log => (
-                                        <div key={log.id} style={{ 
-                                            fontSize: '0.65rem', 
+                                        <div key={log.id} style={{
+                                            fontSize: '0.65rem',
                                             fontFamily: 'var(--font-mono)',
                                             borderLeft: `2px solid ${log.amount > 0 ? 'var(--color-accent)' : '#ff4444'}`,
                                             padding: '0.5rem 0.8rem',
@@ -275,9 +275,9 @@ const DossierPage = () => {
                             {requests.length > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {requests.slice(0, 5).map(req => (
-                                        <div key={req.id} style={{ 
-                                            fontSize: '0.7rem', 
-                                            display: 'flex', 
+                                        <div key={req.id} style={{
+                                            fontSize: '0.7rem',
+                                            display: 'flex',
                                             justifyContent: 'space-between',
                                             fontFamily: 'var(--font-mono)',
                                             borderBottom: '1px dotted var(--color-border)',
@@ -285,7 +285,7 @@ const DossierPage = () => {
                                         }}>
                                             <span>{new Date(req.created_at).toLocaleDateString()}</span>
                                             <span style={{ fontWeight: 900 }}>{req.amount}CR</span>
-                                            <span style={{ 
+                                            <span style={{
                                                 color: req.status === 'pending' ? '#FFA500' : 'var(--color-accent)',
                                                 fontWeight: 900
                                             }}>[{req.status.toUpperCase()}]</span>
@@ -297,19 +297,19 @@ const DossierPage = () => {
                             )}
                         </div>
 
-                        <button onClick={signOut} style={{ 
-                            background: 'none', 
-                            border: '1px solid var(--color-border)', 
-                            color: 'var(--color-text-secondary)', 
-                            padding: '1rem', 
-                            fontSize: '0.7rem', 
-                            fontWeight: 900, 
-                            cursor: 'pointer', 
+                        <button onClick={signOut} style={{
+                            background: 'none',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text-secondary)',
+                            padding: '1rem',
+                            fontSize: '0.7rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
                             fontFamily: 'var(--font-mono)',
                             transition: 'all 0.2s'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#ff4444'; e.currentTarget.style.borderColor = '#ff4444'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#ff4444'; e.currentTarget.style.borderColor = '#ff4444'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
                         >
                             TERMINATE_SESSION
                         </button>

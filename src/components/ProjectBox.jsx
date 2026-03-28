@@ -18,15 +18,38 @@ const ProjectBox = ({ project, onClick }) => {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
             }}
         >
-            {/* Thumbnail */}
+            {/* Thumbnail / Video Preview */}
             <div style={{
                 width: '100%',
                 height: '100%',
-                backgroundImage: `url(${project.thumbnail})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transition: 'transform 0.5s ease'
-            }} />
+                backgroundColor: '#000',
+                position: 'relative'
+            }}>
+                {project.videoUrl || project.video_url ? (
+                    <video
+                        src={project.videoUrl || project.video_url}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            filter: 'grayscale(1) contrast(1.1) brightness(0.7)'
+                        }}
+                    />
+                ) : (
+                    <div style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundImage: `url(${project.thumbnail})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        transition: 'transform 0.5s ease'
+                    }} />
+                )}
+            </div>
 
             {/* Hover Overlay */}
             <motion.div 

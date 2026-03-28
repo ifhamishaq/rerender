@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import Marquee from '../components/Marquee';
-import ProjectMarquee from '../components/ProjectMarquee';
+import PinterestWorkGrid from '../components/PinterestWorkGrid';
 import { Link } from 'react-router-dom';
 import FadeUp from '../components/Animations/FadeUp';
 import products from '../data/products.json';
@@ -75,9 +75,9 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Project Showcase Marquee (Replaces 01 - HOW WE WORK) */}
+            {/* Pinterest Portfolio Selection (replaces Marquee) */}
             <section id="work">
-                <ProjectMarquee />
+                <PinterestWorkGrid />
             </section>
 
             {/* Services Section */}

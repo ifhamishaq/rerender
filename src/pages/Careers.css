@@ -81,7 +81,7 @@
     margin-bottom: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    background-color: rgba(255,255,255,0.02);
+    background-color: rgba(255, 255, 255, 0.02);
 }
 
 .job-card-mini:hover {
@@ -112,9 +112,17 @@
     border-radius: 50%;
 }
 
-.job-status-pip.available { background-color: var(--color-accent); }
-.job-status-pip.scouting { background-color: #ff9900; }
-.job-status-pip.coming_soon { background-color: #555; }
+.job-status-pip.available {
+    background-color: var(--color-accent);
+}
+
+.job-status-pip.scouting {
+    background-color: #ff9900;
+}
+
+.job-status-pip.coming_soon {
+    background-color: #555;
+}
 
 .job-mini-title {
     font-size: 1.25rem;
@@ -211,7 +219,7 @@
     font-size: 0.85rem;
     padding: 1rem;
     border: 1px solid var(--color-border);
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .main-apply-btn {
@@ -251,24 +259,24 @@
     .portal-layout {
         grid-template-columns: 1fr;
     }
-    
+
     .job-list-sidebar {
         border-right: none;
         padding: 1rem;
     }
-    
+
     .mobile-details-preview {
         margin-top: 1.5rem;
         padding-top: 1.5rem;
         border-top: 1px dashed var(--color-border);
     }
-    
+
     .mobile-details-preview p {
         font-size: 0.9rem;
         line-height: 1.5;
         margin-bottom: 1.5rem;
     }
-    
+
     .apply-btn-mini {
         display: block;
         padding: 1rem;

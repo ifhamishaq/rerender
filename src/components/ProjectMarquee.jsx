@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
+import portfolioData from '../data/portfolio.json';
 import VideoModal from './VideoModal';
 
 const ProjectMarquee = () => {
@@ -12,7 +13,6 @@ const ProjectMarquee = () => {
     const contentRef = useRef(null);
     const [totalWidth, setTotalWidth] = useState(0);
 
-    // Parallax effect on scroll for the marquee container
     const { scrollYProgress } = useScroll();
     const xParallax = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
@@ -22,26 +22,35 @@ const ProjectMarquee = () => {
 
     useEffect(() => {
         if (contentRef.current) {
-            setTotalWidth(contentRef.current.scrollWidth / 2); // Divide by 2 because we double for infinite loop
+            setTotalWidth(contentRef.current.scrollWidth / 2);
         }
     }, [projects]);
 
     const fetchProjects = async () => {
-        const { data, error } = await supabase
-            .from('projects')
-            .select('*');
-        
-        if (data) {
-            const motion = data.find(p => p.category?.toUpperCase() === 'MOTION');
-            const g01 = data.find(p => p.title?.toUpperCase().includes('GAMING_THUMBNAIL_01'));
-            const td = data.find(p => p.category?.toUpperCase() === '3D');
-            const l02 = data.find(p => p.title?.toUpperCase().includes('LIFESTYLE_THUMBNAIL_02'));
-            const th = data.find(p => p.category?.toUpperCase() === 'TALKING HEAD');
+        try {
+            // Only use Mihir's new high-end video reels for the Home Selection
+            // Remove 3D videos as requested
+            const newReels = portfolioData.filter(p => 
+                (p.videoUrl || p.video_url) && 
+                p.category?.toUpperCase() !== '3D'
+            );
+            
+            // Explicitly prioritize Mihir's specific IDs if they exist
+            const prioritizedIds = ['lf-01', 'mg-03', 'mg-04', 'th-02', 'th-03'];
+            const sortedReels = [...newReels].sort((a, b) => {
+                const aIdx = prioritizedIds.indexOf(a.id);
+                const bIdx = prioritizedIds.indexOf(b.id);
+                if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+                if (aIdx !== -1) return -1;
+                if (bIdx !== -1) return 1;
+                return 0;
+            });
 
-            const curated = [motion, g01, td, l02, th].filter(Boolean);
-            setProjects(curated);
+            setProjects(sortedReels);
+        } catch (err) {
+            console.error('Marquee Fetch Error:', err);
+            setProjects([]);
         }
-        if (error) console.error('Error fetching curated projects:', error);
     };
 
     const handleProjectClick = (project) => {
@@ -51,7 +60,6 @@ const ProjectMarquee = () => {
 
     if (projects.length === 0) return null;
 
-    // Double the projects for infinite loop
     const displayProjects = [...projects, ...projects];
 
     return (
@@ -62,10 +70,17 @@ const ProjectMarquee = () => {
             overflow: 'hidden',
             borderBottom: '1px solid var(--color-border)'
         }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem', width: '100%', marginBottom: '4rem' }}>
-                <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ color: 'var(--color-accent)' }}>01</span> 
-                    &#8212; PORTFOLIO_SELECTION.26
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem', width: '100%', marginBottom: '4rem' }}>
+                <div className="section-label" style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '1rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.2em'
+                }}>
+                    <span style={{ color: 'var(--color-accent)', fontWeight: 900 }}>01</span> 
+                    &#8212; PORTFOLIO_SELECTION.2
                 </div>
             </div>
 
@@ -73,7 +88,7 @@ const ProjectMarquee = () => {
                 style={{ 
                     position: 'relative', 
                     width: '100%',
-                    x: xParallax // Subtle horizontal shift on scroll
+                    x: xParallax
                 }}
             >
                 <motion.div
@@ -81,12 +96,12 @@ const ProjectMarquee = () => {
                     animate={{ x: [0, -totalWidth] }}
                     transition={{
                         repeat: Infinity,
-                        duration: 35, // Slow marquee
+                        duration: 40,
                         ease: "linear"
                     }}
                     style={{ 
                         display: 'flex', 
-                        gap: '2rem', 
+                        gap: '2.5rem', 
                         padding: '0 1rem',
                         width: 'fit-content'
                     }}
@@ -94,39 +109,78 @@ const ProjectMarquee = () => {
                     {displayProjects.map((project, index) => (
                         <motion.div 
                             key={`${project.id}-${index}`}
-                            whileHover={{ scale: 1.05, y: -10 }}
+                            whileHover={{ scale: 1.02, y: -5 }}
                             onClick={() => handleProjectClick(project)}
                             style={{ 
                                 flexShrink: 0, 
-                                width: '450px', 
+                                width: '550px', 
                                 aspectRatio: '16/9',
                                 backgroundColor: 'var(--color-surface)',
                                 border: '1px solid var(--color-border)',
                                 overflow: 'hidden',
                                 position: 'relative',
                                 cursor: 'pointer',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                                boxShadow: '0 30px 60px rgba(0,0,0,0.6)'
                             }}
                         >
-                            <img 
-                                src={project.thumbnail} 
-                                alt={project.title} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} 
-                            />
+                            {/* Live Preview (Video) or Static Thumbnail */}
+                            <div style={{ width: '100%', height: '100%', backgroundColor: '#000' }}>
+                                {(project.videoUrl || project.video_url) ? (
+                                    <video
+                                        src={project.videoUrl || project.video_url}
+                                        muted
+                                        loop
+                                        playsInline
+                                        autoPlay
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            opacity: 0.9,
+                                            filter: 'contrast(1.1) brightness(1.0)'
+                                        }}
+                                    />
+                                ) : (
+                                    <img 
+                                        src={project.thumbnail} 
+                                        alt={project.title} 
+                                        style={{ 
+                                            width: '100%', 
+                                            height: '100%', 
+                                            objectFit: 'cover', 
+                                            opacity: 0.9,
+                                            filter: 'contrast(1.0) brightness(1.0)'
+                                        }} 
+                                    />
+                                )}
+                            </div>
                             
+                            {/* Editorial Overlay */}
                             <div style={{ 
                                 position: 'absolute', 
                                 bottom: 0, left: 0, right: 0, 
-                                padding: '1.5rem', 
-                                background: 'linear-gradient(transparent, rgba(0,0,0,0.95))',
+                                padding: '2rem', 
+                                background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
                                 color: '#fff',
                                 zIndex: 2
                             }}>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--color-accent)', marginBottom: '0.4rem' }}>
-                                    {project.category.toUpperCase()}
+                                <div style={{ 
+                                    fontFamily: 'var(--font-mono)', 
+                                    fontSize: '0.6rem', 
+                                    color: 'var(--color-accent)', 
+                                    marginBottom: '0.5rem',
+                                    letterSpacing: '0.1em'
+                                }}>
+                                    {project.category?.toUpperCase()} // {project.id?.toUpperCase()}
                                 </div>
-                                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 900 }}>
-                                    {project.title.toUpperCase()}
+                                <div style={{ 
+                                    fontFamily: 'var(--font-display)', 
+                                    fontSize: '1.25rem', 
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    lineHeight: 1
+                                }}>
+                                    {project.title.replace(/_/g, ' ')}
                                 </div>
                             </div>
                         </motion.div>

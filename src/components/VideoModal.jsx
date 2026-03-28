@@ -67,9 +67,10 @@ const VideoModal = ({ isOpen, project, onClose }) => {
 
                         {/* Player / Content / Image */}
                         <div style={{ padding: '0', backgroundColor: '#000', minHeight: (project.aspectratio || project.aspectRatio) === "9/16" ? '600px' : 'auto' }}>
-                            {(project.youtubeid || project.youtubeId) ? (
+                            {(project.youtubeid || project.youtubeId || project.video_url || project.videoUrl) ? (
                                 <PortfolioPlayer 
                                     videoId={project.youtubeid || project.youtubeId} 
+                                    videoUrl={project.video_url || project.videoUrl}
                                     title={project.title} 
                                     client={project.client} 
                                     id={project.id}

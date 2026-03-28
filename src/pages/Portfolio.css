@@ -44,3 +44,39 @@ body.modal-open {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
+
+.folder-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4rem !important;
+    padding: 4rem 0 !important;
+}
+
+.archive-loader {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+}
+
+.serif-italic {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+}
+
+@media (max-width: 768px) {
+    .folder-grid {
+        gap: 2rem !important;
+    }
+    .folder-grid > div {
+        width: 100% !important;
+        max-width: 320px;
+    }
+}

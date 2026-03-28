@@ -1,37 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import FolderIcon from '../components/FolderIcon';
 import ProjectBox from '../components/ProjectBox';
 import VideoModal from '../components/VideoModal';
 import StickySidebar from '../components/StickySidebar';
+import portfolioData from '../data/portfolio.json';
 import './Portfolio.css';
 
 const PortfolioPage = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoryQuery = searchParams.get('category');
+    
     const [allProjects, setAllProjects] = useState([]);
-    const [activeCategory, setActiveCategory] = useState('ALL');
+    const [activeCategory, setActiveCategory] = useState(categoryQuery || 'ALL');
+    const [viewMode, setViewMode] = useState(categoryQuery ? 'GRID' : 'ROOT');
     const [selectedProject, setSelectedProject] = useState(null);
     const [isIdModalOpen, setIsIdModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const categories = ['ALL', 'MOTION', '3D', 'TALKING HEAD', 'THUMBNAIL'];
+    const categories = ['ALL', 'MOTION DESIGN', '3D', 'TALKING HEAD', 'THUMBNAIL', 'LONG FORM'];
 
     useEffect(() => {
         fetchProjects();
     }, []);
 
+    // Sync URL with State for "Back" button support
+    useEffect(() => {
+        // Handle Scroll Reset via Lenis if available
+        const resetScroll = () => {
+            if (window.lenis) {
+                window.lenis.scrollTo(0, { immediate: true });
+            } else {
+                window.scrollTo(0, 0);
+            }
+        };
+
+        if (categoryQuery) {
+            setActiveCategory(categoryQuery);
+            setViewMode('GRID');
+            resetScroll();
+        } else {
+            setActiveCategory('ALL');
+            setViewMode('ROOT');
+            resetScroll();
+        }
+    }, [categoryQuery]);
+
     const fetchProjects = async () => {
         setIsLoading(true);
-        const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (data) setAllProjects(data);
-        if (error) console.error('Error fetching projects:', error);
+        try {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            // Merge with local data (fallback/additional)
+            const combined = [...portfolioData];
+            
+            if (data) {
+                // Ensure no duplicate IDs between local and Supabase
+                const remoteIds = new Set(data.map(p => p.id));
+                const filteredLocal = combined.filter(p => !remoteIds.has(p.id));
+                setAllProjects([...data, ...filteredLocal]);
+            } else {
+                setAllProjects(combined);
+            }
+
+            if (error) console.error('Error fetching projects:', error);
+        } catch (err) {
+            console.error('Portfolio Fetch Error:', err);
+            setAllProjects(portfolioData); // Fallback to local
+        }
         setIsLoading(false);
     };
-    
+    // Group projects by category for folder previews
+    const getCategoryThumbs = (cat) => {
+        return allProjects
+            .filter(p => p.category === cat)
+            .slice(0, 3)
+            .map(p => p.videoUrl || p.video_url || p.thumbnail);
+    };
+
+    const handleFolderClick = (cat) => {
+        setSearchParams({ category: cat });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const filteredProjects = activeCategory === 'ALL' 
         ? allProjects 
         : allProjects.filter(p => p.category === activeCategory);
@@ -44,26 +100,40 @@ const PortfolioPage = () => {
     return (
         <main className="portfolio-finder">
             <StickySidebar items={[
-                { label: 'ARCHIVE', targetId: 'top' },
+                { label: viewMode === 'ROOT' ? 'ARCHIVE' : 'FOLDER', targetId: 'top' },
                 { label: 'CONTACT', targetId: 'inquiry-cta' }
             ]} />
 
             <div id="top" style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 2rem' }}>
                 
-                {/* Header / Filter Bar */}
+                {/* Header / Breadcrumb Bar */}
                 <header style={{ 
                     borderBottom: '1px solid var(--color-border)',
                     paddingBottom: '2rem',
-                    marginBottom: '4rem',
+                    marginBottom: '6rem',
                 }}>
                     <div style={{ 
                         fontFamily: 'var(--font-mono)', 
-                        fontSize: '0.7rem', 
+                        fontSize: '0.65rem', 
                         opacity: 0.5, 
                         marginBottom: '1.5rem',
-                        letterSpacing: '0.2em'
+                        letterSpacing: '0.2em',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
                     }}>
-                        PATH: /STUDIO_WORKS / {activeCategory}
+                        <span 
+                            onClick={() => setSearchParams({})}
+                            style={{ cursor: 'pointer', borderBottom: viewMode === 'ROOT' ? '1px solid var(--color-accent)' : 'none' }}
+                        >
+                            / ARCHIVE
+                        </span>
+                        {viewMode === 'GRID' && (
+                            <>
+                                <span>/</span>
+                                <span style={{ color: 'var(--color-accent)' }}>{activeCategory}</span>
+                            </>
+                        )}
                     </div>
                     
                     <div style={{ 
@@ -75,76 +145,91 @@ const PortfolioPage = () => {
                     }}>
                         <h1 style={{ 
                             fontFamily: 'var(--font-display)', 
-                            fontSize: 'clamp(2.5rem, 6vw, 5rem)', 
-                            lineHeight: 0.8,
+                            fontSize: 'clamp(2.5rem, 6vw, 5.5rem)', 
+                            lineHeight: 0.85,
                             margin: 0,
                             textTransform: 'uppercase'
                         }}>
-                            THE <span style={{ color: 'var(--color-accent)' }}>WORKS</span>
+                            {viewMode === 'ROOT' ? (
+                                <>THE <span className="serif-italic">Studio</span><br/>ARCHIVE</>
+                            ) : (
+                                <>{activeCategory}<br/><span className="serif-italic">Collection</span></>
+                            )}
                         </h1>
 
-                        <div style={{ 
-                            display: 'flex', 
-                            gap: '1rem', 
-                            flexWrap: 'wrap' 
-                        }}>
-                            {categories.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    style={{
-                                        backgroundColor: activeCategory === cat ? 'var(--color-text)' : 'transparent',
-                                        color: activeCategory === cat ? 'var(--color-bg)' : 'var(--color-text)',
-                                        border: '1px solid var(--color-border)',
-                                        padding: '0.5rem 1rem',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.65rem',
-                                        fontWeight: 900,
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        boxShadow: activeCategory === cat ? '4px 4px 0px var(--color-accent)' : 'none'
-                                    }}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
+                        {viewMode === 'GRID' && (
+                            <button
+                                onClick={() => setViewMode('ROOT')}
+                                style={{
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--color-text)',
+                                    border: '1px solid var(--color-border)',
+                                    padding: '0.75rem 1.5rem',
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 900,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textTransform: 'uppercase'
+                                }}
+                            >
+                                [BACK_TO_ARCHIVE]
+                            </button>
+                        )}
                     </div>
                 </header>
 
                 {isLoading ? (
-                    <div style={{ 
-                        height: '400px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        fontFamily: 'var(--font-mono)',
-                        color: 'var(--color-accent)',
-                        fontSize: '0.8rem',
-                        letterSpacing: '0.5em'
-                    }}>
-                        ACCESSING_DATABASE...
-                    </div>
+                    <div className="archive-loader" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>[LOADING_DATABASE...]</div>
                 ) : (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                            gap: '2.5rem',
-                            padding: '1rem 0'
-                        }}
-                    >
-                        {filteredProjects.map((project) => (
-                            <ProjectBox 
-                                key={project.id} 
-                                project={project} 
-                                onClick={() => handleProjectClick(project)}
-                            />
-                        ))}
-                    </motion.div>
+                    <AnimatePresence mode="wait">
+                        {viewMode === 'ROOT' ? (
+                            <motion.div 
+                                key="root"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="folder-grid"
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    justifyContent: 'center',
+                                    gap: '4rem',
+                                    padding: '2rem 0'
+                                }}
+                            >
+                                {categories.filter(c => c !== 'ALL').map(cat => (
+                                    <FolderIcon 
+                                        key={cat}
+                                        label={cat}
+                                        thumbnails={getCategoryThumbs(cat)}
+                                        projectCount={allProjects.filter(p => p.category === cat).length}
+                                        onClick={() => handleFolderClick(cat)}
+                                    />
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                key="grid"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.5 }}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                                    gap: '2.5rem'
+                                }}
+                            >
+                                {filteredProjects.map((project) => (
+                                    <ProjectBox 
+                                        key={project.id} 
+                                        project={project} 
+                                        onClick={() => handleProjectClick(project)}
+                                    />
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 )}
 
                 {/* Video Modal (Quick Look) */}

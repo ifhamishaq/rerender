@@ -7,18 +7,30 @@ import {
     Monitor, Cpu, Globe, Users, Award, TrendingUp
 } from 'lucide-react';
 
+const TEAM_DATA = [
+    {
+        name: 'IFHAM.',
+        role: 'FOUNDER & LEAD DESIGNER',
+        image: '/team/ifham.jpeg',
+        bio: 'Visionary behind the RE-RENDER collective. Specializing in high-end brutalist web architecture, 3D environments, and brand strategy for the next generation of digital products.',
+        link: 'https://ifhamishaq.netlify.app/',
+        status: 'COMMAND'
+    },
+    {
+        name: 'MAHIR.',
+        role: 'LEAD VIDEO EDITOR',
+        image: '/team/mahir.jpg',
+        bio: 'Master of cinematic motion and high-fidelity video storytelling. Mahir transforms raw concepts into aggressive, unforgettable visual experiences for global brands.',
+        link: '/work?category=MOTION DESIGN',
+        status: 'OPERATIVE'
+    }
+];
+
 const STATS = [
     { value: '50+', label: 'PROJECTS FINISHED' },
     { value: '10K+', label: 'DESIGNS CREATED' },
     { value: '24/7', label: 'ALWAYS WORKING' },
     { value: '∞', label: 'NEW IDEAS' }
-];
-
-const ROLES = [
-    { icon: <Film size={20} />, title: 'VIDEO EDITOR', desc: 'Cinematic edits, motion graphics, short-form content' },
-    { icon: <Palette size={20} />, title: 'GRAPHIC DESIGNER', desc: 'Brand identity, thumbnails, social media assets' },
-    { icon: <Box size={20} />, title: '3D ARTIST', desc: 'Product visualization, abstract renders, environments' },
-    { icon: <Code size={20} />, title: 'WEB DEVELOPER', desc: 'React apps, brutalist interfaces, full-stack solutions' }
 ];
 
 const TOOLS_ARSENAL = [
@@ -64,15 +76,14 @@ const About = () => {
             overflow: 'hidden'
         }}>
 
-            {/* ===== HERO SECTION ===== */}
+            {/* ===== HERO SECTION: THE STUDIO ===== */}
             <div style={{
-                padding: '10rem 2rem 8rem',
+                padding: '10rem 2rem 6rem',
                 position: 'relative',
                 borderBottom: '1px solid var(--color-border)'
             }}>
-                {/* Giant BG Text */}
                 <div style={{
-                    position: 'absolute', top: '15%', right: '5%',
+                    position: 'absolute', top: '5%', right: '5%',
                     fontSize: 'clamp(8rem, 20vw, 20rem)', fontWeight: 900,
                     color: 'var(--color-text)', opacity: 0.03,
                     pointerEvents: 'none', lineHeight: 0.8, zIndex: 0,
@@ -81,105 +92,140 @@ const About = () => {
                     RE—RENDER
                 </div>
 
-                <div style={{
-                    maxWidth: '1200px', margin: '0 auto',
-                    display: 'grid', gridTemplateColumns: '1fr 1.2fr',
-                    gap: '6rem', position: 'relative', zIndex: 1
-                }} className="about-grid">
+                <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                    <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '2rem', letterSpacing: '0.2em', fontWeight: 900 }}>
+                        01 — THE BUREAU
+                    </div>
+                    <h1 style={{
+                        fontSize: 'clamp(3rem, 6vw, 6rem)',
+                        lineHeight: 0.9, marginBottom: '3rem',
+                        textTransform: 'uppercase',
+                        fontFamily: 'var(--font-display)', fontWeight: 900,
+                        letterSpacing: '-0.03em',
+                        maxWidth: '900px'
+                    }}>
+                        HIGH-PERFORMANCE <br />
+                        <span style={{ color: 'var(--color-accent)' }}>CREATIVE COLLECTIVE.</span>
+                    </h1>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }} className="about-intro-grid">
+                        <p style={{ fontSize: '1.2rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
+                            RE-RENDER is an elite design and production studio built for the fast-paced digital era. We don't just "edit" or "design"—we engineer unforgettable visual identities.
+                        </p>
+                        <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
+                            Our team combines technical precision with aggressive creativity to push the boundaries of what's possible in web, video, and 3D.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-                    <motion.div
-                        initial={{ x: -30, opacity: 0 }}
-                        whileInView={{ x: 0, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '2rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                            01 — ABOUT ME
-                        </div>
-                        <h1 style={{
-                            fontSize: 'clamp(3.5rem, 7vw, 7rem)',
-                            lineHeight: 0.85, marginBottom: '2.5rem',
-                            textTransform: 'uppercase',
-                            fontFamily: 'var(--font-display)', fontWeight: 900,
-                            letterSpacing: '-0.03em'
-                        }}>
-                            I AM<br />
-                            <span style={{ color: 'var(--color-accent)' }}>IFHAM.</span>
-                        </h1>
+            {/* ===== THE OPERATIVES: TEAM SECTION ===== */}
+            <div style={{ padding: '8rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '4rem', letterSpacing: '0.2em', fontWeight: 900 }}>
+                        02 — LEAD OPERATIVES
+                    </div>
 
-                        <div style={{ width: '80px', height: '3px', backgroundColor: 'var(--color-accent)', marginBottom: '2.5rem' }}></div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }} className="team-grid-cards">
+                        {TEAM_DATA.map((member, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ y: 30, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.2 }}
+                                style={{
+                                    border: '1px solid var(--color-border)',
+                                    backgroundColor: 'var(--color-surface)',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                {/* Technical Header */}
+                                <div style={{ 
+                                    padding: '1rem 1.5rem', 
+                                    borderBottom: '1px solid var(--color-border)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    backgroundColor: 'rgba(255,255,255,0.02)'
+                                }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900, opacity: 0.5 }}>DDR_{member.name}</span>
+                                    <span style={{ 
+                                        fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900, 
+                                        color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
+                                        padding: '2px 8px'
+                                    }}>{member.status}</span>
+                                </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-                            {ROLES.map((role, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ x: -20, opacity: 0 }}
-                                    whileInView={{ x: 0, opacity: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 + 0.3 }}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '1.25rem',
-                                        padding: '1.25rem 0',
-                                        borderBottom: i < ROLES.length - 1 ? '1px solid var(--color-border)' : 'none'
-                                    }}
-                                >
-                                    <div style={{ color: 'var(--color-accent)', opacity: 0.7 }}>{role.icon}</div>
-                                    <div>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}>{role.title}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>{role.desc}</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0' }} className="member-card-inner">
+                                    {/* Image Side */}
+                                    <div style={{ 
+                                        position: 'relative', 
+                                        height: '450px', 
+                                        borderRight: '1px solid var(--color-border)',
+                                        overflow: 'hidden'
+                                    }}>
+                                        <img 
+                                            src={member.image} 
+                                            alt={member.name} 
+                                            style={{ 
+                                                width: '100%', height: '100%', objectFit: 'cover',
+                                                filter: 'grayscale(1) contrast(1.1) brightness(0.9)'
+                                            }} 
+                                        />
+                                        <div style={{ 
+                                            position: 'absolute', bottom: '1rem', left: '1rem',
+                                            backgroundColor: 'var(--color-bg)', padding: '0.5rem 1rem',
+                                            fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900
+                                        }}>
+                                            STDU_REF: {i.toString().padStart(2, '0')}
+                                        </div>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </motion.div>
 
-                    <motion.div
-                        initial={{ y: 40, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-                    >
-                        <p style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)', lineHeight: 1.7, marginBottom: '2rem', color: 'var(--color-text-secondary)' }}>
-                            I make high-quality designs and modern websites.
-                            RE-RENDER is where I build <strong style={{ color: 'var(--color-accent)' }}>websites, videos, and tools</strong> for brands that want the best.
-                        </p>
+                                    {/* Content Side */}
+                                    <div style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                        <div>
+                                            <h3 style={{ 
+                                                fontFamily: 'Playfair Display', fontStyle: 'italic', 
+                                                fontSize: '3rem', margin: '0 0 0.5rem', lineHeight: 1 
+                                            }}>{member.name}</h3>
+                                            <div style={{ 
+                                                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', 
+                                                fontWeight: 900, color: 'var(--color-accent)', marginBottom: '2rem' 
+                                            }}>{member.role}</div>
+                                            
+                                            <p style={{ fontSize: '0.9rem', lineHeight: 1.6, opacity: 0.8, marginBottom: '2rem' }}>
+                                                {member.bio}
+                                            </p>
+                                        </div>
 
-                        <p style={{ fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '3rem', color: 'var(--color-text-secondary)' }}>
-                            I like to build things that look different and work perfectly.
-                            Every pixel is important. Every project is unique.
-                            This is more than a portfolio — it's a <strong style={{ color: 'var(--color-text)' }}>creative studio</strong>.
-                        </p>
-
-                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                            <motion.a
-                                href="https://ifhamishaq.netlify.app/"
-                                target="_blank"
-                                whileHover={{ x: 5 }}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
-                                    color: '#000', backgroundColor: 'var(--color-accent)',
-                                    textDecoration: 'none', fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.75rem', fontWeight: 900, padding: '1rem 2rem',
-                                    letterSpacing: '0.05em'
-                                }}
-                            >
-                                VIEW PORTFOLIO <ArrowRight size={16} />
-                            </motion.a>
-                            <Link
-                                to="/get-in-touch"
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
-                                    color: 'var(--color-text)', backgroundColor: 'transparent',
-                                    textDecoration: 'none', fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.75rem', fontWeight: 900, padding: '1rem 2rem',
-                                    border: '1px solid var(--color-border)', letterSpacing: '0.05em'
-                                }}
-                            >
-                                CONTACT
-                            </Link>
-                        </div>
-                    </motion.div>
+                                        <a 
+                                            href={member.link} 
+                                            target={member.link.startsWith('http') ? "_blank" : "_self"}
+                                            style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
+                                                textDecoration: 'none', fontFamily: 'var(--font-mono)',
+                                                fontSize: '0.7rem', fontWeight: 900, color: 'var(--color-text)',
+                                                border: '1px solid var(--color-text)', padding: '0.75rem 1.5rem',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.backgroundColor = 'var(--color-text)';
+                                                e.currentTarget.style.color = 'var(--color-bg)';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                e.currentTarget.style.color = 'var(--color-text)';
+                                            }}
+                                        >
+                                            VIEW_PORTFOLIO <ArrowRight size={14} />
+                                        </a>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -349,8 +395,13 @@ const About = () => {
 
             {/* Responsive CSS */}
             <style>{`
+                @media (max-width: 1024px) {
+                    .team-grid-cards { grid-template-columns: 1fr !important; }
+                }
                 @media (max-width: 768px) {
-                    .about-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
+                    .about-intro-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+                    .member-card-inner { grid-template-columns: 1fr !important; }
+                    .member-card-inner div:first-child { height: 350px !important; border-right: none !important; border-bottom: 1px solid var(--color-border); }
                     .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
                     .tools-grid { grid-template-columns: 1fr !important; }
                 }

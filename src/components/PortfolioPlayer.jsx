@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-const PortfolioPlayer = ({ videoId, title, client, id, minimal = false, aspectRatio = "16/9" }) => {
+const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false, aspectRatio = "16/9" }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Use youtube-nocookie for privacy and performance
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1`;
+    // YouTube Handling
+    const embedUrl = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1` : null;
 
     return (
         <div style={{ 
@@ -13,8 +13,12 @@ const PortfolioPlayer = ({ videoId, title, client, id, minimal = false, aspectRa
             backgroundColor: '#000', 
             aspectRatio: aspectRatio,
             border: '1px solid var(--color-border)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
         }}>
+            {/* Loading Spinner */}
             {!isLoaded && (
                 <div style={{
                     position: 'absolute',
@@ -36,21 +40,43 @@ const PortfolioPlayer = ({ videoId, title, client, id, minimal = false, aspectRa
                 </div>
             )}
 
-            <iframe
-                src={embedUrl}
-                style={{
-                    position: 'absolute',
-                    top: 0, left: 0, width: '100%', height: '100%',
-                    border: 'none',
-                    zIndex: 1,
-                    opacity: isLoaded ? 1 : 0,
-                    transition: 'opacity 0.2s ease'
-                }}
-                title={title}
-                onLoad={() => setIsLoaded(true)}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-            />
+            {/* Direct Video (MP4) Support */}
+            {videoUrl ? (
+                <video
+                    src={videoUrl}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    onLoadedData={() => setIsLoaded(true)}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        opacity: isLoaded ? 1 : 0,
+                        transition: 'opacity 0.3s ease'
+                    }}
+                />
+            ) : embedUrl ? (
+                /* YouTube Support */
+                <iframe
+                    src={embedUrl}
+                    style={{
+                        position: 'absolute',
+                        top: 0, left: 0, width: '100%', height: '100%',
+                        border: 'none',
+                        zIndex: 1,
+                        opacity: isLoaded ? 1 : 0,
+                        transition: 'opacity 0.2s ease'
+                    }}
+                    title={title}
+                    onLoad={() => setIsLoaded(true)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            ) : null}
             
             {/* Minimal Source Label */}
             <div style={{
@@ -63,9 +89,10 @@ const PortfolioPlayer = ({ videoId, title, client, id, minimal = false, aspectRa
                 fontFamily: 'var(--font-mono)',
                 fontSize: '9px',
                 zIndex: 10,
-                border: '1px solid var(--color-border)'
+                border: '1px solid var(--color-border)',
+                pointerEvents: 'none'
             }}>
-                ID_{id.toUpperCase()}
+                ID_{id?.toUpperCase() || 'REF'}
             </div>
 
             <style>{`
