@@ -96,6 +96,22 @@
         "gdriveImages": []
     },
     {
+        "id": "thumb-08",
+        "title": "ELITE_AUDIT_THUMBNAIL_08",
+        "client": "RE-RENDER_LAB",
+        "year": "2026",
+        "category": "THUMBNAIL",
+        "thumbnail": "/tt.jpg",
+        "aspectRatio": "16/9",
+        "tags": [
+            "VFX",
+            "CTR",
+            "Neural"
+        ],
+        "description": "High-impact thumbnail optimization audit asset for visual systems.",
+        "gdriveImages": []
+    },
+    {
         "id": "thumb-01",
         "title": "GAMING_THUMBNAIL_01",
         "client": "PRO_GAMER",
@@ -157,38 +173,6 @@
             "Graphic"
         ],
         "description": "High-energy entertainment thumbnail designed to spark curiosity and clicks.",
-        "gdriveImages": []
-    },
-    {
-        "id": "thumb-05",
-        "title": "STRATEGY_THUMBNAIL_05",
-        "client": "BUSINESS_INSIDER",
-        "year": "2025",
-        "category": "THUMBNAIL",
-        "thumbnail": "/sampl.jpg",
-        "aspectRatio": "16/9",
-        "tags": [
-            "Strategy",
-            "Business",
-            "Infographic"
-        ],
-        "description": "Information-rich strategy thumbnail that establishes authority and value.",
-        "gdriveImages": []
-    },
-    {
-        "id": "thumb-07",
-        "title": "CREATIVE_THUMBNAIL_07",
-        "client": "VISION_MEDIA",
-        "year": "2025",
-        "category": "THUMBNAIL",
-        "thumbnail": "/xssdS.png",
-        "aspectRatio": "16/9",
-        "tags": [
-            "Creative",
-            "Clean",
-            "Visual"
-        ],
-        "description": "Artistic creative thumbnail showcasing modern design and branding principles.",
         "gdriveImages": []
     },
     {

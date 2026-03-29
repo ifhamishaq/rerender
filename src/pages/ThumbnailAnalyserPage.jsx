@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Cpu } from 'lucide-react';
-import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 
@@ -175,18 +175,16 @@ YOUR OUTPUT MUST BE A SINGLE JSON OBJECT WITH THESE FIELDS:
   "composition": "Short professional analysis of layout...",
   "metrics": {"faceDetails": 1-10, "contrast": 1-10, "saturation": 1-10, "textEmphasis": 1-10},
   "palette": ["#HEX1", "#HEX2", "#HEX3"],
-  "accessibility": {"score": 0-100, "notes": "..."},
-  "psychology": {"trigger": "CURIOSITY/FOMO/AUTHORITY", "notes": "..."},
-  "audience": {"score": 0-100, "profile": "..."},
-  "heuristics": {"hook": "...", "eyePath": "...", "niche": "..."},
-  "heatmap": [{"x": 0-100, "y": 0-100, "label": "FACE/TEXT/ETC", "intensity": 0.1-1.0}],
-  "eyePathPoints": [{"x": 10, "y": 20}, {"x": 50, "y": 50}, {"x": 80, "y": 80}],
-  "colorPsychology": "...",
-  "textReadability": "...",
-  "improvements": ["Specific technical fix 1", "Specific technical fix 2"],
-  "verdict": "Final editorial judgment (high impact)..."
+  "audience": {"score": 0, "profile": ""},
+  "heuristics": {"hook": "", "eyePath": "", "niche": ""},
+  "heatmap": [{"x": 0, "y": 0, "label": "", "intensity": 0.5}],
+  "eyePathPoints": [{"x": 10, "y": 10}],
+  "colorPsychology": "",
+  "textReadability": "",
+  "improvements": ["FIX_1", "FIX_2"],
+  "verdict": ""
 }
-Return ONLY valid JSON.`
+STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON.`
                     },
                     {
                         role: 'user',
@@ -200,17 +198,17 @@ Return ONLY valid JSON.`
             };
 
             const response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });
-            let finalContent = (response.choices?.[0]?.message?.content || '');
-            finalContent = finalContent.replace(/```json|```/g, '').trim();
+            const finalContent = response.choices?.[0]?.message?.content || '';
+            const finalAnalysis = safeParseJSON(finalContent);
             
-            const jsonMatch = finalContent.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                const finalAnalysis = JSON.parse(jsonMatch[0]);
+            if (finalAnalysis) {
                 setFakeProgress(100);
                 setTimeout(() => {
                     setAnalysis(finalAnalysis);
                     setIsAnalyzing(false);
                 }, 500);
+            } else {
+                throw new Error("MALFORMED_RESPONSE: AI output did not contain valid audit data.");
             }
         } catch (err) {
             console.error('ANALYSIS_FAIL:', err);

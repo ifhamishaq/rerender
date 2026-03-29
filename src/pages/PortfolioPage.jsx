@@ -60,12 +60,40 @@ const PortfolioPage = () => {
             const combined = [...portfolioData];
             
             if (data) {
-                // Ensure no duplicate IDs between local and Supabase
+                // Multi-vector Deduplication: If a project exists in Supabase with same Title or Thumbnail,
+                // we hide the local version to prevent duplicates.
                 const remoteIds = new Set(data.map(p => p.id));
-                const filteredLocal = combined.filter(p => !remoteIds.has(p.id));
-                setAllProjects([...data, ...filteredLocal]);
+                const remoteTitles = new Set(data.map(p => (p.title || '').toLowerCase().trim()));
+                const remoteThumbs = new Set(data.map(p => (p.thumbnail || p.video_url || '').toLowerCase().trim()));
+
+                const filteredLocal = combined.filter(p => {
+                    const localTitle = (p.title || '').toLowerCase().trim();
+                    const localThumb = (p.thumbnail || p.videoUrl || '').toLowerCase().trim();
+                    
+                    return !remoteIds.has(p.id) && 
+                           !remoteTitles.has(localTitle) && 
+                           !remoteThumbs.has(localThumb);
+                });
+
+                // --- SMART PINNED SORTING ---
+                // We want thumb-08 / ELITE_AUDIT at the absolute top.
+                const merged = [...data, ...filteredLocal].sort((a, b) => {
+                    const idA = a.id === 'thumb-08' || a.title?.includes('ELITE_AUDIT');
+                    const idB = b.id === 'thumb-08' || b.title?.includes('ELITE_AUDIT');
+                    if (idA && !idB) return -1;
+                    if (!idA && idB) return 1;
+                    return 0; // Maintain relative order for others
+                });
+
+                setAllProjects(merged);
             } else {
-                setAllProjects(combined);
+                // Pin thumb-08 even if only local data
+                const pinnedLocal = [...combined].sort((a, b) => {
+                    if (a.id === 'thumb-08' && b.id !== 'thumb-08') return -1;
+                    if (a.id !== 'thumb-08' && b.id === 'thumb-08') return 1;
+                    return 0;
+                });
+                setAllProjects(pinnedLocal);
             }
 
             if (error) console.error('Error fetching projects:', error);

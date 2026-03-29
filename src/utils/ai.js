@@ -23,6 +23,40 @@ let currentKeyIndex = 0;
  * @param {number} retries - Number of retries allowed
  * @param {number} delay - Initial delay for backoff (ms)
  */
+/**
+ * Robust JSON extraction from AI strings.
+ * Handles markdown blocks, trailing commas, and common AI comments.
+ */
+export const safeParseJSON = (text) => {
+    if (!text) return null;
+    
+    // 1. Clean markdown code blocks
+    let cleaned = text.replace(/```json|```/g, '').trim();
+    
+    // 2. Extract first logical JSON structure { ... } or [ ... ]
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (!jsonMatch) return null;
+    cleaned = jsonMatch[0];
+
+    try {
+        // Attempt standard parse
+        return JSON.parse(cleaned);
+    } catch (e) {
+        // 3. Robust fix: Remove trailing commas
+        cleaned = cleaned.replace(/,\s*([\}\]])/g, '$1');
+        
+        // 4. Robust fix: Attempt to remove C-style comments
+        cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1');
+        
+        try {
+            return JSON.parse(cleaned);
+        } catch (innerErr) {
+            console.error('[AI_JSON_PARSE_FATAL]:', innerErr, 'Text:', cleaned);
+            throw innerErr;
+        }
+    }
+};
+
 export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1000) => {
     const keys = getApiKeys();
     if (keys.length === 0) {
