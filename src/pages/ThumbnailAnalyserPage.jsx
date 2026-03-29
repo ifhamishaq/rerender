@@ -173,18 +173,31 @@ YOUR OUTPUT MUST BE A SINGLE JSON OBJECT WITH THESE FIELDS:
   "ctrScore": 0-10 (professional quality rating),
   "predictedCTR": "string (e.g. 2.4%)",
   "composition": "Short professional analysis of layout...",
-  "metrics": {"faceDetails": 1-10, "contrast": 1-10, "saturation": 1-10, "textEmphasis": 1-10},
+  "metrics": {
+    "faceDetails": 1-10, 
+    "contrast": 1-10, 
+    "saturation": 1-10, 
+    "textEmphasis": 1-10
+  },
   "palette": ["#HEX1", "#HEX2", "#HEX3"],
-  "audience": {"score": 0, "profile": ""},
-  "heuristics": {"hook": "", "eyePath": "", "niche": ""},
-  "heatmap": [{"x": 0, "y": 0, "label": "", "intensity": 0.5}],
+  "audience": {
+    "score": 0, 
+    "profile": "Detailed description of target viewer"
+  },
+  "heuristics": {
+    "hook": "Psychological trigger words/concept", 
+    "eyePath": "Visual flow description", 
+    "niche": "Specific content category"
+  },
+  "heatmap": [{"x": 0, "y": 0, "label": "Area name", "intensity": 0.5}],
   "eyePathPoints": [{"x": 10, "y": 10}],
-  "colorPsychology": "",
-  "textReadability": "",
+  "colorPsychology": "Brief note on color choice impact",
+  "textReadability": "Note on typography clarity",
   "improvements": ["FIX_1", "FIX_2"],
-  "verdict": ""
+  "verdict": "Final overall editorial recommendation"
 }
-STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON.`
+STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON. 
+CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate root fields.`
                     },
                     {
                         role: 'user',
@@ -429,10 +442,10 @@ STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON.`
                                     <BarChart3 size={20} style={{ color: 'var(--color-text)' }} />
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>VISUAL_VECTORS</span>
                                 </div>
-                                <MetricBar label="HUMAN_INTEREST" value={analysis.metrics?.faceDetails || 0} delay={0.3} />
-                                <MetricBar label="CONTRAST_VALUE" value={analysis.metrics?.contrast || 0} delay={0.4} />
-                                <MetricBar label="VIBRANCY_INDEX" value={analysis.metrics?.saturation || 0} delay={0.5} />
-                                <MetricBar label="TYPO_HIERARCHY" value={analysis.metrics?.textEmphasis || 0} delay={0.6} />
+                                <MetricBar label="HUMAN_INTEREST" value={(typeof analysis.metrics?.faceDetails === 'number' ? analysis.metrics.faceDetails : 0)} delay={0.3} />
+                                <MetricBar label="CONTRAST_VALUE" value={(typeof analysis.metrics?.contrast === 'number' ? analysis.metrics.contrast : 0)} delay={0.4} />
+                                <MetricBar label="VIBRANCY_INDEX" value={(typeof analysis.metrics?.saturation === 'number' ? analysis.metrics.saturation : 0)} delay={0.5} />
+                                <MetricBar label="TYPO_HIERARCHY" value={(typeof analysis.metrics?.textEmphasis === 'number' ? analysis.metrics.textEmphasis : 0)} delay={0.6} />
                             </div>
 
                             <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
@@ -554,19 +567,19 @@ STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON.`
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                 <div style={{ border: '2px solid #000', padding: '2.5rem', backgroundColor: '#fff' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>PSYCHOLOGICAL_HOOK</div>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>NEURAL_HOOK_STRATEGY</div>
                                     <h3 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'Playfair Display', fontStyle: 'italic', margin: 0, lineHeight: 1.1 }}>
-                                        "{analysis?.psychology?.trigger || 'NEURAL_PATTERN'}"
+                                        "{analysis?.heuristics?.hook || 'NEURAL_PATTERN'}"
                                     </h3>
                                     <p style={{ fontSize: '0.95rem', color: '#444', marginTop: '1rem', lineHeight: 1.5 }}>
-                                        {analysis?.psychology?.notes}
+                                        Targeting: {analysis?.heuristics?.niche}
                                     </p>
                                 </div>
                                 <div style={{ border: '2px solid #000', padding: '2.5rem', backgroundColor: '#fff' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>ACCESSIBILITY_AUDIT</div>
-                                    <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis?.accessibility?.score}%</div>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>AUDIENCE_READER_FIT</div>
+                                    <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis?.audience?.score || 0}%</div>
                                     <p style={{ fontSize: '0.9rem', color: '#444', marginTop: '0.5rem', lineHeight: 1.4 }}>
-                                        {analysis?.accessibility?.notes}
+                                        {analysis?.audience?.profile}
                                     </p>
                                 </div>
                             </div>
@@ -586,15 +599,17 @@ STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON.`
                                     <div>
                                         <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '2rem', fontFamily: 'var(--font-mono)', borderBottom: '4px solid #000', paddingBottom: '0.5rem' }}>EDITORIAL_METRICS</div>
                                         {Object.entries(analysis.metrics || {}).map(([key, val]) => (
-                                            <div key={key} style={{ marginBottom: '1.5rem' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 900, marginBottom: '0.6rem', fontFamily: 'var(--font-mono)' }}>
-                                                    <span>{key.toUpperCase().replace(/([A-Z])/g, '_$1')}</span>
-                                                    <span>{val}/10</span>
+                                            typeof val === 'number' && (
+                                                <div key={key} style={{ marginBottom: '1.5rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 900, marginBottom: '0.6rem', fontFamily: 'var(--font-mono)' }}>
+                                                        <span>{key.toUpperCase().replace(/([A-Z])/g, '_$1')}</span>
+                                                        <span>{val}/10</span>
+                                                    </div>
+                                                    <div style={{ height: '8px', backgroundColor: '#eee', border: '1.5px solid #000', padding: '1px' }}>
+                                                        <div style={{ height: '100%', width: `${val * 10}%`, backgroundColor: '#000' }} />
+                                                    </div>
                                                 </div>
-                                                <div style={{ height: '8px', backgroundColor: '#eee', border: '1.5px solid #000', padding: '1px' }}>
-                                                    <div style={{ height: '100%', width: `${val * 10}%`, backgroundColor: '#000' }} />
-                                                </div>
-                                            </div>
+                                            )
                                         ))}
                                     </div>
                                 </div>
