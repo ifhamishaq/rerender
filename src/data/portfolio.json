@@ -112,6 +112,22 @@
         "gdriveImages": []
     },
     {
+        "id": "thumb-09",
+        "title": "FINANCIAL_PRECISION_THUMBNAIL",
+        "client": "FINANCE_CORE",
+        "year": "2026",
+        "category": "THUMBNAIL",
+        "thumbnail": "/jeff2.jpg",
+        "aspectRatio": "16/9",
+        "tags": [
+            "Financial",
+            "Strategy",
+            "CTR"
+        ],
+        "description": "Deeply optimized financial thumbnail designed for maximum trust and engagement.",
+        "gdriveImages": []
+    },
+    {
         "id": "thumb-01",
         "title": "GAMING_THUMBNAIL_01",
         "client": "PRO_GAMER",
