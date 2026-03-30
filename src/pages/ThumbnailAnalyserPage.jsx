@@ -248,19 +248,75 @@ const ThumbnailAnalyserPage = () => {
                     "audience": { "score": 0-100, "profile": "string" },
                     "palette": ["#hex", ...], "verdict": "string", "composition": "string", "colorPsychology": "string"
                 }`
-                : `You are the Lead Photoshop Strategist at RE-RENDER.
-                Perform a high-level creative audit. Give technical advice in simple English.
-                Use terms like "Layers, Masks, Curves, Opacity, and Selection Tools."
-                Example: "Create a Levels layer to adjust shadow contrast."
-                CRITICAL: 'heatmap' and 'eyePathPoints' MUST be included.
+                : `You are the Lead Visual Strategist at RE-RENDER — the most advanced thumbnail analysis engine on the internet.
+                You have deep expertise in YouTube algorithm optimization, visual psychology, and Photoshop/design workflows.
+                
+                ANALYSIS FRAMEWORK:
+                1. **CTR Prediction**: Based on contrast, face prominence, text clarity, and emotional triggers
+                2. **Visual Hierarchy**: Where does the eye go first? Is the flow optimal?
+                3. **Color Psychology**: What emotions do the dominant colors trigger?
+                4. **Text Analysis**: Is the text readable at small sizes (mobile YouTube feed)?
+                5. **Face Analysis**: Are faces present? Are expressions exaggerated enough for thumbnails?
+                6. **Competitive Edge**: Would this stand out in a YouTube feed against competitors?
+                7. **Niche Fit**: What content niche does this thumbnail suggest?
+                
+                Give technical Photoshop advice with EXACT steps. Example: "Add a Curves adjustment layer, pull shadows to 15, highlights to 240."
+                
+                CRITICAL: 'heatmap' and 'eyePathPoints' MUST be included with realistic coordinates.
+                
                 JSON_SCHEMA: {
-                    "predictedCTR": "string",
-                    "metrics": { "contrast": 0-10, "saturation": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10 },
-                    "heuristics": { "hook": "string", "eyePath": "string" },
+                    "predictedCTR": "X.X%",
+                    "ctrBenchmark": "Average for this niche is X-X%",
+                    "detectedNiche": "gaming | vlog | tutorial | music | tech | lifestyle | other",
+                    "thumbnailGrade": "A+ | A | B+ | B | C+ | C | D | F",
+                    "metrics": { 
+                        "contrast": 0-10, 
+                        "saturation": 0-10, 
+                        "faceDetails": 0-10, 
+                        "textEmphasis": 0-10, 
+                        "textReadability": 0-10,
+                        "emotionalImpact": 0-10,
+                        "colorHarmony": 0-10,
+                        "visualClutter": 0-10
+                    },
+                    "heuristics": { 
+                        "hook": "What grabs attention first", 
+                        "eyePath": "Where does the eye travel",
+                        "emotionalTrigger": "curiosity | shock | fomo | inspiration | humor | controversy",
+                        "scrollStopPower": "Would this stop a scroll? Why or why not"
+                    },
+                    "textAnalysis": {
+                        "detected": true/false,
+                        "content": "The text found in thumbnail",
+                        "fontSize": "too small | good | large",
+                        "contrast_vs_bg": "low | medium | high",
+                        "suggestion": "How to improve text"
+                    },
+                    "faceAnalysis": {
+                        "detected": true/false,
+                        "expression": "neutral | happy | shocked | angry | none",
+                        "prominence": "small | medium | large",
+                        "suggestion": "How to improve face impact"
+                    },
                     "heatmap": [ { "x": 0-100, "y": 0-100, "intensity": 0.1-1.0, "label": "string" } ],
                     "eyePathPoints": [ { "x": 0-100, "y": 0-100 } ],
-                    "palette": ["#hex", ...], "verdict": "string", "composition": "string", "colorPsychology": "string", 
-                    "improvements": ["Photoshop Step 1", "Photoshop Step 2", ...], "audience": { "score": 0-100, "profile": "string" }
+                    "palette": ["#hex1", "#hex2", "#hex3", "#hex4", "#hex5"], 
+                    "verdict": "One-line brutal honest verdict", 
+                    "composition": "Detailed composition analysis", 
+                    "colorPsychology": "What the colors communicate psychologically", 
+                    "improvements": [
+                        "Exact Photoshop step with tool names and values",
+                        "Exact Photoshop step with tool names and values",
+                        "Exact Photoshop step with tool names and values",
+                        "Exact Photoshop step with tool names and values",
+                        "Exact Photoshop step with tool names and values"
+                    ], 
+                    "audience": { "score": 0-100, "profile": "Who would click this and why" },
+                    "youtubeSpecific": {
+                        "mobileReadability": "Will this work on a phone screen? Yes/No + why",
+                        "suggestedFeedPosition": "Would perform best in: Home | Suggested | Search",
+                        "competitorEdge": "How this compares to typical thumbnails in the niche"
+                    }
                 }`;
 
             const analysisBody = {
@@ -624,14 +680,40 @@ const ThumbnailAnalyserPage = () => {
                                             padding: '0.4rem 1rem', fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)'
                                         }}> BATTLE_RESULT_CONFIRMED </div>
                                     )}
+                                    {/* Grade Badge */}
+                                    {analysis.thumbnailGrade && (
+                                        <div style={{
+                                            position: 'absolute', top: '1.5rem', right: '1.5rem',
+                                            backgroundColor: 'var(--color-text)', color: 'var(--color-bg)',
+                                            padding: '0.8rem 1.2rem', fontSize: '1.5rem', fontWeight: 900, fontFamily: 'var(--font-display)',
+                                            lineHeight: 1
+                                        }}>{analysis.thumbnailGrade}</div>
+                                    )}
                                     <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                                        {isCompareMode ? 'WINNER_VERSION' : 'STRATEGIC_PERFORMANCE_VALUE'}
+                                        {isCompareMode ? 'WINNER_VERSION' : 'PREDICTED_CTR'}
                                     </div>
                                     <div style={{ fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'baseline', gap: '0.25rem', lineHeight: 1, color: 'var(--color-text)' }}>
                                         {isCompareMode ? analysis.winner : (analysis.predictedCTR || '0.0%')}
                                     </div>
+                                    {analysis.ctrBenchmark && (
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem', fontFamily: 'var(--font-mono)' }}>
+                                            {analysis.ctrBenchmark}
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                                        {analysis.detectedNiche && (
+                                            <div style={{ padding: '0.4rem 1rem', border: '1.5px solid var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, color: 'var(--color-accent)', textTransform: 'uppercase' }}>
+                                                NICHE: {analysis.detectedNiche}
+                                            </div>
+                                        )}
+                                        {analysis.heuristics?.emotionalTrigger && (
+                                            <div style={{ padding: '0.4rem 1rem', border: '1.5px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                                                TRIGGER: {analysis.heuristics.emotionalTrigger}
+                                            </div>
+                                        )}
+                                    </div>
                                     <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
-                                        VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.ctrScore > 7 ? 'DESIGN_VIABILITY_CONFIRMED' : 'ITERATION_REQUIRED')}
+                                        VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.verdict || 'ANALYSIS_COMPLETE')}
                                     </div>
                                 </motion.div>
 
@@ -707,6 +789,10 @@ const ThumbnailAnalyserPage = () => {
                                         <MetricBar label="CONTRAST_VALUE" value={(typeof analysis.metrics?.contrast === 'number' ? analysis.metrics.contrast : 0)} delay={0.4} />
                                         <MetricBar label="VIBRANCY_INDEX" value={(typeof analysis.metrics?.saturation === 'number' ? analysis.metrics.saturation : 0)} delay={0.5} />
                                         <MetricBar label="TYPO_HIERARCHY" value={(typeof analysis.metrics?.textEmphasis === 'number' ? analysis.metrics.textEmphasis : 0)} delay={0.6} />
+                                        <MetricBar label="TEXT_READABILITY" value={(typeof analysis.metrics?.textReadability === 'number' ? analysis.metrics.textReadability : 0)} delay={0.7} />
+                                        <MetricBar label="EMOTIONAL_IMPACT" value={(typeof analysis.metrics?.emotionalImpact === 'number' ? analysis.metrics.emotionalImpact : 0)} delay={0.8} />
+                                        <MetricBar label="COLOR_HARMONY" value={(typeof analysis.metrics?.colorHarmony === 'number' ? analysis.metrics.colorHarmony : 0)} delay={0.9} />
+                                        <MetricBar label="VISUAL_CLUTTER" value={(typeof analysis.metrics?.visualClutter === 'number' ? analysis.metrics.visualClutter : 0)} delay={1.0} />
                                     </div>
 
                                     <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
@@ -718,10 +804,16 @@ const ThumbnailAnalyserPage = () => {
                                             <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>HOOK_STRATEGY</div>
                                             <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.heuristics?.hook}</div>
                                         </div>
-                                        <div>
+                                        <div style={{ marginBottom: '2rem' }}>
                                             <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>EYE_TRACKING</div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.heuristics?.eyePath}</div>
                                         </div>
+                                        {analysis.heuristics?.scrollStopPower && (
+                                            <div>
+                                                <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>SCROLL_STOP_POWER</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', lineHeight: 1.6, fontWeight: 700 }}>{analysis.heuristics.scrollStopPower}</div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
@@ -740,15 +832,108 @@ const ThumbnailAnalyserPage = () => {
                                     </div>
                                 </motion.div>
 
+                                {/* Text & Face Analysis Cards */}
+                                {(analysis.textAnalysis || analysis.faceAnalysis) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.35 }}
+                                        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}
+                                    >
+                                        {analysis.textAnalysis && (
+                                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', backgroundColor: 'var(--color-surface)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
+                                                    <FileText size={20} />
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>TEXT_SCAN</span>
+                                                </div>
+                                                {analysis.textAnalysis.detected ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                                        <div>
+                                                            <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontWeight: 900, marginBottom: '0.4rem' }}>DETECTED_TEXT</div>
+                                                            <div style={{ fontSize: '1.1rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>"{analysis.textAnalysis.content}"</div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                                            <div style={{ padding: '0.3rem 0.8rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}>SIZE: {analysis.textAnalysis.fontSize?.toUpperCase()}</div>
+                                                            <div style={{ padding: '0.3rem 0.8rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}>CONTRAST: {analysis.textAnalysis.contrast_vs_bg?.toUpperCase()}</div>
+                                                        </div>
+                                                        {analysis.textAnalysis.suggestion && (
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)', lineHeight: 1.5, fontStyle: 'italic' }}>{analysis.textAnalysis.suggestion}</div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.85rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>NO_TEXT_DETECTED</div>
+                                                )}
+                                            </div>
+                                        )}
+                                        {analysis.faceAnalysis && (
+                                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', backgroundColor: 'var(--color-surface)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
+                                                    <Eye size={20} />
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>FACE_SCAN</span>
+                                                </div>
+                                                {analysis.faceAnalysis.detected ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                                            <div style={{ padding: '0.3rem 0.8rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}>EXPRESSION: {analysis.faceAnalysis.expression?.toUpperCase()}</div>
+                                                            <div style={{ padding: '0.3rem 0.8rem', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}>SIZE: {analysis.faceAnalysis.prominence?.toUpperCase()}</div>
+                                                        </div>
+                                                        {analysis.faceAnalysis.suggestion && (
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--color-accent)', lineHeight: 1.5, fontStyle: 'italic' }}>{analysis.faceAnalysis.suggestion}</div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.85rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>NO_FACE_DETECTED</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* YouTube Specific Insights */}
+                                {analysis.youtubeSpecific && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.4 }}
+                                        style={{ border: '2px solid var(--color-accent)', padding: '2.5rem', backgroundColor: 'var(--color-surface)' }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-accent)', paddingBottom: '1rem' }}>
+                                            <Cpu size={20} style={{ color: 'var(--color-accent)' }} />
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--color-accent)' }}>YOUTUBE_INTELLIGENCE</span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+                                            {analysis.youtubeSpecific.mobileReadability && (
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontWeight: 900, marginBottom: '0.5rem' }}>MOBILE_READABILITY</div>
+                                                    <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{analysis.youtubeSpecific.mobileReadability}</div>
+                                                </div>
+                                            )}
+                                            {analysis.youtubeSpecific.suggestedFeedPosition && (
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontWeight: 900, marginBottom: '0.5rem' }}>BEST_FEED_POSITION</div>
+                                                    <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{analysis.youtubeSpecific.suggestedFeedPosition}</div>
+                                                </div>
+                                            )}
+                                            {analysis.youtubeSpecific.competitorEdge && (
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontWeight: 900, marginBottom: '0.5rem' }}>COMPETITOR_EDGE</div>
+                                                    <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{analysis.youtubeSpecific.competitorEdge}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Audience / Reader Fit */}
                                 <div style={{ border: '2px solid var(--color-text)', padding: '3rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'center' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem', alignItems: 'center' }}>
                                         <div>
                                             <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>READER_FIT</div>
                                             <div style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-display)' }}>{analysis.audience?.score}%</div>
                                         </div>
-                                        <div style={{ borderLeft: '2px solid var(--color-text)', paddingLeft: '4rem' }}>
+                                        <div style={{ borderLeft: '2px solid var(--color-text)', paddingLeft: '2rem' }}>
                                             <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>TARGET_DEMOGRAPHIC_PROFILE</div>
-                                            <div style={{ fontSize: '1.25rem', color: 'var(--color-text)', lineHeight: 1.5, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.audience?.profile}</div>
+                                            <div style={{ fontSize: '1.1rem', color: 'var(--color-text)', lineHeight: 1.5, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.audience?.profile}</div>
                                         </div>
                                     </div>
                                 </div>

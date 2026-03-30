@@ -9,8 +9,8 @@ import { useAuth } from '../context/AuthContext';
 const RED = '#E8111A';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
+const MODEL = 'openai/gpt-oss-20b:free'; // 3.6B active — lowest latency
+const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },

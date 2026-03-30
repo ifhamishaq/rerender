@@ -91,12 +91,21 @@ export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1
             }
         }
 
+        // Handle Gateway Errors (502/503/504) — common with free models under load
+        if ([502, 503, 504].includes(response.status)) {
+            if (retries > 0) {
+                console.warn(`[AI_GATEWAY] ${response.status} error. Retrying in ${delay}ms... (${retries} left)`);
+                await new Promise(res => setTimeout(res, delay));
+                return fetchOpenRouter(body, options, retries - 1, delay * 2);
+            }
+        }
+
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
             const errorMsg = errData.error?.message || `HTTP_${response.status}`;
             
             // Handle common OpenRouter errors
-            if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
+            if (errorMsg.includes('overloaded') || errorMsg.includes('congested') || errorMsg.includes('capacity')) {
                 if (retries > 0) {
                     console.warn(`[AI_RETRY] Model congested. Waiting ${delay}ms...`);
                     await new Promise(res => setTimeout(res, delay));
