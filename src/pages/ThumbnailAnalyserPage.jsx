@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Upload, RefreshCw, Eye, BarChart3, Zap, Download, FileText, Cpu } from 'lucide-react';
+import { 
+    Eye, Zap, Download, BarChart3, ArrowLeft, Upload, 
+    RefreshCw, FileText, Cpu, X, MessageSquare 
+} from 'lucide-react';
+import OracleCore from '../components/OracleCore';
 import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
@@ -27,6 +31,7 @@ const ThumbnailAnalyserPage = () => {
     const [analysis, setAnalysis] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [currentPhase, setCurrentPhase] = useState(0);
+    const [isOracleOpen, setIsOracleOpen] = useState(false);
     const [fakeProgress, setFakeProgress] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
     const [isThermal, setIsThermal] = useState(false);
@@ -34,18 +39,61 @@ const ThumbnailAnalyserPage = () => {
     const fileRef = useRef(null);
     const progressInterval = useRef(null);
 
-    // Sub-component for loading state to avoid duplication
+    // Neural Scanner Loading State
     const PhaseOverlay = ({ currentPhase, fakeProgress }) => (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-            <Cpu size={48} className="spin" style={{ color: 'var(--color-bg)' }} />
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-bg)', letterSpacing: '0.2em' }}>
-                {ANALYSIS_PHASES[currentPhase]}
-            </div>
-            <div style={{ width: '250px', height: '4px', backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative' }}>
-                <motion.div
-                    animate={{ width: `${fakeProgress}%` }}
-                    style={{ height: '100%', backgroundColor: 'var(--color-bg)', position: 'absolute', left: 0 }}
-                />
+        <div style={{ 
+            position: 'absolute', inset: 0, zIndex: 10, 
+            backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', 
+            alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+            backdropFilter: 'blur(5px)'
+        }}>
+            {/* Background Scanner Grid */}
+            <div style={{ 
+                position: 'absolute', inset: 0, opacity: 0.1,
+                backgroundImage: 'radial-gradient(var(--color-text) 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+            }} />
+
+            {/* Moving Scanner Line */}
+            <motion.div 
+                animate={{ top: ['0%', '100%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                style={{ 
+                    position: 'absolute', left: 0, right: 0, height: '2px', 
+                    backgroundColor: 'var(--color-accent)', boxShadow: '0 0 15px var(--color-accent)', 
+                    zIndex: 11 
+                }} 
+            />
+
+            <div style={{ position: 'relative', zIndex: 12, textAlign: 'center' }}>
+                <Cpu size={48} className="spin" style={{ color: 'var(--color-accent)', marginBottom: '1.5rem' }} />
+                
+                <div style={{ 
+                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900, 
+                    color: 'var(--color-accent)', letterSpacing: '0.3em', marginBottom: '1rem',
+                    textShadow: '0 0 10px rgba(0,0,0,0.5)'
+                }}>
+                    {ANALYSIS_PHASES[currentPhase]}
+                </div>
+
+                <div style={{ 
+                    width: '300px', height: '2px', backgroundColor: 'rgba(255,255,255,0.1)', 
+                    overflow: 'hidden', position: 'relative', marginBottom: '1.5rem' 
+                }}>
+                    <motion.div 
+                        animate={{ width: `${fakeProgress}%` }}
+                        style={{ height: '100%', backgroundColor: 'var(--color-accent)', position: 'absolute', left: 0 }}
+                    />
+                </div>
+
+                <div style={{ 
+                    fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--color-bg)',
+                    opacity: 0.6, display: 'flex', gap: '1rem', justifyContent: 'center'
+                }}>
+                    <span>NEURAL_LINK: ACTIVE</span>
+                    <span>PACKET_LOSS: 0.0%</span>
+                    <span>FPS: 60.0</span>
+                </div>
             </div>
         </div>
     );
@@ -57,8 +105,9 @@ const ThumbnailAnalyserPage = () => {
             <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5, overflow: 'visible' }}>
                 <defs>
                     <filter id="thermal-glow">
-                        <feGaussianBlur stdDeviation="15" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        <feGaussianBlur stdDeviation="25" result="blur" />
+                        <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
+                        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
                     </filter>
                 </defs>
                 {heatmap.map((point, i) => {
@@ -98,7 +147,7 @@ const ThumbnailAnalyserPage = () => {
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
                         transition={{ duration: 2, delay: 1 }}
-                        d={`M ${analysis.eyePathPoints.map(p => `${p.x}% ${p.y}%`).join(' L ')}`}
+                        d={`M ${analysis.eyePathPoints.map(p => `${parseFloat(p.x) || 0}% ${parseFloat(p.y) || 0}%`).join(' L ')}`}
                         fill="none"
                         stroke="var(--color-accent)"
                         strokeWidth="2"
@@ -195,12 +244,22 @@ const ThumbnailAnalyserPage = () => {
                     "ctrScoreA": 0-10, "ctrScoreB": 0-10,
                     "predictedCTR_A": "1.2%", "predictedCTR_B": "2.4%",
                     "gapAnalysis": "Why the winner is better...",
-                    ... [rest of standard fields for the winner]
+                    "metrics": { "contrast": 0-10, "saturation": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10 },
+                    "improvements": ["Step 1", "Step 2", ...]
                 }`
-                : `You are the Chief Creative Strategist at RE-RENDER Agency.
-                Perform a high-level creative audit of the provided thumbnail. 
-                Evaluate "Growth Viability" and target demographic profile.
-                OUTPUT JSON: standard fields (predictedCTR, metrics, palette, verdict, etc.)`;
+                : `You are the Lead Photoshop Strategist at RE-RENDER.
+                Perform a high-level creative audit. Give technical advice in simple English.
+                Use terms like "Layers, Masks, Curves, Opacity, and Selection Tools."
+                Example: "Create a Levels layer to adjust shadow contrast."
+                CRITICAL: 'heatmap' and 'eyePathPoints' MUST be included.
+                JSON_SCHEMA: {
+                    "predictedCTR": "string",
+                    "metrics": { "contrast": 0-10, "saturation": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10 },
+                    "heatmap": [ { "x": 0-100, "y": 0-100, "intensity": 0.1-1.0, "label": "string" } ],
+                    "eyePathPoints": [ { "x": 0-100, "y": 0-100 } ],
+                    "palette": ["#hex", ...], "verdict": "string", "composition": "string", "colorPsychology": "string", 
+                    "improvements": ["Photoshop Step 1", "Photoshop Step 2", ...], "audience": { "score": 0-100, "profile": "string" }
+                }`;
 
             const analysisBody = {
                 model: 'nvidia/nemotron-nano-12b-v2-vl:free',
@@ -234,6 +293,13 @@ const ThumbnailAnalyserPage = () => {
             if (finalAnalysis) {
                 setFakeProgress(100);
                 setTimeout(() => {
+                    // NORMALIZE_DATA: Ensure improvements is always an array
+                    if (finalAnalysis && finalAnalysis.improvements && !Array.isArray(finalAnalysis.improvements)) {
+                        finalAnalysis.improvements = [finalAnalysis.improvements];
+                    } else if (finalAnalysis && !finalAnalysis.improvements) {
+                        finalAnalysis.improvements = ["ADJUST_LEVEL_CURVES", "OPT_COLOR_SATURATION"];
+                    }
+                    
                     setAnalysis(finalAnalysis);
                     setIsAnalyzing(false);
                 }, 500);
@@ -549,6 +615,31 @@ const ThumbnailAnalyserPage = () => {
                                         <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
                                             VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.ctrScore > 7 ? 'DESIGN_VIABILITY_CONFIRMED' : 'ITERATION_REQUIRED')}
                                         </div>
+
+                                        <button 
+                                            onClick={() => setIsOracleOpen(true)}
+                                            style={{
+                                                marginTop: '2rem',
+                                                padding: '0.75rem',
+                                                width: '100%',
+                                                backgroundColor: 'transparent',
+                                                color: 'var(--color-text)',
+                                                border: '1px solid var(--color-text)',
+                                                fontFamily: 'var(--font-mono)',
+                                                fontSize: '0.65rem',
+                                                fontWeight: 900,
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.5rem',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-accent)'; e.currentTarget.style.color = '#000'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text)'; }}
+                                        >
+                                            <MessageSquare size={14} /> [ CONSULT_THE_ORACLE ]
+                                        </button>
                                     </motion.div>
                                 )}
                             </div>
@@ -590,7 +681,7 @@ const ThumbnailAnalyserPage = () => {
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>DIRECTOR_FIXES</span>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                            {analysis.improvements?.map((imp, i) => (
+                                            {(Array.isArray(analysis.improvements) ? analysis.improvements : []).map((imp, i) => (
                                                 <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                                                     <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontSize: '0.7rem', fontWeight: 900 }}>{String(i + 1).padStart(2, '0')}</span>
                                                     <span style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.4, fontWeight: 500 }}>{imp}</span>
@@ -801,6 +892,38 @@ const ThumbnailAnalyserPage = () => {
                     .print-only { display: none !important; }
                 }
             `}</style>
+
+            {/* Oracle Modal Overlay */}
+            {isOracleOpen && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 2000,
+                        backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '2rem'
+                    }}
+                >
+                    <motion.div 
+                        initial={{ scale: 0.9, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        style={{
+                            width: '100%', maxWidth: '900px', height: '80vh',
+                            backgroundColor: 'black', border: '1px solid var(--color-accent)',
+                            position: 'relative', overflow: 'hidden',
+                            boxShadow: '0 0 50px rgba(57,255,20,0.1)'
+                        }}
+                    >
+                        <OracleCore 
+                            mode="standard" 
+                            context={`Thumbnail Analysis Results: ${JSON.stringify(analysis)}`}
+                            initialMessage="STRATEG_ORACLE_ACTIVE. Ask me anything about your thumbnail fixes."
+                            onClose={() => setIsOracleOpen(false)}
+                        />
+                    </motion.div>
+                </motion.div>
+            )}
         </main>
     );
 };
