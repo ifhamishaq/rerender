@@ -78,37 +78,45 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const [isSpending, setIsSpending] = useState(false);
+
     const spendCredits = async (amount, reason = 'SYSTEM_USAGE') => {
         if (!profile || profile.credits < amount) return false;
+        if (isSpending) return false; // Prevent double-spend race condition
 
+        setIsSpending(true);
         const newCredits = profile.credits - amount;
         
         // Optimistic Update
         setProfile(prev => ({ ...prev, credits: newCredits }));
 
-        // 1. Update Credits
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ credits: newCredits })
-            .eq('id', user.id);
+        try {
+            // 1. Update Credits
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ credits: newCredits })
+                .eq('id', user.id);
 
-        if (profileError) {
-            console.error('Error spending credits:', profileError);
-            fetchProfile(user.id);
-            return false;
+            if (profileError) {
+                console.error('Error spending credits:', profileError);
+                fetchProfile(user.id);
+                return false;
+            }
+
+            // 2. Log Transaction
+            await supabase
+                .from('credit_logs')
+                .insert({
+                    user_id: user.id,
+                    amount: -amount,
+                    type: 'spend',
+                    reason: reason
+                });
+
+            return true;
+        } finally {
+            setIsSpending(false);
         }
-
-        // 2. Log Transaction
-        await supabase
-            .from('credit_logs')
-            .insert({
-                user_id: user.id,
-                amount: -amount,
-                type: 'spend',
-                reason: reason
-            });
-
-        return true;
     };
 
     const rewardCredits = async (amount, reason = 'REWARD') => {

@@ -11,7 +11,7 @@ import {
     PROMPT_COLLECTIONS, FEATURED_TAGS, NEGATIVE_PROMPT
 } from '../data/wallpaperConfig';
 import { useAuth } from '../context/AuthContext';
-import { AI_COSTS } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { supabase } from '../utils/supabase';
 
 const COLORS = {
@@ -34,7 +34,7 @@ const COLORS = {
 // --- LIGHTWEIGHT Sub-Components ---
 
 const Loader = () => {
-    const pixels = Array.from({ length: 16 }); 
+    const pixels = Array.from({ length: 16 });
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2.5rem' }}>
             <div style={{
@@ -62,11 +62,11 @@ const Loader = () => {
                     />
                 ))}
             </div>
-            <div style={{ 
-                fontSize: '0.8rem', 
-                fontFamily: 'var(--font-mono)', 
-                letterSpacing: '0.2em', 
-                color: 'var(--color-text)', 
+            <div style={{
+                fontSize: '0.8rem',
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.2em',
+                color: 'var(--color-text)',
                 fontWeight: 900
             }}>
                 [ SYNTHESIZING_ASSET_V1 ]
@@ -146,7 +146,7 @@ const WallpaperLab = () => {
         setIsEnhancing(true);
         try {
             const data = await fetchOpenRouter({
-                model: 'stepfun/step-3.5-flash:free',
+                model: 'nvidia/nemotron-3-super-120b-a12b:free',
                 messages: [
                     {
                         role: 'system',
@@ -175,8 +175,8 @@ const WallpaperLab = () => {
     const saveToArchive = (url, metadata) => {
         const newAsset = { id: Date.now(), url, date: new Date().toLocaleString(), ...metadata };
         // Base64 images are large. Limit archive to 10-15 items to stay under 5MB localStorage quota.
-        let updatedArchive = [newAsset, ...archive].slice(0, 12); 
-        
+        let updatedArchive = [newAsset, ...archive].slice(0, 12);
+
         try {
             setArchive(updatedArchive);
             localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedArchive));
@@ -269,7 +269,7 @@ const WallpaperLab = () => {
 
             if (!response.ok) throw new Error("Server communication failed.");
             const data = await response.json();
-            
+
             let finalUrl = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
             if (finalUrl && typeof finalUrl === 'string' && !finalUrl.startsWith('http')) {
                 if (finalUrl.length > 100) finalUrl = `data:image/png;base64,${finalUrl}`;
@@ -310,59 +310,59 @@ const WallpaperLab = () => {
     };
 
     return (
-        <div style={{ 
-            backgroundColor: 'var(--color-bg)', 
-            color: 'var(--color-text)', 
-            minHeight: '100vh', 
-            fontFamily: 'var(--font-sans)', 
-            paddingBottom: isMobile ? '80px' : '0', 
-            paddingTop: '80px' 
+        <div style={{
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
+            minHeight: '100vh',
+            fontFamily: 'var(--font-sans)',
+            paddingBottom: isMobile ? '80px' : '0',
+            paddingTop: '80px'
         }}>
-            
+
             {/* Masthead Header */}
-            <header style={{ 
-                padding: '2rem', 
-                borderBottom: '4px solid var(--color-text)', 
-                maxWidth: '1200px', 
+            <header style={{
+                padding: '2rem',
+                borderBottom: '4px solid var(--color-text)',
+                maxWidth: '1200px',
                 margin: '0 auto',
-                display: 'flex', 
+                display: 'flex',
                 flexDirection: window.innerWidth < 600 ? 'column' : 'row',
-                justifyContent: 'space-between', 
+                justifyContent: 'space-between',
                 alignItems: window.innerWidth < 600 ? 'flex-start' : 'baseline',
                 gap: window.innerWidth < 600 ? '1.5rem' : '0'
             }}>
                 <div>
-                    <div style={{ 
-                        fontFamily: 'var(--font-mono)', 
-                        fontSize: '0.65rem', 
-                        letterSpacing: '0.2em', 
+                    <div style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.2em',
                         color: 'var(--color-text-secondary)',
                         marginBottom: '0.5rem'
                     }}>
                         VOL. 01 // LAB_REPORTS // RE-RENDER_STUDIO
                     </div>
-                    <h1 style={{ 
-                        fontSize: 'clamp(2.5rem, 15vw, 5rem)', 
-                        fontWeight: 900, 
-                        margin: 0, 
-                        letterSpacing: '-0.04em', 
+                    <h1 style={{
+                        fontSize: 'clamp(2.5rem, 15vw, 5rem)',
+                        fontWeight: 900,
+                        margin: 0,
+                        letterSpacing: '-0.04em',
                         lineHeight: 0.9,
                         fontFamily: 'var(--font-display)'
                     }}>
-                        WALLPAPER<br/>
-                        <span style={{ 
-                            fontFamily: 'Playfair Display', 
-                            fontStyle: 'italic', 
+                        WALLPAPER<br />
+                        <span style={{
+                            fontFamily: 'Playfair Display',
+                            fontStyle: 'italic',
                             fontWeight: 400,
                             color: 'var(--color-accent)'
                         }}>LAB</span>
                     </h1>
                 </div>
-                
-                <div style={{ 
-                    textAlign: window.innerWidth < 600 ? 'left' : 'right', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
+
+                <div style={{
+                    textAlign: window.innerWidth < 600 ? 'left' : 'right',
+                    display: 'flex',
+                    flexDirection: 'column',
                     gap: '0.5rem',
                     width: window.innerWidth < 600 ? '100%' : 'auto'
                 }}>
@@ -370,12 +370,12 @@ const WallpaperLab = () => {
                     <div style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>
                         {profile?.credits ?? 0}<span style={{ fontSize: '0.8rem', marginLeft: '0.2rem' }}>CR</span>
                     </div>
-                    <Link to="/dossier" style={{ 
-                        textDecoration: 'none', 
-                        color: 'var(--color-text)', 
-                        border: '1px solid var(--color-text)', 
-                        padding: '0.4rem 0.8rem', 
-                        fontSize: '0.6rem', 
+                    <Link to="/dossier" style={{
+                        textDecoration: 'none',
+                        color: 'var(--color-text)',
+                        border: '1px solid var(--color-text)',
+                        padding: '0.4rem 0.8rem',
+                        fontSize: '0.6rem',
                         fontWeight: 900,
                         fontFamily: 'var(--font-mono)',
                         marginTop: '0.5rem',
@@ -387,15 +387,15 @@ const WallpaperLab = () => {
                 </div>
             </header>
 
-            <main style={{ 
-                maxWidth: '1200px', 
-                margin: '3rem auto', 
-                padding: '0 2rem', 
-                display: 'grid', 
-                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px', 
-                gap: window.innerWidth < 1000 ? '2rem' : '4rem' 
+            <main style={{
+                maxWidth: '1200px',
+                margin: '3rem auto',
+                padding: '0 2rem',
+                display: 'grid',
+                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
+                gap: window.innerWidth < 1000 ? '2rem' : '4rem'
             }}>
-                
+
                 {/* Column 01: Visual Canvas */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{
@@ -413,11 +413,11 @@ const WallpaperLab = () => {
                         {isGenerating ? (
                             <Loader />
                         ) : resultUrl ? (
-                            <motion.img 
-                                initial={{ opacity: 0 }} 
-                                animate={{ opacity: 1 }} 
-                                src={resultUrl} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            <motion.img
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                src={resultUrl}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (
                             <div style={{ color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -427,10 +427,10 @@ const WallpaperLab = () => {
                         )}
                         {resultUrl && !isGenerating && (
                             <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', display: 'flex', gap: '0.75rem' }}>
-                                <button onClick={() => handleDownload(resultUrl)} style={{ 
-                                    background: 'var(--color-text)', color: 'var(--color-bg)', 
-                                    border: 'none', padding: '1rem', cursor: 'pointer', 
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                                <button onClick={() => handleDownload(resultUrl)} style={{
+                                    background: 'var(--color-text)', color: 'var(--color-bg)',
+                                    border: 'none', padding: '1rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                                 }}>
                                     <Download size={24} />
                                 </button>
@@ -438,22 +438,22 @@ const WallpaperLab = () => {
                         )}
                     </div>
 
-                    <div style={{ 
-                        display: 'flex', 
+                    <div style={{
+                        display: 'flex',
                         flexDirection: window.innerWidth < 600 ? 'column' : 'row',
-                        gap: '1.5rem', 
-                        padding: '1.5rem', 
-                        border: '1px solid var(--color-border)', 
-                        fontFamily: 'var(--font-mono)', 
-                        fontSize: '0.65rem', 
-                        color: 'var(--color-text-secondary)' 
+                        gap: '1.5rem',
+                        padding: '1.5rem',
+                        border: '1px solid var(--color-border)',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.65rem',
+                        color: 'var(--color-text-secondary)'
                     }}>
                         <div style={{ flex: 1 }}>
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE_STATUS:</span> {isGenerating ? 'PROCESSING' : 'IDLE'}<br/>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE_STATUS:</span> {isGenerating ? 'PROCESSING' : 'IDLE'}<br />
                             <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ASPECT_RATIO:</span> {ratio}
                         </div>
                         <div style={{ flex: 1 }}>
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> {resultUrl ? 'GEN_SUCCESS' : 'NULL'}<br/>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> {resultUrl ? 'GEN_SUCCESS' : 'NULL'}<br />
                             <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>TIMESTAMP:</span> {new Date().toLocaleTimeString()}
                         </div>
                     </div>
@@ -467,7 +467,7 @@ const WallpaperLab = () => {
 
                 {/* Column 02: Editorial Controls */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                    
+
                     {/* Dimension Select */}
                     <div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>DIMENSIONS</div>
@@ -495,7 +495,7 @@ const WallpaperLab = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <div style={{ display: 'flex', gap: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
                             {['genre', 'style', 'modifiers'].map(tab => (
-                                <button 
+                                <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     style={{
@@ -522,7 +522,7 @@ const WallpaperLab = () => {
                                 ))}
                                 {activeTab === 'modifiers' && (
                                     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                        <textarea 
+                                        <textarea
                                             value={customSupplement}
                                             onChange={(e) => setCustomSupplement(e.target.value)}
                                             placeholder="KEYWORDS..."
@@ -530,7 +530,7 @@ const WallpaperLab = () => {
                                         />
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                             {FEATURED_TAGS.map(tag => (
-                                                <button 
+                                                <button
                                                     key={tag}
                                                     onClick={() => setCustomSupplement(prev => prev ? `${prev}, ${tag}` : tag)}
                                                     style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', padding: '0.4rem 0.8rem', fontSize: '0.6rem', fontFamily: 'var(--font-mono)', cursor: 'pointer', fontWeight: 900 }}
@@ -612,12 +612,12 @@ const WallpaperLab = () => {
                             <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)', margin: 0 }}>LOCAL_ARCHIVE</h2>
                             <span style={{ fontSize: '0.7rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>// {archive.length} ENTRIES</span>
                         </div>
-                        <button 
+                        <button
                             onClick={clearArchive}
-                            style={{ 
-                                background: 'none', border: '1px solid var(--color-border)', 
-                                padding: '0.5rem 1rem', fontSize: '0.6rem', 
-                                fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer' 
+                            style={{
+                                background: 'none', border: '1px solid var(--color-border)',
+                                padding: '0.5rem 1rem', fontSize: '0.6rem',
+                                fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer'
                             }}
                         >
                             PURGE_ARCHIVE
@@ -627,12 +627,12 @@ const WallpaperLab = () => {
                         {archive.map(item => (
                             <div key={item.id} style={{ border: '1px solid var(--color-border)', padding: '0.5rem', backgroundColor: 'var(--color-surface)', position: 'relative' }}>
                                 <img src={item.url} alt="Archive" style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover' }} />
-                                <div style={{ 
+                                <div style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-                                    padding: '1rem 0', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', opacity: 0.6 
+                                    padding: '1rem 0', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', opacity: 0.6
                                 }}>
                                     <div>{item.genre} // {item.style}</div>
-                                    <button 
+                                    <button
                                         onClick={() => handleDownload(item.url)}
                                         style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', padding: '0 0.5rem' }}
                                     >

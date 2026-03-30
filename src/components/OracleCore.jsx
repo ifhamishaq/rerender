@@ -6,9 +6,9 @@ import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const MODEL = 'stepfun/step-3.5-flash:free';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 const VISION_MODEL = 'nvidia/nemotron-nano-12b-v2-vl:free';
-const FALLBACK_MODEL = 'google/gemma-3-27b-it:free';
+const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
 
 // Mode-specific use-case templates
 const USE_CASE_SETS = {
@@ -27,21 +27,21 @@ const USE_CASE_SETS = {
     global: [] // No templates for the compact global widget
 };
 
-const OracleCore = ({ 
-    mode = 'standard', 
-    context = '', 
+const OracleCore = ({
+    mode = 'standard',
+    context = '',
     initialMessage = "ORACLE_ONLINE. How shall we re-render your vision today?",
     onExecute = null,
     onClose = null
 }) => {
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const storageKey = user ? `oracle_chat_${mode}_${user.id}` : `oracle_chat_${mode}_guest`;
-    
+
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem(storageKey);
         return saved ? JSON.parse(saved) : [{ role: 'assistant', content: initialMessage }];
     });
-    
+
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [pendingImage, setPendingImage] = useState(null); // { base64, preview }
@@ -85,10 +85,10 @@ const OracleCore = ({
         formatted = formatted.replace(/^## (.*$)/gm, '<h2 style="color: var(--color-text); font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.25rem; font-weight: 900;">$1</h2>');
         formatted = formatted.replace(/^[\s]*[-*][\s]+(.*)/gm, '<div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; padding-left: 0.5rem;"><span style="color: var(--color-accent)">•</span><span>$1</span></div>');
         formatted = formatted.replace(/^---$/gm, '<div style="height: 1px; background: var(--color-border); margin: 2rem 0; opacity: 0.5;"></div>');
-        
+
         // Markdown Links: [Label](URL)
         formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: var(--color-accent); text-decoration: underline; font-weight: 700; transition: opacity 0.2s;" target="_blank" rel="noopener noreferrer" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">$1</a>');
-        
+
         return formatted;
     };
 
@@ -107,9 +107,9 @@ const OracleCore = ({
 
         // AUTH CHECK
         if (!user) {
-            setMessages(prev => [...prev, { 
-                role: 'assistant', 
-                content: "🚨 **ACCESS_DENIED**: You must be logged in to use the Oracle. Credits are required for neural processing." 
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: "🚨 **ACCESS_DENIED**: You must be logged in to use the Oracle. Credits are required for neural processing."
             }]);
             setIsAuthModalOpen(true);
             return;
@@ -117,9 +117,9 @@ const OracleCore = ({
 
         // CREDIT CHECK
         if (!profile || profile.credits < AI_COSTS.ORACLE) {
-            setMessages(prev => [...prev, { 
-                role: 'assistant', 
-                content: "📉 **OUT_OF_COMPUTE**: Insufficient credits. Please wait for the daily refill or contact support." 
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: "📉 **OUT_OF_COMPUTE**: Insufficient credits. Please wait for the daily refill or contact support."
             }]);
             return;
         }
@@ -129,8 +129,8 @@ const OracleCore = ({
         if (!success) return;
 
         // Build user message for chat display
-        const userMessage = { 
-            role: 'user', 
+        const userMessage = {
+            role: 'user',
             content: messageText || (hasImage ? '📸 Analyze this thumbnail' : ''),
             image: hasImage ? pendingImage.preview : null
         };
@@ -220,8 +220,8 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                 data = await fetchOpenRouter(body, { title: 'RE-RENDER Aesthetic Oracle' });
             } catch (err) {
                 console.warn('[ORACLE] Primary model failed. Switching to fallback...');
-                const fallbackModel = hasImage ? VISION_MODEL : FALLBACK_MODEL;
-                data = await fetchOpenRouter({ ...body, model: fallbackModel }, { title: 'RE-RENDER Aesthetic Oracle' });
+                const fallbackModel = hasImage ? FALLBACK_MODEL : FALLBACK_MODEL;
+                data = await fetchOpenRouter({ ...body, model: fallbackModel }, { title: 'RE-RENDER Aesthetic Oracle (Fallback)' });
             }
 
             if (data.error) throw new Error(data.error.message || 'API_ERROR');
@@ -248,7 +248,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
 
     return (
         <div style={{
-            display: 'flex', flexDirection: 'column', 
+            display: 'flex', flexDirection: 'column',
             height: '100%', width: '100%',
             fontFamily: 'var(--font-sans)', position: 'relative',
             overflow: 'hidden',
@@ -256,7 +256,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
         }}>
             {/* Header for Global/Wallpaper modes */}
             {(isCompact || isWallpaper) && (
-                <div style={{ 
+                <div style={{
                     padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-border)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     backgroundColor: 'rgba(255,255,255,0.02)'
@@ -282,13 +282,13 @@ MISSION: Provide actionable advice and guide users to the right tools within the
 
             {/* Clear chat for standard mode */}
             {!isCompact && !isWallpaper && messages.length > 1 && (
-                <button 
+                <button
                     onClick={clearChat}
-                    style={{ 
+                    style={{
                         position: 'absolute', top: isCompact ? '4.5rem' : '0.75rem', right: '1.5rem', zIndex: 10,
-                        background: 'rgba(0,0,0,0.5)', border: '1px solid var(--color-border)', 
-                        color: 'var(--color-text-secondary)', cursor: 'pointer', 
-                        padding: '0.3rem 0.75rem', fontSize: '0.55rem', 
+                        background: 'rgba(0,0,0,0.5)', border: '1px solid var(--color-border)',
+                        color: 'var(--color-text-secondary)', cursor: 'pointer',
+                        padding: '0.3rem 0.75rem', fontSize: '0.55rem',
                         fontFamily: 'var(--font-mono)', fontWeight: 900,
                         transition: 'all 0.15s'
                     }}
@@ -300,29 +300,29 @@ MISSION: Provide actionable advice and guide users to the right tools within the
             )}
 
             {/* Chat Area */}
-            <div 
+            <div
                 ref={scrollRef}
                 className="oracle-chat-scroll"
-                style={{ 
-                    flex: 1, 
-                    padding: isCompact ? '1.5rem' : '2rem', 
-                    overflowY: 'auto', 
-                    overflowX: 'hidden', 
-                    display: 'flex', flexDirection: 'column', 
-                    gap: isCompact ? '1.5rem' : '3rem', 
+                style={{
+                    flex: 1,
+                    padding: isCompact ? '1.5rem' : '2rem',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    display: 'flex', flexDirection: 'column',
+                    gap: isCompact ? '1.5rem' : '3rem',
                     scrollBehavior: 'smooth',
                     border: (isCompact || isWallpaper) ? 'none' : '1px solid var(--color-border)',
                     backgroundColor: (isCompact || isWallpaper) ? 'transparent' : 'rgba(255,255,255,0.01)',
                 }}
             >
                 {messages.map((m, i) => (
-                    <motion.div 
+                    <motion.div
                         key={i}
                         initial={{ opacity: 0, x: -5 }}
                         animate={{ opacity: 1, x: 0 }}
                         style={{ display: 'flex', gap: isCompact ? '0.75rem' : '1.5rem', alignItems: 'flex-start' }}
                     >
-                        <div style={{ 
+                        <div style={{
                             width: isCompact ? '24px' : '28px', height: isCompact ? '24px' : '28px', flexShrink: 0,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'var(--color-accent)',
@@ -331,10 +331,10 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                         }}>
                             {m.role === 'user' ? <User size={isCompact ? 12 : 14} /> : <Bot size={isCompact ? 12 : 14} />}
                         </div>
-                        
+
                         <div style={{ flex: 1 }}>
-                            <div style={{ 
-                                fontSize: '0.5rem', fontWeight: 900, marginBottom: '0.4rem', 
+                            <div style={{
+                                fontSize: '0.5rem', fontWeight: 900, marginBottom: '0.4rem',
                                 color: 'var(--color-text-secondary)',
                                 fontFamily: 'var(--font-mono)', letterSpacing: '0.1em'
                             }}>
@@ -346,7 +346,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                                     <img src={m.image} alt="Uploaded" style={{ width: '100%', display: 'block' }} />
                                 </div>
                             )}
-                            <div 
+                            <div
                                 style={{
                                     fontSize: isCompact ? '0.85rem' : 'clamp(0.9rem, 1.2vw, 1.05rem)',
                                     lineHeight: 1.6,
@@ -367,15 +367,15 @@ MISSION: Provide actionable advice and guide users to the right tools within the
             </div>
 
             {/* Prompt Section */}
-            <div style={{ 
-                padding: isCompact ? '1rem' : '1.5rem', 
+            <div style={{
+                padding: isCompact ? '1rem' : '1.5rem',
                 backgroundColor: 'rgba(255,255,255,0.02)',
                 borderTop: '1px solid var(--color-border)',
                 flexShrink: 0
             }}>
                 {/* Quick-action templates */}
                 {useCases.length > 0 && (
-                    <div 
+                    <div
                         className="oracle-pills-scroll"
                         style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}
                     >
@@ -420,10 +420,10 @@ MISSION: Provide actionable advice and guide users to the right tools within the
 
                 <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
                     {/* Hidden file input */}
-                    <input 
+                    <input
                         ref={fileInputRef}
-                        type="file" 
-                        accept="image/*" 
+                        type="file"
+                        accept="image/*"
                         onChange={handleImageUpload}
                         style={{ display: 'none' }}
                     />
@@ -448,7 +448,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                         <div style={{ position: 'absolute', left: 0, bottom: '0.8rem', color: 'var(--color-accent)', opacity: 0.5 }}>
                             <ChevronRight size={14} />
                         </div>
-                        <textarea 
+                        <textarea
                             ref={textareaRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
@@ -456,7 +456,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                             placeholder={pendingImage ? "Add context for analysis (optional)..." : (isWallpaper ? "Describe your wallpaper vibe..." : "RE-RENDER DIRECTIVE...")}
                             rows={1}
                             style={{
-                                width: '100%', backgroundColor: 'transparent', 
+                                width: '100%', backgroundColor: 'transparent',
                                 border: 'none', borderBottom: '1px solid var(--color-border)',
                                 color: 'var(--color-text)', padding: '0.6rem 1.5rem', fontFamily: 'var(--font-sans)',
                                 fontSize: isCompact ? '0.85rem' : '1rem', outline: 'none', resize: 'none',
@@ -464,7 +464,7 @@ MISSION: Provide actionable advice and guide users to the right tools within the
                             }}
                         />
                     </div>
-                    <button 
+                    <button
                         type="submit"
                         disabled={isTyping || (!input.trim() && !pendingImage)}
                         style={{

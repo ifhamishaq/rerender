@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-    Eye, Zap, Download, BarChart3, ArrowLeft, Upload, 
-    RefreshCw, FileText, Cpu, X, MessageSquare 
+import {
+    Eye, Zap, Download, BarChart3, ArrowLeft, Upload,
+    RefreshCw, FileText, Cpu, X
 } from 'lucide-react';
-import OracleCore from '../components/OracleCore';
 import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 
-const VISION_MODEL = 'google/gemini-2.0-flash-exp:free';
+const VISION_MODEL = 'nvidia/nemotron-nano-12b-v2-vl:free';
+const FALLBACK_VISION_MODEL = 'google/gemma-3-27b-it:free';
 
 const ANALYSIS_PHASES = [
     "DRAFTING_VISUAL_REVIEW",
@@ -31,62 +31,62 @@ const ThumbnailAnalyserPage = () => {
     const [analysis, setAnalysis] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [currentPhase, setCurrentPhase] = useState(0);
-    const [isOracleOpen, setIsOracleOpen] = useState(false);
     const [fakeProgress, setFakeProgress] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
     const [isThermal, setIsThermal] = useState(false);
+    const [simulatorMode, setSimulatorMode] = useState('DESKTOP'); // DESKTOP, MOBILE, SIDEBAR
 
     const fileRef = useRef(null);
     const progressInterval = useRef(null);
 
     // Neural Scanner Loading State
     const PhaseOverlay = ({ currentPhase, fakeProgress }) => (
-        <div style={{ 
-            position: 'absolute', inset: 0, zIndex: 10, 
-            backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', 
+        <div style={{
+            position: 'absolute', inset: 0, zIndex: 10,
+            backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             backdropFilter: 'blur(5px)'
         }}>
             {/* Background Scanner Grid */}
-            <div style={{ 
+            <div style={{
                 position: 'absolute', inset: 0, opacity: 0.1,
                 backgroundImage: 'radial-gradient(var(--color-text) 1px, transparent 1px)',
                 backgroundSize: '20px 20px'
             }} />
 
             {/* Moving Scanner Line */}
-            <motion.div 
+            <motion.div
                 animate={{ top: ['0%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                style={{ 
-                    position: 'absolute', left: 0, right: 0, height: '2px', 
-                    backgroundColor: 'var(--color-accent)', boxShadow: '0 0 15px var(--color-accent)', 
-                    zIndex: 11 
-                }} 
+                style={{
+                    position: 'absolute', left: 0, right: 0, height: '2px',
+                    backgroundColor: 'var(--color-accent)', boxShadow: '0 0 15px var(--color-accent)',
+                    zIndex: 11
+                }}
             />
 
             <div style={{ position: 'relative', zIndex: 12, textAlign: 'center' }}>
                 <Cpu size={48} className="spin" style={{ color: 'var(--color-accent)', marginBottom: '1.5rem' }} />
-                
-                <div style={{ 
-                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900, 
+
+                <div style={{
+                    fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 900,
                     color: 'var(--color-accent)', letterSpacing: '0.3em', marginBottom: '1rem',
                     textShadow: '0 0 10px rgba(0,0,0,0.5)'
                 }}>
                     {ANALYSIS_PHASES[currentPhase]}
                 </div>
 
-                <div style={{ 
-                    width: '300px', height: '2px', backgroundColor: 'rgba(255,255,255,0.1)', 
-                    overflow: 'hidden', position: 'relative', marginBottom: '1.5rem' 
+                <div style={{
+                    width: '300px', height: '2px', backgroundColor: 'rgba(255,255,255,0.1)',
+                    overflow: 'hidden', position: 'relative', marginBottom: '1.5rem'
                 }}>
-                    <motion.div 
+                    <motion.div
                         animate={{ width: `${fakeProgress}%` }}
                         style={{ height: '100%', backgroundColor: 'var(--color-accent)', position: 'absolute', left: 0 }}
                     />
                 </div>
 
-                <div style={{ 
+                <div style={{
                     fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--color-bg)',
                     opacity: 0.6, display: 'flex', gap: '1rem', justifyContent: 'center'
                 }}>
@@ -104,11 +104,19 @@ const ThumbnailAnalyserPage = () => {
         return (
             <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5, overflow: 'visible' }}>
                 <defs>
+                    <linearGradient id="thermal-gradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#ff0000" />
+                        <stop offset="50%" stopColor="#ffae00" />
+                        <stop offset="100%" stopColor="#fffb00" />
+                    </linearGradient>
                     <filter id="thermal-glow">
                         <feGaussianBlur stdDeviation="25" result="blur" />
                         <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
                         <feComposite in="SourceGraphic" in2="goo" operator="atop" />
                     </filter>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-accent)" />
+                    </marker>
                 </defs>
                 {heatmap.map((point, i) => {
                     const x = parseFloat(point.x) || 0;
@@ -135,11 +143,6 @@ const ThumbnailAnalyserPage = () => {
                         </motion.g>
                     );
                 })}
-                <linearGradient id="thermal-gradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#ff0000" />
-                    <stop offset="50%" stopColor="#ffae00" />
-                    <stop offset="100%" stopColor="#fffb00" />
-                </linearGradient>
 
                 {/* Draw Eye Path Arrows */}
                 {analysis?.eyePathPoints?.length > 1 && (
@@ -155,11 +158,6 @@ const ThumbnailAnalyserPage = () => {
                         markerEnd="url(#arrowhead)"
                     />
                 )}
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-accent)" />
-                    </marker>
-                </defs>
             </svg>
         );
     };
@@ -245,7 +243,10 @@ const ThumbnailAnalyserPage = () => {
                     "predictedCTR_A": "1.2%", "predictedCTR_B": "2.4%",
                     "gapAnalysis": "Why the winner is better...",
                     "metrics": { "contrast": 0-10, "saturation": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10 },
-                    "improvements": ["Step 1", "Step 2", ...]
+                    "heuristics": { "hook": "string", "eyePath": "string" },
+                    "improvements": ["Step 1", "Step 2", ...],
+                    "audience": { "score": 0-100, "profile": "string" },
+                    "palette": ["#hex", ...], "verdict": "string", "composition": "string", "colorPsychology": "string"
                 }`
                 : `You are the Lead Photoshop Strategist at RE-RENDER.
                 Perform a high-level creative audit. Give technical advice in simple English.
@@ -255,6 +256,7 @@ const ThumbnailAnalyserPage = () => {
                 JSON_SCHEMA: {
                     "predictedCTR": "string",
                     "metrics": { "contrast": 0-10, "saturation": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10 },
+                    "heuristics": { "hook": "string", "eyePath": "string" },
                     "heatmap": [ { "x": 0-100, "y": 0-100, "intensity": 0.1-1.0, "label": "string" } ],
                     "eyePathPoints": [ { "x": 0-100, "y": 0-100 } ],
                     "palette": ["#hex", ...], "verdict": "string", "composition": "string", "colorPsychology": "string", 
@@ -262,7 +264,7 @@ const ThumbnailAnalyserPage = () => {
                 }`;
 
             const analysisBody = {
-                model: 'nvidia/nemotron-nano-12b-v2-vl:free',
+                model: VISION_MODEL,
                 messages: [
                     {
                         role: 'system',
@@ -286,7 +288,16 @@ const ThumbnailAnalyserPage = () => {
                 temperature: 0.3
             };
 
-            const response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });
+            let response;
+            try {
+                response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });
+            } catch (primaryErr) {
+                console.warn('[ANALYSER] Primary model failed, trying fallback...', primaryErr.message);
+                response = await fetchOpenRouter(
+                    { ...analysisBody, model: FALLBACK_VISION_MODEL },
+                    { title: 'RE-RENDER Single Audit (Fallback)' }
+                );
+            }
             const finalContent = response.choices?.[0]?.message?.content || '';
             const finalAnalysis = safeParseJSON(finalContent);
 
@@ -299,7 +310,11 @@ const ThumbnailAnalyserPage = () => {
                     } else if (finalAnalysis && !finalAnalysis.improvements) {
                         finalAnalysis.improvements = ["ADJUST_LEVEL_CURVES", "OPT_COLOR_SATURATION"];
                     }
-                    
+
+                    // NORMALIZE_STRATEGIC_DATA: Add fallbacks for missing strategic fields
+                    if (!finalAnalysis.heuristics) finalAnalysis.heuristics = { hook: "PATTERN_INTERRUPT_REQUIRED", eyePath: "LINEAR_TRANSITION_DETECTED" };
+                    if (!finalAnalysis.audience) finalAnalysis.audience = { score: 0, profile: "DEMOGRAPHIC_PENDING" };
+
                     setAnalysis(finalAnalysis);
                     setIsAnalyzing(false);
                 }, 500);
@@ -584,72 +599,106 @@ const ThumbnailAnalyserPage = () => {
                                 }}>
                                     REPLACE_ASSET
                                 </button>
-
-                                {analysis && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        style={{
-                                            marginTop: 'auto',
-                                            border: '2.5px solid var(--color-text)',
-                                            padding: '2rem',
-                                            backgroundColor: 'var(--color-surface)',
-                                            boxShadow: '10px 10px 0px var(--color-accent)',
-                                            position: 'relative',
-                                            overflow: 'hidden'
-                                        }}
-                                    >
-                                        {isCompareMode && (
-                                            <div style={{
-                                                position: 'absolute', top: 0, right: 0,
-                                                backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)',
-                                                padding: '0.4rem 1rem', fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)'
-                                            }}> BATTLE_RESULT </div>
-                                        )}
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                                            {isCompareMode ? 'WINNER_VERSION' : 'STRATEGIC_PERFORMANCE_VALUE'}
-                                        </div>
-                                        <div style={{ fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'baseline', gap: '0.25rem', lineHeight: 1, color: 'var(--color-text)' }}>
-                                            {isCompareMode ? analysis.winner : (analysis.predictedCTR || '0.0%')}
-                                        </div>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
-                                            VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.ctrScore > 7 ? 'DESIGN_VIABILITY_CONFIRMED' : 'ITERATION_REQUIRED')}
-                                        </div>
-
-                                        <button 
-                                            onClick={() => setIsOracleOpen(true)}
-                                            style={{
-                                                marginTop: '2rem',
-                                                padding: '0.75rem',
-                                                width: '100%',
-                                                backgroundColor: 'transparent',
-                                                color: 'var(--color-text)',
-                                                border: '1px solid var(--color-text)',
-                                                fontFamily: 'var(--font-mono)',
-                                                fontSize: '0.65rem',
-                                                fontWeight: 900,
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '0.5rem',
-                                                transition: 'all 0.2s'
-                                            }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-accent)'; e.currentTarget.style.color = '#000'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text)'; }}
-                                        >
-                                            <MessageSquare size={14} /> [ CONSULT_THE_ORACLE ]
-                                        </button>
-                                    </motion.div>
-                                )}
                             </div>
                         )}
 
-                        {analysis && (
-                            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        {/* Audit Dashboard Section - Unified for stability */}
+                        {!isAnalyzing && analysis && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem', marginTop: '4rem' }}>
+                                {/* Top Level Metrics & Verdict */}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    style={{
+                                        border: '2.5px solid var(--color-text)',
+                                        padding: '2.5rem',
+                                        backgroundColor: 'var(--color-surface)',
+                                        boxShadow: '10px 10px 0px var(--color-accent)',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    {isCompareMode && (
+                                        <div style={{
+                                            position: 'absolute', top: 0, right: 0,
+                                            backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)',
+                                            padding: '0.4rem 1rem', fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)'
+                                        }}> BATTLE_RESULT_CONFIRMED </div>
+                                    )}
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                                        {isCompareMode ? 'WINNER_VERSION' : 'STRATEGIC_PERFORMANCE_VALUE'}
+                                    </div>
+                                    <div style={{ fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'baseline', gap: '0.25rem', lineHeight: 1, color: 'var(--color-text)' }}>
+                                        {isCompareMode ? analysis.winner : (analysis.predictedCTR || '0.0%')}
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
+                                        VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.ctrScore > 7 ? 'DESIGN_VIABILITY_CONFIRMED' : 'ITERATION_REQUIRED')}
+                                    </div>
+                                </motion.div>
+
+                                {/* Simulation Studio */}
+                                {(preview || previewB) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 }}
+                                        style={{
+                                            padding: '2.5rem',
+                                            border: '2px solid var(--color-text)',
+                                            backgroundColor: 'rgba(0,0,0,0.5)'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>
+                                                [ SIMULATION_STUDIO_V1.0 ]
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                {['DESKTOP', 'MOBILE', 'SIDEBAR'].map(mode => (
+                                                    <button
+                                                        key={mode}
+                                                        onClick={() => setSimulatorMode(mode)}
+                                                        style={{
+                                                            padding: '0.5rem 1rem',
+                                                            backgroundColor: simulatorMode === mode ? 'var(--color-accent)' : 'transparent',
+                                                            color: simulatorMode === mode ? 'black' : 'var(--color-text)',
+                                                            border: '1px solid var(--color-text)',
+                                                            fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {mode}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div style={{
+                                            display: 'flex', justifyContent: 'center', backgroundColor: '#0f0f0f',
+                                            padding: '4rem 2rem', border: '1.5px solid rgba(255,255,255,0.05)',
+                                            minHeight: '400px', position: 'relative', overflow: 'hidden'
+                                        }}>
+                                            <div style={{
+                                                width: simulatorMode === 'DESKTOP' ? '360px' : simulatorMode === 'MOBILE' ? '320px' : '420px',
+                                                display: simulatorMode === 'SIDEBAR' ? 'flex' : 'block',
+                                                gap: '1rem'
+                                            }}>
+                                                <div style={{ width: simulatorMode === 'SIDEBAR' ? '168px' : '100%', aspectRatio: '16/9', backgroundColor: '#222', backgroundImage: `url(${preview})`, backgroundSize: 'cover', borderRadius: simulatorMode === 'MOBILE' ? '0' : '8px' }}></div>
+                                                <div style={{ marginTop: simulatorMode === 'SIDEBAR' ? '0' : '1rem', flex: 1 }}>
+                                                    <div style={{ height: '1.2rem', backgroundColor: '#333', width: '90%', marginBottom: '0.75rem', borderRadius: '4px' }}></div>
+                                                    <div style={{ height: '0.8rem', backgroundColor: '#222', width: '60%', borderRadius: '4px' }}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
                                 {/* Deep Metrics Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}
+                                >
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
                                             <BarChart3 size={20} style={{ color: 'var(--color-text)' }} />
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>VISUAL_VECTORS</span>
@@ -660,7 +709,7 @@ const ThumbnailAnalyserPage = () => {
                                         <MetricBar label="TYPO_HIERARCHY" value={(typeof analysis.metrics?.textEmphasis === 'number' ? analysis.metrics.textEmphasis : 0)} delay={0.6} />
                                     </div>
 
-                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
                                             <Eye size={20} style={{ color: 'var(--color-text)' }} />
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>EDITORIAL_MAP</span>
@@ -675,7 +724,7 @@ const ThumbnailAnalyserPage = () => {
                                         </div>
                                     </div>
 
-                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
                                             <Zap size={20} style={{ color: 'var(--color-text)' }} />
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>DIRECTOR_FIXES</span>
@@ -689,9 +738,9 @@ const ThumbnailAnalyserPage = () => {
                                             ))}
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
 
-                                <div style={{ border: '2px solid var(--color-text)', padding: '3rem', marginBottom: '4rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                <div style={{ border: '2px solid var(--color-text)', padding: '3rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface)' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'center' }}>
                                         <div>
                                             <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>READER_FIT</div>
@@ -701,17 +750,6 @@ const ThumbnailAnalyserPage = () => {
                                             <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>TARGET_DEMOGRAPHIC_PROFILE</div>
                                             <div style={{ fontSize: '1.25rem', color: 'var(--color-text)', lineHeight: 1.5, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.audience?.profile}</div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
-                                    <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COMPOSITION_NOTES</div>
-                                        <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.composition || 'STABLE_STRUCTURE'}</div>
-                                    </div>
-                                    <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COLOR_PSYCHOLOGY</div>
-                                        <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.colorPsychology || 'NEUTRAL_PALETTE_INFLUENCE'}</div>
                                     </div>
                                 </div>
 
@@ -729,32 +767,32 @@ const ThumbnailAnalyserPage = () => {
                                         <Download size={22} /> [ GENERATE_AUDIT_REPORT ]
                                     </motion.button>
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
                     </>
                 )}
+            </div>
 
-                {/* Visual Intelligence Feed - Always at bottom to fill layout */}
-                <div style={{ maxWidth: '1000px', margin: '8rem auto 0', padding: '0 2rem 4rem' }}>
-                    <div style={{ borderTop: '4px solid var(--color-text)', paddingTop: '4rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '3rem' }}>
-                            <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)', margin: 0 }}>STUDIO_INTELLIGENCE</h2>
-                            <span style={{ fontSize: '0.7rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>// NEURAL_HINTS</span>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-                            {[
-                                { title: "RULE_OF_THIRDS", desc: "Positioning faces on grid intersections increases retention by 14%." },
-                                { title: "CONTRAST_META", desc: "A 50% contrast gap between subject and background creates instant depth." },
-                                { title: "GAZE_DIRECTION", desc: "Eye-tracking confirms viewers follow the subject's gaze into the content." },
-                                { title: "SALIENCY_MAPS", desc: "Neural saliency indicates exactly where user attention locks within the first 50ms." }
-                            ].map((tip, i) => (
-                                <div key={i} style={{ border: '1.5px solid var(--color-border)', padding: '2rem', backgroundColor: 'var(--color-surface)', boxShadow: '5px 5px 0px rgba(0,0,0,0.02)' }}>
-                                    <div style={{ fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1rem' }}>HINT_0{i + 1}</div>
-                                    <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.75rem', fontFamily: 'var(--font-display)', margin: 0 }}>{tip.title}</h4>
-                                    <p style={{ fontSize: '0.85rem', opacity: 0.7, lineHeight: 1.5, marginBottom: 0 }}>{tip.desc}</p>
-                                </div>
-                            ))}
-                        </div>
+            {/* Visual Intelligence Feed - Always at bottom to fill layout */}
+            <div style={{ maxWidth: '1000px', margin: '8rem auto 0', padding: '0 2rem 4rem' }}>
+                <div style={{ borderTop: '4px solid var(--color-text)', paddingTop: '4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '3rem' }}>
+                        <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)', margin: 0 }}>STUDIO_INTELLIGENCE</h2>
+                        <span style={{ fontSize: '0.7rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>// NEURAL_HINTS</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                        {[
+                            { title: "RULE_OF_THIRDS", desc: "Positioning faces on grid intersections increases retention by 14%." },
+                            { title: "CONTRAST_META", desc: "A 50% contrast gap between subject and background creates instant depth." },
+                            { title: "GAZE_DIRECTION", desc: "Eye-tracking confirms viewers follow the subject's gaze into the content." },
+                            { title: "SALIENCY_MAPS", desc: "Neural saliency indicates exactly where user attention locks within the first 50ms." }
+                        ].map((tip, i) => (
+                            <div key={i} style={{ border: '1.5px solid var(--color-border)', padding: '2rem', backgroundColor: 'var(--color-surface)', boxShadow: '5px 5px 0px rgba(0,0,0,0.02)' }}>
+                                <div style={{ fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1rem' }}>HINT_0{i + 1}</div>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.75rem', fontFamily: 'var(--font-display)', margin: 0 }}>{tip.title}</h4>
+                                <p style={{ fontSize: '0.85rem', opacity: 0.7, lineHeight: 1.5, marginBottom: 0 }}>{tip.desc}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -892,38 +930,6 @@ const ThumbnailAnalyserPage = () => {
                     .print-only { display: none !important; }
                 }
             `}</style>
-
-            {/* Oracle Modal Overlay */}
-            {isOracleOpen && (
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    style={{
-                        position: 'fixed', inset: 0, zIndex: 2000,
-                        backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '2rem'
-                    }}
-                >
-                    <motion.div 
-                        initial={{ scale: 0.9, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        style={{
-                            width: '100%', maxWidth: '900px', height: '80vh',
-                            backgroundColor: 'black', border: '1px solid var(--color-accent)',
-                            position: 'relative', overflow: 'hidden',
-                            boxShadow: '0 0 50px rgba(57,255,20,0.1)'
-                        }}
-                    >
-                        <OracleCore 
-                            mode="standard" 
-                            context={`Thumbnail Analysis Results: ${JSON.stringify(analysis)}`}
-                            initialMessage="STRATEG_ORACLE_ACTIVE. Ask me anything about your thumbnail fixes."
-                            onClose={() => setIsOracleOpen(false)}
-                        />
-                    </motion.div>
-                </motion.div>
-            )}
         </main>
     );
 };

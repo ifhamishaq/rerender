@@ -15,6 +15,7 @@ import Marquee from './components/Marquee';
 import Cursor from './components/Cursor';
 import NoiseOverlay from './components/NoiseOverlay';
 import ScrollProgress from './components/ScrollProgress';
+import ErrorBoundary from './components/ErrorBoundary';
 import StickySidebar from './components/StickySidebar';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
@@ -293,9 +294,11 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

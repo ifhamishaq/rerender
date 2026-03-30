@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Copy, Check, Instagram, Twitter, Video } from 'lucide-react';
 
-import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 
 const RED = '#E8111A';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const FALLBACK_MODEL = 'nvidia/nemotron-4-340b-instruct:free';
+const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
@@ -87,30 +87,16 @@ CRITICAL RULES:
             }
 
             const raw = data.choices?.[0]?.message?.content || '';
-            
-            // Robust JSON extraction: look for json block first, then fallback to first/last brace
-            let cleanJson = '';
-            const mdMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-            if (mdMatch) {
-                cleanJson = mdMatch[1];
-            } else {
-                const jsonMatch = raw.match(/\{[\s\S]*\}/);
-                if (jsonMatch) cleanJson = jsonMatch[0];
-            }
+            const parsed = safeParseJSON(raw);
 
-            if (cleanJson) {
-                try {
-                    setCaptions(JSON.parse(cleanJson));
-                } catch (parseErr) {
-                    console.error('JSON Parse Error:', parseErr, 'Raw Content:', raw);
-                    throw new Error("INVALID_JSON_FORMAT");
-                }
+            if (parsed) {
+                setCaptions(parsed);
             } else {
                 throw new Error("NO_JSON_FOUND");
             }
         } catch (err) {
             console.error('Caption generation failed:', err);
-            const msg = err.message === "INVALID_JSON_FORMAT" 
+            const msg = err.message === "INVALID_JSON_FORMAT"
                 ? "AI_SYNTAX_ERROR: The model returned an invalid format. Retrying may help."
                 : "SYSTEM_OVERLOAD: AI nodes are currently congested. Please try again.";
             alert(msg);
