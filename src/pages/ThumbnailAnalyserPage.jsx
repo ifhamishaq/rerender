@@ -20,15 +20,35 @@ const ANALYSIS_PHASES = [
 const ThumbnailAnalyserPage = () => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [imageB, setImageB] = useState(null);
+    const [previewB, setPreviewB] = useState(null);
+    const [isCompareMode, setIsCompareMode] = useState(false);
+
     const [analysis, setAnalysis] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [currentPhase, setCurrentPhase] = useState(0);
     const [fakeProgress, setFakeProgress] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
     const [isThermal, setIsThermal] = useState(false);
-    
+
     const fileRef = useRef(null);
     const progressInterval = useRef(null);
+
+    // Sub-component for loading state to avoid duplication
+    const PhaseOverlay = ({ currentPhase, fakeProgress }) => (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)' }}>
+            <Cpu size={48} className="spin" style={{ color: 'var(--color-bg)' }} />
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-bg)', letterSpacing: '0.2em' }}>
+                {ANALYSIS_PHASES[currentPhase]}
+            </div>
+            <div style={{ width: '250px', height: '4px', backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative' }}>
+                <motion.div
+                    animate={{ width: `${fakeProgress}%` }}
+                    style={{ height: '100%', backgroundColor: 'var(--color-bg)', position: 'absolute', left: 0 }}
+                />
+            </div>
+        </div>
+    );
 
     // Sub-component for Thermal Visuals
     const ThermalOverlay = ({ heatmap, active }) => {
@@ -41,26 +61,31 @@ const ThumbnailAnalyserPage = () => {
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
                 </defs>
-                {heatmap.map((point, i) => (
-                    <motion.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: point.intensity || 0.8, scale: 1 }} transition={{ delay: i * 0.2 }}>
-                        <circle 
-                            cx={`${point.x}%`} 
-                            cy={`${point.y}%`} 
-                            r={40 + (point.intensity * 20)} 
-                            fill="url(#thermal-gradient)"
-                            filter="url(#thermal-glow)"
-                            style={{ opacity: 0.6 }}
-                        />
-                        <text 
-                            x={`${point.x}%`} 
-                            y={`${point.y - 5}%`} 
-                            textAnchor="middle" 
-                            style={{ fill: '#fff', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 900, textShadow: '0 0 10px #f00' }}
-                        >
-                            {point.label}
-                        </text>
-                    </motion.g>
-                ))}
+                {heatmap.map((point, i) => {
+                    const x = parseFloat(point.x) || 0;
+                    const y = parseFloat(point.y) || 0;
+                    const intensity = parseFloat(point.intensity) || 0.5;
+                    return (
+                        <motion.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: intensity, scale: 1 }} transition={{ delay: i * 0.2 }}>
+                            <circle
+                                cx={`${x}%`}
+                                cy={`${y}%`}
+                                r={40 + (intensity * 20)}
+                                fill="url(#thermal-gradient)"
+                                filter="url(#thermal-glow)"
+                                style={{ opacity: 0.6 }}
+                            />
+                            <text
+                                x={`${x}%`}
+                                y={`${y - 5}%`}
+                                textAnchor="middle"
+                                style={{ fill: '#fff', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 900, textShadow: '0 0 10px #f00' }}
+                            >
+                                {point.label}
+                            </text>
+                        </motion.g>
+                    );
+                })}
                 <linearGradient id="thermal-gradient" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor="#ff0000" />
                     <stop offset="50%" stopColor="#ffae00" />
@@ -115,15 +140,19 @@ const ThumbnailAnalyserPage = () => {
         }
     }, [isAnalyzing]);
 
-    const handleUpload = (e) => {
+    const handleUpload = (e, target = 'A') => {
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-            setImage(reader.result);
-            setPreview(reader.result);
+            if (target === 'A') {
+                setImage(reader.result);
+                setPreview(reader.result);
+            } else {
+                setImageB(reader.result);
+                setPreviewB(reader.result);
+            }
             setAnalysis(null);
-            setIsThermal(false);
             setIsThermal(false);
         };
         reader.readAsDataURL(file);
@@ -156,53 +185,41 @@ const ThumbnailAnalyserPage = () => {
         setIsThermal(false);
 
         try {
+            const systemPrompt = isCompareMode
+                ? `You are the Chief Creative Strategist at RE-RENDER. Comparison mode active.
+                Evaluate TWO thumbnails (Version A vs Version B). 
+                Pick a WINNER and explain the psychological gap.
+                OUTPUT JSON: {
+                    "winner": "A" or "B",
+                    "winningVerdict": "Short powerful sentence...",
+                    "ctrScoreA": 0-10, "ctrScoreB": 0-10,
+                    "predictedCTR_A": "1.2%", "predictedCTR_B": "2.4%",
+                    "gapAnalysis": "Why the winner is better...",
+                    ... [rest of standard fields for the winner]
+                }`
+                : `You are the Chief Creative Strategist at RE-RENDER Agency.
+                Perform a high-level creative audit of the provided thumbnail. 
+                Evaluate "Growth Viability" and target demographic profile.
+                OUTPUT JSON: standard fields (predictedCTR, metrics, palette, verdict, etc.)`;
+
             const analysisBody = {
                 model: 'nvidia/nemotron-nano-12b-v2-vl:free',
                 messages: [
                     {
                         role: 'system',
-                        content: `You are an elite YouTube Packaging Consultant and Visual Psychologist.
-Perform a brutal, high-stakes editorial audit of the provided thumbnail.
-
-STRICT CTR RULES:
-- Be extremely PESSIMISTIC. Most thumbnails get 1-3%. Only viral ones get >7%.
-- Never suggest impractical results like 20% or 30%.
-
-YOUR OUTPUT MUST BE A SINGLE JSON OBJECT WITH THESE FIELDS:
-{
-  "ctrScore": 0-10 (professional quality rating),
-  "predictedCTR": "string (e.g. 2.4%)",
-  "composition": "Short professional analysis of layout...",
-  "metrics": {
-    "faceDetails": 1-10, 
-    "contrast": 1-10, 
-    "saturation": 1-10, 
-    "textEmphasis": 1-10
-  },
-  "palette": ["#HEX1", "#HEX2", "#HEX3"],
-  "audience": {
-    "score": 0, 
-    "profile": "Detailed description of target viewer"
-  },
-  "heuristics": {
-    "hook": "Psychological trigger words/concept", 
-    "eyePath": "Visual flow description", 
-    "niche": "Specific content category"
-  },
-  "heatmap": [{"x": 0, "y": 0, "label": "Area name", "intensity": 0.5}],
-  "eyePathPoints": [{"x": 10, "y": 10}],
-  "colorPsychology": "Brief note on color choice impact",
-  "textReadability": "Note on typography clarity",
-  "improvements": ["FIX_1", "FIX_2"],
-  "verdict": "Final overall editorial recommendation"
-}
-STRICT_JSON_PROTOCOL: No comments, no extra text, strictly valid JSON. 
-CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate root fields.`
+                        content: systemPrompt + `
+                        STRICT_JSON_PROTOCOL: No comments, etc. 
+                        CRITICAL: Do not nest the 'audience' object inside 'metrics'.
+                        CRITICAL: 'colorPsychology' and 'improvements' MUST be non-empty.`
                     },
                     {
                         role: 'user',
-                        content: [
-                            { type: 'text', text: "Audit this thumbnail. Be strict and provide valid JSON." },
+                        content: isCompareMode ? [
+                            { type: 'text', text: "Battle Mode: Contrast these two assets. JSON output only." },
+                            { type: 'image_url', image_url: { url: image } },
+                            { type: 'image_url', image_url: { url: imageB } }
+                        ] : [
+                            { type: 'text', text: "Audit this thumbnail. JSON output only." },
                             { type: 'image_url', image_url: { url: image } }
                         ]
                     }
@@ -213,7 +230,7 @@ CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate 
             const response = await fetchOpenRouter(analysisBody, { title: 'RE-RENDER Single Audit' });
             const finalContent = response.choices?.[0]?.message?.content || '';
             const finalAnalysis = safeParseJSON(finalContent);
-            
+
             if (finalAnalysis) {
                 setFakeProgress(100);
                 setTimeout(() => {
@@ -226,14 +243,14 @@ CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate 
         } catch (err) {
             console.error('ANALYSIS_FAIL:', err);
             const isRateLimit = err.message.includes('429');
-            
+
             let userMsg = `ANALYSIS_FAIL: ${err.message}`;
             if (isRateLimit) {
                 userMsg = "SYSTEM_CONGESTION: Free neural nodes are at capacity. Please wait 30 seconds and retry.";
             } else if (err.message.includes('404') || err.message.includes('No endpoints')) {
                 userMsg = "MODEL_OFFLINE: The free multimodal endpoint is temporarily offline. Please try again later.";
             }
-            
+
             alert(userMsg);
             setIsAnalyzing(false);
         }
@@ -254,7 +271,7 @@ CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate 
                 <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>{value}/10</span>
             </div>
             <div style={{ height: '6px', backgroundColor: 'var(--color-surface)', position: 'relative', border: '1.5px solid var(--color-text)', padding: '1px' }}>
-                <motion.div 
+                <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(value / 10) * 100}%` }}
                     transition={{ duration: 1.2, delay, ease: [0.33, 1, 0.68, 1] }}
@@ -265,393 +282,475 @@ CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate 
     );
 
     return (
-        <main style={{ 
-            minHeight: '100vh', 
-            backgroundColor: 'var(--color-bg)', 
-            color: 'var(--color-text)', 
+        <main style={{
+            minHeight: '100vh',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
             paddingTop: 'var(--nav-height)',
             fontFamily: 'var(--font-sans)'
         }}>
             <div className="no-print" style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" className="no-print" style={{ 
-                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem', 
-                    color: 'var(--color-text)', textDecoration: 'none', 
+                <Link to="/tools" className="no-print" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                    color: 'var(--color-text)', textDecoration: 'none',
                     fontFamily: 'var(--font-mono)', fontSize: '0.65rem', marginBottom: '3rem',
                     border: '1px solid var(--color-border)', padding: '0.4rem 0.8rem'
                 }}>
                     <ArrowLeft size={14} /> BACK_TO_TOOLS
                 </Link>
 
-                <div className="no-print" style={{ 
-                    marginBottom: '4rem', 
-                    borderBottom: '4px solid var(--color-text)', 
-                    paddingBottom: '2rem' 
+                <div className="no-print" style={{
+                    marginBottom: '4rem',
+                    borderBottom: '4px solid var(--color-text)',
+                    paddingBottom: '2rem'
                 }}>
-                    <div style={{ 
-                        fontSize: '0.65rem', 
-                        fontFamily: 'var(--font-mono)', 
-                        color: 'var(--color-text-secondary)', 
-                        marginBottom: '1rem', 
-                        letterSpacing: '0.2em', 
-                        fontWeight: 900 
+                    <div style={{
+                        fontSize: '0.65rem',
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--color-text-secondary)',
+                        marginBottom: '1rem',
+                        letterSpacing: '0.2em',
+                        fontWeight: 900
                     }}>
                         VOL. 01 // CRITICAL_AUDIT // RE-RENDER_STUDIO
                     </div>
-                    <h1 style={{ 
-                        fontSize: 'clamp(2.5rem, 8vw, 4rem)', 
-                        fontWeight: 900, 
-                        fontFamily: 'var(--font-display)', 
-                        lineHeight: 0.9, 
-                        margin: 0 
+                    <h1 style={{
+                        fontSize: 'clamp(2.5rem, 8vw, 4rem)',
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-display)',
+                        lineHeight: 0.9,
+                        margin: 0
                     }}>
-                        THUMBNAIL<br />
-                        <span style={{ 
-                            fontFamily: 'Playfair Display', 
-                            fontStyle: 'italic', 
+                        NEURAL<br />
+                        <span style={{
+                            fontFamily: 'Playfair Display',
+                            fontStyle: 'italic',
                             fontWeight: 400,
                             color: 'var(--color-accent)'
-                        }}>AUDIT_UNIT</span>
+                        }}>{isCompareMode ? 'BATTLE_ENGINE' : 'AUDIT_UNIT'}</span>
                     </h1>
                 </div>
 
-                <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} />
-                
-                {!preview ? (
-                    <motion.div
-                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
-                        onClick={() => fileRef.current?.click()}
+                <div className="no-print" style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    marginBottom: '3rem',
+                    border: '1.5px solid var(--color-text)',
+                    padding: '0.5rem',
+                    width: 'fit-content',
+                    backgroundColor: 'var(--color-surface)'
+                }}>
+                    <button
+                        onClick={() => { setIsCompareMode(false); setAnalysis(null); }}
                         style={{
-                            border: '2px solid var(--color-text)', padding: '6rem 2rem',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem',
-                            cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
-                            boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
+                            padding: '0.6rem 1.25rem', border: 'none',
+                            backgroundColor: !isCompareMode ? 'var(--color-text)' : 'transparent',
+                            color: !isCompareMode ? 'var(--color-bg)' : 'var(--color-text)',
+                            fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer'
                         }}
                     >
-                        <Upload size={32} style={{ color: 'var(--color-text)' }} />
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>
-                            [ INSERT_ASSET_FOR_REVIEW ]
+                        SINGLE_AUDIT
+                    </button>
+                    <button
+                        onClick={() => { setIsCompareMode(true); setAnalysis(null); }}
+                        style={{
+                            padding: '0.6rem 1.25rem', border: 'none',
+                            backgroundColor: isCompareMode ? 'var(--color-text)' : 'transparent',
+                            color: isCompareMode ? 'var(--color-bg)' : 'var(--color-text)',
+                            fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer'
+                        }}
+                    >
+                        BATTLE_MODE ⚔️
+                    </button>
+                </div>
+
+                <input ref={fileRef} type="file" accept="image/*" onChange={(e) => handleUpload(e, 'A')} style={{ display: 'none' }} />
+                <input id="fileB" type="file" accept="image/*" onChange={(e) => handleUpload(e, 'B')} style={{ display: 'none' }} />
+
+                {!preview ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isCompareMode ? '1fr 1fr' : '1fr', gap: '2rem' }}>
+                            <motion.div
+                                whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
+                                onClick={() => fileRef.current?.click()}
+                                style={{
+                                    border: '2px solid var(--color-text)', padding: '6rem 2rem',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem',
+                                    cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
+                                    backgroundColor: 'var(--color-surface)',
+                                    boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <Upload size={32} />
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>[ UPLOAD_ASSET_A ]</div>
+                            </motion.div>
+
+                            {isCompareMode && (
+                                <motion.div
+                                    whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
+                                    onClick={() => document.getElementById('fileB')?.click()}
+                                    style={{
+                                        border: '2px solid var(--color-text)', padding: '6rem 2rem',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem',
+                                        cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
+                                        backgroundColor: 'var(--color-surface)',
+                                        boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    <Upload size={32} />
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>[ UPLOAD_ASSET_B ]</div>
+                                </motion.div>
+                            )}
                         </div>
-                    </motion.div>
+                    </div>
                 ) : (
-                    <div>
-                        <div style={{ display: 'grid', gridTemplateColumns: isAnalyzing ? '1fr' : '1.5fr 1fr', gap: '4rem', marginBottom: '4rem' }}>
-                            <div style={{ 
-                                border: '2px solid var(--color-text)', 
-                                overflow: 'hidden', 
-                                backgroundColor: '#000', 
-                                display: 'flex', 
-                                alignItems: 'center', 
+                    <>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: isCompareMode && preview && previewB ? '1fr auto 1fr' : (isCompareMode ? '1fr 1fr' : '1fr'),
+                            gap: '2rem',
+                            alignItems: 'center',
+                            marginBottom: '4rem'
+                        }}>
+                            <div style={{
+                                border: '2px solid var(--color-text)',
+                                overflow: 'hidden',
+                                backgroundColor: '#000',
+                                display: 'flex',
+                                alignItems: 'center',
                                 position: 'relative',
                                 boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
                             }}>
-                                <img 
-                                    src={preview} 
-                                    alt="Thumbnail preview" 
-                                    style={{ 
-                                        width: '100%', 
-                                        display: 'block', 
-                                        opacity: isAnalyzing ? 0.2 : 1, 
+                                <img
+                                    src={preview}
+                                    alt="Preview A"
+                                    style={{
+                                        width: '100%',
+                                        display: 'block',
+                                        opacity: isAnalyzing ? 0.2 : 1,
                                         transition: 'all 0.8s ease'
-                                    }} 
+                                    }}
                                 />
-                                
                                 <ThermalOverlay heatmap={analysis?.heatmap} active={isThermal && !isAnalyzing} />
-
-                                {isAnalyzing && (
-                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', zIndex: 10 }}>
-                                        <Cpu size={48} className="spin" style={{ color: 'var(--color-bg)' }} />
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-bg)', letterSpacing: '0.2em' }}>
-                                            {ANALYSIS_PHASES[currentPhase]}
-                                        </div>
-                                        <div style={{ width: '250px', height: '4px', backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative' }}>
-                                            <motion.div 
-                                                animate={{ width: `${fakeProgress}%` }}
-                                                style={{ height: '100%', backgroundColor: 'var(--color-bg)', position: 'absolute', left: 0 }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
+                                {isAnalyzing && <PhaseOverlay currentPhase={currentPhase} fakeProgress={fakeProgress} />}
                             </div>
-                            
-                            {!isAnalyzing && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    {analysis && (
-                                        <button 
-                                            onClick={() => setIsThermal(!isThermal)}
+
+                            {isCompareMode && preview && previewB && (
+                                <div style={{
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '2rem',
+                                    fontWeight: 900,
+                                    color: 'var(--color-accent)',
+                                    fontStyle: 'italic'
+                                }}>VS</div>
+                            )}
+
+                            {isCompareMode && (
+                                <div style={{
+                                    border: '2px solid var(--color-text)',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#000',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
+                                }}>
+                                    {previewB ? (
+                                        <img
+                                            src={previewB}
+                                            alt="Preview B"
                                             style={{
-                                                padding: '1rem',
-                                                backgroundColor: isThermal ? 'var(--color-text)' : 'transparent',
-                                                color: isThermal ? 'var(--color-bg)' : 'var(--color-text)',
-                                                border: '2px solid var(--color-text)',
-                                                fontFamily: 'var(--font-mono)',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 900,
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '0.75rem'
+                                                width: '100%',
+                                                display: 'block',
+                                                opacity: isAnalyzing ? 0.2 : 1,
+                                                transition: 'all 0.8s ease'
                                             }}
-                                        >
-                                            <Zap size={16} fill={isThermal ? 'currentColor' : 'none'} />
-                                            {isThermal ? 'DISABLE_HEAT_GRID' : 'ACTIVATE_HEAT_GRID'}
-                                        </button>
+                                        />
+                                    ) : (
+                                        <div
+                                            onClick={() => document.getElementById('fileB')?.click()}
+                                            style={{ height: '300px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
+                                            [ INSERT_B ]
+                                        </div>
                                     )}
-
-                                    <button onClick={handleAnalyze} disabled={isAnalyzing} style={{
-                                        padding: '1.5rem', backgroundColor: 'var(--color-text)',
-                                        color: 'var(--color-bg)', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
-                                        fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem'
-                                    }}>
-                                        <Eye size={20} /> RUN_EDITORIAL_AUDIT
-                                    </button>
-                                    
-                                    <button onClick={() => { setPreview(null); setImage(null); setAnalysis(null); }} style={{
-                                        padding: '1rem', backgroundColor: 'transparent', color: 'var(--color-text-secondary)',
-                                        border: '1px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', cursor: 'pointer',
-                                        opacity: 0.6
-                                    }}>
-                                        REPLACE_ASSET
-                                    </button>
-
-                                    {analysis && (
-                                        <motion.div 
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            style={{ marginTop: 'auto', border: '2.5px solid var(--color-text)', padding: '2rem', backgroundColor: 'var(--color-surface)' }}
-                                        >
-                                            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>PREDICTED_CTR_ESTIMATE</div>
-                                            <div style={{ fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'baseline', gap: '0.25rem', lineHeight: 1 }}>
-                                                {analysis.predictedCTR || '0.0%'}
-                                            </div>
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
-                                                VERDICT: {analysis.ctrScore > 7 ? 'ELITE_DIRECTOR_CUT' : 'CONVERSION_LOCKED'}
-                                            </div>
-                                        </motion.div>
-                                    )}
+                                    {isAnalyzing && <PhaseOverlay currentPhase={currentPhase} fakeProgress={fakeProgress} />}
                                 </div>
                             )}
                         </div>
 
+                        {!isAnalyzing && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {analysis && (
+                                    <button
+                                        onClick={() => setIsThermal(!isThermal)}
+                                        style={{
+                                            padding: '1rem',
+                                            backgroundColor: isThermal ? 'var(--color-text)' : 'transparent',
+                                            color: isThermal ? 'var(--color-bg)' : 'var(--color-text)',
+                                            border: '2px solid var(--color-text)',
+                                            fontFamily: 'var(--font-mono)',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 900,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.75rem'
+                                        }}
+                                    >
+                                        <Zap size={16} fill={isThermal ? 'currentColor' : 'none'} />
+                                        {isThermal ? 'DISABLE_HEAT_GRID' : 'ACTIVATE_HEAT_GRID'}
+                                    </button>
+                                )}
+
+                                <button onClick={handleAnalyze} disabled={isAnalyzing} style={{
+                                    padding: '1.5rem', backgroundColor: 'var(--color-text)',
+                                    color: 'var(--color-bg)', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
+                                    fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem'
+                                }}>
+                                    <Eye size={20} /> RUN_EDITORIAL_AUDIT
+                                </button>
+
+                                <button onClick={() => { setPreview(null); setImage(null); setAnalysis(null); }} style={{
+                                    padding: '1rem', backgroundColor: 'transparent', color: 'var(--color-text-secondary)',
+                                    border: '1px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', cursor: 'pointer',
+                                    opacity: 0.6
+                                }}>
+                                    REPLACE_ASSET
+                                </button>
+
+                                {analysis && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        style={{
+                                            marginTop: 'auto',
+                                            border: '2.5px solid var(--color-text)',
+                                            padding: '2rem',
+                                            backgroundColor: 'var(--color-surface)',
+                                            boxShadow: '10px 10px 0px var(--color-accent)',
+                                            position: 'relative',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        {isCompareMode && (
+                                            <div style={{
+                                                position: 'absolute', top: 0, right: 0,
+                                                backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)',
+                                                padding: '0.4rem 1rem', fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)'
+                                            }}> BATTLE_RESULT </div>
+                                        )}
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                                            {isCompareMode ? 'WINNER_VERSION' : 'STRATEGIC_PERFORMANCE_VALUE'}
+                                        </div>
+                                        <div style={{ fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'baseline', gap: '0.25rem', lineHeight: 1, color: 'var(--color-text)' }}>
+                                            {isCompareMode ? analysis.winner : (analysis.predictedCTR || '0.0%')}
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', marginTop: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
+                                            VERDICT: {isCompareMode ? analysis.winningVerdict : (analysis.ctrScore > 7 ? 'DESIGN_VIABILITY_CONFIRMED' : 'ITERATION_REQUIRED')}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
+                        )}
+
                         {analysis && (
                             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                        {/* Deep Metrics Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
-                                    <BarChart3 size={20} style={{ color: 'var(--color-text)' }} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>VISUAL_VECTORS</span>
-                                </div>
-                                <MetricBar label="HUMAN_INTEREST" value={(typeof analysis.metrics?.faceDetails === 'number' ? analysis.metrics.faceDetails : 0)} delay={0.3} />
-                                <MetricBar label="CONTRAST_VALUE" value={(typeof analysis.metrics?.contrast === 'number' ? analysis.metrics.contrast : 0)} delay={0.4} />
-                                <MetricBar label="VIBRANCY_INDEX" value={(typeof analysis.metrics?.saturation === 'number' ? analysis.metrics.saturation : 0)} delay={0.5} />
-                                <MetricBar label="TYPO_HIERARCHY" value={(typeof analysis.metrics?.textEmphasis === 'number' ? analysis.metrics.textEmphasis : 0)} delay={0.6} />
-                            </div>
-
-                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
-                                    <Eye size={20} style={{ color: 'var(--color-text)' }} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>EDITORIAL_MAP</span>
-                                </div>
-                                <div style={{ marginBottom: '2rem' }}>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>HOOK_STRATEGY</div>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.heuristics?.hook}</div>
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>EYE_TRACKING</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.heuristics?.eyePath}</div>
-                                </div>
-                            </div>
-
-                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
-                                    <Zap size={20} style={{ color: 'var(--color-text)' }} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>DIRECTOR_FIXES</span>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    {analysis.improvements?.map((imp, i) => (
-                                        <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontSize: '0.7rem', fontWeight: 900 }}>{String(i + 1).padStart(2, '0')}</span>
-                                            <span style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.4, fontWeight: 500 }}>{imp}</span>
+                                {/* Deep Metrics Grid */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
+                                            <BarChart3 size={20} style={{ color: 'var(--color-text)' }} />
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>VISUAL_VECTORS</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ border: '2px solid var(--color-text)', padding: '3rem', marginBottom: '4rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'center' }}>
-                                <div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>READER_FIT</div>
-                                    <div style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-display)' }}>{analysis.audience?.score}%</div>
-                                </div>
-                                <div style={{ borderLeft: '2px solid var(--color-text)', paddingLeft: '4rem' }}>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>TARGET_DEMOGRAPHIC_PROFILE</div>
-                                    <div style={{ fontSize: '1.25rem', color: 'var(--color-text)', lineHeight: 1.5, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.audience?.profile}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
-                            <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
-                                <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COMPOSITION_NOTES</div>
-                                <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.composition}</div>
-                            </div>
-                            <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
-                                <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COLOR_PSYCHOLOGY</div>
-                                <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.colorPsychology}</div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-
-                            <motion.button 
-                                whileHover={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}
-                                onClick={handleExport} 
-                                style={{
-                                    padding: '1.5rem 2.5rem', backgroundColor: 'transparent', color: 'var(--color-text)',
-                                    border: '2px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
-                                    fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <Download size={22} /> [ GENERATE_AUDIT_REPORT ]
-                            </motion.button>
-                        </div>
-                            </motion.div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Print Friendly Template */}
-            <div id="print-area" className="print-only" style={{ padding: '4rem', backgroundColor: '#F8F6F1', color: '#000', minHeight: '100vh', fontFamily: 'var(--font-sans)', position: 'relative' }}>
-                {/* Background Watermark */}
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '15rem', fontWeight: 900, color: 'rgba(0,0,0,0.03)', pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 0, fontFamily: 'var(--font-display)' }}>
-                    RE-RENDER
-                </div>
-
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '8px solid #000', paddingBottom: '2.5rem', marginBottom: '4rem' }}>
-                        <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '0.5rem', color: '#E8111A' }}>VOL. 01 // CRITICAL_SYSTEMS_AUDIT</div>
-                            <h1 style={{ fontSize: '5rem', fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 0.8, letterSpacing: '-0.05em' }}>
-                                THUMBNAIL<br/>
-                                <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>AUDIT_REPORT</span>
-                            </h1>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1rem', fontWeight: 900, border: '4px solid #000', padding: '0.5rem 1rem', display: 'inline-block', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
-                                {analysis?.ctrScore > 20 ? 'CERTIFIED_HIGH_REACH' : 'REVISION_STRATEGY'}
-                            </div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.6 }}>ISSUED: {new Date().toLocaleDateString()}</div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.6 }}>SCAN_ID: RR-{Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
-                        </div>
-                    </div>
-
-                    {preview && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', marginBottom: '5rem' }}>
-                            <div style={{ border: '4px solid #000', padding: '0.5rem', backgroundColor: '#fff' }}>
-                                <img src={preview} alt="Thumbnail" style={{ width: '100%', height: '420px', objectFit: 'cover' }} />
-                                <div style={{ padding: '1.5rem', borderTop: '2px solid #000', backgroundColor: '#F8F6F1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900 }}>ASSET_PREVIEW_V2.0</div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        {analysis?.palette?.map((color, i) => (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <div style={{ width: '12px', height: '12px', backgroundColor: color, border: '1px solid #000' }} />
-                                                <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)' }}>{color}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <div style={{ border: '2px solid #000', padding: '2.5rem', backgroundColor: '#fff' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>NEURAL_HOOK_STRATEGY</div>
-                                    <h3 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'Playfair Display', fontStyle: 'italic', margin: 0, lineHeight: 1.1 }}>
-                                        "{analysis?.heuristics?.hook || 'NEURAL_PATTERN'}"
-                                    </h3>
-                                    <p style={{ fontSize: '0.95rem', color: '#444', marginTop: '1rem', lineHeight: 1.5 }}>
-                                        Targeting: {analysis?.heuristics?.niche}
-                                    </p>
-                                </div>
-                                <div style={{ border: '2px solid #000', padding: '2.5rem', backgroundColor: '#fff' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>AUDIENCE_READER_FIT</div>
-                                    <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis?.audience?.score || 0}%</div>
-                                    <p style={{ fontSize: '0.9rem', color: '#444', marginTop: '0.5rem', lineHeight: 1.4 }}>
-                                        {analysis?.audience?.profile}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {analysis && (
-                        <>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '5rem', marginBottom: '5rem' }}>
-                                <div>
-                                    <div style={{ marginBottom: '4rem' }}>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '1.5rem', fontFamily: 'var(--font-mono)', borderBottom: '4px solid #000', paddingBottom: '0.5rem' }}>RETENTION_ESTIMATE</div>
-                                        <div style={{ fontSize: '8rem', fontWeight: 900, lineHeight: 0.8, fontFamily: 'var(--font-display)', marginBottom: '1rem' }}>{analysis.predictedCTR || '0.0%'}</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: '#E8111A' }}>PROJECTED_CONVERSION_RATE</div>
+                                        <MetricBar label="HUMAN_INTEREST" value={(typeof analysis.metrics?.faceDetails === 'number' ? analysis.metrics.faceDetails : 0)} delay={0.3} />
+                                        <MetricBar label="CONTRAST_VALUE" value={(typeof analysis.metrics?.contrast === 'number' ? analysis.metrics.contrast : 0)} delay={0.4} />
+                                        <MetricBar label="VIBRANCY_INDEX" value={(typeof analysis.metrics?.saturation === 'number' ? analysis.metrics.saturation : 0)} delay={0.5} />
+                                        <MetricBar label="TYPO_HIERARCHY" value={(typeof analysis.metrics?.textEmphasis === 'number' ? analysis.metrics.textEmphasis : 0)} delay={0.6} />
                                     </div>
 
-                                    <div>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '2rem', fontFamily: 'var(--font-mono)', borderBottom: '4px solid #000', paddingBottom: '0.5rem' }}>EDITORIAL_METRICS</div>
-                                        {Object.entries(analysis.metrics || {}).map(([key, val]) => (
-                                            typeof val === 'number' && (
-                                                <div key={key} style={{ marginBottom: '1.5rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 900, marginBottom: '0.6rem', fontFamily: 'var(--font-mono)' }}>
-                                                        <span>{key.toUpperCase().replace(/([A-Z])/g, '_$1')}</span>
-                                                        <span>{val}/10</span>
-                                                    </div>
-                                                    <div style={{ height: '8px', backgroundColor: '#eee', border: '1.5px solid #000', padding: '1px' }}>
-                                                        <div style={{ height: '100%', width: `${val * 10}%`, backgroundColor: '#000' }} />
-                                                    </div>
-                                                </div>
-                                            )
-                                        ))}
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
+                                            <Eye size={20} style={{ color: 'var(--color-text)' }} />
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>EDITORIAL_MAP</span>
+                                        </div>
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>HOOK_STRATEGY</div>
+                                            <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.heuristics?.hook}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>EYE_TRACKING</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.heuristics?.eyePath}</div>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <div style={{ marginBottom: '4rem' }}>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '1.5rem', fontFamily: 'var(--font-mono)', borderBottom: '4px solid #000', paddingBottom: '0.5rem' }}>TECHNICAL_CORRECTIONS</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '1.5px solid var(--color-text)', paddingBottom: '1rem' }}>
+                                            <Zap size={20} style={{ color: 'var(--color-text)' }} />
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>DIRECTOR_FIXES</span>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                             {analysis.improvements?.map((imp, i) => (
-                                                <div key={i} style={{ borderLeft: '6px solid #000', paddingLeft: '2rem', fontSize: '1.2rem', lineHeight: 1.4, fontWeight: 500 }}>
-                                                    <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '0.4rem', opacity: 0.5 }}>ISSUE_{i+1}</div>
-                                                    {imp}
+                                                <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontSize: '0.7rem', fontWeight: 900 }}>{String(i + 1).padStart(2, '0')}</span>
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text)', lineHeight: 1.4, fontWeight: 500 }}>{imp}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div style={{ border: '4px solid #000', padding: '3.5rem', backgroundColor: '#fff', position: 'relative', boxShadow: '15px 15px 0px rgba(0,0,0,0.05)' }}>
-                                        <div style={{ position: 'absolute', top: '-1rem', left: '2rem', backgroundColor: '#000', color: '#fff', padding: '0.3rem 1.25rem', fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>DIRECTOR_VERDICT</div>
-                                        <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.4, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>"{analysis.verdict}"</div>
+                                <div style={{ border: '2px solid var(--color-text)', padding: '3rem', marginBottom: '4rem', boxShadow: '10px 10px 0px rgba(0,0,0,0.05)' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'center' }}>
+                                        <div>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>READER_FIT</div>
+                                            <div style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, fontFamily: 'var(--font-display)' }}>{analysis.audience?.score}%</div>
+                                        </div>
+                                        <div style={{ borderLeft: '2px solid var(--color-text)', paddingLeft: '4rem' }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>TARGET_DEMOGRAPHIC_PROFILE</div>
+                                            <div style={{ fontSize: '1.25rem', color: 'var(--color-text)', lineHeight: 1.5, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>{analysis.audience?.profile}</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </>
-                    )}
 
-                    <div style={{ borderTop: '4px solid #000', paddingTop: '4rem', marginTop: '4rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem' }}>
-                            <div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1.5rem', color: '#666' }}>COMPOSITION_BALANCE_REPORT</div>
-                                <p style={{ fontSize: '1rem', lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{analysis?.composition}</p>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1.5rem', color: '#666' }}>COLOR_PSYCHOLOGY_STRATEGY</div>
-                                <p style={{ fontSize: '1rem', lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{analysis?.colorPsychology}</p>
-                            </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
+                                    <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COMPOSITION_NOTES</div>
+                                        <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.composition || 'STABLE_STRUCTURE'}</div>
+                                    </div>
+                                    <div style={{ borderLeft: '4px solid var(--color-text)', paddingLeft: '2rem' }}>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.1em' }}>COLOR_PSYCHOLOGY</div>
+                                        <div style={{ fontSize: '0.95rem', color: 'var(--color-text)', lineHeight: 1.6 }}>{analysis.colorPsychology || 'NEUTRAL_PALETTE_INFLUENCE'}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+                                    <motion.button
+                                        whileHover={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}
+                                        onClick={handleExport}
+                                        style={{
+                                            padding: '1.5rem 2.5rem', backgroundColor: 'transparent', color: 'var(--color-text)',
+                                            border: '2px solid var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem',
+                                            fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1.25rem',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Download size={22} /> [ GENERATE_AUDIT_REPORT ]
+                                    </motion.button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </>
+                )}
+
+                {/* Visual Intelligence Feed - Always at bottom to fill layout */}
+                <div style={{ maxWidth: '1000px', margin: '8rem auto 0', padding: '0 2rem 4rem' }}>
+                    <div style={{ borderTop: '4px solid var(--color-text)', paddingTop: '4rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '3rem' }}>
+                            <h2 style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)', margin: 0 }}>STUDIO_INTELLIGENCE</h2>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>// NEURAL_HINTS</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                            {[
+                                { title: "RULE_OF_THIRDS", desc: "Positioning faces on grid intersections increases retention by 14%." },
+                                { title: "CONTRAST_META", desc: "A 50% contrast gap between subject and background creates instant depth." },
+                                { title: "GAZE_DIRECTION", desc: "Eye-tracking confirms viewers follow the subject's gaze into the content." },
+                                { title: "SALIENCY_MAPS", desc: "Neural saliency indicates exactly where user attention locks within the first 50ms." }
+                            ].map((tip, i) => (
+                                <div key={i} style={{ border: '1.5px solid var(--color-border)', padding: '2rem', backgroundColor: 'var(--color-surface)', boxShadow: '5px 5px 0px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ fontSize: '0.6rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1rem' }}>HINT_0{i + 1}</div>
+                                    <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.75rem', fontFamily: 'var(--font-display)', margin: 0 }}>{tip.title}</h4>
+                                    <p style={{ fontSize: '0.85rem', opacity: 0.7, lineHeight: 1.5, marginBottom: 0 }}>{tip.desc}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div style={{ marginTop: 'auto', paddingTop: '4rem', borderTop: '1px solid rgba(0,0,0,0.1)', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', fontFamily: 'var(--font-mono)', letterSpacing: '0.3rem', opacity: 0.3 }}>
-                    RE-RENDER_LAB // NEURAL_ASSET_AUDIT // V2.0 // CONFIDENTIAL
+            {/* Print Friendly Template - Re-Packaged to avoid half-cut content */}
+            <div id="print-area" className="print-only" style={{ padding: '4rem', backgroundColor: '#F8F6F1', color: '#000', minHeight: '100vh', fontFamily: 'var(--font-sans)', position: 'relative' }}>
+                <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto' }}>
+                    <div style={{ borderBottom: '8px solid #000', paddingBottom: '2.5rem', marginBottom: '4rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '0.5rem', color: '#E8111A' }}>VOL. 02 // CREATIVE_STRATEGY_AUDIT</div>
+                                <h1 style={{ fontSize: '4.5rem', fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 0.8, letterSpacing: '-0.05em' }}>
+                                    THUMBNAIL<br />
+                                    <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>STRATEGIST</span>
+                                </h1>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.6 }}>ISSUED: {new Date().toLocaleDateString()}</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.6 }}>AUDIT_CODE: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ pageBreakInside: 'avoid', marginBottom: '4rem' }}>
+                        <div style={{ border: '4px solid #000', padding: '0.5rem', backgroundColor: '#fff', marginBottom: '2rem' }}>
+                            <img src={preview} alt="Thumbnail" style={{ width: '100%', height: 'auto', maxHeight: '450px', objectFit: 'contain' }} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '1rem' }}>
+                            <div style={{ fontSize: '1rem', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>PERFORMANCE_SCORE: {analysis?.predictedCTR || 'N/A'}</div>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                {analysis?.palette?.map((color, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '12px', height: '12px', backgroundColor: color, border: '1px solid #000' }} />
+                                        <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)' }}>{color}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', pageBreakInside: 'avoid', marginBottom: '4rem' }}>
+                        <div style={{ border: '2px solid #000', padding: '2rem', backgroundColor: '#fff' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1.5px solid #000', paddingBottom: '0.5rem' }}>NEURAL_HOOK</div>
+                            <h3 style={{ fontSize: '1.75rem', fontWeight: 900, fontFamily: 'Playfair Display', fontStyle: 'italic', margin: 0, lineHeight: 1.1 }}>
+                                "{analysis?.heuristics?.hook || 'N/A'}"
+                            </h3>
+                        </div>
+                        <div style={{ border: '2px solid #000', padding: '2rem', backgroundColor: '#fff' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1.5px solid #000', paddingBottom: '0.5rem' }}>READER_DATA</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis?.audience?.score || 0}%</div>
+                            <p style={{ fontSize: '0.8rem', color: '#444', marginTop: '0.5rem', lineHeight: 1.4, margin: 0 }}>
+                                {analysis?.audience?.profile}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style={{ pageBreakInside: 'avoid', marginBottom: '4rem' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 900, marginBottom: '1.5rem', fontFamily: 'var(--font-mono)', borderBottom: '4px solid #000', paddingBottom: '0.5rem' }}>STRATEGIC_FIXES</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                            {analysis?.improvements?.map((imp, i) => (
+                                <div key={i} style={{ borderLeft: '4px solid #000', paddingLeft: '1.5rem', fontSize: '0.95rem', lineHeight: 1.4, fontWeight: 500 }}>
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '0.3rem', opacity: 0.5 }}>STRATEGY_{i + 1}</div>
+                                    {imp}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ pageBreakInside: 'avoid', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1.5rem', color: '#666' }}>COMPOSITION_ANALYSIS</div>
+                            <p style={{ fontSize: '0.95rem', lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{analysis?.composition || 'BALANCED'}</p>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1.5rem', color: '#666' }}>COLOR_PSYCHOLOGY</div>
+                            <p style={{ fontSize: '0.95rem', lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{analysis?.colorPsychology || 'STRATEGIC'}</p>
+                        </div>
+                    </div>
+
+                    <div style={{ pageBreakInside: 'avoid', border: '4px solid #000', padding: '2.5rem', backgroundColor: '#fff', marginBottom: '4rem' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1.5rem', color: '#666' }}>DIRECTOR_VERDICT</div>
+                        <p style={{ fontSize: '1rem', lineHeight: 1.6, margin: 0, fontWeight: 700, fontFamily: 'Playfair Display', fontStyle: 'italic' }}>"{analysis?.verdict || 'CONFIRMED'}"</p>
+                    </div>
+
+                    <div style={{ marginTop: 'auto', paddingTop: '4rem', borderTop: '2px solid rgba(0,0,0,0.1)', fontSize: '0.7rem', fontWeight: 900, textAlign: 'center', fontFamily: 'var(--font-mono)', letterSpacing: '0.3rem', opacity: 0.3 }}>
+                        RE-RENDER_STRATEGY // ASSISTED_BY_NEURAL_NODES // CONFIDENTIAL
+                    </div>
                 </div>
             </div>
 
@@ -682,11 +781,20 @@ CRITICAL: Do not nest the 'audience' object inside 'metrics'. They are separate 
                     }
                     
                     @page { 
-                        margin: 1.5cm; 
+                        margin: 1.25cm; 
                         size: portrait;
                     }
 
                     main { padding-top: 0 !important; }
+
+                    /* Fix for cut content */
+                    #print-area * {
+                        page-break-inside: auto;
+                    }
+                    #print-area > div > div {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
                 }
                 
                 @media screen {

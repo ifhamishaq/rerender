@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Copy, Check, Instagram, Twitter, Video } from 'lucide-react';
 
-import { fetchOpenRouter } from '../utils/ai';
+import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 
 const RED = '#E8111A';
