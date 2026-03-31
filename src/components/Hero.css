@@ -1,4 +1,4 @@
-/* Hero — Street-Style, Asymmetric */
+/* Hero — Cinematic Mind-Hack */
 .hero {
     position: relative;
     height: 100vh;
@@ -11,6 +11,20 @@
     background-color: var(--color-bg);
     will-change: transform;
 }
+
+/* Cinematic letterbox bars */
+.hero-letterbox {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4vh;
+    background: #000;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.hero-letterbox-top { top: 0; }
+.hero-letterbox-bottom { bottom: 0; }
 
 /* Background Marquee */
 .hero-marquee-container {
@@ -42,20 +56,55 @@
     100% { transform: translateX(-50%); }
 }
 
+/* GIF/Video background */
+.hero-bg-media {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero-bg-media img,
+.hero-bg-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
+}
+
+body:not(.dark-mode) .hero-bg-media {
+    opacity: 0.3;
+}
+
+body.dark-mode .hero-bg-media {
+    opacity: 0.4;
+}
+
 /* Content */
 .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
-    pointer-events: auto; /* Ensure content is clickable over 3D canvas */
+    max-width: 850px;
+    pointer-events: auto;
 }
 
 /* Editorial Header Meta */
 .hero-editorial-meta {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
     margin-bottom: 40px;
+    flex-wrap: wrap;
 }
 
 .mono-label {
@@ -72,6 +121,7 @@
     background: var(--color-border);
 }
 
+/* Title styles */
 .hero-title.editorial {
     display: flex;
     flex-direction: column;
@@ -79,34 +129,46 @@
     margin-bottom: 40px;
 }
 
-.hero-title .sans-bold {
-    font-size: clamp(2.5rem, 10vw, 9rem);
+.hero-title-line-1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 10vw, 6rem);
     font-weight: 950;
-    line-height: 0.85;
-    letter-spacing: -0.05em;
-    display: block;
-}
-
-.hero-title .serif-italic {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3.2rem, 15vw, 11rem);
-    font-style: italic;
-    font-weight: 400;
-    line-height: 0.8;
-    color: var(--color-text);
-    margin-left: 0%;
-}
-
-.hero-title .sans-outline {
-    font-size: clamp(2.8rem, 14vw, 10rem);
-    font-weight: 950;
-    line-height: 1;
+    line-height: 0.95;
     letter-spacing: -0.04em;
-    color: transparent;
-    -webkit-text-stroke: 1.5px var(--color-text);
-    margin-top: -1%;
-    margin-left: 5%;
-    will-change: transform, opacity;
+    display: block;
+    color: var(--color-text);
+}
+
+.hero-title-rotating-wrap {
+    display: block;
+    position: relative;
+    min-height: clamp(4rem, 15vw, 10rem);
+    overflow: visible;
+}
+
+.hero-rotating-word {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 12vw, 8rem);
+    font-style: italic;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-accent);
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-shadow: 0 0 60px rgba(57, 255, 20, 0.15);
+}
+
+body:not(.dark-mode) .hero-rotating-word {
+    text-shadow: none;
+}
+
+/* CTA Group */
+.hero-cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .hero-cta.editorial-cta {
@@ -125,7 +187,7 @@
     font-size: 0.9rem;
     color: var(--color-text-secondary);
     line-height: 1.8;
-    max-width: 450px;
+    max-width: 500px;
 }
 
 .hero-cta {
@@ -138,12 +200,28 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-bg);
-    /* Contrast boost */
     background: var(--color-accent);
     padding: 18px 44px;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.hero-cta:hover::before {
+    left: 100%;
 }
 
 .hero-cta:hover {
@@ -173,12 +251,8 @@
     z-index: 99;
     pointer-events: none;
 }
-.shutter-top {
-    top: 0;
-}
-.shutter-bottom {
-    bottom: 0;
-}
+.shutter-top { top: 0; }
+.shutter-bottom { bottom: 0; }
 
 /* Stats */
 .hero-stats {
@@ -222,7 +296,7 @@
     position: absolute;
     bottom: 40px;
     right: 5%;
-    z-index: 2;
+    z-index: 11;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -237,35 +311,35 @@
 }
 
 @keyframes scrollPulse {
-    0%,
-    100% {
-        opacity: 0.2;
-        transform: scaleY(0.5);
-    }
-    50% {
-        opacity: 1;
-        transform: scaleY(1);
-    }
+    0%, 100% { opacity: 0.2; transform: scaleY(0.5); }
+    50% { opacity: 1; transform: scaleY(1); }
 }
+
+/* === RESPONSIVE === */
 
 @media (max-width: 1024px) {
     .hero-marquee-container {
         font-size: 10vw;
     }
+    .hero-letterbox { height: 2vh; }
 }
 
 @media (max-width: 768px) {
-    .hero-editorial-meta {
-        margin-bottom: 24px;
-        gap: 12px;
-    }
-    
-    .line-sep {
-        width: 30px;
+    .hero {
+        padding: 0 5%;
     }
 
-    .hero-title .serif-italic {
-        margin-left: 5%;
+    .hero-editorial-meta {
+        margin-bottom: 24px;
+        gap: 10px;
+    }
+
+    .hero-editorial-meta .line-sep {
+        width: 20px;
+    }
+
+    .hero-title-rotating-wrap {
+        min-height: clamp(2.5rem, 10vw, 5rem);
     }
 
     .vertical-line {
@@ -275,19 +349,13 @@
     .hero-stats {
         gap: 32px;
         flex-wrap: wrap;
-        bottom: 100px;
-        left: 5%;
-        right: 5%;
     }
 
     .hero-stat-number {
         font-size: 1.8rem;
     }
 
-    .hero-services-peek {
-        grid-template-columns: repeat(2, 1fr) !important;
-        margin-top: 2rem !important;
-    }
+    .hero-letterbox { height: 1.5vh; }
 }
 
 /* Services Peek Styles */
@@ -320,4 +388,3 @@
     transform: translateY(-2px);
     color: var(--color-accent) !important;
 }
-

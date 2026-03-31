@@ -1,27 +1,63 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 import Hero from '../components/Hero';
 import Marquee from '../components/Marquee';
 import PinterestWorkGrid from '../components/PinterestWorkGrid';
 import { Link } from 'react-router-dom';
-import FadeUp from '../components/Animations/FadeUp';
-import products from '../data/products.json';
 import { useTheme } from '../context/ThemeContext';
 import Testimonials from '../components/Testimonials';
 import PricingFAQ from '../components/PricingFAQ';
 import StickySidebar from '../components/StickySidebar';
 import servicesData from '../data/services.json';
 
+/* ── Animated Counter Hook ─────────────────────────── */
+const AnimatedCounter = ({ target, suffix = '', prefix = '', duration = 2 }) => {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true, margin: '-100px' });
+    const count = useMotionValue(0);
+    const rounded = useTransform(count, v => Math.floor(v));
+    const [display, setDisplay] = useState(0);
+
+    useEffect(() => {
+        if (isInView) {
+            const controls = animate(count, target, {
+                duration,
+                ease: [0.16, 1, 0.3, 1],
+            });
+            const unsubscribe = rounded.on('change', v => setDisplay(v));
+            return () => {
+                controls.stop();
+                unsubscribe();
+            };
+        }
+    }, [isInView, target, count, rounded, duration]);
+
+    return (
+        <span ref={ref}>
+            {prefix}{display}{suffix}
+        </span>
+    );
+};
+
+/* ── Current Month Helper ──────────────────────────── */
+const getCurrentMonth = () => {
+    const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
+                     'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+    return months[new Date().getMonth()];
+};
+
 const Home = () => {
     const { isDarkMode } = useTheme();
+    const [fakeViewers] = useState(() => Math.floor(Math.random() * 18) + 12);
 
     return (
         <main style={{ backgroundColor: 'var(--color-bg)', position: 'relative' }}>
             <StickySidebar items={[
                 { label: 'START', targetId: 'top' },
+                { label: 'PROOF', targetId: 'work' },
                 { label: 'SERVICES', targetId: 'services' },
                 { label: 'PROCESS', targetId: 'process' },
-                { label: 'WORK', targetId: 'work' },
+                { label: 'REVIEWS', targetId: 'testimonials' },
                 { label: 'FAQ', targetId: 'faq' }
             ]} />
 
@@ -29,58 +65,84 @@ const Home = () => {
             <Hero />
             <Marquee />
 
-            {/* ===== STATS BAR ===== */}
+            {/* ===== STATS BAR — Animated Social Proof ===== */}
             <section style={{
-                padding: '4rem 2rem',
+                padding: '5rem 2rem',
                 backgroundColor: 'var(--color-surface)',
                 borderTop: '1px solid var(--color-border)',
                 borderBottom: '1px solid var(--color-border)',
+                position: 'relative',
+                overflow: 'hidden'
             }}>
+                {/* Subtle animated gradient */}
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'radial-gradient(ellipse at 30% 50%, rgba(57,255,20,0.03), transparent 70%)',
+                    pointerEvents: 'none'
+                }} />
+
                 <div style={{
                     maxWidth: '1200px',
                     margin: '0 auto',
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                     gap: '2rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    position: 'relative'
                 }}>
                     {[
-                        { num: '50+', label: 'PROJECTS DELIVERED' },
-                        { num: '30+', label: 'CLIENTS SERVED' },
-                        { num: '3YRS', label: 'IN THE INDUSTRY' },
-                        { num: '5★', label: 'AVERAGE RATING' },
+                        { target: 50, suffix: '+', label: 'PROJECTS DELIVERED' },
+                        { target: 30, suffix: '+', label: 'HAPPY CLIENTS' },
+                        { target: 100, suffix: '%', label: 'CLIENT SATISFACTION' },
+                        { target: 0, suffix: '%', label: 'REFUND REQUESTS' },
                     ].map((stat) => (
-                        <div key={stat.label}>
+                        <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                        >
                             <div style={{
-                                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
                                 fontWeight: 900,
                                 fontFamily: 'var(--font-sans)',
                                 lineHeight: 1,
                                 color: 'var(--color-accent)',
-                                marginBottom: '0.5rem'
+                                marginBottom: '0.75rem',
+                                position: 'relative'
                             }}>
-                                {stat.num}
+                                <AnimatedCounter target={stat.target} suffix={stat.suffix} duration={2.5} />
+                                {/* Glow underline */}
+                                <div style={{
+                                    width: '40px',
+                                    height: '2px',
+                                    background: 'var(--color-accent)',
+                                    margin: '0.75rem auto 0',
+                                    boxShadow: '0 0 10px rgba(57,255,20,0.3)',
+                                    opacity: 0.6
+                                }} />
                             </div>
                             <div style={{
                                 fontFamily: 'var(--font-mono)',
-                                fontSize: '0.7rem',
-                                letterSpacing: '0.15em',
+                                fontSize: '0.65rem',
+                                letterSpacing: '0.2em',
                                 color: 'var(--color-text-secondary)',
-                                opacity: 1
+                                marginTop: '0.75rem'
                             }}>
                                 {stat.label}
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </section>
 
-            {/* Pinterest Portfolio Selection (replaces Marquee) */}
+            {/* ===== PORTFOLIO — Pinterest Grid ===== */}
             <section id="work">
                 <PinterestWorkGrid />
             </section>
 
-            {/* Services Section */}
+            {/* ===== SERVICES — "What We Obsess Over" ===== */}
             <section id="services" style={{
                 padding: '8rem 2rem',
                 backgroundColor: 'var(--color-surface)',
@@ -95,7 +157,7 @@ const Home = () => {
                             marginBottom: '2rem'
                         }}>
                             <span style={{ color: 'var(--color-accent)', opacity: 1 }}>02</span>
-                            &#8212; SERVICES
+                            &#8212; CAPABILITIES
                             <span style={{ flex: 1, height: '1px', backgroundColor: 'currentColor', opacity: 0.3, display: 'block' }} />
                         </div>
                         <h2 style={{
@@ -106,15 +168,17 @@ const Home = () => {
                             textTransform: 'uppercase',
                             color: 'var(--color-text)'
                         }}>
-                            OUR SERVICES
+                            WHAT WE <span style={{ color: 'var(--color-accent)', fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontWeight: 400, textTransform: 'lowercase' }}>obsess</span> OVER
                         </h2>
                         <p style={{
                             color: 'var(--color-text-secondary)',
-                            opacity: 0.6,
-                            fontSize: '1.1rem',
-                            lineHeight: 1.6
+                            fontSize: '1.05rem',
+                            lineHeight: 1.7,
+                            maxWidth: '550px',
+                            fontFamily: 'var(--font-mono)',
+                            marginTop: '1rem'
                         }}>
-                            We build premium websites and videos for modern brands.
+                            Every pixel, every frame, every line of code — crafted with the precision your brand deserves. No shortcuts. No templates.
                         </p>
                     </div>
 
@@ -131,7 +195,7 @@ const Home = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="hero-services-peek-item"
+                                className="hero-services-peek-item glow-border"
                                 style={{
                                     backgroundColor: 'var(--color-surface)',
                                     border: '1px solid var(--color-border)',
@@ -140,8 +204,16 @@ const Home = () => {
                                     flexDirection: 'column',
                                     position: 'relative',
                                     overflow: 'hidden',
-                                    minHeight: '280px',
-                                    cursor: 'default'
+                                    minHeight: '300px',
+                                    cursor: 'default',
+                                    borderLeft: '3px solid transparent',
+                                    transition: 'border-left-color 0.4s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderLeftColor = 'var(--color-accent)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderLeftColor = 'transparent';
                                 }}
                             >
                                 <img 
@@ -151,11 +223,22 @@ const Home = () => {
                                         position: 'absolute',
                                         top: 0, left: 0, width: '100%', height: '100%',
                                         objectFit: 'cover',
-                                        opacity: 0.1,
+                                        opacity: 0.08,
                                         zIndex: 0
                                     }}
                                 />
                                 <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    {/* Service number */}
+                                    <div style={{
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.6rem',
+                                        color: 'var(--color-accent)',
+                                        letterSpacing: '0.2em',
+                                        marginBottom: '1rem',
+                                        opacity: 0.7
+                                    }}>
+                                        SERVICE_0{index + 1}
+                                    </div>
                                     <h3 style={{
                                         fontSize: '1.5rem',
                                         marginBottom: '1rem',
@@ -169,7 +252,7 @@ const Home = () => {
                                     <p style={{
                                         color: 'var(--color-text-secondary)',
                                         fontSize: '1rem',
-                                        lineHeight: 1.6,
+                                        lineHeight: 1.7,
                                         marginBottom: '2rem',
                                         flexGrow: 1
                                     }}>
@@ -178,14 +261,15 @@ const Home = () => {
                                     <div style={{
                                         display: 'flex',
                                         flexWrap: 'wrap',
-                                        gap: '0.5rem'
+                                        gap: '0.5rem',
+                                        marginBottom: '1.5rem'
                                     }}>
                                         {service.tags.map(tag => (
                                             <span key={tag} style={{
-                                                fontSize: '0.65rem',
+                                                fontSize: '0.6rem',
                                                 fontFamily: 'var(--font-mono)',
                                                 padding: '0.3rem 0.6rem',
-                                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                                backgroundColor: 'rgba(57,255,20,0.05)',
                                                 color: 'var(--color-text)',
                                                 fontWeight: 'bold',
                                                 border: '1px solid var(--color-border)'
@@ -194,45 +278,72 @@ const Home = () => {
                                             </span>
                                         ))}
                                     </div>
+                                    {/* CTA arrow */}
+                                    <div style={{
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 700,
+                                        color: 'var(--color-text-secondary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        opacity: 0.5,
+                                        transition: 'opacity 0.3s, color 0.3s'
+                                    }}>
+                                        EXPLORE →
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                            <Link to="/get-in-touch" style={{
-                                display: 'inline-block',
-                                padding: '1rem 2.5rem',
-                                backgroundColor: 'transparent',
-                                color: 'var(--color-accent)',
-                                border: '2px solid var(--color-accent)',
-                                fontFamily: 'var(--font-mono)',
-                                fontWeight: 'bold',
-                                fontSize: '1.1rem',
-                                textDecoration: 'none',
-                                textTransform: 'uppercase',
-                                transition: 'all 0.3s ease',
-                                boxShadow: '4px 4px 0px var(--color-accent)'
+                        <Link to="/get-in-touch" style={{
+                            display: 'inline-block',
+                            padding: '1rem 2.5rem',
+                            backgroundColor: 'transparent',
+                            color: 'var(--color-accent)',
+                            border: '2px solid var(--color-accent)',
+                            fontFamily: 'var(--font-mono)',
+                            fontWeight: 'bold',
+                            fontSize: '1.1rem',
+                            textDecoration: 'none',
+                            textTransform: 'uppercase',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '4px 4px 0px var(--color-accent)'
+                        }}
+                            onMouseEnter={(e) => {
+                                e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
+                                e.target.style.transform = 'translate(-2px, -2px)';
                             }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
-                                }}>
-                                GET IN TOUCH
-                            </Link>
+                            onMouseLeave={(e) => {
+                                e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
+                                e.target.style.transform = 'translate(0, 0)';
+                            }}>
+                            LET'S BUILD TOGETHER
+                        </Link>
                     </div>
                 </div>
             </section>
 
-
-            {/* ===== AGENCY PROCESS SECTION ===== */}
+            {/* ===== PROCESS — Urgency Engine ===== */}
             <section id="process" style={{
                 padding: '10rem 2rem',
                 backgroundColor: 'var(--color-bg)',
-                borderBottom: '1px solid var(--color-border)'
+                borderBottom: '1px solid var(--color-border)',
+                position: 'relative',
+                overflow: 'hidden'
             }}>
+                {/* Ambient glow */}
+                <div style={{
+                    position: 'absolute',
+                    top: '20%', right: '-10%',
+                    width: '400px', height: '400px',
+                    background: 'radial-gradient(circle, rgba(57,255,20,0.04), transparent 70%)',
+                    borderRadius: '50%',
+                    pointerEvents: 'none'
+                }} />
+
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ marginBottom: '6rem', textAlign: 'center' }}>
                         <div className="section-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
@@ -249,8 +360,19 @@ const Home = () => {
                         }}>
                             WE HELP YOU <span className="serif-italic" style={{ color: 'var(--color-accent)', textTransform: 'lowercase', fontWeight: 400 }}>grow</span> FAST
                         </h2>
+                        <p style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.9rem',
+                            color: 'var(--color-text-secondary)',
+                            maxWidth: '500px',
+                            margin: '2rem auto 0',
+                            lineHeight: 1.7
+                        }}>
+                            A proven 3-step system that takes you from concept to launch — faster than you thought possible.
+                        </p>
                     </div>
 
+                    {/* Process steps with connecting lines */}
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -258,20 +380,39 @@ const Home = () => {
                         position: 'relative'
                     }}>
                         {[
-                            { step: '01', title: 'PLAN', desc: 'We talk about your goals and create a clear plan for your project.' },
-                            { step: '02', title: 'BUILD', desc: 'Our team makes your videos and website with the best tools.' },
-                            { step: '03', title: 'LAUNCH', desc: 'We help you launch your project so you can start seeing results.' }
+                            { step: '01', title: 'STRATEGIZE', desc: 'We dive deep into your brand, audience, and competitors. No generic plans — only razor-sharp strategy built for your specific growth.' },
+                            { step: '02', title: 'CREATE', desc: 'Our team builds your assets with obsessive attention to detail. Every pixel, every frame, every interaction — designed to convert.' },
+                            { step: '03', title: 'DOMINATE', desc: 'We launch, optimize, and iterate until the results speak for themselves. Your competition won\'t see it coming.' }
                         ].map((item, i) => (
-                            <div key={item.step} style={{ position: 'relative' }}>
+                            <motion.div
+                                key={item.step}
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6, delay: i * 0.15 }}
+                                style={{ position: 'relative' }}
+                            >
+                                {/* Step number background */}
                                 <div style={{
-                                    fontSize: '6rem',
+                                    fontSize: '8rem',
                                     fontFamily: 'var(--font-display)',
-                                    opacity: 0.05,
+                                    opacity: 0.04,
                                     position: 'absolute',
-                                    top: '-2rem',
+                                    top: '-3rem',
                                     left: '-1rem',
-                                    lineHeight: 1
+                                    lineHeight: 1,
+                                    fontWeight: 900
                                 }}>{item.step}</div>
+
+                                {/* Accent line */}
+                                <div style={{
+                                    width: '40px',
+                                    height: '3px',
+                                    backgroundColor: 'var(--color-accent)',
+                                    marginBottom: '1.5rem',
+                                    boxShadow: '0 0 8px rgba(57,255,20,0.3)'
+                                }} />
+
                                 <h3 style={{
                                     fontSize: '1.5rem',
                                     fontFamily: 'var(--font-mono)',
@@ -281,15 +422,25 @@ const Home = () => {
                                 }}>{item.title}</h3>
                                 <p style={{
                                     color: 'var(--color-text-secondary)',
-                                    fontSize: '1.1rem',
-                                    lineHeight: 1.6
+                                    fontSize: '1rem',
+                                    lineHeight: 1.7
                                 }}>{item.desc}</p>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
 
+                    {/* Urgency CTA Block */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        style={{ marginTop: '6rem', textAlign: 'center' }}
+                    >
                         <div style={{
-                            display: 'inline-block',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '10px',
                             padding: '1rem 2rem',
                             border: '1px solid var(--color-accent)',
                             fontFamily: 'var(--font-mono)',
@@ -299,7 +450,8 @@ const Home = () => {
                             marginBottom: '2rem',
                             letterSpacing: '0.2em'
                         }}>
-                            WE ARE TAKING 2 MORE PROJECTS
+                            <span className="live-dot" />
+                            ONLY TAKING 2 MORE PROJECTS IN {getCurrentMonth()} 2026
                         </div>
                         <br />
                         <Link to="/get-in-touch" style={{
@@ -308,14 +460,16 @@ const Home = () => {
                             fontWeight: 900,
                             color: 'var(--color-text)',
                             textDecoration: 'none',
-                            borderBottom: '2px solid var(--color-accent)',
-                            transition: 'opacity 0.2s',
-                            letterSpacing: '-0.02em'
+                            borderBottom: '3px solid var(--color-accent)',
+                            transition: 'opacity 0.2s, border-color 0.3s',
+                            letterSpacing: '-0.02em',
+                            paddingBottom: '4px'
                         }}
                         onMouseEnter={(e) => e.target.style.opacity = '0.7'}
                         onMouseLeave={(e) => e.target.style.opacity = '1'}>
-                            START YOUR PROJECT &rarr;
+                            YOUR COMPETITORS ALREADY STARTED →
                         </Link>
+                    </motion.div>
                 </div>
             </section>
 
@@ -325,18 +479,54 @@ const Home = () => {
                 <PricingFAQ />
             </div>
 
-            {/* Massive CTA Section */}
-            <section style={{
+            {/* ===== FINAL CTA — The Psychological Close ===== */}
+            <section className="gradient-bg-animated" style={{
                 padding: '10rem 2rem',
-                backgroundColor: 'var(--color-bg)',
                 color: 'var(--color-text)',
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden',
                 borderTop: '1px solid var(--color-border)'
             }}>
-                {/* ... existing CTA ... */}
-                <div style={{ position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '0 auto' }}>
+                {/* Particle-like floating dots */}
+                {[...Array(6)].map((_, i) => (
+                    <motion.div
+                        key={i}
+                        animate={{
+                            y: [0, -30, 0],
+                            opacity: [0.1, 0.3, 0.1]
+                        }}
+                        transition={{
+                            duration: 3 + i * 0.5,
+                            repeat: Infinity,
+                            delay: i * 0.4
+                        }}
+                        style={{
+                            position: 'absolute',
+                            width: '4px',
+                            height: '4px',
+                            borderRadius: '50%',
+                            backgroundColor: 'var(--color-accent)',
+                            left: `${15 + i * 14}%`,
+                            top: `${20 + (i % 3) * 25}%`,
+                            pointerEvents: 'none'
+                        }}
+                    />
+                ))}
+
+                <div style={{ position: 'relative', zIndex: 10, maxWidth: '900px', margin: '0 auto' }}>
+                    {/* Viewer counter at top */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        className="viewer-counter"
+                        style={{ justifyContent: 'center', marginBottom: '3rem' }}
+                    >
+                        <span className="live-dot" style={{ width: '6px', height: '6px' }} />
+                        {fakeViewers} people are viewing this page right now
+                    </motion.div>
+
                     <motion.h2
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -347,41 +537,91 @@ const Home = () => {
                             lineHeight: 0.9,
                             fontFamily: 'var(--font-sans)',
                             fontWeight: 900,
-                            margin: '0 0 2rem 0',
+                            margin: '0 0 1.5rem 0',
                             textTransform: 'uppercase'
                         }}
                     >
-                        READY TO START?
+                        STILL <span style={{ color: 'var(--color-accent)', fontFamily: "'Playfair Display', serif", fontStyle: 'italic', textTransform: 'lowercase' }}>scrolling?</span>
                     </motion.h2>
-                    <p style={{
-                        fontSize: 'clamp(1rem, 3vw, 1.5rem)',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 'bold',
-                        marginBottom: '4rem'
-                    }}>
-                        LET'S BUILD SOMETHING GREAT TOGETHER.
-                    </p>
-                    <a href="/services#inquiry" style={{
-                        display: 'inline-block',
-                        padding: '1.5rem 4rem',
-                        backgroundColor: 'var(--color-text)',
-                        color: 'var(--color-accent)',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 900,
-                        fontSize: '1.5rem',
-                        textDecoration: 'none',
-                        textTransform: 'uppercase',
-                        boxShadow: '8px 8px 0px #121212',
-                        transition: 'transform 0.1s ease, box-shadow 0.1s ease'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.boxShadow = '12px 12px 0px #121212';
+
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 }}
+                        style={{
+                            fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
+                            fontFamily: 'var(--font-mono)',
+                            color: 'var(--color-text-secondary)',
+                            marginBottom: '4rem',
+                            lineHeight: 1.7,
+                            maxWidth: '600px',
+                            margin: '0 auto 4rem'
                         }}
-                        onMouseLeave={(e) => {
-                            e.target.style.boxShadow = '8px 8px 0px #121212';
+                    >
+                        The brands that win don't hesitate. They move first.<br />
+                        <strong style={{ color: 'var(--color-text)' }}>Your next project starts with one conversation.</strong>
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.5 }}
+                    >
+                        <a href="/get-in-touch" style={{
+                            display: 'inline-block',
+                            padding: '1.5rem 4rem',
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#000',
+                            fontFamily: 'var(--font-mono)',
+                            fontWeight: 900,
+                            fontSize: '1.3rem',
+                            textDecoration: 'none',
+                            textTransform: 'uppercase',
+                            boxShadow: '8px 8px 0px var(--color-text)',
+                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'translate(-4px, -4px)';
+                                e.target.style.boxShadow = '12px 12px 0px var(--color-text)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'translate(0, 0)';
+                                e.target.style.boxShadow = '8px 8px 0px var(--color-text)';
+                            }}>
+                            LET'S TALK — IT'S FREE →
+                        </a>
+
+                        {/* Trust micro-copy */}
+                        <div style={{
+                            marginTop: '2rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                         }}>
-                        CONTACT US TODAY
-                    </a>
+                            <div style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.65rem',
+                                color: 'var(--color-text-secondary)',
+                                letterSpacing: '0.1em'
+                            }}>
+                                ⚡ AVERAGE RESPONSE TIME: 2 HOURS
+                            </div>
+                            <div style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.6rem',
+                                color: 'var(--color-text-secondary)',
+                                opacity: 0.5,
+                                letterSpacing: '0.1em'
+                            }}>
+                                NO COMMITMENT. NO CREDIT CARD. JUST A CONVERSATION.
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
         </main>

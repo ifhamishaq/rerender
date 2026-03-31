@@ -46,7 +46,6 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
                     src={videoUrl}
                     controls
                     autoPlay
-                    muted
                     loop
                     playsInline
                     preload="auto"

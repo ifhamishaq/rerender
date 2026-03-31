@@ -1,10 +1,22 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
 import testimonials from '../data/testimonials.json';
 
-const Testimonials = () => {
-    const scrollerRef = useRef(null);
+const StarRating = ({ rating = 5 }) => (
+    <div className="star-rating" style={{ marginBottom: '12px' }}>
+        {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+    </div>
+);
 
+const VerifiedBadge = () => (
+    <span className="verified-badge">
+        <Check size={10} strokeWidth={3} />
+        VERIFIED CLIENT
+    </span>
+);
+
+const Testimonials = () => {
     return (
         <section id="testimonials" style={{
             padding: '8rem 0',
@@ -21,9 +33,19 @@ const Testimonials = () => {
                     textTransform: 'uppercase',
                     lineHeight: 1
                 }}>
-                    TRUSTED BY <br />
-                    <span style={{ color: 'var(--color-accent)' }}>CREATIVES.</span>
+                    DON'T TAKE <br />
+                    <span style={{ color: 'var(--color-accent)' }}>OUR WORD FOR IT.</span>
                 </h2>
+                <p style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.85rem',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '1.5rem',
+                    maxWidth: '500px',
+                    lineHeight: 1.7
+                }}>
+                    Every client we've worked with has come back for more. Here's why they can't stop recommending us.
+                </p>
             </div>
 
             <div style={{ 
@@ -31,7 +53,7 @@ const Testimonials = () => {
                 width: '100%'
             }}>
                 <motion.div 
-                    animate={{ x: [0, -1728] }} // 4 items at 400px + 2rem (32px) gap each
+                    animate={{ x: [0, -1728] }}
                     transition={{
                         duration: 30,
                         repeat: Infinity,
@@ -44,33 +66,63 @@ const Testimonials = () => {
                         width: 'max-content'
                     }}
                 >
-                    {/* Triple the list to ensure no white space on loop */}
                     {[...testimonials, ...testimonials, ...testimonials].map((t, i) => (
                         <div
                             key={i}
+                            className="glass-card glow-border"
                             style={{
-                                width: '400px',
+                                width: '420px',
                                 backgroundColor: 'var(--color-surface)',
                                 border: '1px solid var(--color-border)',
                                 padding: '3rem',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '1.5rem',
+                                gap: '1rem',
                                 flexShrink: 0,
-                                transition: 'transform 0.3s ease',
+                                position: 'relative',
                                 cursor: 'default'
                             }}
                         >
-                            <div style={{ fontSize: '1.1rem', lineHeight: 1.6, fontFamily: 'var(--font-serif)', fontStyle: 'italic', opacity: 0.9 }}>
+                            {/* Giant decorative quote mark */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1.5rem',
+                                fontSize: '6rem',
+                                fontFamily: 'var(--font-serif)',
+                                color: 'var(--color-accent)',
+                                opacity: 0.08,
+                                lineHeight: 1,
+                                pointerEvents: 'none'
+                            }}>
+                                "
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <StarRating rating={5} />
+                                <VerifiedBadge />
+                            </div>
+
+                            <div style={{ 
+                                fontSize: '1.1rem', 
+                                lineHeight: 1.7, 
+                                fontFamily: 'var(--font-serif)', 
+                                fontStyle: 'italic', 
+                                opacity: 0.9,
+                                position: 'relative',
+                                zIndex: 1
+                            }}>
                                 "{t.content}"
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto' }}>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
                                 <div style={{ 
-                                    width: '40px', 
-                                    height: '40px', 
+                                    width: '44px', 
+                                    height: '44px', 
                                     borderRadius: '50%', 
                                     overflow: 'hidden', 
-                                    border: '1px solid var(--color-accent)' 
+                                    border: '2px solid var(--color-accent)',
+                                    flexShrink: 0
                                 }}>
                                     <img src={t.avatar} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>

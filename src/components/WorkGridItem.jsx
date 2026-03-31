@@ -8,8 +8,11 @@ const WorkGridItem = ({ project, index, onClick }) => {
     // Handle Hover Playback
     const handleMouseEnter = () => {
         if (videoRef.current) {
+            videoRef.current.muted = false;
             videoRef.current.play().catch(err => {
                 console.warn('Playback blocked by browser:', err);
+                videoRef.current.muted = true;
+                videoRef.current.play().catch(e => console.error(e));
             });
             setIsVisible(true);
         }
@@ -18,6 +21,7 @@ const WorkGridItem = ({ project, index, onClick }) => {
     const handleMouseLeave = () => {
         if (videoRef.current) {
             videoRef.current.pause();
+            videoRef.current.muted = true;
             videoRef.current.currentTime = 0; // Reset to first frame (acts as thumbnail)
             setIsVisible(false);
         }
