@@ -1,12 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
 
 :root {
-  --color-bg: #F8F6F1;
-  --color-text: #0E0E0E;
-  --color-text-secondary: #5A5A5A;
-  --color-accent: #39FF14;
-  --color-surface: #EFEDE8;
-  --color-border: #D8D5CE;
+  /* Skeuomorphic Light Mode - Matte Plastic/Metal */
+  --color-bg: #E3E5E6;
+  --color-text: #2B2E30;
+  --color-text-secondary: #6A7A80;
+  --color-accent: #FF3B30; /* Physical Red */
+  --color-surface: #D5D9DC;
+  --color-border: #B0B5B9;
+
+  /* Physical Shadows & Highlights */
+  --shadow-raised: 
+    -2px -2px 6px rgba(255, 255, 255, 0.8),
+    4px 4px 10px rgba(0, 0, 0, 0.15),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px rgba(0, 0, 0, 0.05);
+
+  --shadow-pressed: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.6);
+
+  --shadow-screen: 
+    inset 3px 3px 8px rgba(0, 0, 0, 0.2),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.7);
+
+  --led-glow: 0 0 8px var(--color-accent), inset 0 0 4px #fff;
+  --led-off: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.3);
 
   --font-sans: 'Space Grotesk', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -22,12 +42,32 @@
 }
 
 body.dark-mode {
-  --color-bg: #080808;
-  --color-text: #EFEFEF;
-  --color-text-secondary: #888888;
-  --color-accent: #39FF14;
-  --color-surface: #141414;
-  --color-border: #252525;
+  /* Skeuomorphic Dark Mode - Dark Brushed Gear */
+  --color-bg: #1A1A1A;
+  --color-text: #E5E5E5;
+  --color-text-secondary: #8A8A8A;
+  --color-accent: #39FF14; /* High-Visibility Green LED */
+  --color-surface: #222222;
+  --color-border: #0F0F0F;
+
+  /* Physical Shadows & Highlights */
+  --shadow-raised: 
+    -2px -2px 4px rgba(255, 255, 255, 0.04),
+    4px 4px 12px rgba(0, 0, 0, 0.8),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.08),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.6);
+
+  --shadow-pressed: 
+    inset 3px 3px 8px rgba(0, 0, 0, 0.8),
+    inset -1px -1px 4px rgba(255, 255, 255, 0.04);
+
+  --shadow-screen: 
+    inset 3px 3px 12px rgba(0, 0, 0, 0.9),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.03),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --led-glow: 0 0 12px var(--color-accent), inset 0 0 5px rgba(255,255,255,0.8), inset 0 0 2px #fff;
+  --led-off: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.1);
 }
 
 * {
@@ -40,17 +80,22 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Physical groove */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 10px;
+  background: var(--color-bg);
+  box-shadow: inset 2px 0 4px rgba(0,0,0,0.2);
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--color-surface);
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-raised);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -59,6 +104,7 @@ html {
 
 body {
   background-color: var(--color-bg);
+  background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 60%);
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -69,7 +115,7 @@ body {
 
 /* === EDITORIAL UTILITIES === */
 
-/* Section label: e.g. "01 — SERVICES" */
+/* Section label: physical stamped look */
 .section-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -81,22 +127,25 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 2rem;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .section-label::after {
   content: '';
   display: block;
   flex: 1;
-  height: 1px;
+  height: 2px;
   background: var(--color-border);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.1);
 }
 
-/* Accent dot used in nav and section markers */
+/* Accent dot - hardware LED */
 .accent-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--color-accent);
+  box-shadow: var(--led-glow);
   display: inline-block;
 }
 
@@ -116,7 +165,7 @@ body {
   }
 }
 
-/* Nav link hover underline */
+/* Nav link physical groove hover */
 .nav-link {
   position: relative;
   font-family: var(--font-mono);
@@ -125,42 +174,28 @@ body {
   text-transform: uppercase;
   color: var(--color-text);
   text-decoration: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  opacity: 0.8;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover {
   opacity: 1;
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--color-accent);
-  transition: width 0.25s ease;
-}
-
-.nav-link:hover::after {
-  width: 100%;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
 }
 
 /* === MICRO-ANIMATIONS === */
 
 @keyframes pulse-accent {
-
-  0%,
-  100% {
+  0%, 100% {
+    box-shadow: var(--led-glow);
     opacity: 1;
-    transform: scale(1);
   }
-
   50% {
-    opacity: 0.5;
-    transform: scale(0.7);
+    box-shadow: 0 0 2px var(--color-accent), inset 0 0 1px #fff;
+    opacity: 0.7;
   }
 }
 
@@ -168,67 +203,136 @@ body {
   0% {
     background-position: -200% center;
   }
-
   100% {
     background-position: 200% center;
   }
 }
 
 @keyframes float {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
-
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
 }
 
 /* Accent dot pulse in nav */
 .accent-dot {
-  animation: pulse-accent 2.5s ease-in-out infinite;
+  animation: pulse-accent 2s ease-in-out infinite;
 }
 
-/* === MIND-HACK LANDING PAGE UTILITIES === */
+/* === SKEUOMORPHIC UTILITIES === */
 
-/* Live pulsing dot — signals availability & urgency */
-@keyframes livePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); }
-  50% { box-shadow: 0 0 0 8px rgba(57, 255, 20, 0); }
+.skeuo-panel {
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-raised);
+}
+
+.skeuo-screen {
+  background-color: #111;
+  color: var(--color-accent); /* LED text */
+  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-screen);
+  font-family: var(--font-mono);
+}
+
+.skeuo-button {
+  background: linear-gradient(to bottom, var(--color-surface), var(--color-bg));
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  box-shadow: var(--shadow-raised);
+  transition: all 0.1s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.skeuo-button:active {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+}
+
+.skeuo-icon-btn {
+  background: linear-gradient(to bottom, var(--color-surface), var(--color-bg));
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-raised);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.skeuo-icon-btn:active {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+}
+
+/* LED Indicator (was live-dot) */
+@keyframes ledPulse {
+  0%, 100% { box-shadow: var(--led-glow); background: var(--color-accent); }
+  50% { box-shadow: 0 0 4px var(--color-accent); background: color-mix(in srgb, var(--color-accent) 60%, black); }
 }
 
 .live-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #39FF14;
+  background: var(--color-accent);
   display: inline-block;
-  animation: livePulse 2s ease-in-out infinite;
+  box-shadow: var(--led-glow);
+  border: 1px solid rgba(0,0,0,0.2);
+  animation: ledPulse 2s ease-in-out infinite;
 }
 
-/* Glassmorphism card */
+/* Physical Raised Plate (was Glassmorphism) */
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-raised);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  pointer-events: none;
 }
 
 body:not(.dark-mode) .glass-card {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
-/* Glow border on hover */
+/* physical indent on hover */
 .glow-border {
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  transition: all 0.2s ease;
 }
 
 .glow-border:hover {
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 20px rgba(57, 255, 20, 0.15), inset 0 0 20px rgba(57, 255, 20, 0.03);
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(2px);
+  border-color: var(--color-border);
 }
 
 /* Gradient background shift for CTA */
@@ -426,25 +530,45 @@ textarea:focus-visible {
   outline-offset: 4px;
 }
 
-/* === NATIVE FORM ELEMENTS DARK MODE === */
+/* === NATIVE FORM ELEMENTS SKUEOMORPHIC === */
 input,
 textarea,
 select {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  transition: border-color 0.2s ease, background-color 0.3s ease;
+  background-color: #111;
+  color: var(--color-accent);
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-screen);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  transition: all 0.2s ease;
+}
+
+body:not(.dark-mode) input,
+body:not(.dark-mode) textarea,
+body:not(.dark-mode) select {
+  background-color: #F0F0F0;
+  color: #333;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 8px var(--color-accent);
+  outline: none;
 }
 
 input::placeholder,
 textarea::placeholder {
   color: var(--color-text-secondary);
-  opacity: 1;
+  opacity: 0.5;
 }
 
 select option {
   background-color: var(--color-surface);
   color: var(--color-text);
+  font-family: var(--font-mono);
 }
 
 img,

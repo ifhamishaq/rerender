@@ -144,6 +144,22 @@
         "gdriveImages": []
     },
     {
+        "id": "thumb-10",
+        "title": "PODCAST_THUMBNAIL_WIN",
+        "client": "JASON",
+        "year": "2026",
+        "category": "THUMBNAIL",
+        "thumbnail": "/THUMBNAIL1A.jpg",
+        "aspectRatio": "16/9",
+        "tags": [
+            "Podcast",
+            "High-Contrast",
+            "CTR"
+        ],
+        "description": "High-converting podcast thumbnail with bold text and strong facial expressions.",
+        "gdriveImages": []
+    },
+    {
         "id": "thumb-02",
         "title": "LIFESTYLE_THUMBNAIL_02",
         "client": "VLOG_CENTRAL",

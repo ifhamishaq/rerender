@@ -298,28 +298,7 @@ const Home = () => {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                        <Link to="/get-in-touch" style={{
-                            display: 'inline-block',
-                            padding: '1rem 2.5rem',
-                            backgroundColor: 'transparent',
-                            color: 'var(--color-accent)',
-                            border: '2px solid var(--color-accent)',
-                            fontFamily: 'var(--font-mono)',
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem',
-                            textDecoration: 'none',
-                            textTransform: 'uppercase',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '4px 4px 0px var(--color-accent)'
-                        }}
-                            onMouseEnter={(e) => {
-                                e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
-                                e.target.style.transform = 'translate(-2px, -2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.boxShadow = '4px 4px 0px var(--color-accent)';
-                                e.target.style.transform = 'translate(0, 0)';
-                            }}>
+                        <Link to="/get-in-touch" className="skeuo-button" style={{ fontSize: '1.1rem' }}>
                             LET'S BUILD TOGETHER
                         </Link>
                     </div>
@@ -569,29 +548,12 @@ const Home = () => {
                         viewport={{ once: true }}
                         transition={{ delay: 0.5 }}
                     >
-                        <a href="/get-in-touch" style={{
-                            display: 'inline-block',
+                        <a href="/get-in-touch" className="skeuo-button" style={{ 
+                            fontSize: '1.3rem', 
                             padding: '1.5rem 4rem',
-                            backgroundColor: 'var(--color-accent)',
-                            color: '#000',
-                            fontFamily: 'var(--font-mono)',
-                            fontWeight: 900,
-                            fontSize: '1.3rem',
-                            textDecoration: 'none',
-                            textTransform: 'uppercase',
-                            boxShadow: '8px 8px 0px var(--color-text)',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}
-                            onMouseEnter={(e) => {
-                                e.target.style.transform = 'translate(-4px, -4px)';
-                                e.target.style.boxShadow = '12px 12px 0px var(--color-text)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.transform = 'translate(0, 0)';
-                                e.target.style.boxShadow = '8px 8px 0px var(--color-text)';
-                            }}>
+                            border: '2px solid var(--color-accent)',
+                            boxShadow: '0 0 15px rgba(255,59,48,0.3), var(--shadow-raised)'
+                        }}>
                             LET'S TALK — IT'S FREE →
                         </a>
 

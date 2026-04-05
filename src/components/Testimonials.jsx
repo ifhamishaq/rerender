@@ -69,19 +69,20 @@ const Testimonials = () => {
                     {[...testimonials, ...testimonials, ...testimonials].map((t, i) => (
                         <div
                             key={i}
-                            className="glass-card glow-border"
+                            className="skeuo-panel"
                             style={{
                                 width: '420px',
-                                backgroundColor: 'var(--color-surface)',
-                                border: '1px solid var(--color-border)',
                                 padding: '3rem',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '1rem',
                                 flexShrink: 0,
                                 position: 'relative',
-                                cursor: 'default'
+                                cursor: 'default',
+                                transition: 'transform 0.2s ease',
                             }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(2px)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                         >
                             {/* Giant decorative quote mark */}
                             <div style={{
@@ -122,6 +123,7 @@ const Testimonials = () => {
                                     borderRadius: '50%', 
                                     overflow: 'hidden', 
                                     border: '2px solid var(--color-accent)',
+                                    boxShadow: 'var(--led-glow)',
                                     flexShrink: 0
                                 }}>
                                     <img src={t.avatar} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

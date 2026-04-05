@@ -168,26 +168,8 @@ const Navbar = () => {
                     {/* Contact CTA */}
                     <a
                         href="mailto:real.re.render@gmail.com"
-                        style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.1em',
-                            textTransform: 'uppercase',
-                            padding: '0.5rem 1.25rem',
-                            border: '1px solid var(--color-text)',
-                            color: 'var(--color-text)',
-                            textDecoration: 'none',
-                            transition: 'background 0.2s, color 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'var(--color-text)';
-                            e.currentTarget.style.color = 'var(--color-bg)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'var(--color-text)';
-                        }}
+                        className="skeuo-button"
+                        style={{ padding: '0.4rem 1rem', fontSize: '0.75rem' }}
                     >
                         HIRE US
                     </a>
@@ -224,57 +206,39 @@ const Navbar = () => {
 
                         {/* Auth Button */}
                         <button
+                            className="skeuo-icon-btn"
                             onClick={user ? signOut : () => setIsAuthModalOpen(true)}
                             title={user ? 'Sign Out' : 'Login'}
                             style={{
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '1px solid var(--color-border)',
                                 width: '32px',
                                 height: '32px',
                                 color: user ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                                background: 'none',
-                                transition: 'all 0.2s',
                             }}
                         >
                             {user ? <LogOut size={14} /> : <User size={14} />}
                         </button>
 
                         <button
+                            className="skeuo-icon-btn"
                             onClick={toggleAudio}
                             title={isPlaying ? 'Pause Music' : 'Play Music'}
                             style={{
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: 'none',
                                 width: '32px',
                                 height: '32px',
                                 color: isPlaying ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                                background: 'none',
-                                transition: 'color 0.2s',
                             }}
                         >
                             {isPlaying ? <Volume2 size={15} /> : <VolumeX size={15} />}
                         </button>
 
                         <button
+                            className="skeuo-icon-btn"
                             onClick={toggleTheme}
                              title="Toggle Theme"
                             style={{
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: 'none',
                                 width: '32px',
                                 height: '32px',
                                 color: 'var(--color-text-secondary)',
-                                background: 'none',
-                                transition: 'color 0.2s',
                             }}
                         >
                             {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
@@ -331,16 +295,12 @@ const Navbar = () => {
                         Navigation
                     </div>
                     <button 
+                        className="skeuo-icon-btn"
                         onClick={toggleMenu}
                         style={{
-                            background: 'none',
-                            border: '1px solid var(--color-border)',
+                            width: '36px',
+                            height: '36px',
                             color: 'var(--color-text)',
-                            padding: '0.5rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
                         }}
                     >
                         <X size={20} />
@@ -370,13 +330,13 @@ const Navbar = () => {
                 ))}
                     {/* Mobile Audio / Theme / Auth */}
                     <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                        <button onClick={user ? signOut : () => setIsAuthModalOpen(true)} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user ? 'var(--color-accent)' : 'var(--color-text)' }}>
+                        <button className="skeuo-icon-btn" onClick={user ? signOut : () => setIsAuthModalOpen(true)} style={{ width: '36px', height: '36px', color: user ? 'var(--color-accent)' : 'var(--color-text)' }}>
                             {user ? <LogOut size={16} /> : <User size={16} />}
                         </button>
-                        <button onClick={toggleAudio} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isPlaying ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+                        <button className="skeuo-icon-btn" onClick={toggleAudio} style={{ width: '36px', height: '36px', color: isPlaying ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
                             {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
                         </button>
-                        <button onClick={toggleTheme} style={{ border: '1px solid var(--color-border)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)' }}>
+                        <button className="skeuo-icon-btn" onClick={toggleTheme} style={{ width: '36px', height: '36px', color: 'var(--color-text-secondary)' }}>
                             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
                         </button>
                     </div>

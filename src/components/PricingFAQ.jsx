@@ -7,12 +7,12 @@ const FAQItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div style={{ borderBottom: '1px solid var(--color-border)' }}>
+        <div className="skeuo-panel" style={{ marginBottom: '1rem' }}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     width: '100%',
-                    padding: '2rem 0',
+                    padding: '2rem',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -21,10 +21,8 @@ const FAQItem = ({ question, answer }) => {
                     cursor: 'pointer',
                     textAlign: 'left',
                     color: 'var(--color-text)',
-                    transition: 'opacity 0.2s ease'
+                    transition: 'all 0.2s ease'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
                 <h3 style={{ 
                     fontSize: 'clamp(1rem, 2vw, 1.4rem)', 
@@ -54,7 +52,7 @@ const FAQItem = ({ question, answer }) => {
                             fontFamily: 'var(--font-mono)',
                             lineHeight: 1.6,
                             color: 'var(--color-text-secondary)',
-                            paddingBottom: '2rem',
+                            padding: '0 2rem 2rem 2rem',
                             maxWidth: '800px',
                             margin: 0
                         }}>
@@ -85,7 +83,7 @@ const PricingFAQ = () => {
                     </h2>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--color-border)' }}>
+                <div style={{ padding: '0.2rem' }}>
                     {faqData.map((item, index) => (
                         <FAQItem key={index} {...item} />
                     ))}
