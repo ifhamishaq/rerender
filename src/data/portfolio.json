@@ -278,5 +278,17 @@
         "tags": ["Long Form", "Documentary", "Cinematic"],
         "description": "High-fidelity cinematic long-form production, optimized for YouTube and OTT.",
         "gdriveImages": []
+    },
+    {
+        "id": "lf-02",
+        "title": "STRATEGIC_BRAND_PRODUCTION",
+        "client": "ELITE_SYSTEMS",
+        "year": "2026",
+        "category": "LONG FORM",
+        "youtubeId": "ae1n72Y1mKk",
+        "aspectRatio": "16/9",
+        "tags": ["Long Form", "Cinematic", "Strategy"],
+        "description": "High-fidelity cinematic production optimized for engagement and conversion.",
+        "gdriveImages": []
     }
 ]
