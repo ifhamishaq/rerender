@@ -17,10 +17,10 @@ const TEAM_DATA = [
         status: 'COMMAND'
     },
     {
-        name: 'MAHIR.',
+        name: 'HARPREET SINGH.',
         role: 'LEAD VIDEO EDITOR',
-        image: '/team/mahir.jpg',
-        bio: 'Master of cinematic motion and high-fidelity video storytelling. Mahir transforms raw concepts into aggressive, unforgettable visual experiences for global brands.',
+        image: null,
+        bio: 'The silent architect of cinematic narrative. Harpreet specializes in heavy-duty rhythm, aggressive pacing, and the subconscious flow of high-end commercial production.',
         link: '/work?category=MOTION DESIGN',
         status: 'OPERATIVE'
     }
@@ -164,20 +164,56 @@ const About = () => {
                                         position: 'relative', 
                                         height: '450px', 
                                         borderRight: '1px solid var(--color-border)',
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        backgroundColor: 'var(--color-bg)'
                                     }}>
-                                        <img 
-                                            src={member.image} 
-                                            alt={member.name} 
-                                            style={{ 
-                                                width: '100%', height: '100%', objectFit: 'cover',
-                                                filter: 'grayscale(1) contrast(1.1) brightness(0.9)'
-                                            }} 
-                                        />
+                                        {member.image ? (
+                                            <img 
+                                                src={member.image} 
+                                                alt={member.name} 
+                                                style={{ 
+                                                    width: '100%', height: '100%', objectFit: 'cover',
+                                                    filter: 'grayscale(1) contrast(1.1) brightness(0.9)'
+                                                }} 
+                                            />
+                                        ) : (
+                                            <div style={{
+                                                width: '100%', height: '100%',
+                                                display: 'flex', flexDirection: 'column',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                padding: '2rem', textAlign: 'center',
+                                                position: 'relative'
+                                            }}>
+                                                <div style={{
+                                                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                                    opacity: 0.1, pointerEvents: 'none',
+                                                    background: 'repeating-linear-gradient(45deg, var(--color-text), var(--color-text) 1px, transparent 1px, transparent 10px)'
+                                                }} />
+                                                <span style={{ 
+                                                    fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--color-accent)', 
+                                                    marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 900
+                                                }}>
+                                                    [ IDENTITY_PROTECTED ]
+                                                </span>
+                                                <div style={{ 
+                                                    fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 900, 
+                                                    lineHeight: 1.2, textTransform: 'uppercase', color: 'var(--color-text)',
+                                                    letterSpacing: '0.1em'
+                                                }}>
+                                                    DATA_ENCRYPTED<br />
+                                                    REDACTED_VIEW
+                                                </div>
+                                                <div style={{
+                                                    marginTop: '2rem', width: '30px', height: '1px', backgroundColor: 'var(--color-accent)',
+                                                    boxShadow: '0 0 10px var(--color-accent)'
+                                                }} />
+                                            </div>
+                                        )}
                                         <div style={{ 
                                             position: 'absolute', bottom: '1rem', left: '1rem',
                                             backgroundColor: 'var(--color-bg)', padding: '0.5rem 1rem',
-                                            fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900
+                                            fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900,
+                                            border: '1px solid var(--color-border)', zIndex: 2
                                         }}>
                                             STDU_REF: {i.toString().padStart(2, '0')}
                                         </div>
