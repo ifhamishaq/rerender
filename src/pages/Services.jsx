@@ -1,38 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import servicesList from '../data/services.json';
 
 const Services = () => {
     const { isDarkMode } = useTheme();
-    const [appliedDiscount, setAppliedDiscount] = useState(null);
-    const [hasWon, setHasWon] = useState(false);
     const [selectedService, setSelectedService] = useState('');
 
-    useEffect(() => {
-        const discount = localStorage.getItem('re_render_discount');
-        if (discount) {
-            setAppliedDiscount(discount);
-            setHasWon(true);
-        }
-    }, []);
-
-    const triggerRandomWin = () => {
-        if (hasWon) return; // Only win once per session/unit
-        
-        const r = Math.random();
-        // 80% chance to win something
-        if (r < 0.8) {
-            const prizes = [10, 15, 20, 25, 30, 50];
-            const win = prizes[Math.floor(Math.random() * prizes.length)];
-            setAppliedDiscount(win);
-            setHasWon(true);
-            localStorage.setItem('re_render_discount', win);
-        }
-    };
-
     const handleServiceClick = (serviceTitle) => {
-        // Map pretty title to form value if needed, or just use title
         const serviceMap = {
             'VIDEO EDITING': 'video-editing',
             'GRAPHIC DESIGN': 'graphic-design',
@@ -140,58 +115,7 @@ const Services = () => {
                 <div id="inquiry" style={{ paddingTop: '4rem', borderTop: '2px solid var(--color-border)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', alignItems: 'start' }}>
                         {/* Left: Copy */}
-                        <motion.div
-                            onViewportEnter={triggerRandomWin}
-                            viewport={{ once: true, amount: 0.5 }}
-                        >
-                            <AnimatePresence>
-                                {hasWon && appliedDiscount && (
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -50, scale: 0.9 }}
-                                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                                        style={{
-                                            backgroundColor: 'var(--color-accent)',
-                                            color: '#000',
-                                            padding: '1.5rem',
-                                            marginBottom: '2rem',
-                                            border: '2px solid #000',
-                                            boxShadow: '8px 8px 0px #000',
-                                            position: 'relative',
-                                            overflow: 'hidden'
-                                        }}
-                                    >
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: 0, right: 0,
-                                            fontSize: '4rem',
-                                            opacity: 0.1,
-                                            fontWeight: 900,
-                                            pointerEvents: 'none',
-                                            lineHeight: 1
-                                        }}>
-                                            WINNER
-                                        </div>
-                                        <h3 style={{ 
-                                            margin: 0, 
-                                            fontFamily: 'var(--font-sans)', 
-                                            fontWeight: 900, 
-                                            fontSize: '1.2rem',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.05em'
-                                        }}>
-                                            You Got a Discount! ⚡
-                                        </h3>
-                                        <p style={{ 
-                                            margin: '0.5rem 0 0', 
-                                            fontFamily: 'var(--font-mono)', 
-                                            fontSize: '0.9rem',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            YOU WON A {appliedDiscount}% DISCOUNT FOR THIS PROJECT.
-                                        </p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        <div>
 
                             <h2 style={{
                                 fontSize: 'clamp(2rem, 5vw, 4rem)',
@@ -229,7 +153,7 @@ const Services = () => {
                                     </div>
                                 ))}
                             </div>
-                        </motion.div>
+                        </div>
 
                         {/* Right: Form */}
                         <form
@@ -242,24 +166,7 @@ const Services = () => {
                             <input type="hidden" name="form-name" value="project-inquiry" />
                             <p hidden><label>Don't fill: <input name="bot-field" /></label></p>
 
-                            {appliedDiscount && (
-                                <div style={{
-                                    padding: '1rem',
-                                    backgroundColor: 'rgba(57, 255, 20, 0.1)',
-                                    border: '1px solid var(--color-accent)',
-                                    color: 'var(--color-accent)',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 'bold',
-                                    letterSpacing: '0.05em',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem'
-                                }}>
-                                    ⚡ {appliedDiscount}% DISCOUNT APPLIED TO INQUIRY
-                                    <input type="hidden" name="applied_discount" value={`${appliedDiscount}%`} />
-                                </div>
-                            )}
+
 
                             {[
                                 { label: 'YOUR NAME', name: 'name', type: 'text', placeholder: 'John Doe' },

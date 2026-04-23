@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Footer = () => {
     const year = new Date().getFullYear();
     const location = useLocation();
-    const accentColor = location.pathname === '/arcade' ? '#E8111A' : 'var(--color-accent)';
+    const accentColor = 'var(--color-accent)';
 
     return (
         <footer style={{
@@ -56,7 +56,6 @@ const Footer = () => {
                         { to: '/get-in-touch', label: 'Contact' },
                         { to: '/about', label: 'About' },
                         { to: '/careers', label: 'Careers' },
-                        { to: '/submit-prompt', label: 'Submit Prompt' },
                     ].map(({ to, label }) => (
                         <Link key={to} to={to} style={{
                             color: 'var(--color-text)',

@@ -1,36 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 import Hero from '../components/Hero';
-import Marquee from '../components/Marquee';
 import PinterestWorkGrid from '../components/PinterestWorkGrid';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import Testimonials from '../components/Testimonials';
 import PricingFAQ from '../components/PricingFAQ';
 import StickySidebar from '../components/StickySidebar';
+import InfographicProcess from '../components/InfographicProcess';
 import servicesData from '../data/services.json';
 
 /* ── Animated Counter Hook ─────────────────────────── */
 const AnimatedCounter = ({ target, suffix = '', prefix = '', duration = 2 }) => {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, margin: '-100px' });
-    const count = useMotionValue(0);
-    const rounded = useTransform(count, v => Math.floor(v));
     const [display, setDisplay] = useState(0);
 
     useEffect(() => {
         if (isInView) {
-            const controls = animate(count, target, {
+            const controls = animate(0, target, {
                 duration,
                 ease: [0.16, 1, 0.3, 1],
+                onUpdate: (value) => {
+                    setDisplay(Math.floor(value));
+                }
             });
-            const unsubscribe = rounded.on('change', v => setDisplay(v));
-            return () => {
-                controls.stop();
-                unsubscribe();
-            };
+            return () => controls.stop();
         }
-    }, [isInView, target, count, rounded, duration]);
+    }, [isInView, target, duration]);
 
     return (
         <span ref={ref}>
@@ -63,7 +60,6 @@ const Home = () => {
 
             <div id="top" />
             <Hero />
-            <Marquee />
 
             {/* ===== STATS BAR — Animated Social Proof ===== */}
             <section style={{
@@ -305,152 +301,8 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* ===== PROCESS — Urgency Engine ===== */}
-            <section id="process" style={{
-                padding: '10rem 2rem',
-                backgroundColor: 'var(--color-bg)',
-                borderBottom: '1px solid var(--color-border)',
-                position: 'relative',
-                overflow: 'hidden'
-            }}>
-                {/* Ambient glow */}
-                <div style={{
-                    position: 'absolute',
-                    top: '20%', right: '-10%',
-                    width: '400px', height: '400px',
-                    background: 'radial-gradient(circle, rgba(57,255,20,0.04), transparent 70%)',
-                    borderRadius: '50%',
-                    pointerEvents: 'none'
-                }} />
-
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ marginBottom: '6rem', textAlign: 'center' }}>
-                        <div className="section-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
-                            <span style={{ color: 'var(--color-accent)' }}>03</span>
-                            &#8212; HOW WE WORK
-                        </div>
-                        <h2 style={{
-                            fontSize: 'clamp(3rem, 10vw, 7rem)',
-                            fontFamily: 'var(--font-display)',
-                            textTransform: 'uppercase',
-                            lineHeight: 0.85,
-                            marginTop: '2rem',
-                            letterSpacing: '-0.04em'
-                        }}>
-                            WE HELP YOU <span className="serif-italic" style={{ color: 'var(--color-accent)', textTransform: 'lowercase', fontWeight: 400 }}>grow</span> FAST
-                        </h2>
-                        <p style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.9rem',
-                            color: 'var(--color-text-secondary)',
-                            maxWidth: '500px',
-                            margin: '2rem auto 0',
-                            lineHeight: 1.7
-                        }}>
-                            A proven 3-step system that takes you from concept to launch — faster than you thought possible.
-                        </p>
-                    </div>
-
-                    {/* Process steps with connecting lines */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '4rem',
-                        position: 'relative'
-                    }}>
-                        {[
-                            { step: '01', title: 'STRATEGIZE', desc: 'We dive deep into your brand, audience, and competitors. No generic plans — only razor-sharp strategy built for your specific growth.' },
-                            { step: '02', title: 'CREATE', desc: 'Our team builds your assets with obsessive attention to detail. Every pixel, every frame, every interaction — designed to convert.' },
-                            { step: '03', title: 'DOMINATE', desc: 'We launch, optimize, and iterate until the results speak for themselves. Your competition won\'t see it coming.' }
-                        ].map((item, i) => (
-                            <motion.div
-                                key={item.step}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: i * 0.15 }}
-                                style={{ position: 'relative' }}
-                            >
-                                {/* Step number background */}
-                                <div style={{
-                                    fontSize: '8rem',
-                                    fontFamily: 'var(--font-display)',
-                                    opacity: 0.04,
-                                    position: 'absolute',
-                                    top: '-3rem',
-                                    left: '-1rem',
-                                    lineHeight: 1,
-                                    fontWeight: 900
-                                }}>{item.step}</div>
-
-                                {/* Accent line */}
-                                <div style={{
-                                    width: '40px',
-                                    height: '3px',
-                                    backgroundColor: 'var(--color-accent)',
-                                    marginBottom: '1.5rem',
-                                    boxShadow: '0 0 8px rgba(57,255,20,0.3)'
-                                }} />
-
-                                <h3 style={{
-                                    fontSize: '1.5rem',
-                                    fontFamily: 'var(--font-mono)',
-                                    color: 'var(--color-accent)',
-                                    marginBottom: '1.5rem',
-                                    fontWeight: 900
-                                }}>{item.title}</h3>
-                                <p style={{
-                                    color: 'var(--color-text-secondary)',
-                                    fontSize: '1rem',
-                                    lineHeight: 1.7
-                                }}>{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    {/* Urgency CTA Block */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        style={{ marginTop: '6rem', textAlign: 'center' }}
-                    >
-                        <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '1rem 2rem',
-                            border: '1px solid var(--color-accent)',
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.8rem',
-                            color: 'var(--color-accent)',
-                            textTransform: 'uppercase',
-                            marginBottom: '2rem',
-                            letterSpacing: '0.2em'
-                        }}>
-                            <span className="live-dot" />
-                            ONLY TAKING 2 MORE PROJECTS IN {getCurrentMonth()} 2026
-                        </div>
-                        <br />
-                        <Link to="/get-in-touch" style={{
-                            fontFamily: 'var(--font-display)',
-                            fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-                            fontWeight: 900,
-                            color: 'var(--color-text)',
-                            textDecoration: 'none',
-                            borderBottom: '3px solid var(--color-accent)',
-                            transition: 'opacity 0.2s, border-color 0.3s',
-                            letterSpacing: '-0.02em',
-                            paddingBottom: '4px'
-                        }}
-                        onMouseEnter={(e) => e.target.style.opacity = '0.7'}
-                        onMouseLeave={(e) => e.target.style.opacity = '1'}>
-                            YOUR COMPETITORS ALREADY STARTED →
-                        </Link>
-                    </motion.div>
-                </div>
-            </section>
+            {/* ===== PROCESS — Infographic Pipeline ===== */}
+            <InfographicProcess />
 
             <Testimonials />
             

@@ -8,12 +8,7 @@ const WorkGridItem = ({ project, index, onClick }) => {
     // Handle Hover Playback
     const handleMouseEnter = () => {
         if (videoRef.current) {
-            videoRef.current.muted = false;
-            videoRef.current.play().catch(err => {
-                console.warn('Playback blocked by browser:', err);
-                videoRef.current.muted = true;
-                videoRef.current.play().catch(e => console.error(e));
-            });
+            videoRef.current.play().catch(e => console.warn('Hover playback blocked:', e));
             setIsVisible(true);
         }
     };
@@ -57,7 +52,7 @@ const WorkGridItem = ({ project, index, onClick }) => {
                     <video
                         ref={videoRef}
                         src={project.videoUrl || project.video_url}
-                        preload="metadata"
+                        preload="auto"
                         muted
                         loop
                         playsInline

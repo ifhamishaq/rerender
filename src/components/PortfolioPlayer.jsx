@@ -1,23 +1,71 @@
 import React, { useState } from 'react';
 
-const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false, aspectRatio = "16/9" }) => {
+const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false, aspectRatio = "16/9", onClose }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     // YouTube Handling
     const embedUrl = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1` : null;
 
     return (
-        <div style={{ 
-            position: 'relative', 
-            width: '100%', 
-            backgroundColor: '#000', 
-            aspectRatio: aspectRatio,
+        <div style={{
+            position: 'relative',
+            width: '100%',
+            backgroundColor: 'var(--color-bg)',
+            borderRadius: '12px',
             border: '1px solid var(--color-border)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05) inset',
             overflow: 'hidden',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            flexDirection: 'column'
         }}>
+            {/* Mac Title Bar */}
+            <div style={{
+                height: '32px', // standard mac height
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 12px',
+                borderBottom: '1px solid var(--color-border)',
+                gap: '8px',
+                position: 'relative',
+                zIndex: 10
+            }}>
+                {/* Traffic Lights */}
+                <div 
+                    onClick={onClose}
+                    style={{ 
+                        width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#FF5F56', 
+                        cursor: onClose ? 'pointer' : 'default',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }} 
+                />
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#27C93F' }} />
+                
+                {/* Optional Domain / Title */}
+                <div style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--color-text-secondary)',
+                    pointerEvents: 'none',
+                    opacity: 0.8
+                }}>
+                    {title || 're-render.agency'}
+                </div>
+            </div>
+
+            {/* Video Container */}
+            <div style={{
+                position: 'relative',
+                width: '100%',
+                backgroundColor: '#000',
+                aspectRatio: aspectRatio,
+            }}>
             {/* Loading Spinner */}
             {!isLoaded && (
                 <div style={{
@@ -47,14 +95,17 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
                     controls
                     autoPlay
                     loop
+                    muted
                     playsInline
                     preload="auto"
                     onLoadedData={() => setIsLoaded(true)}
                     style={{
+                        position: 'absolute',
+                        top: 0, left: 0,
                         width: '100%',
                         height: '100%',
                         objectFit: 'contain',
-                        opacity: isLoaded ? 1 : 0,
+                        opacity: 1,
                         transition: 'opacity 0.3s ease'
                     }}
                 />
@@ -67,7 +118,7 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
                         top: 0, left: 0, width: '100%', height: '100%',
                         border: 'none',
                         zIndex: 1,
-                        opacity: isLoaded ? 1 : 0,
+                        opacity: 1,
                         transition: 'opacity 0.2s ease'
                     }}
                     title={title}
@@ -77,21 +128,6 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
                 />
             ) : null}
             
-            {/* Minimal Source Label */}
-            <div style={{
-                position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
-                padding: '2px 6px',
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '9px',
-                zIndex: 10,
-                border: '1px solid var(--color-border)',
-                pointerEvents: 'none'
-            }}>
-                ID_{id?.toUpperCase() || 'REF'}
             </div>
 
             <style>{`

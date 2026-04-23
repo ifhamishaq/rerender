@@ -5,8 +5,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import MacTopBar from './components/MacTopBar';
 import AuthModal from './components/AuthModal';
-import GlobalOracle from './components/GlobalOracle';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -21,36 +21,18 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import LicenseAgreement from './components/LicenseAgreement';
 import RefundPolicy from './components/RefundPolicy';
-import Features from './components/Features';
 import NotFound from './components/NotFound';
 import Admin from './components/Admin';
-import Prompts from './components/Prompts';
-import SubmitPrompt from './components/SubmitPrompt';
 
 // Lazy Loaded Pages
 const Home = React.lazy(() => import('./pages/Home'));
 const Services = React.lazy(() => import('./pages/Services'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage'));
-const PricingPage = React.lazy(() => import('./pages/PricingPage'));
-const ArcadePage = React.lazy(() => import('./pages/ArcadePage'));
-const TypeRacerPage = React.lazy(() => import('./pages/TypeRacerPage'));
-const HexCodeHeroPage = React.lazy(() => import('./pages/HexCodeHeroPage'));
-const PalettePickerPage = React.lazy(() => import('./pages/PalettePickerPage'));
-const ReflexGamePage = React.lazy(() => import('./pages/ReflexGamePage'));
-const WallpaperLab = React.lazy(() => import('./pages/WallpaperLab'));
-const ToolsPage = React.lazy(() => import('./pages/ToolsPage'));
 const CareersPage = React.lazy(() => import('./pages/CareersPage'));
 const ApplyPage = React.lazy(() => import('./pages/ApplyPage'));
 const ContractPage = React.lazy(() => import('./pages/ContractPage'));
 const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
-const AILabPage = React.lazy(() => import('./pages/AILabPage'));
-const SafeZonePage = React.lazy(() => import('./pages/SafeZonePage'));
-const EstimatePage = React.lazy(() => import('./pages/EstimatePage'));
-const CaptionWriterPage = React.lazy(() => import('./pages/CaptionWriterPage'));
-const ThumbnailAnalyserPage = React.lazy(() => import('./pages/ThumbnailAnalyserPage'));
 
-// Standalone AI Tools Section
-import SlotMachineWidget from './components/SlotMachineWidget';
 import TransitionWipe from './components/Animations/TransitionWipe';
 
 // Global persistent audio — lives outside routing so it never resets on page nav
@@ -72,28 +54,16 @@ const TitleManager = () => {
   useEffect(() => {
     const titleMap = {
       '/': 'RE-RENDER | Creative Agency',
-      '/careers': 'Join the Team | RE-RENDER',
-      '/about': 'About | RE-RENDER',
+      '/work': 'Our Work | RE-RENDER',
       '/get-in-touch': 'Contact Us | RE-RENDER',
-      '/features': 'Features | RE-RENDER',
-      '/prompts': 'Prompt Lab | RE-RENDER',
-      '/submit-prompt': 'Submit Prompt | RE-RENDER',
-      '/arcade': 'The Arcade | RE-RENDER',
-      '/arcade/creative-studio': 'Creative Studio | RE-RENDER',
-      '/arcade/type-racer': 'Type Racer | RE-RENDER',
-      '/arcade/hex-code-hero': 'Hex Code Hero | RE-RENDER',
-      '/arcade/palette-thief': 'Palette Thief | RE-RENDER',
-      '/arcade/reflex': 'Chrono Strike | RE-RENDER',
-      '/arcade/wallpaper-lab': 'AI Wallpaper Lab | RE-RENDER',
-      '/tools': 'Utility Labs | RE-RENDER',
+      '/about': 'About | RE-RENDER',
+      '/careers': 'Join the Team | RE-RENDER',
+      '/apply': 'Apply | RE-RENDER',
       '/admin': 'Admin Panel | RE-RENDER',
       '/privacy': 'Privacy Policy | RE-RENDER',
       '/terms': 'Terms of Service | RE-RENDER',
       '/refund': 'Refund Policy | RE-RENDER',
       '/license': 'License Agreement | RE-RENDER',
-      '/lab/caption-writer': 'Caption Writer | RE-RENDER',
-      '/lab/thumbnail-analyser': 'Thumbnail Analyser | RE-RENDER',
-
     };
 
     document.title = titleMap[location.pathname] || 'RE-RENDER | Elite Creative Agency';
@@ -200,18 +170,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<TransitionWipe><Home /></TransitionWipe>} />
         <Route path="/work" element={<TransitionWipe><PortfolioPage /></TransitionWipe>} />
         <Route path="/get-in-touch" element={<TransitionWipe><Services /></TransitionWipe>} />
-        <Route path="/pricing" element={<TransitionWipe><PricingPage /></TransitionWipe>} />
         <Route path="/about" element={<TransitionWipe><AboutPage /></TransitionWipe>} />
-        <Route path="/arcade" element={<TransitionWipe><ArcadePage /></TransitionWipe>} />
-        <Route path="/arcade/type-racer" element={<TransitionWipe><TypeRacerPage /></TransitionWipe>} />
-        <Route path="/arcade/hex-code-hero" element={<TransitionWipe><HexCodeHeroPage /></TransitionWipe>} />
-        <Route path="/arcade/palette-thief" element={<TransitionWipe><PalettePickerPage /></TransitionWipe>} />
-        <Route path="/arcade/reflex" element={<TransitionWipe><ReflexGamePage /></TransitionWipe>} />
-        <Route path="/arcade/wallpaper-lab" element={<TransitionWipe><WallpaperLab /></TransitionWipe>} />
-        <Route path="/tools" element={<TransitionWipe><ToolsPage /></TransitionWipe>} />
-        <Route path="/features" element={<TransitionWipe><Features /></TransitionWipe>} />
-        <Route path="/prompts" element={<TransitionWipe><Prompts /></TransitionWipe>} />
-        <Route path="/submit-prompt" element={<TransitionWipe><SubmitPrompt /></TransitionWipe>} />
         
         {isAdminLocal && <Route path="/admin" element={<TransitionWipe><Admin /></TransitionWipe>} />}
         
@@ -223,12 +182,6 @@ const AnimatedRoutes = () => {
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />
         <Route path="/license" element={<TransitionWipe><LicenseAgreement /></TransitionWipe>} />
         <Route path="/refund" element={<TransitionWipe><RefundPolicy /></TransitionWipe>} />
-        <Route path="/lab/ai-agent" element={<TransitionWipe><AILabPage /></TransitionWipe>} />
-        <Route path="/lab/safe-zone" element={<TransitionWipe><SafeZonePage /></TransitionWipe>} />
-        <Route path="/estimate" element={<TransitionWipe><EstimatePage /></TransitionWipe>} />
-        <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
-        <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
-        <Route path="/dossier" element={<TransitionWipe><DossierPage /></TransitionWipe>} />
         <Route path="/services" element={<Navigate to="/get-in-touch" replace />} />
         <Route path="*" element={<TransitionWipe><NotFound /></TransitionWipe>} />
 
@@ -238,7 +191,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-import DossierPage from './pages/DossierPage';
+
 
 const MainApp = () => {
     const { isAuthModalOpen, setIsAuthModalOpen } = useAuth();
@@ -249,11 +202,11 @@ const MainApp = () => {
                 <TitleManager />
                 <ScrollToTop />
                 <GlobalAudio />
-                <div className="app" style={{ position: 'relative' }}>
+                <div className="app" style={{ position: 'relative', paddingTop: '28px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                    <MacTopBar />
                     <Cursor />
                     <ScrollProgress />
                     <Navbar />
-                    <GlobalOracle />
 
                     <AnimatedRoutes />
 
