@@ -7,8 +7,9 @@ import Magnetic from '../components/Animations/Magnetic';
 
 const ApplyPage = () => {
     const { jobId } = useParams();
+    console.log('ApplyPage Mounted for JobID:', jobId);
     const navigate = useNavigate();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, setIsAuthModalOpen } = useAuth();
     const [existingApplication, setExistingApplication] = useState(null);
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -131,7 +132,18 @@ const ApplyPage = () => {
         </div>
     );
 
-    if (!user) return <Navigate to="/" replace />;
+    if (!user) return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', fontStyle: 'italic', marginBottom: '2rem', color: 'var(--color-accent)' }}>Authentication Required</h1>
+            <p style={{ opacity: 0.6, marginBottom: '2rem', maxWidth: '400px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>You must be logged in to submit an application dossier.</p>
+            <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                style={{ backgroundColor: 'var(--color-accent)', color: '#000', padding: '1rem 2rem', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer' }}
+            >
+                LOG_IN_TO_APPLY
+            </button>
+        </div>
+    );
 
     if (existingApplication) return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>

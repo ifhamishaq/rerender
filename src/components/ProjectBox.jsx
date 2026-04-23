@@ -4,18 +4,20 @@ import { motion } from 'framer-motion';
 const ProjectBox = ({ project, onClick }) => {
     return (
         <motion.div 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02, y: -5 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onClick}
             style={{
                 position: 'relative',
                 width: '100%',
                 aspectRatio: '16/9',
                 backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
+                borderRadius: '32px',
                 overflow: 'hidden',
                 cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(10px)'
             }}
         >
             {/* Thumbnail / Video Preview */}
@@ -58,12 +60,13 @@ const ProjectBox = ({ project, onClick }) => {
                 style={{
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(8px)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '1rem',
+                    padding: '1.5rem',
                     textAlign: 'center'
                 }}
             >

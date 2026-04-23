@@ -34,30 +34,12 @@ const STATS = [
 ];
 
 const TOOLS_ARSENAL = [
-    { 
-        category: 'AI SUITE',
-        items: [
-            { name: 'Aesthetic Oracle', desc: 'AI creative director powered by StepFun', icon: <Sparkles size={16} />, link: '/lab/ai-agent' },
-            { name: 'Thumbnail Analyser', desc: 'Vision AI for thumbnail critique', icon: <Upload size={16} />, link: '/lab/ai-agent' },
-            { name: 'Wallpaper Lab', desc: 'AI-generated wallpapers with prompt enhancement', icon: <ImageIcon size={16} />, link: '/arcade/wallpaper-lab' }
-        ]
-    },
-    {
-        category: 'CREATIVE TOOLS',
-        items: [
-            { name: 'Prompt Lab', desc: 'Curated prompts for AI generation', icon: <FileText size={16} />, link: '/prompts' },
-            { name: 'Safe Zone', desc: 'Brand-safe content validator', icon: <Shield size={16} />, link: '/lab/safe-zone' },
-            { name: 'Utility Labs', desc: 'Full toolkit for creators', icon: <Wand2 size={16} />, link: '/tools' }
-        ]
-    },
-    {
-        category: 'THE ARCADE',
-        items: [
-            { name: 'Type Racer', desc: 'Speed typing with creative prompts', icon: <Gamepad2 size={16} />, link: '/arcade/type-racer' },
-            { name: 'Hex Code Hero', desc: 'Color matching challenge', icon: <Palette size={16} />, link: '/arcade/hex-code-hero' },
-            { name: 'Chrono Strike', desc: 'Reflex testing for creators', icon: <Zap size={16} />, link: '/arcade/reflex' }
-        ]
-    }
+    { name: 'Aesthetic Oracle', category: 'AI', icon: <Sparkles size={16} /> },
+    { name: 'Thumbnail Analyser', category: 'AI', icon: <Upload size={16} /> },
+    { name: 'Prompt Lab', category: 'TOOLS', icon: <FileText size={16} /> },
+    { name: 'Vite & React', category: 'STACK', icon: <Code size={16} /> },
+    { name: 'After Effects', category: 'VIDEO', icon: <Film size={16} /> },
+    { name: 'Blender', category: '3D', icon: <Box size={16} /> }
 ];
 
 const TECH_STACK = [
@@ -108,12 +90,9 @@ const About = () => {
                         <span style={{ color: 'var(--color-accent)' }}>CREATIVE COLLECTIVE.</span>
                     </h1>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }} className="about-intro-grid">
-                        <p style={{ fontSize: '1.2rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
-                            RE-RENDER is an elite design and production studio built for the fast-paced digital era. We don't just "edit" or "design"—we engineer unforgettable visual identities.
-                        </p>
-                        <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
-                            Our team combines technical precision with aggressive creativity to push the boundaries of what's possible in web, video, and 3D.
+                    <div style={{ maxWidth: '800px' }}>
+                        <p style={{ fontSize: '1.4rem', lineHeight: 1.4, color: 'var(--color-text)', fontWeight: 500, marginBottom: '2rem' }}>
+                            RE-RENDER is an elite creative studio engineered for the next generation of brands. We don't just design—we build unforgettable visual identities.
                         </p>
                     </div>
                 </div>
@@ -135,10 +114,12 @@ const About = () => {
                                 viewport={{ once: true, margin: "-10%" }}
                                 transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1], delay: i * 0.1 }}
                                 style={{
+                                    borderRadius: '28px',
                                     border: '1px solid var(--color-border)',
                                     backgroundColor: 'var(--color-surface)',
                                     position: 'relative',
-                                    overflow: 'hidden'
+                                    overflow: 'hidden',
+                                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                                 }}
                             >
                                 {/* Technical Header */}
@@ -286,76 +267,7 @@ const About = () => {
                         </motion.div>
                     ))}
                 </div>
-            </div>
-
-            {/* ===== TOOLS ARSENAL ===== */}
-            <div style={{ padding: '8rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <motion.div
-                        initial={{ y: 20, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: true }}
-                        style={{ marginBottom: '5rem' }}
-                    >
-                        <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1.5rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                            02 — MY TOOLS
-                        </div>
-                        <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.9, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
-                            TOOLS I'VE<br />
-                            <span style={{ color: 'var(--color-accent)' }}>BUILT.</span>
-                        </h2>
-                    </motion.div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }} className="tools-grid">
-                        {TOOLS_ARSENAL.map((group, gi) => (
-                            <motion.div
-                                key={gi}
-                                initial={{ y: 30, opacity: 0 }}
-                                whileInView={{ y: 0, opacity: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: gi * 0.15 }}
-                                style={{ border: '1px solid var(--color-border)', padding: '0' }}
-                            >
-                                <div style={{
-                                    padding: '1.5rem 2rem',
-                                    borderBottom: '1px solid var(--color-border)',
-                                    backgroundColor: 'rgba(255,255,255,0.02)'
-                                }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--color-accent)' }}>
-                                        {group.category}
-                                    </span>
-                                </div>
-                                {group.items.map((item, ii) => (
-                                    <Link
-                                        key={ii}
-                                        to={item.link}
-                                        style={{
-                                            display: 'flex', alignItems: 'flex-start', gap: '1rem',
-                                            padding: '1.5rem 2rem', textDecoration: 'none',
-                                            borderBottom: ii < group.items.length - 1 ? '1px solid var(--color-border)' : 'none',
-                                            transition: 'background-color 0.15s', color: 'inherit'
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(57,255,20,0.03)'}
-                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                                    >
-                                        <div style={{ color: 'var(--color-accent)', marginTop: '0.15rem', flexShrink: 0 }}>{item.icon}</div>
-                                        <div>
-                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
-                                                {item.name}
-                                            </div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-                                                {item.desc}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* ===== TECH STACK ===== */}
+                      {/* ===== UNIFIED TOOLKIT ===== */}
             <div style={{ padding: '8rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <motion.div
@@ -365,39 +277,49 @@ const About = () => {
                         style={{ marginBottom: '4rem' }}
                     >
                         <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', marginBottom: '1.5rem', letterSpacing: '0.2em', fontWeight: 900 }}>
-                            003 — STACK
+                            03 — THE TOOLKIT
                         </div>
                         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.9, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
-                            TECH I<br />
-                            <span style={{ color: 'var(--color-accent)' }}>USE.</span>
+                            UNIFIED<br />
+                            <span style={{ color: 'var(--color-accent)' }}>ARSENAL.</span>
                         </h2>
                     </motion.div>
-
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                        {TECH_STACK.map((tech, i) => (
+ 
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
+                        gap: '1rem' 
+                    }}>
+                        {TOOLS_ARSENAL.map((item, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                whileInView={{ scale: 1, opacity: 1 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: i * 0.04 }}
+                                transition={{ delay: i * 0.05 }}
                                 style={{
-                                    padding: '0.75rem 1.5rem',
+                                    padding: '1.5rem',
+                                    borderRadius: '16px',
                                     border: '1px solid var(--color-border)',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem', fontWeight: 900,
-                                    letterSpacing: '0.1em',
-                                    color: 'var(--color-text-secondary)',
-                                    transition: 'all 0.15s'
+                                    backgroundColor: 'var(--color-surface)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '1rem',
+                                    alignItems: 'center',
+                                    textAlign: 'center'
                                 }}
-                                whileHover={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
                             >
-                                {tech}
+                                <div style={{ color: 'var(--color-accent)' }}>{item.icon}</div>
+                                <div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>{item.name}</div>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem', opacity: 0.6 }}>{item.category}</div>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
                 </div>
             </div>
+       </div>
 
             {/* ===== PHILOSOPHY ===== */}
             <div style={{ padding: '8rem 2rem' }}>

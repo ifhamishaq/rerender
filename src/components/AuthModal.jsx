@@ -137,7 +137,6 @@ const AuthModal = ({ isOpen, onClose }) => {
             </div>
         </AnimatePresence>
     );
-;
 };
 
 export default AuthModal;

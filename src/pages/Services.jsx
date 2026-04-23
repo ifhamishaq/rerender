@@ -65,13 +65,14 @@ const Services = () => {
                         {servicesList.map((service, index) => (
                             <motion.button
                                 key={index}
-                                whileHover={{ scale: 1.02 }}
+                                whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleServiceClick(service.title)}
                                 style={{
                                     position: 'relative',
-                                    height: '100px',
+                                    height: '80px',
                                     backgroundColor: 'var(--color-surface)',
+                                    borderRadius: '100px', // Pill-shaped
                                     border: selectedService === (service.title.toLowerCase().replace(' ', '-')) ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
                                     color: 'var(--color-text)',
                                     cursor: 'pointer',
@@ -80,29 +81,17 @@ const Services = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     textAlign: 'center',
-                                    padding: '1rem'
+                                    padding: '0 2rem'
                                 }}
                             >
-                                <img 
-                                    src={service.gif} 
-                                    alt="" 
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0, left: 0, width: '100%', height: '100%',
-                                        objectFit: 'cover',
-                                        opacity: 0.15,
-                                        filter: 'grayscale(1)',
-                                        zIndex: 0
-                                    }}
-                                />
                                 <span style={{
                                     position: 'relative',
                                     zIndex: 1,
                                     fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.8rem',
+                                    fontSize: '0.75rem',
                                     fontWeight: 900,
                                     textTransform: 'uppercase',
-                                    letterSpacing: '0.1em'
+                                    letterSpacing: '0.15em'
                                 }}>
                                     {service.title}
                                 </span>
@@ -168,45 +157,86 @@ const Services = () => {
 
 
 
-                            {[
-                                { label: 'YOUR NAME', name: 'name', type: 'text', placeholder: 'John Doe' },
-                                { label: 'EMAIL ADDRESS', name: 'email', type: 'email', placeholder: 'you@company.com' },
-                                { label: 'COMPANY / BRAND', name: 'company', type: 'text', placeholder: 'Optional' }
-                            ].map(field => (
-                                <div key={field.name}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 'bold',
-                                        letterSpacing: '0.1em',
-                                        marginBottom: '0.5rem',
-                                        color: 'var(--color-text)'
-                                    }}>
-                                        {field.label}
-                                    </label>
-                                    <input
-                                        type={field.type}
-                                        name={field.name}
-                                        required={field.name !== 'company'}
-                                        placeholder={field.placeholder}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.85rem 1rem',
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="form-row-mobile">
+                                {[
+                                    { label: 'YOUR NAME', name: 'name', type: 'text', placeholder: 'John Doe' },
+                                    { label: 'EMAIL ADDRESS', name: 'email', type: 'email', placeholder: 'you@company.com' }
+                                ].map(field => (
+                                    <div key={field.name}>
+                                        <label style={{
+                                            display: 'block',
                                             fontFamily: 'var(--font-mono)',
-                                            fontSize: '0.9rem',
-                                            backgroundColor: 'var(--color-surface)',
-                                            color: 'var(--color-text)',
-                                            border: '1px solid var(--color-border)',
-                                            outline: 'none',
-                                            transition: 'border-color 0.2s',
-                                            boxSizing: 'border-box'
-                                        }}
-                                        onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
-                                        onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
-                                    />
-                                </div>
-                            ))}
+                                            fontSize: '0.65rem',
+                                            fontWeight: 'bold',
+                                            letterSpacing: '0.1em',
+                                            marginBottom: '0.75rem',
+                                            color: 'var(--color-text-secondary)',
+                                            opacity: 0.6
+                                        }}>
+                                            {field.label}
+                                        </label>
+                                        <input
+                                            type={field.type}
+                                            name={field.name}
+                                            required
+                                            placeholder={field.placeholder}
+                                            style={{
+                                                width: '100%',
+                                                padding: '1.2rem',
+                                                borderRadius: '16px',
+                                                fontFamily: 'var(--font-mono)',
+                                                fontSize: '0.9rem',
+                                                backgroundColor: 'var(--color-surface)',
+                                                color: 'var(--color-text)',
+                                                border: '1px solid var(--color-border)',
+                                                outline: 'none',
+                                                transition: 'all 0.2s',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            onFocus={(e) => {
+                                                e.target.style.borderColor = 'var(--color-accent)';
+                                                e.target.style.backgroundColor = 'rgba(57, 255, 20, 0.02)';
+                                            }}
+                                            onBlur={(e) => {
+                                                e.target.style.borderColor = 'var(--color-border)';
+                                                e.target.style.backgroundColor = 'var(--color-surface)';
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div>
+                                <label style={{
+                                    display: 'block',
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 'bold',
+                                    letterSpacing: '0.1em',
+                                    marginBottom: '0.75rem',
+                                    color: 'var(--color-text-secondary)',
+                                    opacity: 0.6
+                                }}>
+                                    COMPANY / BRAND (OPTIONAL)
+                                </label>
+                                <input
+                                    type="text"
+                                    name="company"
+                                    placeholder="Your Brand"
+                                    style={{
+                                        width: '100%',
+                                        padding: '1.2rem',
+                                        borderRadius: '16px',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.9rem',
+                                        backgroundColor: 'var(--color-surface)',
+                                        color: 'var(--color-text)',
+                                        border: '1px solid var(--color-border)',
+                                        outline: 'none',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
 
                             <div>
                                 <label style={{
@@ -319,25 +349,25 @@ const Services = () => {
                             </div>
 
                             <motion.button
-                                whileTap={{ scale: 0.97 }}
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
                                 type="submit"
                                 style={{
-                                    padding: '1rem',
+                                    padding: '1.2rem',
                                     backgroundColor: 'var(--color-accent)',
                                     color: '#000',
                                     fontFamily: 'var(--font-mono)',
-                                    fontWeight: 'bold',
+                                    fontWeight: 950,
                                     fontSize: '1rem',
                                     border: 'none',
+                                    borderRadius: '100px',
                                     cursor: 'pointer',
                                     textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                    transition: 'opacity 0.2s ease'
+                                    letterSpacing: '0.1em',
+                                    marginTop: '1rem'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                             >
-                                GET A QUOTE →
+                                SEND INQUIRY →
                             </motion.button>
                         </form>
                     </div>

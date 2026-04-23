@@ -64,96 +64,45 @@ const CareersPage = () => {
                 {isLoading ? (
                     <div className="selection-empty" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>[LOADING_LIVE_DATA...]</div>
                 ) : (
-                    <div className="portal-layout">
-                        {/* JOB LIST SIDEBAR */}
-                        <aside className="job-list-sidebar">
-                            {filteredJobs.length > 0 ? filteredJobs.map(job => (
-                                <div
-                                    key={job.id}
-                                    className={`job-card-mini ${selectedJob?.id === job.id ? 'selected' : ''}`}
-                                    onClick={() => setSelectedJob(job)}
-                                >
-                                    <div className="card-mini-top">
-                                        <span className="job-sidemark">{job.sidemark}</span>
-                                        <span className={`job-status-pip ${job.status?.toLowerCase()}`}></span>
+                    <div className="apple-jobs-list">
+                        {filteredJobs.length > 0 ? filteredJobs.map(job => (
+                            <motion.div
+                                key={job.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                whileHover={{ scale: 1.01 }}
+                                className="apple-job-card"
+                            >
+                                <Link to={`/apply/${job.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <div className="job-card-header">
+                                        <div className="job-card-main-info">
+                                            <h3 className="apple-job-title">{job.title}</h3>
+                                            <div className="job-tags">
+                                                <span className="job-tag">{job.type}</span>
+                                                <span className="job-tag access">REMOTE-FIRST</span>
+                                                <span className="job-tag access">ASYNC-OK</span>
+                                            </div>
+                                        </div>
+                                        <div className="apple-apply-btn">
+                                            APPLY ↗
+                                        </div>
                                     </div>
-                                    <h3 className="job-mini-title">{job.title}</h3>
-                                    <div className="job-mini-meta">
-                                        <span>{job.type}</span>
-                                        <span>•</span>
-                                        <span>REMOTE</span>
+                                    
+                                    <div className="job-card-body">
+                                        <p>{job.description}</p>
+                                        {job.specs && (
+                                            <div className="job-specs-brief">
+                                                {job.specs.slice(0, 3).map((s, i) => (
+                                                    <span key={i} className="spec-chip">{s}</span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    {selectedJob?.id === job.id && isMobile && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            className="mobile-details-preview"
-                                        >
-                                            <p>{job.description}</p>
-                                            <Link to={`/apply/${job.id}`} className="apply-btn-mini">QUICK_APPLY</Link>
-                                        </motion.div>
-                                    )}
-                                </div>
-                            )) : (
-                                <div className="no-jobs">[NO_MATCHING_OPENINGS]</div>
-                            )}
-                        </aside>
-
-                        {/* JOB DETAILS VIEW */}
-                        {!isMobile && (
-                            <section className="job-details-view">
-                                <AnimatePresence mode="wait">
-                                    {selectedJob ? (
-                                        <motion.div
-                                            key={selectedJob.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="details-content"
-                                        >
-                                            <div className="details-header">
-                                                <div className="job-badge">{selectedJob.type}</div>
-                                                <h2 className="details-title">
-                                                    <span className="serif-italic">{selectedJob.serif_title}</span><br />
-                                                    {selectedJob.title}
-                                                </h2>
-                                                <div className="details-meta-grid">
-                                                    <div className="meta-item">
-                                                        <label>STATUS</label>
-                                                        <span>{selectedJob.status}</span>
-                                                    </div>
-                                                    <div className="meta-item">
-                                                        <label>LOCATION</label>
-                                                        <span>GLOBAL / REMOTE</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="details-body">
-                                                <p className="job-full-desc">{selectedJob.description}</p>
-                                                <div className="specs-section">
-                                                    <label className="mono-label">REQUIREMENTS</label>
-                                                    <ul className="spec-list">
-                                                        {selectedJob.specs?.map((s, i) => (
-                                                            <li key={i}>{s}</li>
-                                                        )) || <li>[NO_SPECIFICATIONS_LISTED]</li>}
-                                                    </ul>
-                                                </div>
-                                            </div>
-
-                                            <div className="details-footer">
-                                                <Magnetic strength={0.2}>
-                                                    <Link to={`/apply/${selectedJob.id}`} className="main-apply-btn">
-                                                        APPLY NOW
-                                                    </Link>
-                                                </Magnetic>
-                                            </div>
-                                        </motion.div>
-                                    ) : (
-                                        <div className="selection-empty">SELECT_A_POSITION_TO_VIEW_DETAILS</div>
-                                    )}
-                                </AnimatePresence>
-                            </section>
+                                </Link>
+                            </motion.div>
+                        )) : (
+                            <div className="no-jobs">[NO_MATCHING_OPENINGS]</div>
                         )}
                     </div>
                 )}
