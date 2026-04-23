@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Sun, Moon, Volume2, VolumeX, Wifi, BatteryFull, Command } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const MacTopBar = () => {
     const { isDarkMode, toggleTheme } = useTheme();
+    const { user, signOut, setIsAuthModalOpen } = useAuth();
     const [time, setTime] = useState(new Date());
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -93,37 +96,92 @@ const MacTopBar = () => {
                 </div>
             </div>
 
-            {/* Right Box: Status Icons + Time */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', height: '100%' }}>
+            {/* Right Box: Status Icons + Auth + Time */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '100%' }}>
                 
+                {/* Studio Status Badge */}
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '6px', 
+                    fontSize: '10px', 
+                    fontWeight: 700, 
+                    color: 'var(--color-accent)', 
+                    backgroundColor: 'rgba(57, 255, 20, 0.05)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(57, 255, 20, 0.1)'
+                }} className="hide-mobile">
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-accent)', animation: 'pulse 2s infinite' }}></span>
+                    STUDIO_ONLINE
+                </div>
+
+                {/* Auth Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Link to="/profile" style={{ color: 'inherit', textDecoration: 'none', opacity: 0.9, fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>
+                                {profile?.full_name?.split(' ')[0].toUpperCase() || 'PROFILE'}
+                            </Link>
+                            <div style={{ width: '1px', height: '12px', backgroundColor: 'var(--color-border)' }}></div>
+                            <span 
+                                onClick={signOut}
+                                style={{ cursor: 'pointer', opacity: 0.4, fontSize: '10px', fontWeight: 600 }}
+                            >
+                                LOGOUT
+                            </span>
+                        </div>
+                    ) : (
+                        <span 
+                            onClick={() => setIsAuthModalOpen(true)}
+                            style={{ 
+                                cursor: 'pointer', 
+                                opacity: 0.9, 
+                                fontSize: '11px', 
+                                fontWeight: 700, 
+                                color: 'var(--color-accent)',
+                                letterSpacing: '0.05em'
+                            }}
+                        >
+                            LOGIN
+                        </span>
+                    )}
+                </div>
+
                 {/* Audio Toggle */}
                 <div 
                     onClick={toggleAudio} 
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.8 }}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.7 }}
                     title={isPlaying ? "Pause Music" : "Play Music"}
                 >
-                    {isPlaying ? <Volume2 size={15} /> : <VolumeX size={15} />}
+                    {isPlaying ? <Volume2 size={13} /> : <VolumeX size={13} />}
                 </div>
 
                 {/* Theme Toggle */}
                 <div 
                     onClick={toggleTheme} 
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.8 }}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.7 }}
                     title="Toggle Dark Mode"
                 >
-                    {isDarkMode ? <Moon size={14} /> : <Sun size={14} />}
+                    {isDarkMode ? <Moon size={12} /> : <Sun size={12} />}
                 </div>
 
                 {/* Wifi / Battery (Aesthetic) */}
-                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.8 }}>
-                    <Wifi size={14} />
+                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.6 }} className="hide-mobile">
+                    <Wifi size={13} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.9 }}>
-                    <BatteryFull size={16} color="#34C759" /> {/* Apple Green */}
+                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.7 }} className="hide-mobile">
+                    <BatteryFull size={15} color="#34C759" />
                 </div>
 
                 {/* Clock */}
-                <div style={{ cursor: 'default', marginLeft: '4px' }}>
+                <div style={{ 
+                    cursor: 'default', 
+                    fontSize: '12px', 
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    marginLeft: '4px'
+                }}>
                     {formattedTime}
                 </div>
             </div>

@@ -10,6 +10,9 @@ import AuthModal from './components/AuthModal';
 import Hero from './components/Hero';
 import ScrollToTop from './components/ScrollToTop';
 
+import AboutPage from './pages/AboutPage';
+import ProfilePage from './pages/ProfilePage';
+import DossierPage from './pages/DossierPage';
 import Footer from './components/Footer';
 import Marquee from './components/Marquee';
 import Cursor from './components/Cursor';
@@ -27,7 +30,6 @@ import Admin from './components/Admin';
 // Lazy Loaded Pages
 const Home = React.lazy(() => import('./pages/Home'));
 const Services = React.lazy(() => import('./pages/Services'));
-const AboutPage = React.lazy(() => import('./pages/AboutPage'));
 const CareersPage = React.lazy(() => import('./pages/CareersPage'));
 const ApplyPage = React.lazy(() => import('./pages/ApplyPage'));
 const ContractPage = React.lazy(() => import('./pages/ContractPage'));
@@ -177,6 +179,8 @@ const AnimatedRoutes = () => {
         <Route path="/careers" element={<TransitionWipe><CareersPage /></TransitionWipe>} />
         <Route path="/apply" element={<TransitionWipe><ApplyPage /></TransitionWipe>} />
         <Route path="/apply/:jobId" element={<TransitionWipe><ApplyPage /></TransitionWipe>} />
+        <Route path="/profile" element={<TransitionWipe><ProfilePage /></TransitionWipe>} />
+        <Route path="/dossier" element={<TransitionWipe><DossierPage /></TransitionWipe>} />
         <Route path="/legal/portfolio-agreement" element={<TransitionWipe><ContractPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />

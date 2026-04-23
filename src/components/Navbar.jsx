@@ -58,6 +58,7 @@ const Navbar = () => {
         { href: '/get-in-touch', icon: <Mail size={32} strokeWidth={1.5} />, label: 'Contact' },
         { href: '/careers', icon: <Briefcase size={32} strokeWidth={1.5} />, label: 'Careers' },
         { href: '/about', icon: <Info size={32} strokeWidth={1.5} />, label: 'About' },
+        { href: '/profile', icon: <User size={32} strokeWidth={1.5} />, label: 'Profile' },
     ];
 
     const isActive = (href) => location.pathname === href;
