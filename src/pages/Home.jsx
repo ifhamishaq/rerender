@@ -63,7 +63,7 @@ const Home = () => {
 
             {/* ===== STATS BAR — Animated Social Proof ===== */}
             <section style={{
-                padding: '5rem 2rem',
+                padding: 'clamp(3rem, 10vw, 5rem) clamp(1rem, 5vw, 2rem)',
                 backgroundColor: 'var(--color-surface)',
                 borderTop: '1px solid var(--color-border)',
                 borderBottom: '1px solid var(--color-border)',
@@ -140,7 +140,7 @@ const Home = () => {
 
             {/* ===== SERVICES — "What We Obsess Over" ===== */}
             <section id="services" style={{
-                padding: '8rem 2rem',
+                padding: 'clamp(4rem, 12vw, 8rem) clamp(1rem, 5vw, 2rem)',
                 backgroundColor: 'var(--color-surface)',
                 borderBottom: '1px solid var(--color-border)'
             }}>
@@ -312,7 +312,7 @@ const Home = () => {
 
             {/* ===== FINAL CTA — The Psychological Close ===== */}
             <section className="gradient-bg-animated" style={{
-                padding: '10rem 2rem',
+                padding: 'clamp(5rem, 15vw, 10rem) clamp(1rem, 5vw, 2rem)',
                 color: 'var(--color-text)',
                 textAlign: 'center',
                 position: 'relative',

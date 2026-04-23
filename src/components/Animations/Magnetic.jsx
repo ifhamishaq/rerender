@@ -13,7 +13,10 @@ const Magnetic = ({ children, strength = 0.5 }) => {
     const springX = useSpring(x, springConfig);
     const springY = useSpring(y, springConfig);
 
+    const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
     const handleMouseMove = (e) => {
+        if (isTouchDevice) return;
         const { clientX, clientY } = e;
         if (!ref.current) return;
         
@@ -29,6 +32,7 @@ const Magnetic = ({ children, strength = 0.5 }) => {
     };
 
     const handleMouseLeave = () => {
+        if (isTouchDevice) return;
         x.set(0);
         y.set(0);
     };

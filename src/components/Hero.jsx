@@ -49,23 +49,28 @@ export default function Hero() {
                     
                     {/* Massive static headline */}
                     <h1 className="hero-title editorial reduced">
-                        <motion.span 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 1, delay: 0.2 }}
-                            className="hero-title-line-1"
-                        >
-                            DIGITAL EXPERIENCES
-                        </motion.span>
-                        <motion.span 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 1, delay: 0.4 }}
-                            className="hero-title-line-1"
-                            style={{ color: 'var(--color-accent)' }}
-                        >
-                            THAT DRIVE ROI.
-                        </motion.span>
+                        <div style={{ overflow: 'hidden' }}>
+                            <motion.span 
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1], delay: 0.2 }}
+                                className="hero-title-line-1"
+                                style={{ display: 'block' }}
+                            >
+                                RE-RENDERING YOUR
+                            </motion.span>
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                            <motion.span 
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1], delay: 0.4 }}
+                                className="hero-title-line-1"
+                                style={{ color: 'var(--color-accent)', display: 'block' }}
+                            >
+                                DIGITAL DOMINANCE.
+                            </motion.span>
+                        </div>
                     </h1>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2.5rem' }}>

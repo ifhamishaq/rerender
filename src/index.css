@@ -1,11 +1,11 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
 
 :root {
   /* Modern Premium Light Mode */
   --color-bg: #f5f5f7;
   --color-text: #1d1d1f;
   --color-text-secondary: #86868b;
-  --color-accent: #0071e3; 
+  --color-accent: #39FF14; 
   --color-surface: #FFFFFF;
   --color-border: #d2d2d7;
 
@@ -14,7 +14,7 @@
   --shadow-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-screen: 0 8px 32px rgba(0, 0, 0, 0.08);
 
-  --led-glow: 0 0 16px rgba(0, 0, 0, 0.1);
+  --led-glow: 0 0 16px rgba(57, 255, 20, 0.3);
   --led-off: none;
 
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -35,7 +35,7 @@ body.dark-mode {
   --color-bg: #000000;
   --color-text: #f5f5f7;
   --color-text-secondary: #86868b;
-  --color-accent: #2997ff; 
+  --color-accent: #39FF14; 
   --color-surface: #1d1d1f;
   --color-border: #424245;
 
@@ -44,7 +44,7 @@ body.dark-mode {
   --shadow-pressed: inset 0 2px 8px rgba(0, 0, 0, 0.8);
   --shadow-screen: 0 12px 48px rgba(0, 0, 0, 0.6);
 
-  --led-glow: 0 0 24px rgba(255, 255, 255, 0.15);
+  --led-glow: 0 0 24px rgba(57, 255, 20, 0.5);
   --led-off: none;
 }
 
@@ -362,8 +362,9 @@ body:not(.dark-mode) .glass-card {
   text-transform: uppercase;
   color: var(--color-accent);
   padding: 3px 8px;
-  border: 1px solid rgba(57, 255, 20, 0.3);
-  background: rgba(57, 255, 20, 0.05);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  background: rgba(57, 255, 20, 0.1);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
 }
 
 /* Star rating */
@@ -637,7 +638,11 @@ html.lenis body {
 
   /* Hero image container */
   .hero-section>div:nth-child(2) {
-    min-height: 300px;
+    min-height: 40vh !important;
+  }
+
+  :root {
+    --spacing-xl: 2.5rem;
   }
 }
 
@@ -834,8 +839,10 @@ html.lenis body {
   display: flex;
   font-weight: 600;
   overflow: hidden;
-  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 100px; /* Fully rounded */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.2);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+  backdrop-filter: blur(12px) saturate(180%);
 }
 
 .liquidGlass-effect {
@@ -843,68 +850,70 @@ html.lenis body {
   z-index: 0;
   inset: 0;
   backdrop-filter: blur(3px);
-  filter: url(#glass-distortion);
-  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .liquidGlass-effect {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .liquidGlass-tint {
-  z-index: 1;
   position: absolute;
+  z-index: 1;
   inset: 0;
-  background: rgba(255, 255, 255, 0.50);
-}
-
-body.dark-mode .liquidGlass-tint {
-  background: rgba(40, 40, 40, 0.60);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0.3;
 }
 
 .liquidGlass-shine {
   position: absolute;
-  inset: 0;
   z-index: 2;
-  overflow: hidden;
-  box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  opacity: 0.4;
 }
 
 .liquidGlass-text {
+  position: relative;
   z-index: 3;
-  font-size: 2rem;
-  color: black;
+  width: 100%;
 }
 
 .dock {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: 2rem;
-  padding: 0.6rem;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 15px;
 }
 
-.dock,
-.dock > div {
-  border-radius: 2rem;
+@media (max-width: 768px) {
+  .liquidGlass-wrapper {
+    scale: 0.85;
+    bottom: 15px !important;
+  }
+  .dock {
+    padding: 8px 12px;
+    gap: 8px;
+  }
 }
 
-.dock:hover {
-  padding: 0.8rem;
-  border-radius: 2.5rem;
-}
-.dock:hover > div {
-  border-radius: 2.5rem;
+/* Portfolio Masonry Grid */
+.portfolio-masonry-grid {
+  column-count: 3;
 }
 
-.dock img {
-  width: 75px;
-  padding: 0;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
-  cursor: pointer;
+@media (max-width: 1024px) {
+  .portfolio-masonry-grid {
+    column-count: 2;
+  }
 }
 
-.dock img:hover {
-  transform: scale(0.95) translateY(-10px);
-  transform-origin: center center;
+@media (max-width: 600px) {
+  .portfolio-masonry-grid {
+    column-count: 1;
+  }
 }
-
-

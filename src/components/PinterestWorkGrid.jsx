@@ -38,7 +38,7 @@ const PinterestWorkGrid = () => {
 
     return (
         <section style={{ 
-            padding: '8rem 2rem', 
+            padding: 'clamp(4rem, 12vw, 8rem) clamp(1rem, 5vw, 2rem)', 
             backgroundColor: 'var(--color-bg)',
             borderBottom: '1px solid var(--color-border)'
         }}>
@@ -69,11 +69,13 @@ const PinterestWorkGrid = () => {
                 </div>
 
                 {/* Pinterest Masonry Grid */}
-                <div style={{
-                    columnCount: window.innerWidth < 768 ? 1 : 3,
-                    columnGap: '2rem',
-                    width: '100%',
-                }}>
+                <div 
+                    className="portfolio-masonry-grid"
+                    style={{
+                        columnGap: '2rem',
+                        width: '100%',
+                    }}
+                >
                     {projects.map((project, index) => (
                         <WorkGridItem 
                             key={project.id}

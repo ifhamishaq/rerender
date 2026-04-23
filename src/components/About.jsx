@@ -130,10 +130,10 @@ const About = () => {
                         {TEAM_DATA.map((member, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ y: 30, opacity: 0 }}
+                                initial={{ y: 50, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.2 }}
+                                viewport={{ once: true, margin: "-10%" }}
+                                transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1], delay: i * 0.1 }}
                                 style={{
                                     border: '1px solid var(--color-border)',
                                     backgroundColor: 'var(--color-surface)',
