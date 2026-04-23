@@ -426,16 +426,18 @@ const Services = () => {
                             fontSize: '1.2rem',
                             textDecoration: 'none',
                             textTransform: 'uppercase',
-                            boxShadow: '8px 8px 0px var(--color-accent)',
-                            transition: 'transform 0.1s ease, box-shadow 0.1s ease',
+                            textTransform: 'uppercase',
+                            borderRadius: '100px',
+                            boxShadow: 'var(--shadow-raised)',
+                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                             onMouseEnter={(e) => {
-                                e.target.style.transform = 'translate(-4px, -4px)';
-                                e.target.style.boxShadow = '12px 12px 0px var(--color-accent)';
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = 'var(--shadow-screen)';
                             }}
                             onMouseLeave={(e) => {
-                                e.target.style.transform = 'translate(0, 0)';
-                                e.target.style.boxShadow = '8px 8px 0px var(--color-accent)';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = 'var(--shadow-raised)';
                             }}>
                             START A PROJECT
                         </a>

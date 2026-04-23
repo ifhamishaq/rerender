@@ -299,7 +299,7 @@ const About = () => {
                                 transition={{ delay: i * 0.05 }}
                                 style={{
                                     padding: '1.5rem',
-                                    borderRadius: '16px',
+                                    borderRadius: '24px',
                                     border: '1px solid var(--color-border)',
                                     backgroundColor: 'var(--color-surface)',
                                     display: 'flex',

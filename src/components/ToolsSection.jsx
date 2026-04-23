@@ -43,61 +43,78 @@ const GlitchText = ({ text }) => {
 const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false }) => (
     <Link to={link || "#"} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <motion.div
-            whileHover={{ backgroundColor: 'var(--color-surface)', y: -4 }}
-            transition={{ duration: 0.2 }}
+            whileHover={{ y: -6, scale: 1.02 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             style={{
-                border: isHot ? `1px solid ${ACCENT}` : '1px solid var(--color-border)',
-                padding: '2.5rem',
-                display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                backgroundColor: 'var(--color-bg)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '24px',
+                padding: '2rem',
+                display: 'flex', flexDirection: 'column', gap: '1.25rem',
+                backgroundColor: 'var(--color-surface)',
                 position: 'relative', overflow: 'hidden',
                 height: '100%',
                 cursor: 'pointer',
-                boxShadow: isHot ? `0 0 20px rgba(232,17,26,0.05)` : 'none'
+                boxShadow: '0 10px 40px rgba(0,0,0,0.04)'
             }}
         >
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '4px', height: '60px', backgroundColor: ACCENT }} />
+            <div style={{
+                position: 'absolute', top: '-50px', right: '-50px',
+                width: '150px', height: '150px',
+                borderRadius: '50%',
+                background: isHot ? 'radial-gradient(circle, var(--color-accent) 0%, transparent 70%)' : 'none',
+                opacity: 0.1,
+                pointerEvents: 'none'
+            }} />
             
-            {isHot && (
-                <div style={{
-                    position: 'absolute', top: '1.5rem', right: '-2.5rem',
-                    backgroundColor: ACCENT, color: '#000', padding: '0.25rem 3rem',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900,
-                    transform: 'rotate(45deg)', letterSpacing: '0.1em', boxShadow: '0 0 10px rgba(232,17,26,0.3)',
-                    zIndex: 10
-                }}>
-                    HOT
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ 
+                    fontSize: '2rem',
+                    background: 'var(--color-bg)',
+                    width: '60px', height: '60px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: '16px',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05)',
+                    border: '1px solid var(--color-border)'
+                 }}>
+                    {icon}
                 </div>
-            )}
+                {isHot && (
+                    <div style={{
+                        backgroundColor: 'rgba(57, 255, 20, 0.1)',
+                        color: 'var(--color-accent)',
+                        padding: '0.4rem 1rem',
+                        borderRadius: '20px',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.05em',
+                        border: '1px solid rgba(57, 255, 20, 0.2)'
+                    }}>
+                        New
+                    </div>
+                )}
+            </div>
 
-            <div style={{ fontSize: '3rem' }}>{icon}</div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, marginTop: '1rem' }}>
                 <div style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.3em',
-                    color: ACCENT, textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 700
+                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em',
+                    color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 600
                 }}>
-                    // {tag}
+                    {tag}
                 </div>
                 <h3 style={{
-                    fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.5rem',
-                    color: 'var(--color-text)', margin: '0 0 0.75rem', letterSpacing: '-0.02em', textTransform: 'uppercase'
+                    fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem',
+                    color: 'var(--color-text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em'
                 }}>
                     {title}
                 </h3>
                 <p style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0
+                    fontFamily: 'var(--font-sans)', fontSize: '0.9rem',
+                    color: 'var(--color-text-secondary)', lineHeight: 1.5, margin: 0,
+                    fontWeight: 500
                 }}>
                     {desc}
                 </p>
-            </div>
-            <div style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{
-                    padding: '0.5rem 1.25rem', border: `1px solid ${ACCENT}`, color: ACCENT,
-                    fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em'
-                }}>
-                    LAUNCH_SYSTEM →
-                </div>
             </div>
         </motion.div>
     </Link>

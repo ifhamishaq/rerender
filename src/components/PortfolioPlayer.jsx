@@ -11,7 +11,7 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
             position: 'relative',
             width: '100%',
             backgroundColor: 'var(--color-bg)',
-            borderRadius: '12px',
+            borderRadius: '20px',
             border: '1px solid var(--color-border)',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05) inset',
             overflow: 'hidden',

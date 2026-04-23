@@ -174,13 +174,13 @@ const ReflexGamePage = () => {
                                     onClick={() => setIsHardMode(!isHardMode)}
                                     style={{
                                         width: '70px', height: '35px', backgroundColor: '#000',
-                                        position: 'relative', border: 'none', cursor: 'pointer'
+                                        position: 'relative', border: 'none', cursor: 'pointer', borderRadius: '100px'
                                     }}
                                 >
                                     <motion.div
                                         animate={{ x: isHardMode ? 35 : 5, backgroundColor: isHardMode ? RED : '#fff' }}
                                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        style={{ width: '25px', height: '25px', borderRadius: '0%', position: 'absolute', top: '5px', left: 0 }}
+                                        style={{ width: '25px', height: '25px', borderRadius: '50%', position: 'absolute', top: '5px', left: 0 }}
                                     />
                                 </button>
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: isHardMode ? RED : '#999', fontWeight: 900 }}>BLIND_STRIKE</span>

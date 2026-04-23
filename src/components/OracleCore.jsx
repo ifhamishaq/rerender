@@ -379,7 +379,7 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'var(--color-accent)',
                             color: m.role === 'user' ? 'var(--color-text)' : '#000',
-                            borderRadius: '2px', marginTop: '0.25rem'
+                            borderRadius: '12px', marginTop: '0.25rem'
                         }}>
                             {m.role === 'user' ? <User size={isCompact ? 12 : 14} /> : <Bot size={isCompact ? 12 : 14} />}
                         </div>
@@ -394,7 +394,7 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                             </div>
                             {/* Image preview in chat */}
                             {m.image && (
-                                <div style={{ marginBottom: '0.75rem', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--color-border)', maxWidth: '280px' }}>
+                                <div style={{ marginBottom: '0.75rem', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--color-border)', maxWidth: '280px' }}>
                                     <img src={m.image} alt="Uploaded" style={{ width: '100%', display: 'block' }} />
                                 </div>
                             )}
@@ -461,8 +461,8 @@ MISSION: Make every creative who talks to you walk away with something actionabl
 
                 {/* Pending image preview strip */}
                 {pendingImage && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', padding: '0.5rem', border: '1px solid var(--color-accent)', borderRadius: '4px', backgroundColor: 'rgba(57,255,20,0.05)' }}>
-                        <img src={pendingImage.preview} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '2px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', padding: '0.5rem', border: '1px solid var(--color-accent)', borderRadius: '12px', backgroundColor: 'rgba(57,255,20,0.05)' }}>
+                        <img src={pendingImage.preview} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }} />
                         <span style={{ flex: 1, fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontWeight: 900 }}>THUMBNAIL_LOADED</span>
                         <button onClick={() => setPendingImage(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', opacity: 0.5 }}>
                             <X size={14} />

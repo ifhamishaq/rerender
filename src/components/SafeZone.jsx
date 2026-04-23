@@ -41,15 +41,15 @@ const SafeZone = () => {
       <div style={{ position: 'absolute', right: '1rem', bottom: '8rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
         <div style={{ width: '45px', height: '45px', borderRadius: '50%', border: '2px solid #fff', backgroundColor: 'rgba(0,0,0,0.3)' }} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '4px' }} />
+          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '12px' }} />
           <div style={{ fontSize: '0.6rem' }}>88.2K</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '4px' }} />
+          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '12px' }} />
           <div style={{ fontSize: '0.6rem' }}>1.2K</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '4px' }} />
+          <div style={{ width: '30px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '12px' }} />
           <div style={{ fontSize: '0.6rem' }}>5.6K</div>
         </div>
       </div>
@@ -77,7 +77,7 @@ const SafeZone = () => {
         <div style={{ width: '28px', height: '28px', backgroundColor: 'rgba(255,255,255,0.3)' }} />
         <div style={{ width: '28px', height: '28px', backgroundColor: 'rgba(255,255,255,0.3)' }} />
         <div style={{ width: '28px', height: '28px', backgroundColor: 'rgba(255,255,255,0.3)' }} />
-        <div style={{ width: '28px', height: '28px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '4px' }} />
+        <div style={{ width: '28px', height: '28px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '12px' }} />
       </div>
       {/* Bottom Info */}
       <div style={{ position: 'absolute', bottom: '1.5rem', left: '1rem', right: '5rem' }}>

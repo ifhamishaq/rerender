@@ -88,89 +88,89 @@ const TitleManager = () => {
 };
 
 const DigitalLoader = () => {
-    const [progress, setProgress] = React.useState(0);
-    const [status, setStatus] = React.useState('SYS_BOOT');
+    const [isReady, setIsReady] = React.useState(false);
 
     React.useEffect(() => {
-        const statuses = ['SYNCING', 'LOADING', 'RE-RENDER', 'DESIGNING', 'READY'];
-        let statusIdx = 0;
-
-        const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    return 100;
-                }
-                const inc = Math.floor(Math.random() * 5) + 1;
-                if (prev % 20 === 0) setStatus(statuses[statusIdx++ % statuses.length]);
-                return Math.min(prev + inc, 100);
-            });
-        }, 40);
-
-        return () => clearInterval(interval);
+        const timer = setTimeout(() => setIsReady(true), 2200);
+        return () => clearTimeout(timer);
     }, []);
 
     return (
-        <div style={{
-            width: '100vw', height: '100vh',
-            backgroundColor: '#000', color: 'var(--color-accent)',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-mono)',
-            position: 'fixed', inset: 0, zIndex: 9999,
-            overflow: 'hidden'
-        }}>
-            {/* Retro Scanning Line */}
-            <motion.div 
-                animate={{ top: ['0%', '100%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                style={{
-                    position: 'absolute', left: 0, right: 0, height: '2px',
-                    background: 'var(--color-accent)', opacity: 0.2, boxShadow: '0 0 20px var(--color-accent)'
-                }}
-            />
+        <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: isReady ? 0 : 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            onAnimationComplete={() => isReady}
+            style={{
+                width: '100vw', height: '100vh',
+                backgroundColor: '#000',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                position: 'fixed', inset: 0, zIndex: 9999,
+                overflow: 'hidden',
+                pointerEvents: isReady ? 'none' : 'all'
+            }}
+        >
+            {/* Subtle radial glow behind spinner */}
+            <div style={{
+                position: 'absolute',
+                width: '300px', height: '300px',
+                background: 'radial-gradient(circle, rgba(57,255,20,0.06) 0%, transparent 70%)',
+                borderRadius: '50%',
+                filter: 'blur(40px)',
+                pointerEvents: 'none'
+            }} />
 
-            <div style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
-                <div style={{ fontSize: '0.6rem', letterSpacing: '0.4em', marginBottom: '1rem', opacity: 0.8 }}>
-                    &gt; {status}
-                </div>
-                
-                <div style={{ 
-                    fontSize: 'clamp(3rem, 15vw, 8rem)', 
-                    fontWeight: 900, 
-                    fontFamily: 'var(--font-display)', 
-                    lineHeight: 1,
-                    display: 'flex', alignItems: 'baseline',
-                    color: '#fff', textShadow: '0 0 10px var(--color-accent)'
-                }}>
-                    {progress.toString().padStart(3, '0')}
-                    <span style={{ fontSize: '1.5rem', color: 'var(--color-accent)', fontWeight: 'bold' }}>%</span>
-                </div>
-
-                <div style={{ 
-                    width: 'min(80vw, 400px)', height: '1px', 
-                    backgroundColor: 'rgba(255,255,255,0.1)', 
-                    marginTop: '2rem', position: 'relative'
-                }}>
-                    <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        style={{ height: '100%', backgroundColor: 'var(--color-accent)', boxShadow: '0 0 10px var(--color-accent)' }}
+            {/* Apple-style spinning ring */}
+            <div style={{ position: 'relative', width: '48px', height: '48px', marginBottom: '2.5rem' }}>
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ animation: 'appleSpinLoader 1s linear infinite' }}>
+                    <defs>
+                        <linearGradient id="loader-gradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#39FF14" stopOpacity="1" />
+                            <stop offset="100%" stopColor="#39FF14" stopOpacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <circle
+                        cx="24" cy="24" r="20"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.06)"
+                        strokeWidth="2.5"
                     />
-                </div>
-
-                <div style={{ marginTop: '1.5rem', fontSize: '0.5rem', opacity: 0.4, maxWidth: '200px', marginInline: 'auto' }}>
-                    RE-RENDER CREATIVE AGENCY // QUALITY DESIGN
-                </div>
+                    <circle
+                        cx="24" cy="24" r="20"
+                        fill="none"
+                        stroke="url(#loader-gradient)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeDasharray="80 45.66"
+                    />
+                </svg>
             </div>
 
-            {/* Faint Grid Overlay */}
-            <div style={{ 
-                position: 'absolute', inset: 0, 
-                backgroundImage: 'linear-gradient(rgba(57,255,20,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,20,0.03) 1px, transparent 1px)',
-                backgroundSize: '30px 30px', pointerEvents: 'none'
-            }} />
-        </div>
+            {/* Pulsing wordmark */}
+            <motion.div
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                    fontSize: '0.75rem',
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.35em',
+                    color: '#fff',
+                    fontWeight: 700,
+                    userSelect: 'none'
+                }}
+            >
+                RE — RENDER
+            </motion.div>
+
+            {/* Inline keyframes */}
+            <style>{`
+                @keyframes appleSpinLoader {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
+        </motion.div>
     );
 };
 

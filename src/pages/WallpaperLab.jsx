@@ -57,7 +57,7 @@ const Loader = () => {
                         }}
                         style={{
                             backgroundColor: 'var(--color-text)',
-                            borderRadius: '0px',
+                            borderRadius: '4px',
                         }}
                     />
                 ))}
@@ -81,7 +81,7 @@ const Pill = ({ active, onClick, children }) => (
         onClick={onClick}
         style={{
             padding: '0.6rem 1.25rem',
-            borderRadius: '0px',
+            borderRadius: '100px',
             backgroundColor: active ? 'var(--color-text)' : 'transparent',
             color: active ? 'var(--color-bg)' : 'var(--color-text)',
             border: `1.5px solid var(--color-text)`,

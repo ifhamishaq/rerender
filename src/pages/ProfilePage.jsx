@@ -100,47 +100,7 @@ const ProfilePage = () => {
                         </Link>
                     </motion.div>
 
-                    {/* Applications Card */}
-                    <motion.div 
-                        variants={cardVariants} initial="initial" animate="animate"
-                        transition={{ delay: 0.2 }}
-                        style={glassStyle}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <div style={{ p: '10px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
-                                <Briefcase size={24} />
-                            </div>
-                            <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', opacity: 0.4 }}>CAREER_VECTORS</span>
-                        </div>
-                        <div style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', fontFamily: 'var(--font-display)' }}>
-                            {profile?.role === 'freelancer' ? 'ACTIVE' : 'USER'}
-                        </div>
-                        <p style={{ fontSize: '0.85rem', opacity: 0.6 }}>Current recruitment and role status.</p>
-                        <Link to="/dossier" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '2rem', color: '#fff', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 700 }}>
-                            VIEW_DOSSIER <ChevronRight size={14} />
-                        </Link>
-                    </motion.div>
-
-                    {/* Security Card */}
-                    <motion.div 
-                        variants={cardVariants} initial="initial" animate="animate"
-                        transition={{ delay: 0.3 }}
-                        style={glassStyle}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <div style={{ p: '10px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
-                                <Shield size={24} />
-                            </div>
-                            <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', opacity: 0.4 }}>ID_PROTOCOL</span>
-                        </div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.8 }}>
-                            {user.id.slice(0, 16)}...
-                        </div>
-                        <p style={{ fontSize: '0.85rem', opacity: 0.6 }}>Unique identifier for studio operations.</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '2rem', opacity: 0.4, fontSize: '0.8rem', fontWeight: 700 }}>
-                            <Settings size={14} /> SECURE_NODE
-                        </div>
-                    </motion.div>
+                    {/* Applications and Security Cards Removed by request */}
 
                 </div>
 

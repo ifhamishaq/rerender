@@ -763,10 +763,10 @@ const ThumbnailAnalyserPage = () => {
                                                 display: simulatorMode === 'SIDEBAR' ? 'flex' : 'block',
                                                 gap: '1rem'
                                             }}>
-                                                <div style={{ width: simulatorMode === 'SIDEBAR' ? '168px' : '100%', aspectRatio: '16/9', backgroundColor: '#222', backgroundImage: `url(${preview})`, backgroundSize: 'cover', borderRadius: simulatorMode === 'MOBILE' ? '0' : '8px' }}></div>
+                                                <div style={{ width: simulatorMode === 'SIDEBAR' ? '168px' : '100%', aspectRatio: '16/9', backgroundColor: '#222', backgroundImage: `url(${preview})`, backgroundSize: 'cover', borderRadius: simulatorMode === 'MOBILE' ? '20px' : '24px' }}></div>
                                                 <div style={{ marginTop: simulatorMode === 'SIDEBAR' ? '0' : '1rem', flex: 1 }}>
-                                                    <div style={{ height: '1.2rem', backgroundColor: '#333', width: '90%', marginBottom: '0.75rem', borderRadius: '4px' }}></div>
-                                                    <div style={{ height: '0.8rem', backgroundColor: '#222', width: '60%', borderRadius: '4px' }}></div>
+                                                    <div style={{ height: '1.2rem', backgroundColor: '#333', width: '90%', marginBottom: '0.75rem', borderRadius: '100px' }}></div>
+                                                    <div style={{ height: '0.8rem', backgroundColor: '#222', width: '60%', borderRadius: '100px' }}></div>
                                                 </div>
                                             </div>
                                         </div>

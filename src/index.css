@@ -216,7 +216,7 @@ body {
 
 .skeuo-panel {
   background-color: var(--color-surface);
-  border-radius: 16px;
+  border-radius: 24px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-raised);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -230,7 +230,7 @@ body {
 .skeuo-screen {
   background-color: var(--color-surface);
   color: var(--color-text);
-  border-radius: 12px;
+  border-radius: 20px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-screen);
   font-family: var(--font-sans);
@@ -307,7 +307,7 @@ body {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-raised);
-  border-radius: 8px;
+  border-radius: 24px;
   position: relative;
   overflow: hidden;
 }
@@ -541,7 +541,7 @@ select {
   color: var(--color-accent);
   border: 2px solid var(--color-border);
   box-shadow: var(--shadow-screen);
-  border-radius: 6px;
+  border-radius: 16px;
   padding: 0.75rem 1rem;
   font-family: var(--font-mono);
   transition: all 0.2s ease;

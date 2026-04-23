@@ -549,95 +549,109 @@ const DossierPage = () => {
                             </section>
                         )}
 
-                        {/* Support Section */}
+                        {/* Recharge Section (Apple Style) */}
                         <section>
-                            <div style={{ border: '2px solid var(--color-text)', padding: '2.5rem', position: 'relative' }}>
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-15px',
-                                    left: '30px',
-                                    background: 'var(--color-bg)',
-                                    padding: '0 15px',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 900
-                                }}>
-                                    SUPPORT_THE_WORKSPACE
+                            <div style={{ 
+                                background: 'var(--color-surface)', 
+                                border: '1px solid var(--color-border)', 
+                                borderRadius: '24px', 
+                                padding: '3rem', 
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                                    <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>Recharge Balance</h2>
+                                    <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-text-secondary)', fontSize: '1rem' }}>Select a credit pack to top up your account.</p>
                                 </div>
 
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
-                                    gap: window.innerWidth < 768 ? '2rem' : '3rem',
-                                    alignItems: 'start'
+                                    gridTemplateColumns: window.innerWidth < 768 ? '1fr 1fr' : 'repeat(5, 1fr)',
+                                    gap: '1rem',
+                                    marginBottom: '3rem'
                                 }}>
-                                    <div>
-                                        <p style={{
-                                            fontSize: '1.1rem',
-                                            lineHeight: 1.5,
-                                            margin: 0,
-                                            fontFamily: 'var(--font-sans)',
-                                            fontWeight: 500
-                                        }}>
-                                            Maintain the engine. Support the developers to gain priority access, higher generation limits, and exclusive features.
-                                        </p>
-                                        <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
-                                            <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '1rem',
-                                                padding: '1rem 2rem',
-                                                textDecoration: 'none',
-                                                transition: 'all 0.3s ease',
-                                                opacity: 0.8
+                                    {[
+                                        { val: 10, label: '10 CR', price: '$1' },
+                                        { val: 50, label: '50 CR', price: '$5', popular: true },
+                                        { val: 120, label: '120 CR', price: '$10' },
+                                        { val: 300, label: '300 CR', price: '$25' },
+                                        { val: 999, label: 'PRO', price: '$10' }
+                                    ].map(tier => (
+                                        <div 
+                                            key={tier.val}
+                                            onClick={() => setAmount(tier.val)}
+                                            style={{
+                                                border: amount == tier.val ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+                                                borderRadius: '16px',
+                                                padding: '1.5rem 0.5rem',
+                                                textAlign: 'center',
+                                                cursor: 'pointer',
+                                                background: amount == tier.val ? 'rgba(57, 255, 20, 0.05)' : 'transparent',
+                                                transition: 'all 0.2s ease',
+                                                position: 'relative'
                                             }}
-                                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                                            onMouseLeave={e => e.currentTarget.style.opacity = '0.8'}
-                                            >
-                                                <img src="/paypal.png" alt="PayPal Gateway" style={{ height: '45px', filter: 'brightness(0) invert(1)' }} />
+                                        >
+                                            {tier.popular && (
+                                                <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: 'var(--color-accent)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>POPULAR</div>
+                                            )}
+                                            <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '0.2rem' }}>{tier.label}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>{tier.price}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <form onSubmit={handleSubmit} style={{
+                                    background: 'var(--color-bg)',
+                                    borderRadius: '16px',
+                                    padding: '2rem',
+                                    border: '1px solid var(--color-border)'
+                                }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.75rem', fontFamily: 'var(--font-sans)' }}>1. Pay via PayPal</label>
+                                            <a href={PAYPAL_LINK} target="_blank" rel="noopener noreferrer" style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
+                                                background: '#0070ba', color: '#fff', borderRadius: '100px', padding: '0.8rem', textDecoration: 'none', fontWeight: 600, gap: '8px', transition: 'opacity 0.2s', fontFamily: 'var(--font-sans)'
+                                            }} onMouseEnter={e => e.currentTarget.style.opacity = '0.9'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
+                                                Pay with PayPal
                                             </a>
                                         </div>
-                                    </div>
-
-                                    <form onSubmit={handleSubmit} style={{
-                                        borderLeft: window.innerWidth < 768 ? 'none' : '1px solid var(--color-border)',
-                                        paddingLeft: window.innerWidth < 768 ? '0' : '2.5rem',
-                                        borderTop: window.innerWidth < 768 ? '1px solid var(--color-border)' : 'none',
-                                        paddingTop: window.innerWidth < 768 ? '2.5rem' : '0'
-                                    }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div>
-                                                <label style={{ fontSize: '0.65rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.5, display: 'block', marginBottom: '0.5rem' }}>SELECT_TIER</label>
-                                                <select value={amount} onChange={(e) => setAmount(e.target.value)} style={minimalInputStyle}>
-                                                    <option value="10">10 CR ($1)</option>
-                                                    <option value="50">50 CR ($5)</option>
-                                                    <option value="120">120 CR ($10)</option>
-                                                    <option value="999">PRO_ACCESS ($10) [PERMANENT]</option>
-                                                    <option value="300">300 CR ($25)</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label style={{ fontSize: '0.65rem', fontWeight: 900, fontFamily: 'var(--font-mono)', opacity: 0.5, display: 'block', marginBottom: '0.5rem' }}>TX_ID / EMAIL</label>
-                                                <input type="text" placeholder="REQUIRED_FOR_VERIFICATION" value={txId} onChange={(e) => setTxId(e.target.value)} style={minimalInputStyle} />
-                                            </div>
-                                            <button type="submit" disabled={submitting} style={{
-                                                width: '100%',
-                                                background: 'var(--color-accent)',
-                                                color: '#000',
-                                                outline: '2px solid #000',
-                                                border: 'none',
-                                                padding: '1rem',
-                                                fontWeight: 900,
-                                                fontSize: '0.8rem',
-                                                cursor: 'pointer',
-                                                fontFamily: 'var(--font-mono)',
-                                                letterSpacing: '0.05em'
-                                            }}>
-                                                {submitting ? 'EXECUTING...' : 'VERIFY_TRANSFER'}
-                                            </button>
+                                        <div>
+                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.75rem', fontFamily: 'var(--font-sans)' }}>2. Enter Transaction ID</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Transaction ID or PayPal Email" 
+                                                value={txId} 
+                                                onChange={(e) => setTxId(e.target.value)} 
+                                                style={{
+                                                    width: '100%', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '0.9rem', fontSize: '0.9rem', color: 'var(--color-text)', outline: 'none', fontFamily: 'var(--font-sans)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                                }} 
+                                            />
                                         </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                    <button type="submit" disabled={submitting} style={{
+                                        width: '100%',
+                                        background: 'var(--color-text)',
+                                        color: 'var(--color-bg)',
+                                        borderRadius: '100px',
+                                        border: 'none',
+                                        padding: '1rem',
+                                        fontWeight: 600,
+                                        fontSize: '0.95rem',
+                                        cursor: 'pointer',
+                                        marginTop: '2rem',
+                                        transition: 'transform 0.2s ease',
+                                        boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                                        fontFamily: 'var(--font-sans)'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.01)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                    >
+                                        {submitting ? 'Verifying...' : 'Complete Recharge'}
+                                    </button>
+                                </form>
                             </div>
                         </section>
                     </div>

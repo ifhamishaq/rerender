@@ -79,8 +79,9 @@ const MacTopBar = () => {
             userSelect: 'none'
         }}>
             {/* Logo Link */}
-            <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontWeight: 900, fontSize: '14px', letterSpacing: '-0.03em', marginRight: '20px' }}>RE-RENDER</span>
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', paddingRight: '12px' }}>
+                <Command size={16} className="mobile-only" strokeWidth={2.5} />
+                <span className="desktop-only" style={{ fontWeight: 900, fontSize: '14px', letterSpacing: '-0.03em', marginRight: '20px' }}>RE-RENDER</span>
             </Link>
 
             {/* Right Group: Auth + Controls + Time */}
@@ -130,11 +131,12 @@ const MacTopBar = () => {
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 gap: '6px'
                             }}
                         >
                             <User size={13} strokeWidth={3} />
-                            <span>LOGIN</span>
+                            <span className="hide-mobile">LOGIN</span>
                         </button>
                     )}
                 </div>
