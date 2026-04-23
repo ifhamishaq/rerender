@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const MacTopBar = () => {
     const { isDarkMode, toggleTheme } = useTheme();
-    const { user, signOut, setIsAuthModalOpen } = useAuth();
+    const { user, profile, signOut, setIsAuthModalOpen } = useAuth();
     const [time, setTime] = useState(new Date());
     const [isPlaying, setIsPlaying] = useState(false);
 
