@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Volume2, VolumeX, Wifi, BatteryFull, Command } from 'lucide-react';
+import { Sun, Moon, Volume2, VolumeX, Wifi, BatteryFull, Command, User } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -58,131 +58,117 @@ const MacTopBar = () => {
     return (
         <div style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '28px', // macOS standard topbar height
-            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.4)' : 'rgba(255, 255, 255, 0.4)',
+            top: '16px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: '48px',
+            backgroundColor: isDarkMode ? 'rgba(15, 15, 15, 0.8)' : 'rgba(255, 255, 255, 0.8)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
+            border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '100px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '0 16px',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-            fontSize: '13px',
-            fontWeight: 500,
+            padding: '0 8px 0 24px', // More padding on left for logo
             color: 'var(--color-text)',
-            zIndex: 9999,
+            zIndex: 10000,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+            width: 'fit-content',
+            minWidth: 'min(95vw, 600px)',
             userSelect: 'none'
         }}>
-            {/* Left Box: Logo + Menus */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', cursor: 'default' }}>
-                    <Command size={14} strokeWidth={2.5} />
-                </div>
-                
-                <div style={{ display: 'flex', gap: '16px', fontWeight: 600 }}>
-                    {menuItems.map((item, idx) => (
-                        <span key={item} style={{ 
-                            cursor: 'default', 
-                            opacity: 0.9,
-                            fontWeight: idx === 0 ? 800 : 500 
-                        }}>
-                            {item}
-                        </span>
-                    ))}
-                </div>
-            </div>
+            {/* Logo Link */}
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontWeight: 900, fontSize: '14px', letterSpacing: '-0.03em', marginRight: '20px' }}>RE-RENDER</span>
+            </Link>
 
-            {/* Right Box: Status Icons + Auth + Time */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '100%' }}>
+            {/* Right Group: Auth + Controls + Time */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', height: '100%' }}>
                 
-                {/* Studio Status Badge */}
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '6px', 
-                    fontSize: '10px', 
-                    fontWeight: 700, 
-                    color: 'var(--color-accent)', 
-                    backgroundColor: 'rgba(57, 255, 20, 0.05)',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(57, 255, 20, 0.1)'
-                }} className="hide-mobile">
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-accent)', animation: 'pulse 2s infinite' }}></span>
-                    STUDIO_ONLINE
-                </div>
-
-                {/* Auth Controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {/* Auth Pill */}
+                <div style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
                     {user ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Link to="/profile" style={{ color: 'inherit', textDecoration: 'none', opacity: 0.9, fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>
-                                {profile?.full_name?.split(' ')[0].toUpperCase() || 'PROFILE'}
-                            </Link>
-                            <div style={{ width: '1px', height: '12px', backgroundColor: 'var(--color-border)' }}></div>
-                            <span 
-                                onClick={signOut}
-                                style={{ cursor: 'pointer', opacity: 0.4, fontSize: '10px', fontWeight: 600 }}
-                            >
-                                LOGOUT
-                            </span>
-                        </div>
+                        <Link to="/profile" style={{ 
+                            textDecoration: 'none', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            padding: '0 12px 0 4px',
+                            height: '100%',
+                            backgroundColor: 'rgba(57, 255, 20, 0.1)',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(57, 255, 20, 0.2)',
+                            color: 'var(--color-text)'
+                        }}>
+                            <div style={{ 
+                                width: '28px', 
+                                height: '28px', 
+                                borderRadius: '50%', 
+                                backgroundColor: 'var(--color-accent)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                color: '#000'
+                            }}>
+                                <User size={15} strokeWidth={2.5} />
+                            </div>
+                            <span className="hide-mobile" style={{ fontSize: '10px', fontWeight: 800 }}>{profile?.full_name?.split(' ')[0].toUpperCase()}</span>
+                        </Link>
                     ) : (
-                        <span 
+                        <button 
                             onClick={() => setIsAuthModalOpen(true)}
                             style={{ 
-                                cursor: 'pointer', 
-                                opacity: 0.9, 
-                                fontSize: '11px', 
-                                fontWeight: 700, 
-                                color: 'var(--color-accent)',
-                                letterSpacing: '0.05em'
+                                background: 'var(--color-accent)',
+                                color: '#000',
+                                border: 'none',
+                                padding: '0 16px',
+                                borderRadius: '20px',
+                                height: '100%',
+                                fontSize: '11px',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
                             }}
                         >
-                            LOGIN
-                        </span>
+                            <User size={13} strokeWidth={3} />
+                            <span>LOGIN</span>
+                        </button>
                     )}
                 </div>
 
-                {/* Audio Toggle */}
-                <div 
-                    onClick={toggleAudio} 
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.7 }}
-                    title={isPlaying ? "Pause Music" : "Play Music"}
-                >
-                    {isPlaying ? <Volume2 size={13} /> : <VolumeX size={13} />}
-                </div>
-
-                {/* Theme Toggle */}
-                <div 
-                    onClick={toggleTheme} 
-                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', opacity: 0.7 }}
-                    title="Toggle Dark Mode"
-                >
-                    {isDarkMode ? <Moon size={12} /> : <Sun size={12} />}
-                </div>
-
-                {/* Wifi / Battery (Aesthetic) */}
-                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.6 }} className="hide-mobile">
-                    <Wifi size={13} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', opacity: 0.7 }} className="hide-mobile">
-                    <BatteryFull size={15} color="#34C759" />
-                </div>
-
-                {/* Clock */}
+                {/* System Controls */}
                 <div style={{ 
-                    cursor: 'default', 
-                    fontSize: '12px', 
-                    fontWeight: 600,
-                    fontVariantNumeric: 'tabular-nums',
-                    marginLeft: '4px'
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px', 
+                    padding: '0 12px',
+                    borderLeft: '1px solid var(--color-border)',
+                    opacity: 0.7
                 }}>
-                    {formattedTime}
+                    <div onClick={toggleAudio} style={{ cursor: 'pointer', display: 'flex' }}>
+                        {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                    </div>
+                    <div onClick={toggleTheme} style={{ cursor: 'pointer', display: 'flex' }}>
+                        {isDarkMode ? <Moon size={15} /> : <Sun size={15} />}
+                    </div>
+                </div>
+
+                {/* Clock Pill */}
+                <div style={{ 
+                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    padding: '0 16px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    fontVariantNumeric: 'tabular-nums'
+                }} className="hide-tablet">
+                    {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Sun, Moon, User, LogOut, Wallet, X, Home, FolderGit2, Mail, Briefcase, Info } from 'lucide-react';
+import { Volume2, VolumeX, Sun, Moon, User, LogOut, Wallet, X, Home, FolderGit2, Mail, Briefcase, Info, Terminal } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -53,12 +53,13 @@ const Navbar = () => {
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
     const navLinks = [
-        { href: '/', icon: <Home size={32} strokeWidth={1.5} />, label: 'Home' },
-        { href: '/work', icon: <FolderGit2 size={32} strokeWidth={1.5} />, label: 'Work' },
-        { href: '/get-in-touch', icon: <Mail size={32} strokeWidth={1.5} />, label: 'Contact' },
-        { href: '/careers', icon: <Briefcase size={32} strokeWidth={1.5} />, label: 'Careers' },
-        { href: '/about', icon: <Info size={32} strokeWidth={1.5} />, label: 'About' },
-        { href: '/profile', icon: <User size={32} strokeWidth={1.5} />, label: 'Profile' },
+        { href: '/', icon: <Home size={28} strokeWidth={1.5} />, label: 'Home' },
+        { href: '/work', icon: <FolderGit2 size={28} strokeWidth={1.5} />, label: 'Work' },
+        { href: '/tools', icon: <Terminal size={28} strokeWidth={1.5} />, label: 'Tools' },
+        { href: '/get-in-touch', icon: <Mail size={28} strokeWidth={1.5} />, label: 'Contact' },
+        { href: '/careers', icon: <Briefcase size={28} strokeWidth={1.5} />, label: 'Careers' },
+        { href: '/about', icon: <Info size={28} strokeWidth={1.5} />, label: 'About' },
+        { href: '/profile', icon: <User size={28} strokeWidth={1.5} />, label: 'Profile' },
     ];
 
     const isActive = (href) => location.pathname === href;
@@ -130,7 +131,7 @@ const Navbar = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     zIndex: 1000,
-                    pointerEvents: 'none', // Allow clicking through the empty wrapper
+                    pointerEvents: 'none', 
                 }}
             >
                 <div className="liquidGlass-wrapper dock" style={{ pointerEvents: 'auto' }}>
@@ -150,13 +151,13 @@ const Navbar = () => {
                                             alignItems: 'center', 
                                             justifyContent: 'center', 
                                             padding: '0 8px', 
-                                            gap: '6px', 
+                                            gap: '4px', 
                                             color: isActive(link.href) ? 'var(--color-accent)' : 'var(--color-text)',
-                                            width: '75px'
+                                            width: 'min-content'
                                         }}
                                     >
-                                        {link.icon}
-                                        <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        <div style={{ transform: 'scale(0.85)' }}>{link.icon}</div>
+                                        <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                             {link.label}
                                         </span>
                                     </motion.div>

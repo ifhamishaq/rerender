@@ -177,6 +177,34 @@ const ToolsSection = () => {
                             isHot={true}
                         />
                         <ToolCard
+                            icon="⌨️"
+                            title="TYPE RACER"
+                            desc="Your keyboard is the weapon. Type design manifests and code snippets. Speed earns glory."
+                            link="/arcade/type-racer"
+                            tag="EXPERIMENT"
+                        />
+                        <ToolCard
+                            icon="👁️"
+                            title="HEX CODE HERO"
+                            desc="Read the matrix. Three hex codes, one background color. Can you spot the difference?"
+                            link="/arcade/hex-code-hero"
+                            tag="EXPERIMENT"
+                        />
+                        <ToolCard
+                            icon="🎨"
+                            title="PALETTE PICKER"
+                            desc="Steal the aesthetic. Extract and generate cohesive color palettes from visual inputs."
+                            link="/arcade/palette-picker"
+                            tag="UTILITY"
+                        />
+                        <ToolCard
+                            icon="⏱️"
+                            title="CHRONO STRIKE"
+                            desc="Stop the clock exactly at 5.000s. A brutal test of internal timing and reflexes."
+                            link="/arcade/reflex"
+                            tag="EXPERIMENT"
+                        />
+                        <ToolCard
                             icon="🗒️"
                             title="PROMPT LAB"
                             desc="A centralized repository of engineered visual directives for generative workflows."

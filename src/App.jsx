@@ -34,6 +34,19 @@ const CareersPage = React.lazy(() => import('./pages/CareersPage'));
 const ApplyPage = React.lazy(() => import('./pages/ApplyPage'));
 const ContractPage = React.lazy(() => import('./pages/ContractPage'));
 const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
+const ToolsPage = React.lazy(() => import('./pages/ToolsPage'));
+
+// Utility & Lab Pages
+const AILabPage = React.lazy(() => import('./pages/AILabPage'));
+const CaptionWriterPage = React.lazy(() => import('./pages/CaptionWriterPage'));
+const ThumbnailAnalyserPage = React.lazy(() => import('./pages/ThumbnailAnalyserPage'));
+const WallpaperLab = React.lazy(() => import('./pages/WallpaperLab'));
+const HexCodeHeroPage = React.lazy(() => import('./pages/HexCodeHeroPage'));
+const PalettePickerPage = React.lazy(() => import('./pages/PalettePickerPage'));
+const ReflexGamePage = React.lazy(() => import('./pages/ReflexGamePage'));
+const TypeRacerPage = React.lazy(() => import('./pages/TypeRacerPage'));
+const SafeZonePage = React.lazy(() => import('./pages/SafeZonePage'));
+const EstimatePage = React.lazy(() => import('./pages/EstimatePage'));
 
 import TransitionWipe from './components/Animations/TransitionWipe';
 
@@ -181,6 +194,21 @@ const AnimatedRoutes = () => {
         <Route path="/apply/:jobId" element={<TransitionWipe><ApplyPage /></TransitionWipe>} />
         <Route path="/profile" element={<TransitionWipe><ProfilePage /></TransitionWipe>} />
         <Route path="/dossier" element={<TransitionWipe><DossierPage /></TransitionWipe>} />
+        <Route path="/tools" element={<TransitionWipe><ToolsPage /></TransitionWipe>} />
+        
+        {/* Lab & Utility Routes */}
+        <Route path="/lab/ai-agent" element={<TransitionWipe><AILabPage /></TransitionWipe>} />
+        <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
+        <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
+        <Route path="/lab/safe-zone" element={<TransitionWipe><SafeZonePage /></TransitionWipe>} />
+        <Route path="/estimate" element={<TransitionWipe><EstimatePage /></TransitionWipe>} />
+        
+        {/* Arcade / Experiment Routes (Migrated to Tools) */}
+        <Route path="/arcade/wallpaper-lab" element={<TransitionWipe><WallpaperLab /></TransitionWipe>} />
+        <Route path="/arcade/hex-code-hero" element={<TransitionWipe><HexCodeHeroPage /></TransitionWipe>} />
+        <Route path="/arcade/palette-picker" element={<TransitionWipe><PalettePickerPage /></TransitionWipe>} />
+        <Route path="/arcade/type-racer" element={<TransitionWipe><TypeRacerPage /></TransitionWipe>} />
+        <Route path="/arcade/reflex" element={<TransitionWipe><ReflexGamePage /></TransitionWipe>} />
         <Route path="/legal/portfolio-agreement" element={<TransitionWipe><ContractPage /></TransitionWipe>} />
         <Route path="/privacy" element={<TransitionWipe><PrivacyPolicy /></TransitionWipe>} />
         <Route path="/terms" element={<TransitionWipe><TermsOfService /></TransitionWipe>} />

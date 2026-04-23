@@ -134,7 +134,19 @@ body {
   display: none !important;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
   .desktop-only {
     display: none !important;
   }
