@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Eye, Zap, Download, BarChart3, ArrowLeft, Upload, RefreshCw, FileText, Cpu, X, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Eye, Zap, Download, BarChart3, ArrowLeft, Upload, RefreshCw, FileText, Cpu, X, Sparkles, Image as ImageIcon, CheckCircle2, AlertTriangle, Palette, Layout } from 'lucide-react';
 
 import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
@@ -19,30 +19,20 @@ const ThumbnailAnalyserPage = () => {
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
-    const [imageB, setImageB] = useState(null);
-    const [previewB, setPreviewB] = useState(null);
-    const [isCompareMode, setIsCompareMode] = useState(false);
     const [analysis, setAnalysis] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [isThermal, setIsThermal] = useState(false);
     const [error, setError] = useState(null);
 
     const fileRef = useRef(null);
 
-    const handleUpload = (e, target = 'A') => {
+    const handleUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-            if (target === 'A') {
-                setImage(reader.result);
-                setPreview(reader.result);
-            } else {
-                setImageB(reader.result);
-                setPreviewB(reader.result);
-            }
+            setImage(reader.result);
+            setPreview(reader.result);
             setAnalysis(null);
-            setIsThermal(false);
         };
         reader.readAsDataURL(file);
     };
@@ -68,16 +58,20 @@ const ThumbnailAnalyserPage = () => {
         setError(null);
 
         try {
-            const systemPrompt = `You are a helpful visual strategist. Your goal is to help the user optimize their thumbnail for clicks.
-            Talk in normal, plain English. Avoid sounding like a machine.
-            Use **double asterisks** for important highlights.
+            const systemPrompt = `You are a helpful creative director. Analyze this thumbnail with extreme nuance.
+            Be fair: appreciate the strengths but be honest about the flaws.
+            Talk in normal, plain English. Use **bold text** to highlight key points.
+            
             JSON_SCHEMA: {
                 "predictedCTR": "X.X%",
                 "thumbnailGrade": "A+ | A | B | C | D",
-                "verdict": "A brief, helpful, human-sounding verdict",
+                "verdict": "A brief, human-sounding strategic verdict",
                 "metrics": { "contrast": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10, "hook": 0-10 },
-                "improvements": ["Helpful tip 1", "Helpful tip 2", "Helpful tip 3"],
-                "heatmap": [ { "x": 0-100, "y": 0-100, "intensity": 0.1-1.0, "label": "string" } ]
+                "strengths": ["What works well..."],
+                "weaknesses": ["What needs fixing..."],
+                "composition": "Analysis of visual hierarchy and balance",
+                "colorTheory": "Analysis of color harmony and psychological impact",
+                "improvements": ["Helpful tip 1", "Helpful tip 2", "Helpful tip 3"]
             }`;
 
             const body = {
@@ -85,19 +79,19 @@ const ThumbnailAnalyserPage = () => {
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: [
-                        { type: 'text', text: "Audit this thumbnail. Be extremely fast." },
+                        { type: 'text', text: "Audit this thumbnail for a high-performance YouTube channel. Give me a fair, detailed breakdown." },
                         { type: 'image_url', image_url: { url: image } }
                     ]}
                 ],
-                temperature: 0.3
+                temperature: 0.4
             };
 
             let data;
             try {
                 data = await fetchOpenRouter(body, { title: 'RE-RENDER Thumbnail Audit (Fast)' });
             } catch (err) {
-                console.warn('[ANALYSER] Fast model failed, trying primary...', err);
-                data = await fetchOpenRouter({ ...body, model: VISION_MODEL }, { title: 'RE-RENDER Thumbnail Audit' });
+                console.warn('[ANALYSER] Fast model failed, trying fallback...', err);
+                data = await fetchOpenRouter({ ...body, model: FALLBACK_MODEL }, { title: 'RE-RENDER Thumbnail Audit' });
             }
 
             const parsed = safeParseJSON(data.choices?.[0]?.message?.content);
@@ -113,34 +107,50 @@ const ThumbnailAnalyserPage = () => {
         }
     };
 
-    const ThermalOverlay = ({ heatmap, active }) => {
-        if (!active || !heatmap) return null;
-        return (
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
-                {heatmap.map((point, i) => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        left: `${point.x}%`,
-                        top: `${point.y}%`,
-                        width: '60px',
-                        height: '60px',
-                        transform: 'translate(-50%, -50%)',
-                        background: 'radial-gradient(circle, rgba(255,0,0,0.4) 0%, transparent 70%)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        fontSize: '0.6rem',
-                        fontFamily: 'var(--font-mono)',
-                        fontWeight: 900,
-                        textShadow: '0 0 5px #000'
-                    }}>
-                        {point.label}
-                    </div>
-                ))}
-            </div>
-        );
+    const handleDownloadReport = () => {
+        if (!analysis) return;
+        const report = `
+RE-RENDER NEURAL AUDIT REPORT
+-----------------------------
+TIMESTAMP: ${new Date().toLocaleString()}
+GRADE: ${analysis.thumbnailGrade}
+PREDICTED CTR: ${analysis.predictedCTR}
+
+VERDICT:
+${analysis.verdict}
+
+STRENGTHS:
+${analysis.strengths?.map(s => `- ${s}`).join('\n')}
+
+WEAKNESSES:
+${analysis.weaknesses?.map(w => `- ${w}`).join('\n')}
+
+VISUAL COMPOSITION:
+${analysis.composition}
+
+COLOR THEORY:
+${analysis.colorTheory}
+
+KEY IMPROVEMENTS:
+${analysis.improvements?.map(i => `- ${i}`).join('\n')}
+
+METRICS:
+- Contrast: ${analysis.metrics?.contrast}/10
+- Face Details: ${analysis.metrics?.faceDetails}/10
+- Text Emphasis: ${analysis.metrics?.textEmphasis}/10
+- Hook Power: ${analysis.metrics?.hook}/10
+-----------------------------
+END OF REPORT
+        `;
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rerender_audit_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -168,7 +178,7 @@ const ThumbnailAnalyserPage = () => {
                 gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
                 gap: window.innerWidth < 1000 ? '2rem' : '4rem'
             }}>
-                {/* Column 01: Visual Canvas */}
+                {/* Column 01: Visual Canvas & Detailed Analysis */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{
                         width: '100%',
@@ -183,12 +193,9 @@ const ThumbnailAnalyserPage = () => {
                         boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
                     }}>
                         {isAnalyzing ? (
-                            <LabLoader label="NEURAL_SCAN_IN_PROGRESS" />
+                            <LabLoader label="PERFORMING_DEEP_STRATEGIC_SCAN..." />
                         ) : preview ? (
-                            <>
-                                <img src={preview} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <ThermalOverlay heatmap={analysis?.heatmap} active={isThermal} />
-                            </>
+                            <img src={preview} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                             <div onClick={() => fileRef.current?.click()} style={{ color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
                                 <ImageIcon size={48} opacity={0.2} />
@@ -196,6 +203,43 @@ const ThumbnailAnalyserPage = () => {
                             </div>
                         )}
                     </div>
+
+                    {analysis && !isAnalyzing && (
+                        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', gap: '2rem' }}>
+                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#10B981' }}>
+                                    <CheckCircle2 size={18} />
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>STRENGTHS</span>
+                                </div>
+                                <ul style={{ paddingLeft: '1rem', margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>
+                                    {analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}
+                                </ul>
+                            </div>
+                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#EF4444' }}>
+                                    <AlertTriangle size={18} />
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>WEAKNESSES</span>
+                                </div>
+                                <ul style={{ paddingLeft: '1rem', margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>
+                                    {analysis.weaknesses?.map((w, i) => <li key={i}>{w}</li>)}
+                                </ul>
+                            </div>
+                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                    <Layout size={18} />
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>COMPOSITION</span>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>{analysis.composition}</p>
+                            </div>
+                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                    <Palette size={18} />
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>COLOR THEORY</span>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>{analysis.colorTheory}</p>
+                            </div>
+                        </div>
+                    )}
 
                     <div style={{
                         display: 'flex',
@@ -207,8 +251,8 @@ const ThumbnailAnalyserPage = () => {
                         color: 'var(--color-text-secondary)'
                     }}>
                         <div style={{ flex: 1 }}>
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE:</span> {VISION_MODEL.split('/')[1].toUpperCase()}<br />
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>SCAN_MODE:</span> {isCompareMode ? 'BATTLE' : 'SINGLE'}
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE:</span> {VISION_FAST_MODEL.split('/')[1].toUpperCase()}<br />
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>SCAN_DEPTH:</span> DEEP_STRATEGIC
                         </div>
                         <div style={{ flex: 1 }}>
                             <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> {analysis ? 'SCAN_SUCCESS' : 'NULL'}<br />
@@ -219,19 +263,6 @@ const ThumbnailAnalyserPage = () => {
                     {error && (
                         <div style={{ color: '#FF0000', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', fontWeight: 900, border: '1px solid #FF0000', padding: '1rem' }}>
                             CRITICAL_ERROR: {error.toUpperCase()}
-                        </div>
-                    )}
-
-                    {analysis && !isAnalyzing && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={() => setIsThermal(!isThermal)} style={{ flex: 1, padding: '1rem', background: isThermal ? ACCENT : 'none', border: `1.5px solid ${ACCENT}`, color: isThermal ? '#000' : ACCENT, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>
-                                    {isThermal ? 'DISABLE_HEAT_GRID' : 'ENABLE_HEAT_GRID'}
-                                </button>
-                                <button onClick={() => { setPreview(null); setAnalysis(null); }} style={{ padding: '1rem', background: 'none', border: '1.5px solid var(--color-text)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>
-                                    RESET
-                                </button>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -251,6 +282,23 @@ const ThumbnailAnalyserPage = () => {
                                     <p style={{ marginTop: '2rem', fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.8 }}>"{analysis.verdict}"</p>
                                 </div>
                             </div>
+
+                            {/* Download Button */}
+                            <button
+                                onClick={handleDownloadReport}
+                                style={{
+                                    width: '100%', padding: '1.25rem',
+                                    backgroundColor: 'var(--color-text)',
+                                    color: 'var(--color-bg)',
+                                    border: 'none',
+                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.8rem',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
+                                    boxShadow: '6px 6px 0px rgba(0,0,0,0.1)'
+                                }}
+                            >
+                                <Download size={18} />
+                                DOWNLOAD_REPORT.TXT
+                            </button>
 
                             {/* Metrics */}
                             <div>
@@ -280,6 +328,12 @@ const ThumbnailAnalyserPage = () => {
                                         </div>
                                     ))}
                                 </div>
+                                <button 
+                                    onClick={() => { setPreview(null); setAnalysis(null); }} 
+                                    style={{ marginTop: '2rem', width: '100%', padding: '1rem', background: 'none', border: '1.5px solid var(--color-text)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                    START_NEW_AUDIT
+                                </button>
                             </div>
                         </>
                     ) : (
@@ -309,7 +363,7 @@ const ThumbnailAnalyserPage = () => {
                     )}
                 </div>
             </main>
-            <input ref={fileRef} type="file" accept="image/*" onChange={(e) => handleUpload(e)} style={{ display: 'none' }} />
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} />
             <style>{`
                 .spin { animation: spin 1s linear infinite; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
