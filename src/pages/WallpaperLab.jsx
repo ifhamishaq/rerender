@@ -146,7 +146,7 @@ const WallpaperLab = () => {
         setIsEnhancing(true);
         try {
             const data = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super-120b-a12b:free',
+                model: 'google/gemma-4-31b:free',
                 messages: [
                     {
                         role: 'system',

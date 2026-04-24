@@ -11,8 +11,8 @@ import LabPill from '../components/LabPill';
 
 const ACCENT = '#E8111A';
 
-const MODEL = 'inclusionai/ling-2.6-1t:free';
-const FALLBACK_MODEL = 'inclusionai/ling-2.6-flash:free';
+const MODEL = 'google/gemma-4-31b:free';
+const FALLBACK_MODEL = 'tencent/hy3-preview:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
