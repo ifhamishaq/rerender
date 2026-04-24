@@ -9,6 +9,7 @@ import LabPill from './LabPill';
 
 const MODEL = 'google/gemma-4-31b-it:free';
 const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
+const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
 const FALLBACK_MODEL = 'tencent/hy3-preview:free';
 
 // Mode-specific use-case templates
@@ -120,7 +121,7 @@ const OracleCore = ({
 
         try {
             const apiMessages = hasImage ? [
-                { role: 'system', content: 'You are the RE-RENDER VISION ENGINE. Analyze the image and provide a creative breakdown.' },
+                { role: 'system', content: 'You are the RE-RENDER VISION ENGINE. Analyze the image and provide a creative breakdown. Focus on visual hierarchy and text clarity if applicable.' },
                 { role: 'user', content: [
                     { type: 'text', text: messageText || 'Analyze this image.' },
                     { type: 'image_url', image_url: { url: currentImage.base64 } }
@@ -131,11 +132,23 @@ const OracleCore = ({
                 { role: 'user', content: messageText }
             ];
 
-            const data = await fetchOpenRouter({
-                model: hasImage ? VISION_MODEL : MODEL,
-                messages: apiMessages,
-                temperature: 0.7,
-            }, { title: 'RE-RENDER Aesthetic Oracle' });
+            let data;
+            const modelToUse = hasImage ? VISION_FAST_MODEL : MODEL;
+
+            try {
+                data = await fetchOpenRouter({
+                    model: modelToUse,
+                    messages: apiMessages,
+                    temperature: 0.7,
+                }, { title: 'RE-RENDER Aesthetic Oracle' });
+            } catch (err) {
+                console.warn('[ORACLE] Fast vision failed, trying primary vision...', err);
+                data = await fetchOpenRouter({
+                    model: hasImage ? VISION_MODEL : FALLBACK_MODEL,
+                    messages: apiMessages,
+                    temperature: 0.7,
+                }, { title: 'RE-RENDER Aesthetic Oracle (Recovery)' });
+            }
 
             const assistantMessage = data.choices?.[0]?.message?.content || 'EMPTY_RESPONSE';
             setMessages(prev => [...prev, { role: 'assistant', content: assistantMessage }]);

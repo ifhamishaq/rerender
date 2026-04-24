@@ -10,6 +10,7 @@ import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
 
 const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
+const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
 const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
 
 const ACCENT = 'var(--color-accent)';
@@ -78,11 +79,11 @@ const ThumbnailAnalyserPage = () => {
             }`;
 
             const body = {
-                model: VISION_MODEL,
+                model: VISION_FAST_MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: [
-                        { type: 'text', text: "Audit this thumbnail." },
+                        { type: 'text', text: "Audit this thumbnail. Be extremely fast." },
                         { type: 'image_url', image_url: { url: image } }
                     ]}
                 ],
@@ -91,9 +92,10 @@ const ThumbnailAnalyserPage = () => {
 
             let data;
             try {
-                data = await fetchOpenRouter(body, { title: 'RE-RENDER Thumbnail Audit' });
+                data = await fetchOpenRouter(body, { title: 'RE-RENDER Thumbnail Audit (Fast)' });
             } catch (err) {
-                data = await fetchOpenRouter({ ...body, model: FALLBACK_MODEL }, { title: 'RE-RENDER Thumbnail Audit' });
+                console.warn('[ANALYSER] Fast model failed, trying primary...', err);
+                data = await fetchOpenRouter({ ...body, model: VISION_MODEL }, { title: 'RE-RENDER Thumbnail Audit' });
             }
 
             const parsed = safeParseJSON(data.choices?.[0]?.message?.content);
