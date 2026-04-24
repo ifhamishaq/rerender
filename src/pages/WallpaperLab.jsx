@@ -370,7 +370,7 @@ const WallpaperLab = () => {
                     <div style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>
                         {profile?.credits ?? 0}<span style={{ fontSize: '0.8rem', marginLeft: '0.2rem' }}>CR</span>
                     </div>
-                    <Link to="/dossier" style={{
+                    <Link to="/profile" style={{
                         textDecoration: 'none',
                         color: 'var(--color-text)',
                         border: '1px solid var(--color-text)',
@@ -382,7 +382,7 @@ const WallpaperLab = () => {
                         display: 'inline-block',
                         width: 'fit-content'
                     }}>
-                        BUY_CREDITS
+                        GET_CREDITS
                     </Link>
                 </div>
             </header>

@@ -60,10 +60,7 @@ export const AuthProvider = ({ children }) => {
                     .from('profiles')
                     .insert([{ 
                         id: userId, 
-                        credits: 50, 
-                        role: 'user', 
-                        pay_balance: 0.00,
-                        freelancer_info: {} 
+                        credits: 50
                     }])
                     .select()
                     .single();
@@ -71,10 +68,10 @@ export const AuthProvider = ({ children }) => {
                 if (newData) setProfile(newData);
                 if (createError) console.error('Failed to create fallback profile:', createError);
             } else if (error) {
-                console.error('Dossier Query Error:', error.message);
+                console.error('Profile Fetch Error:', error.message);
             }
         } catch (err) {
-            console.error('Dossier Network Error:', err);
+            console.error('Profile Connection Error:', err);
         }
     };
 

@@ -125,7 +125,7 @@ const ReflexGamePage = () => {
     return (
         <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: '#F8F6F1', display: 'flex', flexDirection: 'column', color: '#000' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '0 2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <Link to="/arcade" style={{
+                <Link to="/tools" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                     fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
                     letterSpacing: '0.1em', color: '#000', textDecoration: 'none',

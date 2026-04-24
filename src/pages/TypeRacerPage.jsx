@@ -169,7 +169,7 @@ const TypeRacer = () => {
         const boxes = '🟩'.repeat(greens) + '🟥'.repeat(reds);
 
         const nameDisplay = playerName.trim().toUpperCase() || 'ANONYMOUS RACER';
-        const shareText = `RE-RENDER Type Racer\n🏆 Typist: ${nameDisplay}\n🔥 NET WPM: ${netWpm} (RAW: ${rawWpm})\n🎯 Accuracy: ${accuracy}%\n⚡ Max Combo: ${maxCombo}\n${boxes}\n\nhttps://re-render.com/arcade/type-racer`;
+        const shareText = `RE-RENDER Type Racer\n🏆 Typist: ${nameDisplay}\n🔥 NET WPM: ${netWpm} (RAW: ${rawWpm})\n🎯 Accuracy: ${accuracy}%\n⚡ Max Combo: ${maxCombo}\n${boxes}\n\nhttps://re-render.com/tools/type-racer`;
         navigator.clipboard.writeText(shareText);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
@@ -241,7 +241,7 @@ const TypeRacer = () => {
     return (
         <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: '#F8F6F1', color: '#000' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}>
-                <Link to="/arcade" style={{
+                <Link to="/tools" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                     fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
                     letterSpacing: '0.1em', color: '#000', textDecoration: 'none',

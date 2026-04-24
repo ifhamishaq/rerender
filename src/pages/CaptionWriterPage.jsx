@@ -114,23 +114,57 @@ CRITICAL RULES:
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem', opacity: 0.5, fontWeight: 900 }}>
+                <Link to="/tools" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                    color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
+                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', marginBottom: '3rem',
+                    backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '0.6rem 1.25rem', borderRadius: '100px', fontWeight: 900,
+                    transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
+                >
                     <ArrowLeft size={14} /> BACK_TO_LAB
                 </Link>
 
                 <div style={{ marginBottom: '5rem' }}>
-                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: RED, marginBottom: '1.5rem', letterSpacing: '0.3em', fontWeight: 900 }}>
+                    <div style={{ 
+                        fontSize: '0.6rem', fontFamily: 'var(--font-mono)', 
+                        color: RED, marginBottom: '1rem', letterSpacing: '0.4em', 
+                        fontWeight: 900, opacity: 0.8 
+                    }}>
                         VOL_02 // NEURAL_COPY
                     </div>
-                    <h1 style={{ fontSize: 'clamp(4rem, 10vw, 7rem)', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 0.8, textTransform: 'uppercase', margin: 0, letterSpacing: '-0.06em' }}>
+                    <h1 style={{ 
+                        fontSize: 'clamp(3rem, 10vw, 6rem)', fontWeight: 900, 
+                        fontFamily: 'var(--font-display)', lineHeight: 0.85, 
+                        textTransform: 'uppercase', margin: 0, letterSpacing: '-0.04em' 
+                    }}>
                         CAPTION<br />
-                        <span style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 400 }}>WRITER.</span>
+                        <span style={{ 
+                            fontFamily: 'Playfair Display', fontStyle: 'italic', 
+                            fontWeight: 400, color: '#fff', opacity: 0.9, textTransform: 'none' 
+                        }}>Writer.</span>
                     </h1>
                 </div>
 
                 {/* Input Area */}
-                <div style={{ border: '4px solid var(--color-text)', padding: '3rem', backgroundColor: 'var(--color-surface)', marginBottom: '3rem', position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '-1rem', left: '2rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', padding: '0.3rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>SOURCE_CONTEXT</div>
+                <div style={{ 
+                    borderRadius: '32px', padding: '3rem', 
+                    backgroundColor: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    backdropFilter: 'blur(30px)',
+                    marginBottom: '3rem', position: 'relative',
+                    boxShadow: '0 30px 60px rgba(0,0,0,0.2)'
+                }}>
+                    <div style={{ 
+                        position: 'absolute', top: '-0.75rem', left: '2rem', 
+                        backgroundColor: RED, color: '#fff', 
+                        padding: '0.3rem 1rem', fontSize: '0.55rem', 
+                        fontFamily: 'var(--font-mono)', fontWeight: 900,
+                        borderRadius: '100px', letterSpacing: '0.1em'
+                    }}>SOURCE_CONTEXT</div>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -138,25 +172,28 @@ CRITICAL RULES:
                         rows={5}
                         style={{
                             width: '100%', padding: '0', backgroundColor: 'transparent',
-                            border: 'none', color: 'var(--color-text)',
+                            border: 'none', color: '#fff',
                             fontFamily: 'Playfair Display', fontSize: '1.75rem', fontStyle: 'italic',
-                            resize: 'none', outline: 'none', lineHeight: 1.4
+                            resize: 'none', outline: 'none', lineHeight: 1.4,
+                            opacity: 0.9
                         }}
                     />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', marginBottom: '4rem', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', backgroundColor: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.08)' }}>
                         {TONES.map(t => (
                             <button
                                 key={t}
                                 onClick={() => setTone(t)}
                                 style={{
-                                    padding: '0.6rem 1.25rem', border: '2px solid var(--color-text)',
-                                    backgroundColor: tone === t ? 'var(--color-text)' : 'transparent',
-                                    color: tone === t ? 'var(--color-bg)' : 'var(--color-text)',
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900,
-                                    cursor: 'pointer', textTransform: 'uppercase'
+                                    padding: '0.6rem 1.25rem', border: 'none',
+                                    borderRadius: '100px',
+                                    backgroundColor: tone === t ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                    color: tone === t ? '#fff' : 'rgba(255,255,255,0.4)',
+                                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
+                                    cursor: 'pointer', textTransform: 'uppercase',
+                                    transition: 'all 0.3s'
                                 }}
                             >
                                 {t}
@@ -165,12 +202,15 @@ CRITICAL RULES:
                     </div>
 
                     <button onClick={handleGenerate} disabled={isGenerating || !description.trim()} style={{
-                        padding: '1.25rem 3rem', backgroundColor: (isGenerating || !description.trim()) ? 'var(--color-border)' : RED,
-                        color: '#fff', border: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
+                        padding: '1rem 2.5rem', backgroundColor: (isGenerating || !description.trim()) ? 'rgba(255,255,255,0.05)' : RED,
+                        color: '#fff', border: 'none', borderRadius: '100px',
+                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                         fontWeight: 900, cursor: isGenerating ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
-                        textTransform: 'uppercase'
+                        textTransform: 'uppercase',
+                        boxShadow: (isGenerating || !description.trim()) ? 'none' : `0 10px 30px ${RED}44`,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}>
-                        {isGenerating ? <><RefreshCw size={18} className="spin" /> [ PROCESSING ]</> : '[ INITIALIZE_GEN ]'}
+                        {isGenerating ? <><RefreshCw size={16} className="spin" /> [ PROCESSING ]</> : '[ INITIALIZE_GEN ]'}
                     </button>
                 </div>
 
@@ -181,25 +221,32 @@ CRITICAL RULES:
                             {captions.captions?.map((c, i) => {
                                 const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
                                 return (
-                                    <div key={i} style={{ border: '4px solid var(--color-text)', backgroundColor: 'var(--color-surface)', position: 'relative' }}>
+                                    <div key={i} style={{ 
+                                        borderRadius: '24px', 
+                                        backgroundColor: 'rgba(255,255,255,0.02)', 
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        backdropFilter: 'blur(20px)',
+                                        overflow: 'hidden',
+                                        boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
+                                    }}>
                                         <div style={{
-                                            padding: '1.5rem', borderBottom: '2.5px solid var(--color-text)',
+                                            padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)',
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            backgroundColor: 'var(--color-bg)'
+                                            background: 'rgba(255,255,255,0.01)'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <span style={{ color: 'var(--color-text)' }}>{platform.icon}</span>
-                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                    <span style={{ color: platform.color }}>{platform.icon}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8 }}>
                                                         {platform.name}
                                                     </span>
                                                 </div>
                                                 {c.psychology && (
                                                     <div style={{
-                                                        padding: '0.2rem 0.6rem', backgroundColor: 'var(--color-text)',
-                                                        color: 'var(--color-bg)', fontSize: '0.6rem',
+                                                        padding: '0.2rem 0.6rem', backgroundColor: 'rgba(255,255,255,0.05)',
+                                                        color: 'var(--color-accent)', fontSize: '0.55rem',
                                                         fontFamily: 'var(--font-mono)', fontWeight: 900,
-                                                        letterSpacing: '0.05em'
+                                                        letterSpacing: '0.05em', borderRadius: '4px'
                                                     }}>
                                                         {c.psychology.toUpperCase()}
                                                     </div>
@@ -207,16 +254,32 @@ CRITICAL RULES:
                                             </div>
                                             <button
                                                 onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
-                                                style={{ background: 'none', border: '1.5px solid var(--color-text)', color: 'var(--color-text)', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                                                style={{ 
+                                                    background: 'rgba(255,255,255,0.05)', 
+                                                    border: 'none', 
+                                                    color: '#fff', 
+                                                    cursor: 'pointer', 
+                                                    padding: '0.4rem 0.8rem', 
+                                                    fontSize: '0.6rem', 
+                                                    fontFamily: 'var(--font-mono)', 
+                                                    fontWeight: 900, 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    gap: '0.4rem',
+                                                    borderRadius: '100px',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                                             >
                                                 {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? <Check size={12} /> : <Copy size={12} />}
                                                 {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
                                             </button>
                                         </div>
                                         <div style={{ padding: '2.5rem' }}>
-                                            <p style={{ fontSize: '1.1rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: 'var(--color-text)', fontWeight: 500 }}>{c.caption}</p>
+                                            <p style={{ fontSize: '1.15rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: '#fff', fontWeight: 500, opacity: 0.9 }}>{c.caption}</p>
                                             {c.hashtags && (
-                                                <p style={{ fontSize: '0.85rem', color: RED, marginTop: '2rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>{c.hashtags}</p>
+                                                <p style={{ fontSize: '0.8rem', color: RED, marginTop: '2rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.05em' }}>{c.hashtags}</p>
                                             )}
                                         </div>
                                     </div>

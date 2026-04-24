@@ -21,8 +21,7 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
             {/* Mac Title Bar */}
             <div style={{
                 height: '32px', // standard mac height
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '0 12px',
@@ -106,7 +105,9 @@ const PortfolioPlayer = ({ videoId, videoUrl, title, client, id, minimal = false
                         height: '100%',
                         objectFit: 'contain',
                         opacity: 1,
-                        transition: 'opacity 0.3s ease'
+                        transition: 'opacity 0.3s ease',
+                        willChange: 'transform',
+                        transform: 'translateZ(0)'
                     }}
                 />
             ) : embedUrl ? (

@@ -152,7 +152,7 @@ const Navbar = () => {
                                             justifyContent: 'center', 
                                             padding: '0 8px', 
                                             gap: '4px', 
-                                            color: isActive(link.href) ? 'var(--color-accent)' : 'var(--color-text)',
+                                            color: isActive(link.href) ? 'var(--color-accent)' : '#fff',
                                             width: 'min-content'
                                         }}
                                     >

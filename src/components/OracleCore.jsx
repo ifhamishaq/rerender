@@ -4,6 +4,7 @@ import { Send, RefreshCw, User, Bot, ChevronRight, X, Target, Palette, FileText,
 
 import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = 'openai/gpt-oss-20b:free'; // 3.6B active — fast chat
@@ -35,6 +36,7 @@ const OracleCore = ({
     onClose = null
 }) => {
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
+    const { isDarkMode } = useTheme();
     const storageKey = user ? `oracle_chat_${mode}_${user.id}` : `oracle_chat_${mode}_guest`;
 
     const [messages, setMessages] = useState(() => {
@@ -232,15 +234,14 @@ EXPANDED USE_CASES:
 2. **Software Tutorials**: Step-by-step guides for ANY effect in any software listed above.
 3. **Trending Effects**: What's viral right now and how to recreate it.
 4. **Prompt Engineering**: Refine generative prompts for the [TOOLS](/tools) section.
-5. **Agency Navigation**: Guide users to [WORK](/work), [ARCADE](/arcade), or [HIRE US](/get-in-touch).
-6. **Dossier Analysis**: Help users manage credits in [DOSSIER](/dossier).
+5. **Agency Navigation**: Guide users to [WORK](/work), [TOOLS](/tools), or [HIRE US](/get-in-touch).
+6. **Profile Management**: Help users manage credits and settings in [PROFILE](/profile).
 7. **Troubleshooting**: Debug render failures, export issues, color space problems, codec errors.
 
 NAVIGATION_MAP:
 - [WORK Showcase](/work)
-- [DOSSIER Hub](/dossier)
+- [PROFILE & CREDITS](/profile)
 - [CREATIVE TOOLS](/tools)
-- [ARCADE](/arcade)
 - [HIRE US](/get-in-touch)
 - [PRICING](/pricing)
 
@@ -304,52 +305,71 @@ MISSION: Make every creative who talks to you walk away with something actionabl
             height: '100%', width: '100%',
             fontFamily: 'var(--font-sans)', position: 'relative',
             overflow: 'hidden',
-            backgroundColor: (isCompact || isWallpaper) ? 'var(--color-bg)' : 'transparent'
+            backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.4)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+            borderRadius: '32px',
+            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+            boxShadow: isDarkMode ? '0 20px 60px rgba(0,0,0,0.4)' : '0 20px 60px rgba(0,0,0,0.08)'
         }}>
             {/* Header for Global/Wallpaper modes */}
-            {(isCompact || isWallpaper) && (
-                <div style={{
-                    padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-border)',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.02)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-accent)' }}></div>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 900, fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>
-                            {isWallpaper ? 'PROMPT_ASSISTANT' : 'ORACLE_CORE'}
-                        </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                        {messages.length > 1 && (
-                            <button onClick={clearChat} style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: '0.25rem 0.5rem', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: 900 }}>
-                                CLEAR
-                            </button>
-                        )}
-                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', opacity: 0.5 }}>
-                            <X size={16} />
-                        </button>
-                    </div>
+            {/* Header */}
+            <div style={{
+                padding: '1.25rem 1.75rem', 
+                borderBottom: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: isDarkMode 
+                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.03), transparent)'
+                    : 'linear-gradient(to bottom, rgba(0,0,0,0.01), transparent)',
+                zIndex: 20
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ 
+                        width: '8px', height: '8px', 
+                        backgroundColor: 'var(--color-accent)', 
+                        borderRadius: '50%',
+                        boxShadow: '0 0 10px var(--color-accent)'
+                    }}></div>
+                    <span style={{ 
+                        fontSize: '0.65rem', fontWeight: 900, 
+                        fontFamily: 'var(--font-mono)', letterSpacing: '0.15em', 
+                        opacity: 0.8,
+                        color: 'var(--color-text)'
+                    }}>
+                        {isWallpaper ? 'PROMPT_ASSISTANT' : (isCompact ? 'ORACLE_CORE' : 'NEURAL_ORACLE_V4')}
+                    </span>
                 </div>
-            )}
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    {messages.length > 1 && (
+                        <button onClick={clearChat} style={{ 
+                            background: 'none', 
+                            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`, 
+                            borderRadius: '100px', 
+                            color: 'var(--color-text-secondary)', 
+                            cursor: 'pointer', padding: '0.4rem 0.8rem', fontSize: '0.55rem', 
+                            fontFamily: 'var(--font-mono)', fontWeight: 900,
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.color = 'var(--color-accent)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
+                        >
+                            PURGE_HISTORY
+                        </button>
+                    )}
+                    {(isCompact || isWallpaper || onClose) && (
+                        <button onClick={onClose} style={{ 
+                            background: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', 
+                            border: 'none', color: 'var(--color-text)', 
+                            cursor: 'pointer', width: '28px', height: '28px', 
+                            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                        }}>
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+            </div>
 
-            {/* Clear chat for standard mode */}
-            {!isCompact && !isWallpaper && messages.length > 1 && (
-                <button
-                    onClick={clearChat}
-                    style={{
-                        position: 'absolute', top: isCompact ? '4.5rem' : '0.75rem', right: '1.5rem', zIndex: 10,
-                        background: 'rgba(0,0,0,0.5)', border: '1px solid var(--color-border)',
-                        color: 'var(--color-text-secondary)', cursor: 'pointer',
-                        padding: '0.3rem 0.75rem', fontSize: '0.55rem',
-                        fontFamily: 'var(--font-mono)', fontWeight: 900,
-                        transition: 'all 0.15s'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.color = 'var(--color-accent)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
-                >
-                    CLEAR_CHAT
-                </button>
-            )}
+
 
             {/* Chat Area */}
             <div
@@ -357,56 +377,90 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                 className="oracle-chat-scroll"
                 style={{
                     flex: 1,
-                    padding: isCompact ? '1.5rem' : '2rem',
+                    padding: isCompact ? '1.5rem' : '2rem 3rem 4rem',
                     overflowY: 'auto',
                     overflowX: 'hidden',
                     display: 'flex', flexDirection: 'column',
-                    gap: isCompact ? '1.5rem' : '3rem',
+                    gap: isCompact ? '1.5rem' : '2.5rem',
                     scrollBehavior: 'smooth',
-                    border: (isCompact || isWallpaper) ? 'none' : '1px solid var(--color-border)',
-                    backgroundColor: (isCompact || isWallpaper) ? 'transparent' : 'rgba(255,255,255,0.01)',
+                    backgroundColor: 'transparent',
                 }}
             >
                 {messages.map((m, i) => (
                     <motion.div
                         key={i}
-                        initial={{ opacity: 0, x: -5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        style={{ display: 'flex', gap: isCompact ? '0.75rem' : '1.5rem', alignItems: 'flex-start' }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ 
+                            display: 'flex', 
+                            gap: isCompact ? '0.75rem' : '1.5rem', 
+                            alignItems: 'flex-start',
+                            flexDirection: m.role === 'user' ? 'row-reverse' : 'row'
+                        }}
                     >
                         <div style={{
-                            width: isCompact ? '24px' : '28px', height: isCompact ? '24px' : '28px', flexShrink: 0,
+                            width: isCompact ? '28px' : '32px', height: isCompact ? '28px' : '32px', flexShrink: 0,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'var(--color-accent)',
+                            backgroundColor: m.role === 'user' 
+                                ? (isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)') 
+                                : 'var(--color-accent)',
                             color: m.role === 'user' ? 'var(--color-text)' : '#000',
-                            borderRadius: '12px', marginTop: '0.25rem'
+                            borderRadius: '50%', marginTop: '0.25rem',
+                            boxShadow: m.role === 'user' ? 'none' : '0 4px 15px rgba(57,255,20,0.2)'
                         }}>
-                            {m.role === 'user' ? <User size={isCompact ? 12 : 14} /> : <Bot size={isCompact ? 12 : 14} />}
+                            {m.role === 'user' ? <User size={isCompact ? 14 : 16} /> : <Bot size={isCompact ? 14 : 16} />}
                         </div>
 
-                        <div style={{ flex: 1 }}>
+                        <div style={{ 
+                            flex: 1, 
+                            maxWidth: isCompact ? '85%' : '80%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: m.role === 'user' ? 'flex-end' : 'flex-start'
+                        }}>
                             <div style={{
-                                fontSize: '0.5rem', fontWeight: 900, marginBottom: '0.4rem',
+                                fontSize: '0.55rem', fontWeight: 900, marginBottom: '0.5rem',
                                 color: 'var(--color-text-secondary)',
-                                fontFamily: 'var(--font-mono)', letterSpacing: '0.1em'
+                                fontFamily: 'var(--font-mono)', letterSpacing: '0.15em',
+                                opacity: 0.5
                             }}>
-                                {m.role === 'user' ? 'SOURCE' : 'ORACLE'}
+                                {m.role === 'user' ? 'CLIENT_NODE' : 'ORACLE_CORE'}
                             </div>
-                            {/* Image preview in chat */}
+                            
                             {m.image && (
-                                <div style={{ marginBottom: '0.75rem', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--color-border)', maxWidth: '280px' }}>
+                                <div style={{ 
+                                    marginBottom: '0.75rem', 
+                                    borderRadius: '20px', 
+                                    overflow: 'hidden', 
+                                    border: '1px solid rgba(255,255,255,0.1)', 
+                                    maxWidth: '280px',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                                }}>
                                     <img src={m.image} alt="Uploaded" style={{ width: '100%', display: 'block' }} />
                                 </div>
                             )}
-                            <div
-                                style={{
-                                    fontSize: isCompact ? '0.85rem' : 'clamp(0.9rem, 1.2vw, 1.05rem)',
-                                    lineHeight: 1.6,
-                                    color: 'var(--color-text)',
-                                    whiteSpace: 'pre-wrap'
-                                }}
-                                dangerouslySetInnerHTML={{ __html: formatContent(m.content) }}
-                            />
+
+                             <div style={{
+                                backgroundColor: m.role === 'user' 
+                                    ? (isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') 
+                                    : (isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'),
+                                padding: isCompact ? '0.75rem 1rem' : '1.25rem 1.75rem',
+                                borderRadius: m.role === 'user' ? '24px 24px 4px 24px' : '24px 24px 24px 4px',
+                                border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}`,
+                                position: 'relative',
+                                boxShadow: (!isDarkMode && m.role === 'assistant') ? '0 4px 12px rgba(0,0,0,0.03)' : 'none'
+                            }}>
+                                <div
+                                    style={{
+                                        fontSize: isCompact ? '0.85rem' : '1rem',
+                                        lineHeight: 1.6,
+                                        color: 'var(--color-text)',
+                                        whiteSpace: 'pre-wrap',
+                                        opacity: 0.9
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: formatContent(m.content) }}
+                                />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -420,16 +474,18 @@ MISSION: Make every creative who talks to you walk away with something actionabl
 
             {/* Prompt Section */}
             <div style={{
-                padding: isCompact ? '1rem' : '1.5rem',
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                borderTop: '1px solid var(--color-border)',
-                flexShrink: 0
+                padding: isCompact ? '1.25rem' : '1.5rem 2.5rem 2.5rem',
+                backgroundColor: 'transparent',
+                borderTop: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                flexShrink: 0,
+                position: 'relative',
+                zIndex: 10
             }}>
                 {/* Quick-action templates */}
                 {useCases.length > 0 && (
                     <div
                         className="oracle-pills-scroll"
-                        style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}
+                        style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.25rem', overflowX: 'auto', paddingBottom: '0.5rem' }}
                     >
                         {useCases.map(uc => (
                             <button
@@ -442,15 +498,25 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                                     }
                                 }}
                                 style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.4rem',
-                                    padding: '0.5rem 0.75rem', border: '1px solid var(--color-border)',
-                                    backgroundColor: 'transparent', color: 'var(--color-text-secondary)',
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.6rem 1rem', border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                                    borderRadius: '100px',
+                                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', 
+                                    color: 'var(--color-text-secondary)',
                                     fontSize: '0.55rem', fontWeight: 900, fontFamily: 'var(--font-mono)',
-                                    cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: '0.05em',
-                                    transition: 'all 0.15s'
+                                    cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: '0.08em',
+                                    transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                                onMouseEnter={e => { 
+                                    e.currentTarget.style.color = 'var(--color-accent)'; 
+                                    e.currentTarget.style.borderColor = 'rgba(57,255,20,0.4)'; 
+                                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+                                }}
+                                onMouseLeave={e => { 
+                                    e.currentTarget.style.color = 'var(--color-text-secondary)'; 
+                                    e.currentTarget.style.borderColor = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
                             >
                                 {uc.icon}
                                 <span>{uc.label}</span>
@@ -470,7 +536,24 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                     </div>
                 )}
 
-                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+                <form 
+                    onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} 
+                    style={{ 
+                        display: 'flex', 
+                        gap: '0.75rem', 
+                        alignItems: 'center',
+                        backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+                        border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)'}`,
+                        borderRadius: '100px',
+                        padding: '0.5rem 0.6rem 0.5rem 1.5rem',
+                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        boxShadow: isDarkMode ? '0 4px 30px rgba(0,0,0,0.3)' : '0 10px 40px rgba(0,0,0,0.08)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)'
+                    }}
+                    onFocusCapture={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(57,255,20,0.1)'; }}
+                    onBlurCapture={e => { e.currentTarget.style.borderColor = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)'; e.currentTarget.style.boxShadow = isDarkMode ? '0 4px 30px rgba(0,0,0,0.3)' : '0 10px 40px rgba(0,0,0,0.08)'; }}
+                >
                     {/* Hidden file input */}
                     <input
                         ref={fileInputRef}
@@ -479,56 +562,66 @@ MISSION: Make every creative who talks to you walk away with something actionabl
                         onChange={handleImageUpload}
                         style={{ display: 'none' }}
                     />
-                    {/* Upload button */}
-                    {!isCompact && (
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            title="Upload thumbnail for analysis"
-                            style={{
-                                background: 'none', border: '1px solid var(--color-border)',
-                                color: pendingImage ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                                borderColor: pendingImage ? 'var(--color-accent)' : 'var(--color-border)',
-                                padding: '0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center',
-                                transition: 'all 0.15s'
-                            }}
-                        >
-                            <Upload size={14} />
-                        </button>
-                    )}
-                    <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
-                        <div style={{ position: 'absolute', left: 0, bottom: '0.8rem', color: 'var(--color-accent)', opacity: 0.5 }}>
-                            <ChevronRight size={14} />
-                        </div>
+                    
+                    <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <textarea
                             ref={textareaRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                            placeholder={pendingImage ? "Add context for analysis (optional)..." : (isWallpaper ? "Describe your wallpaper vibe..." : "RE-RENDER DIRECTIVE...")}
+                            placeholder={pendingImage ? "Add context..." : (isWallpaper ? "Describe your vibe..." : "Oracle directive...")}
                             rows={1}
                             style={{
-                                width: '100%', backgroundColor: 'transparent',
-                                border: 'none', borderBottom: '1px solid var(--color-border)',
-                                color: 'var(--color-text)', padding: '0.6rem 1.5rem', fontFamily: 'var(--font-sans)',
-                                fontSize: isCompact ? '0.85rem' : '1rem', outline: 'none', resize: 'none',
-                                maxHeight: '120px', overflowY: 'auto'
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: 'var(--color-text)', padding: '0.6rem 0', fontFamily: 'var(--font-sans)',
+                                fontSize: isCompact ? '0.85rem' : '0.95rem', outline: 'none', resize: 'none',
+                                maxHeight: '120px', overflowY: 'auto',
+                                opacity: 0.9
                             }}
                         />
                     </div>
-                    <button
-                        type="submit"
-                        disabled={isTyping || (!input.trim() && !pendingImage)}
-                        style={{
-                            backgroundColor: 'var(--color-accent)', color: '#000', border: 'none',
-                            padding: isCompact ? '0.6rem' : '0.7rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center',
-                            gap: '0.4rem', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.6rem',
-                            opacity: (isTyping || (!input.trim() && !pendingImage)) ? 0.3 : 1
-                        }}
-                    >
-                        <Send size={isCompact ? 12 : 14} />
-                        {!isCompact && <span>{pendingImage ? 'ANALYZE' : 'EXECUTE'}</span>}
-                    </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {!isCompact && (
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                title="Upload thumbnail"
+                                style={{
+                                    background: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', 
+                                    border: 'none',
+                                    color: pendingImage ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                                    width: '36px', height: '36px', borderRadius: '50%',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+                                onMouseLeave={e => e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}
+                            >
+                                <Upload size={14} />
+                            </button>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={isTyping || (!input.trim() && !pendingImage)}
+                            style={{
+                                backgroundColor: 'var(--color-accent)', color: '#000', border: 'none',
+                                height: '36px', width: isCompact ? '36px' : 'auto',
+                                padding: isCompact ? '0' : '0 1.25rem', borderRadius: '100px',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                gap: '0.6rem', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.65rem',
+                                opacity: (isTyping || (!input.trim() && !pendingImage)) ? 0.3 : 1,
+                                boxShadow: '0 4px 15px rgba(57,255,20,0.3)',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => { if(!isTyping) e.currentTarget.style.transform = 'scale(1.02)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                        >
+                            <Send size={14} />
+                            {!isCompact && <span>EXECUTE</span>}
+                        </button>
+                    </div>
                 </form>
             </div>
 

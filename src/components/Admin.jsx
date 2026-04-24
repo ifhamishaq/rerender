@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
-    const { user, profile, loading: authLoading } = useAuth(); // Get profile for role check
-    const [activeTab, setActiveTab] = useState('products');
-    const [adminPin, setAdminPin] = useState('');
-    const [isPinAuthorized, setIsPinAuthorized] = useState(() => {
-        return sessionStorage.getItem('ADMIN_AUTH_L5') === 'granted';
-    });
+    const { user, profile, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('applicants');
+    const [isPinAuthorized, setIsPinAuthorized] = useState(true); 
 
-    // --- Products State ---
-    const [products, setProducts] = useState([]);
-    const [editingId, setEditingId] = useState(null);
-    const [formData, setFormData] = useState({
-        title: '', price: '', color: '#000000', category: 'LUTS', link: '', desc: '', image: '', type: 'PAID'
-    });
+    const [creditAdjustment, setCreditAdjustment] = useState({});
 
-    // --- Prompts State ---
-    const [prompts, setPrompts] = useState([]);
-    const [editingPromptId, setEditingPromptId] = useState(null);
-    const [promptForm, setPromptForm] = useState({
-        title: '', prompt: '', category: 'PORTRAIT', image: ''
-    });
+
+
+
 
     // --- Blog State Removed ---
 
@@ -34,37 +25,34 @@ const Admin = () => {
         serifTitle: 'The', description: '', specs: '', link: '', buttonLabel: 'APPLY_NOW', style: 'premium'
     });
 
-    // --- Services State ---
-    const [services, setServices] = useState([]);
-    const [editingServiceId, setEditingServiceId] = useState(null);
-    const [serviceForm, setServiceForm] = useState({
-        title: '', desc: '', tags: '', gif: ''
-    });
+
  
     // --- Credit Requests State ---
     const [topupRequests, setTopupRequests] = useState([]);
  
-    // --- Payout Requests State ---
-    const [payoutRequests, setPayoutRequests] = useState([]);
 
-    // --- Phase 6: All Users State ---
+
     const [allUsers, setAllUsers] = useState([]);
     const [userSearch, setUserSearch] = useState('');
-    const [freelancerFilter, setFreelancerFilter] = useState(false);
+    const [submissions, setSubmissions] = useState([]);
+    const [allProjects, setAllProjects] = useState([]);
+    const [portfolioForm, setPortfolioForm] = useState({
+        title: '', category: 'MOTION', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9'
+    });
+    const [editingProjectId, setEditingProjectId] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
  
     // --- Phase 6: Moderation State ---
     const [allThreads, setAllThreads] = useState([]);
  
-    // --- Phase 6: Metrics State ---
-    const [metrics, setMetrics] = useState({ users: 0, threads: 0, totalCredits: 0 });
+
  
     // --- Applicants State ---
     const [applicants, setApplicants] = useState([]);
+    const [appFeedback, setAppFeedback] = useState({});
+    const [appStatusUpdates, setAppStatusUpdates] = useState({});
  
-    // --- Payout Ledger State ---
-    const [isPayModalOpen, setIsPayModalOpen] = useState(false);
-    const [payData, setPayData] = useState({ userId: '', amount: '', project: '' });
-    const [globalPayments, setGlobalPayments] = useState([]);
+
  
     const [status, setStatus] = useState('');
 
@@ -72,167 +60,75 @@ const Admin = () => {
         if (authLoading) return; // Wait for auth to settle
 
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const isOwner = profile?.role === 'admin';
+        const isAdminRole = profile?.role === 'admin';
+        const isOwner = isLocal || isAdminRole; 
 
-        if (!isLocal && !isOwner) {
+        if (!isOwner) {
             console.log('--- ADMIN_ACCESS_DENIED ---');
-            console.log('Current UID:', user?.id);
-            console.log('Current Role:', profile?.role || 'user');
-            console.log('To promote, run: UPDATE profiles SET role = "admin" WHERE id = "' + user?.id + '";');
-            window.location.href = '/';
+            navigate('/');
             return;
         }
         
         // IF we reach here, either we are LOCAL or we are an OWNER.
         // We can safely fetch data.
         
-        fetchProducts();
-        fetchPrompts();
         fetchCareers();
-        fetchServices();
         fetchTopupRequests();
-        fetchPayoutRequests();
         fetchAllUsers();
-        // fetchAllThreads(); // Phase 6: Not yet implemented
-        fetchMetrics();
         fetchApplicants();
-        fetchGlobalPayments();
+        fetchSubmissions();
+        fetchPortfolio();
     }, [user, authLoading]);
 
-    // --- Products CRUD ---
-    const fetchProducts = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/products');
-            if (!res.ok) throw new Error('OFFLINE');
-            const data = await res.json();
-            setProducts(data);
-        } catch (err) {
-            console.log('Local CMS server is offline. (Safe to ignore on Production)');
-        }
+
+
+
+
+    // --- Careers CRUD (Migrated to Supabase) ---
+    const fetchCareers = async () => {
+        const { data, error } = await supabase
+            .from('careers')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setCareers(data);
+        if (error) console.error('Supabase Careers Error:', error);
     };
 
-    const handleUpload = async (e, target = 'product') => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const data = new FormData();
-        data.append('image', file);
-
-        try {
-            const res = await fetch('http://localhost:3001/api/upload', {
-                method: 'POST',
-                body: data
-            });
-            const result = await res.json();
-            if (result.url) {
-                if (target === 'product') setFormData(prev => ({ ...prev, image: result.url }));
-                else if (target === 'prompt') setPromptForm(prev => ({ ...prev, image: result.url }));
-                setStatus('Image uploaded successfully');
-            }
-        } catch (err) {
-            console.error(err);
-            setStatus('Image upload failed');
-        }
-    };
-
-    const handleTypeChange = (e) => {
-        const type = e.target.value;
-        setFormData(prev => ({
-            ...prev,
-            type,
-            price: type === 'FREE' ? 'FREE' : prev.price
-        }));
-    };
-
-    const handleSave = async () => {
-        const productToSave = {
-            ...formData,
-            id: editingId || Date.now()
+    const handleSaveCareer = async () => {
+        const toSave = { 
+            ...careerForm, 
+            specs: typeof careerForm.specs === 'string' ? careerForm.specs.split('\n').filter(s => s.trim()) : careerForm.specs
         };
-
-        if (productToSave.type === 'FREE') {
-            productToSave.price = 'FREE';
-        }
-
-        let updatedProducts;
-        if (editingId) {
-            updatedProducts = products.map(p => p.id === editingId ? productToSave : p);
+        
+        let error;
+        if (editingCareerId) {
+            const { error: err } = await supabase
+                .from('careers')
+                .update(toSave)
+                .eq('id', editingCareerId);
+            error = err;
         } else {
-            updatedProducts = [...products, productToSave];
+            const { error: err } = await supabase
+                .from('careers')
+                .insert([toSave]);
+            error = err;
         }
 
-        try {
-            await fetch('http://localhost:3001/api/products', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedProducts)
-            });
-            setProducts(updatedProducts);
-            setStatus('Saved successfully!');
-            setEditingId(null);
-            setFormData({ title: '', price: '', color: '#000000', category: 'LUTS', link: '', desc: '', image: '', type: 'PAID' });
-        } catch (err) {
-            setStatus('Error saving data.');
-        }
-    };
-
-    const handleEdit = (product) => {
-        setEditingId(product.id);
-        setFormData({ ...product, type: product.price === 'FREE' ? 'FREE' : 'PAID' });
-    };
-
-    const handleDelete = async (id) => {
-        const updatedProducts = products.filter(p => p.id !== id);
-        try {
-            await fetch('http://localhost:3001/api/products', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedProducts)
-            });
-            setProducts(updatedProducts);
-            setStatus('Deleted successfully!');
-        } catch (err) {
-            setStatus('Error deleting.');
-        }
-    };
-
-    // --- Prompts CRUD ---
-    const fetchPrompts = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/prompts');
-            if (res.ok) {
-                const data = await res.json();
-                setPrompts(data);
-            }
-        } catch (err) {}
-    };
-
-    const handleSavePrompt = async () => {
-        const promptToSave = {
-            ...promptForm,
-            id: editingPromptId || Date.now()
-        };
-
-        let updatedPrompts;
-        if (editingPromptId) {
-            updatedPrompts = prompts.map(p => p.id === editingPromptId ? promptToSave : p);
+        if (error) {
+            setStatus('Error: ' + error.message);
         } else {
-            updatedPrompts = [...prompts, promptToSave];
+            setStatus('Career Listing Saved to Supabase!');
+            setEditingCareerId(null);
+            setCareerForm({ sidemark: '', type: 'INTERNSHIP', status: 'AVAILABLE', title: '', serifTitle: 'The', description: '', specs: '', link: '', buttonLabel: 'APPLY_NOW', style: 'premium' });
+            fetchCareers();
         }
+    };
 
-        try {
-            await fetch('http://localhost:3001/api/prompts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedPrompts)
-            });
-            setPrompts(updatedPrompts);
-            setStatus('Prompt saved!');
-            setEditingPromptId(null);
-            setPromptForm({ title: '', prompt: '', category: 'PORTRAIT', image: '' });
-        } catch (err) {
-            setStatus('Error saving prompt.');
-        }
+    const handleDeleteCareer = async (id) => {
+        if (!window.confirm('Delete this career listing?')) return;
+        const { error } = await supabase.from('careers').delete().eq('id', id);
+        if (error) setStatus('Error: ' + error.message);
+        else { setStatus('Listing Deleted'); fetchCareers(); }
     };
 
     // --- Applicants CRUD ---
@@ -257,31 +153,19 @@ const Admin = () => {
         }
     };
 
-    const handleUpdateApplicantStatus = async (id, newStatus, targetUserId) => {
-        try {
-            // 1. Update Application Status
-            const { error: appError } = await supabase
-                .from('career_applications')
-                .update({ status: newStatus })
-                .eq('id', id);
-            
-            if (appError) throw appError;
+    const handleUpdateApplicantStatus = async (id, newStatus, userId, feedback = '') => {
+        const { error } = await supabase
+            .from('career_applications')
+            .update({ 
+                status: newStatus,
+                feedback: feedback 
+            })
+            .eq('id', id);
 
-            // 2. Automate Role Promotion if Accepted
-            if (newStatus === 'ACCEPTED' && targetUserId) {
-                const { error: roleError } = await supabase
-                    .from('profiles')
-                    .update({ role: 'freelancer' })
-                    .eq('id', targetUserId);
-                
-                if (roleError) console.error('ROLE_PROMOTION_ERROR:', roleError);
-                else setStatus('Candidate Promoted to Freelancer.');
-            }
-
-            setApplicants(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
-            setStatus(`Applicant updated to ${newStatus}`);
-        } catch (err) {
-            setStatus('Error updating applicant');
+        if (!error) {
+            fetchApplicants();
+            setStatus(`UPDATED_${id}_TO_${newStatus}`);
+            setTimeout(() => setStatus(''), 3000);
         }
     };
 
@@ -297,99 +181,89 @@ const Admin = () => {
         }
     };
 
-    const handleEditPrompt = (prompt) => {
-        setEditingPromptId(prompt.id);
-        setPromptForm({ ...prompt });
+
+
+    // --- Portfolio CRUD ---
+    const fetchPortfolio = async () => {
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setAllProjects(data);
     };
 
-    const handleDeletePrompt = async (id) => {
-        const updatedPrompts = prompts.filter(p => p.id !== id);
+    const handleSaveProject = async () => {
+        const payload = { ...portfolioForm };
+        if (!payload.title) { setStatus('Error: Title Required'); return; }
+
+        let error;
+        if (editingProjectId) {
+            const { error: err } = await supabase
+                .from('projects')
+                .update(payload)
+                .eq('id', editingProjectId);
+            error = err;
+        } else {
+            const { error: err } = await supabase
+                .from('projects')
+                .insert([payload]);
+            error = err;
+        }
+
+        if (error) {
+            setStatus('Error: ' + error.message);
+        } else {
+            setStatus(editingProjectId ? 'Project Updated!' : 'Project Added!');
+            setEditingProjectId(null);
+            setPortfolioForm({ title: '', category: 'MOTION', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' });
+            fetchPortfolio();
+        }
+    };
+
+    const handleDeleteProject = async (id) => {
+        if (!window.confirm('Delete project from archive?')) return;
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+        if (error) setStatus('Error: ' + error.message);
+        else { setStatus('Project Deleted'); fetchPortfolio(); }
+    };
+
+    const handleFileUpload = async (e, field) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setIsUploading(true);
+        setStatus('Uploading Asset...');
+
         try {
-            await fetch('http://localhost:3001/api/prompts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedPrompts)
-            });
-            setPrompts(updatedPrompts);
-            setStatus('Prompt deleted!');
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const filePath = `portfolio/${fileName}`;
+
+            // We attempt to upload to 'assets' bucket. If it fails, we fall back to a generic error message.
+            const { error: uploadError } = await supabase.storage
+                .from('assets') 
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('assets')
+                .getPublicUrl(filePath);
+
+            setPortfolioForm(prev => ({ ...prev, [field]: publicUrl }));
+            setStatus('Upload Successful!');
         } catch (err) {
-            setStatus('Error deleting prompt.');
+            console.error('Upload Error:', err);
+            setStatus('Upload Failed: Ensure "assets" bucket exists in Supabase.');
+        } finally {
+            setIsUploading(false);
         }
     };
 
     // --- Blog CRUD Removed ---
 
-    // --- Careers CRUD ---
-    const fetchCareers = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/careers');
-            if (res.ok) {
-                const data = await res.json();
-                setCareers(data);
-            }
-        } catch (err) {}
-    };
 
-    const handleSaveCareer = async () => {
-        const careerToSave = { 
-            ...careerForm, 
-            id: editingCareerId || Date.now(),
-            specs: typeof careerForm.specs === 'string' ? careerForm.specs.split('\n').filter(s => s.trim()) : careerForm.specs
-        };
-        let updated = editingCareerId ? careers.map(c => c.id === editingCareerId ? careerToSave : c) : [...careers, careerToSave];
-        try {
-            await fetch('http://localhost:3001/api/careers', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updated)
-            });
-            setCareers(updated); setStatus('Career saved!'); setEditingCareerId(null);
-            setCareerForm({ sidemark: '', type: 'INTERNSHIP', status: 'AVAILABLE', title: '', serifTitle: 'The', description: '', specs: '', link: '', buttonLabel: 'APPLY_NOW', style: 'premium' });
-        } catch (err) { setStatus('Error saving career.'); }
-    };
 
-    const handleDeleteCareer = async (id) => {
-        const updated = careers.filter(c => c.id !== id);
-        try {
-            await fetch('http://localhost:3001/api/careers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
-            setCareers(updated); setStatus('Career deleted!');
-        } catch (err) { setStatus('Error deleting career.'); }
-    };
 
-    // --- Services CRUD ---
-    const fetchServices = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/api/services');
-            if (res.ok) {
-                const data = await res.json();
-                setServices(data);
-            }
-        } catch (err) {}
-    };
-
-    const handleSaveService = async () => {
-        const serviceToSave = { 
-            ...serviceForm, 
-            id: editingServiceId || Date.now(),
-            tags: typeof serviceForm.tags === 'string' ? serviceForm.tags.split(',').map(t => t.trim()).filter(t => t) : serviceForm.tags
-        };
-        let updated = editingServiceId ? services.map(s => s.id === editingServiceId ? serviceToSave : s) : [...services, serviceToSave];
-        try {
-            await fetch('http://localhost:3001/api/services', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updated)
-            });
-            setServices(updated); setStatus('Service saved!'); setEditingServiceId(null);
-            setServiceForm({ title: '', desc: '', tags: '', gif: '' });
-        } catch (err) { setStatus('Error saving service.'); }
-    };
-
-    const handleDeleteService = async (id) => {
-        const updated = services.filter(s => s.id !== id);
-        try {
-            await fetch('http://localhost:3001/api/services', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
-            setServices(updated); setStatus('Service deleted!');
-        } catch (err) { setStatus('Error deleting service.'); }
-    };
  
     // --- Credit Management CRUD ---
     const fetchTopupRequests = async () => {
@@ -450,17 +324,7 @@ const Admin = () => {
         if (data) setAllUsers(data);
     };
  
-    const fetchMetrics = async () => {
-        const { count: userCount } = await supabase.from('profiles', { count: 'exact', head: true }).select('*');
-        const { data: creditData } = await supabase.from('profiles').select('credits');
-        const totalCredits = creditData?.reduce((acc, curr) => acc + (curr.credits || 0), 0) || 0;
-        
-        setMetrics({
-            users: userCount || 0,
-            threads: 0,
-            totalCredits
-        });
-    };
+
  
     const handleAdjustCredits = async (userId, amount, reason) => {
         const { error } = await supabase.rpc('admin_adjust_credits', { 
@@ -471,131 +335,58 @@ const Admin = () => {
         if (!error) {
             setStatus(`Adjusted balance for user.`);
             fetchAllUsers();
-            fetchMetrics();
         } else {
             setStatus('Credit Adjustment Failed: ' + error.message);
         }
     };
 
-    const fetchPayoutRequests = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('payout_requests')
-                .select(`
-                    *,
-                    profiles ( full_name, role, pay_balance )
-                `)
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            if (data) setPayoutRequests(data);
-        } catch (err) {
-            console.error('Error fetching payouts:', err);
-        }
-    };
-
-    const fetchGlobalPayments = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('freelancer_payments')
-                .select('*, profiles(full_name, email)')
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            if (data) setGlobalPayments(data);
-        } catch (err) {
-            console.error('Error fetching global payments:', err);
-        }
-    };
 
 
-    const handleRecordProjectPayment = async (e) => {
-        e.preventDefault();
-        const { error } = await supabase.rpc('record_project_payment', { 
-            target_user_id: payData.userId, 
-            payment_amount: parseFloat(payData.amount),
-            proj_name: payData.project
-        });
-        
-        if (!error) {
-            setStatus(`Payment Recorded: $${payData.amount} for ${payData.project}.`);
-            setIsPayModalOpen(false);
-            setPayData({ userId: '', amount: '', project: '' });
-            fetchAllUsers();
-            fetchGlobalPayments();
-        } else {
-            console.error('PAYMENT_LEDGER_ERROR:', error);
-            setStatus('Payment Failed: ' + error.message);
-        }
-    };
 
-    const handleApprovePayout = async (id) => {
-        setStatus('Processing Payout...');
-        const { data, error } = await supabase.rpc('approve_payout', { payout_id: id });
-        if (error) {
-            setStatus('Payout Failed: ' + error.message);
-        } else if (data) {
-            setStatus('Payout Approved & Ledger Balanced.');
-            fetchPayoutRequests();
-            fetchAllUsers();
-        }
-    };
 
-    const handleRejectPayout = async (id) => {
-        const { error } = await supabase.rpc('reject_payout', { payout_id: id });
-        if (!error) {
-            setStatus('Payout Request Rejected.');
-            fetchPayoutRequests();
-        }
-    };
  
     const handleTogglePro = async (userId, proStatus) => {
-        const { error } = await supabase.rpc('admin_toggle_pro', { 
-            target_user_id: userId, 
-            pro_status: proStatus 
-        });
-        if (!error) {
-            setStatus(`User Pro-status updated.`);
-            fetchAllUsers();
-        }
-    };
-
-
-    const handleToggleRole = async (userId, currentRole) => {
-        const newRole = currentRole === 'freelancer' ? 'user' : 'freelancer';
+        setStatus('UPDATING_PRO_STATUS...');
         const { error } = await supabase
             .from('profiles')
-            .update({ role: newRole })
+            .update({ is_pro: proStatus })
             .eq('id', userId);
             
         if (!error) {
-            setStatus(`ID_${userId.slice(0,4)} role set to ${newRole.toUpperCase()}.`);
+            setStatus(`SUCCESS: User PRO_STATUS set to ${proStatus}`);
             fetchAllUsers();
+            setTimeout(() => setStatus(''), 3000);
         } else {
-            setStatus('Role Shift Failed: ' + error.message);
+            console.error('PRO_TOGGLE_ERROR:', error);
+            setStatus('Error: ' + error.message + ' (Check RLS Policies)');
         }
     };
- 
- 
-    const handlePinVerify = async (e) => {
-        e.preventDefault();
-        setStatus('VERIFYING_PROTOCOL...');
-        
-        const { data: isValid, error } = await supabase.rpc('verify_admin_pin', { 
-            input_pin: adminPin 
-        });
 
-        if (error) {
-            setStatus('ACCESS_DENIED: Protocol Error (' + error.message + ')');
-        } else if (isValid) {
-            setIsPinAuthorized(true);
-            sessionStorage.setItem('ADMIN_AUTH_L5', 'granted');
-            setStatus('Level 5 Clearance Granted.');
+    // --- Submissions CRUD ---
+    const fetchSubmissions = async () => {
+        const { data, error } = await supabase
+            .from('contact_submissions')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setSubmissions(data);
+    };
+
+    const handleDeleteSubmission = async (id) => {
+        if (!window.confirm('Wipe lead?')) return;
+        const { error } = await supabase.from('contact_submissions').delete().eq('id', id);
+        if (!error) {
+            setSubmissions(prev => prev.filter(s => s.id !== id));
+            setStatus('Lead deleted');
         } else {
-            setStatus('ACCESS_DENIED: Invalid PIN Syntax.');
-            setAdminPin('');
+            setStatus('Error wiping lead: ' + error.message);
         }
     };
+
+
+
+ 
+ 
+
 
     // --- Tab Style ---
     const tabStyle = (tab) => ({
@@ -652,6 +443,34 @@ const Admin = () => {
         textTransform: 'uppercase'
     };
 
+    const labelStyle = {
+        display: 'block',
+        fontSize: '0.6rem',
+        opacity: 0.5,
+        marginBottom: '0.5rem',
+        fontFamily: 'var(--font-mono)'
+    };
+
+    const actionBtnStyle = {
+        padding: '0.5rem 1rem',
+        backgroundColor: '#222',
+        color: 'var(--color-accent)',
+        border: '1px solid var(--color-border)',
+        cursor: 'pointer',
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.65rem',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 900
+    };
+
+    const saveBtnStyle = {
+        ...buttonStyle,
+        backgroundColor: 'var(--color-accent)',
+        boxShadow: '0 4px 15px rgba(57, 255, 20, 0.3)'
+    };
+
     return (
         <div style={{ backgroundColor: '#000', minHeight: '100vh', color: '#fff' }}>
             <div style={{ padding: '8rem 2rem 4rem', fontFamily: 'var(--font-mono)', maxWidth: '1000px', margin: '0 auto' }}>
@@ -660,40 +479,7 @@ const Admin = () => {
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)' }}>[SYSTEM_CONNECTED] [MODE: PORTAL]</div>
                 </div>
 
-                {/* ===== RECORD COMPLETION MODAL ===== */}
-                {isPayModalOpen && (
-                    <div style={modalOverlayStyle}>
-                        <div style={modalContentStyle}>
-                            <h2 style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--color-accent)', marginBottom: '1.5rem', fontSize: '2rem' }}>Record_Completion</h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.5, marginBottom: '2rem' }}>
-                                INJECTING_USD_INTO_LEDGER // ID: {payData.userId.slice(0,8)}
-                            </p>
-                            
-                            <form onSubmit={handleRecordProjectPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)' }}>PROJECT_NAME / ID</label>
-                                    <input 
-                                        required placeholder="VFX_SCENE_01_FINAL" 
-                                        value={payData.project} onChange={e => setPayData({...payData, project: e.target.value})}
-                                        style={inputStyle} 
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)' }}>PAYMENT_AMOUNT_($USD)</label>
-                                    <input 
-                                        required type="number" step="0.01" placeholder="100.00" 
-                                        value={payData.amount} onChange={e => setPayData({...payData, amount: e.target.value})}
-                                        style={inputStyle} 
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                    <button type="submit" style={{ ...buttonStyle, flex: 1, padding: '1rem' }}>TRANSMIT_PAYMENT</button>
-                                    <button type="button" onClick={() => setIsPayModalOpen(false)} style={{ ...buttonStyle, backgroundColor: '#444', padding: '1rem' }}>ABORT</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
+
 
                 {status && (
                     <div style={{ 
@@ -709,146 +495,202 @@ const Admin = () => {
                     </div>
                 )}
 
-                {/* Tab Switcher */}
                 <div style={{ display: 'flex', gap: '2px', marginBottom: '2rem', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-border)' }}>
-                    <button onClick={() => setActiveTab('products')} style={tabStyle('products')}>SHOP</button>
-                    <button onClick={() => setActiveTab('services')} style={tabStyle('services')}>SERVICES</button>
-                    <button onClick={() => setActiveTab('careers')} style={tabStyle('careers')}>CAREERS</button>
                     <button onClick={() => setActiveTab('applicants')} style={tabStyle('applicants')}>APPLICANTS</button>
-                    <button onClick={() => setActiveTab('prompts')} style={tabStyle('prompts')}>PROMPTS</button>
+                    <button onClick={() => setActiveTab('leads')} style={tabStyle('leads')}>LEADS</button>
+                    <button onClick={() => setActiveTab('careers')} style={tabStyle('careers')}>CAREERS</button>
+                    <button onClick={() => setActiveTab('portfolio')} style={tabStyle('portfolio')}>PORTFOLIO</button>
                     <button onClick={() => setActiveTab('credits')} style={tabStyle('credits')}>CREDITS</button>
-                    <button onClick={() => setActiveTab('payouts')} style={tabStyle('payouts')}>PAYOUTS</button>
                     <button onClick={() => setActiveTab('users')} style={tabStyle('users')}>USERS</button>
-                    <button onClick={() => setActiveTab('metrics')} style={tabStyle('metrics')}>STATS</button>
                 </div>
 
-                {/* ===== PRODUCTS TAB ===== */}
-                {activeTab === 'products' && (
-                    <>
-                        <div style={sectionBox}>
-                            <h2 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{editingId ? 'EDIT_PRODUCT' : 'NEW_PRODUCT'}</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div style={{ border: '1px dashed var(--color-border)', padding: '1rem' }}>
-                                    <label style={{ fontSize: '0.7rem', display: 'block', marginBottom: '0.5rem' }}>IMAGE_UPLOAD</label>
-                                    <input type="file" onChange={(e) => handleUpload(e, 'product')} />
-                                    {formData.image && <img src={formData.image} alt="Preview" style={{ width: '80px', marginTop: '1rem' }} />}
-                                </div>
-                                <input placeholder="TITLE" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} style={inputStyle} />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <select value={formData.type} onChange={handleTypeChange} style={inputStyle}>
-                                        <option value="PAID">PAID</option><option value="FREE">FREE</option>
-                                    </select>
-                                    <input placeholder="PRICE" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} style={inputStyle} disabled={formData.type === 'FREE'} />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={inputStyle}>
-                                        <option value="LUTS">LUTS</option><option value="PACKS">PACKS</option><option value="TEXTURES">TEXTURES</option>
-                                    </select>
-                                    <input type="color" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} style={{ ...inputStyle, padding: '2px', height: '40px' }} />
-                                </div>
-                                <textarea placeholder="DESCRIPTION" value={formData.desc} onChange={e => setFormData({ ...formData, desc: e.target.value })} style={{ ...inputStyle, minHeight: '80px' }} />
-                                <button onClick={handleSave} style={buttonStyle}>{editingId ? 'UPDATE' : 'DEPLOY'}</button>
-                            </div>
-                        </div>
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {products.map(p => (
-                                <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', border: '1px solid var(--color-border)', padding: '1.5rem', alignItems: 'center', backgroundColor: '#0a0a0a' }}>
-                                    <div><strong style={{ fontSize: '1.1rem' }}>{p.title}</strong><br/><small style={{ color: 'var(--color-text-secondary)' }}>{p.category} | {p.price}</small></div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button onClick={() => handleEdit(p)} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[EDIT]</button>
-                                        <button onClick={() => handleDelete(p.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[DEL]</button>
+
+ 
+                {/* ===== LEADS TAB ===== */}
+                {activeTab === 'leads' && (
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                            PROJECT_LEADS_&_ESTIMATES
+                            <button onClick={fetchSubmissions} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
+                        </h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {submissions.length > 0 ? submissions.map(s => (
+                                <div key={s.id} style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#111' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{s.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-accent)' }}>{s.email}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{s.estimate}</div>
+                                            <div style={{ fontSize: '0.6rem', opacity: 0.5 }}>{new Date(s.created_at).toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', padding: '1rem', backgroundColor: '#050505', border: '1px solid #1a1a1a', fontSize: '0.7rem' }}>
+                                        <div><span style={{ opacity: 0.5 }}>CATEGORY:</span><br/>{s.category?.toUpperCase()}</div>
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <span style={{ opacity: 0.5 }}>PROJECT_DETAILS:</span><br/>
+                                            <div style={{ marginTop: '0.5rem', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{s.quantity_duration}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                        <button onClick={() => handleDeleteSubmission(s.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.65rem', fontWeight: 900 }}>[WIPE_LEAD]</button>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_LEADS_FOUND</div>
+                            )}
                         </div>
-                    </>
+                    </div>
                 )}
-
-                {/* ===== BLOG TAB REMOVED ===== */}
 
                 {/* ===== CAREERS TAB ===== */}
                 {activeTab === 'careers' && (
-                    <>
-                        <div style={sectionBox}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>MANAGE_OPENINGS</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="TITLE (e.g. INTERNSHIP)" value={careerForm.title} onChange={e => setCareerForm({...careerForm, title: e.target.value})} style={inputStyle} />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                                    <input placeholder="SIDEMARK (001/INT)" value={careerForm.sidemark} onChange={e => setCareerForm({...careerForm, sidemark: e.target.value})} style={inputStyle} />
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '2rem' }}>CAREERS_MANAGEMENT</h2>
+                        
+                        <div style={{ backgroundColor: '#050505', padding: '2rem', border: '1px solid var(--color-border)', marginBottom: '3rem' }}>
+                            <h3 style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.5 }}>{editingCareerId ? 'EDIT_CAREER_LISTING' : 'ADD_NEW_CAREER'}</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={labelStyle}>TITLE</label>
+                                    <input value={careerForm.title} onChange={e => setCareerForm({...careerForm, title: e.target.value})} style={inputStyle} placeholder="Art Director" />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>TYPE</label>
+                                    <select value={careerForm.type} onChange={e => setCareerForm({...careerForm, type: e.target.value})} style={inputStyle}>
+                                        <option value="FULL-TIME">FULL-TIME</option>
+                                        <option value="PART-TIME">PART-TIME</option>
+                                        <option value="CONTRACT">CONTRACT</option>
+                                        <option value="INTERNSHIP">INTERNSHIP</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>STATUS</label>
                                     <select value={careerForm.status} onChange={e => setCareerForm({...careerForm, status: e.target.value})} style={inputStyle}>
-                                        <option value="AVAILABLE">AVAILABLE</option><option value="SCOUTING">SCOUTING</option><option value="COMING_SOON">COMING_SOON</option>
-                                    </select>
-                                    <select value={careerForm.style} onChange={e => setCareerForm({...careerForm, style: e.target.value})} style={inputStyle}>
-                                        <option value="premium">PREMIUM</option><option value="inverted">INVERTED</option><option value="accent">ACCENT</option>
+                                        <option value="AVAILABLE">AVAILABLE</option>
+                                        <option value="CLOSED">CLOSED</option>
+                                        <option value="HIDDEN">HIDDEN</option>
                                     </select>
                                 </div>
-                                <textarea placeholder="DESCRIPTION" value={careerForm.description} onChange={e => setCareerForm({...careerForm, description: e.target.value})} style={{...inputStyle, minHeight: '80px'}} />
-                                <textarea placeholder="SPECS (One per line)" value={Array.isArray(careerForm.specs) ? careerForm.specs.join('\n') : careerForm.specs} onChange={e => setCareerForm({...careerForm, specs: e.target.value})} style={{...inputStyle, minHeight: '80px'}} />
-                                <button onClick={handleSaveCareer} style={buttonStyle}>SAVE_LISTING</button>
+                                <div>
+                                    <label style={labelStyle}>SIDEMARK</label>
+                                    <input value={careerForm.sidemark} onChange={e => setCareerForm({...careerForm, sidemark: e.target.value})} style={inputStyle} placeholder="Vol. 01" />
+                                </div>
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={labelStyle}>DESCRIPTION</label>
+                                    <textarea value={careerForm.description} onChange={e => setCareerForm({...careerForm, description: e.target.value})} style={{...inputStyle, minHeight: '100px'}} placeholder="What is this role about?" />
+                                </div>
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={labelStyle}>SPECS (One per line)</label>
+                                    <textarea value={Array.isArray(careerForm.specs) ? careerForm.specs.join('\n') : careerForm.specs} onChange={e => setCareerForm({...careerForm, specs: e.target.value})} style={{...inputStyle, minHeight: '100px'}} placeholder="3+ Years Experience&#10;C4D / Octane Expert" />
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                                <button onClick={handleSaveCareer} style={{ ...saveBtnStyle, flex: 1 }}>{editingCareerId ? 'UPDATE_LISTING' : 'PUBLISH_LISTING'}</button>
+                                {editingCareerId && <button onClick={() => { setEditingCareerId(null); setCareerForm({ sidemark: '', type: 'INTERNSHIP', status: 'AVAILABLE', title: '', serifTitle: 'The', description: '', specs: '', link: '', buttonLabel: 'APPLY_NOW', style: 'premium' }); }} style={{ background: '#222', border: 'none', color: '#fff', padding: '0 2rem', borderRadius: '4px', cursor: 'pointer' }}>CANCEL</button>}
                             </div>
                         </div>
-                        {careers.map(c => (
-                            <div key={c.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>
-                                <strong>{c.title}</strong> [{c.status}]
-                                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => { setEditingCareerId(c.id); setCareerForm(c); }} style={{ color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>[EDIT]</button>
-                                    <button onClick={() => handleDeleteCareer(c.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>[DEL]</button>
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                )}
 
-                {/* ===== PROMPTS TAB ===== */}
-                {activeTab === 'prompts' && (
-                    <>
-                        <div style={sectionBox}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>PROMPT_ENGINE</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="TITLE" value={promptForm.title} onChange={e => setPromptForm({ ...promptForm, title: e.target.value })} style={inputStyle} />
-                                <textarea placeholder="PROMPT_TEXT" value={promptForm.prompt} onChange={e => setPromptForm({ ...promptForm, prompt: e.target.value })} style={{ ...inputStyle, minHeight: '120px' }} />
-                                <button onClick={handleSavePrompt} style={buttonStyle}>SAVE_PROMPT</button>
-                            </div>
-                        </div>
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {prompts.map(p => (
-                                <div key={p.id} style={{ border: '1px solid var(--color-border)', padding: '1rem' }}>
-                                    <strong>{p.title}</strong>
-                                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                                        <button onClick={() => handleEditPrompt(p)} style={{ color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>[EDIT]</button>
-                                        <button onClick={() => handleDeletePrompt(p.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>[DEL]</button>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                            {careers.map(c => (
+                                <div key={c.id} style={{ border: '1px solid var(--color-border)', backgroundColor: '#0a0a0a', padding: '1.5rem' }}>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{c.type} // {c.status}</div>
+                                    <div style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '1rem' }}>{c.title}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <button onClick={() => { setEditingCareerId(c.id); setCareerForm(c); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.65rem' }}>[EDIT]</button>
+                                        <button onClick={() => handleDeleteCareer(c.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '0.65rem' }}>[WIPE]</button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </>
-                )}
-
-                {/* ===== SERVICES TAB ===== */}
-                {activeTab === 'services' && (
-                    <>
-                        <div style={sectionBox}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>MANAGE_SERVICES</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="TITLE" value={serviceForm.title} onChange={e => setServiceForm({...serviceForm, title: e.target.value})} style={inputStyle} />
-                                <input placeholder="GIF URL / PATH" value={serviceForm.gif} onChange={e => setServiceForm({...serviceForm, gif: e.target.value})} style={inputStyle} />
-                                <textarea placeholder="DESCRIPTION" value={serviceForm.desc} onChange={e => setServiceForm({...serviceForm, desc: e.target.value})} style={{...inputStyle, minHeight: '80px'}} />
-                                <input placeholder="TAGS (comma separated)" value={Array.isArray(serviceForm.tags) ? serviceForm.tags.join(', ') : serviceForm.tags} onChange={e => setServiceForm({...serviceForm, tags: e.target.value})} style={inputStyle} />
-                                <button onClick={handleSaveService} style={buttonStyle}>SAVE_SERVICE</button>
-                            </div>
-                        </div>
-                        {services.map(s => (
-                            <div key={s.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>
-                                <strong>{s.title}</strong>
-                                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => { setEditingServiceId(s.id); setServiceForm(s); }} style={{ color: 'var(--color-accent)', background: 'none', border: 'none', cursor: 'pointer' }}>[EDIT]</button>
-                                    <button onClick={() => handleDeleteService(s.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>[DEL]</button>
-                                </div>
-                            </div>
-                        ))}
-                    </>
+                    </div>
                 )}
  
+
+ 
+
+ 
+
+ 
+                {/* ===== PORTFOLIO TAB ===== */}
+                {activeTab === 'portfolio' && (
+                    <div style={sectionBox}>
+                        <h2 style={{ marginBottom: '2rem' }}>PORTFOLIO_ENGINE</h2>
+                        
+                        {/* Add/Edit Form */}
+                        <div style={{ backgroundColor: '#050505', padding: '2rem', border: '1px solid var(--color-border)', marginBottom: '3rem' }}>
+                            <h3 style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.5 }}>{editingProjectId ? 'EDIT_EXISTING_PROJECT' : 'ADD_NEW_PROJECT'}</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={labelStyle}>TITLE</label>
+                                    <input value={portfolioForm.title} onChange={e => setPortfolioForm({...portfolioForm, title: e.target.value})} style={inputStyle} placeholder="Project Name" />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>CATEGORY</label>
+                                    <select value={portfolioForm.category} onChange={e => setPortfolioForm({...portfolioForm, category: e.target.value})} style={inputStyle}>
+                                        <option value="MOTION">MOTION</option>
+                                        <option value="CGI">CGI</option>
+                                        <option value="WEB">WEB</option>
+                                        <option value="AI">AI</option>
+                                        <option value="BRANDING">BRANDING</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>CLIENT</label>
+                                    <input value={portfolioForm.client} onChange={e => setPortfolioForm({...portfolioForm, client: e.target.value})} style={inputStyle} placeholder="Optional" />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>ASPECT_RATIO</label>
+                                    <select value={portfolioForm.aspectratio} onChange={e => setPortfolioForm({...portfolioForm, aspectratio: e.target.value})} style={inputStyle}>
+                                        <option value="16/9">16/9 (Widescreen)</option>
+                                        <option value="9/16">9/16 (Vertical)</option>
+                                        <option value="1/1">1/1 (Square)</option>
+                                    </select>
+                                </div>
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={labelStyle}>THUMBNAIL_URL / FILE</label>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={portfolioForm.thumbnail} onChange={e => setPortfolioForm({...portfolioForm, thumbnail: e.target.value})} style={{...inputStyle, flex: 1}} placeholder="https://..." />
+                                        <input type="file" onChange={e => handleFileUpload(e, 'thumbnail')} style={{ display: 'none' }} id="thumb-upload" />
+                                        <label htmlFor="thumb-upload" style={{ ...actionBtnStyle, whiteSpace: 'nowrap' }}>{isUploading ? '...' : '[UPLOAD]'}</label>
+                                    </div>
+                                </div>
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={labelStyle}>VIDEO_URL / YT_ID</label>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <input value={portfolioForm.video_url} onChange={e => setPortfolioForm({...portfolioForm, video_url: e.target.value})} style={{...inputStyle, flex: 1}} placeholder="Direct MP4 URL" />
+                                        <input value={portfolioForm.youtubeid} onChange={e => setPortfolioForm({...portfolioForm, youtubeid: e.target.value})} style={{...inputStyle, width: '150px'}} placeholder="YouTube ID" />
+                                        <input type="file" onChange={e => handleFileUpload(e, 'video_url')} style={{ display: 'none' }} id="video-upload" />
+                                        <label htmlFor="video-upload" style={{ ...actionBtnStyle, whiteSpace: 'nowrap' }}>[UPLOAD_MP4]</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                                <button onClick={handleSaveProject} style={{ ...saveBtnStyle, flex: 1 }}>{editingProjectId ? 'PUSH_UPDATES' : 'EXECUTE_DEPLOY'}</button>
+                                {editingProjectId && <button onClick={() => { setEditingProjectId(null); setPortfolioForm({ title: '', category: 'MOTION', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' }); }} style={{ background: '#222', border: 'none', color: '#fff', padding: '0 2rem', borderRadius: '4px', cursor: 'pointer' }}>CANCEL</button>}
+                            </div>
+                        </div>
+
+                        {/* Projects List */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                            {allProjects.map(p => (
+                                <div key={p.id} style={{ border: '1px solid var(--color-border)', backgroundColor: '#0a0a0a', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ width: '100%', aspectRatio: p.aspectratio === '9/16' ? '9/16' : '16/9', backgroundColor: '#000', backgroundImage: `url(${p.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                                    <div style={{ padding: '1rem', flex: 1 }}>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginBottom: '0.25rem' }}>{p.category}</div>
+                                        <div style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '1rem' }}>{p.title}</div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <button onClick={() => { setEditingProjectId(p.id); setPortfolioForm(p); window.scrollTo(0, 0); }} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.65rem' }}>[EDIT]</button>
+                                            <button onClick={() => handleDeleteProject(p.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '0.65rem' }}>[WIPE]</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* ===== CREDITS TAB ===== */}
                 {activeTab === 'credits' && (
                     <>
@@ -903,152 +745,11 @@ const Admin = () => {
                     </>
                 )}
  
-                {/* ===== PAYOUTS TAB ===== */}
-                {activeTab === 'payouts' && (
-                    <div style={sectionBox}>
-                        <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                            PENDING_WITHDRAWAL_REQUESTS
-                            <button onClick={fetchPayoutRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
-                        </h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {payoutRequests.filter(r => r.status === 'pending').length > 0 ? payoutRequests.filter(r => r.status === 'pending').map(req => (
-                                <div key={req.id} style={{ 
-                                    padding: '1.5rem', 
-                                    border: '1px solid var(--color-border)', 
-                                    backgroundColor: '#111', 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <div>
-                                        <div style={{ fontWeight: 900, marginBottom: '0.3rem' }}>
-                                            {req.profiles?.full_name || 'FREELANCER_NODE'} 
-                                            <span style={{ color: 'var(--color-accent)', marginLeft: '1rem' }}>${req.amount} USD</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
-                                            GATEWAY: <span style={{ color: '#fff' }}>{req.payout_method}</span> | 
-                                            TARGET: <span style={{ color: '#fff' }}>{req.payout_address}</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.3rem' }}>
-                                            CURRENT_LEDGER_BALANCE: ${req.profiles?.pay_balance || '0.00'}
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <button 
-                                            onClick={() => handleApprovePayout(req.id)}
-                                            style={{ ...buttonStyle, padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
-                                        >
-                                            APPROVE_TRANSFER
-                                        </button>
-                                        <button 
-                                            onClick={() => handleRejectPayout(req.id)}
-                                            style={{ ...buttonStyle, backgroundColor: '#333', color: '#ff4444', padding: '0.6rem 1.2rem', fontSize: '0.7rem' }}
-                                        >
-                                            REJECT
-                                        </button>
-                                    </div>
-                                </div>
-                            )) : (
-                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_PENDING_WITHDRAWALS</div>
-                            )}
-                        </div>
-
-                        {/* WITHDRAWAL_HISTORY */}
-                        <div style={{ marginTop: '4rem', borderTop: '2px solid var(--color-border)', paddingTop: '2rem' }}>
-                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
-                                Withdrawal_History
-                                <button onClick={fetchPayoutRequests} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
-                            </h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {payoutRequests.filter(r => r.status !== 'pending').length > 0 ? payoutRequests.filter(r => r.status !== 'pending').map(req => (
-                                    <div key={req.id} style={{ 
-                                        padding: '1.5rem', 
-                                        border: '1px solid #222', 
-                                        backgroundColor: '#0a0a0a',
-                                        display: 'flex', 
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        opacity: 0.7
-                                    }}>
-                                        <div>
-                                            <div style={{ fontWeight: 900, marginBottom: '0.3rem' }}>
-                                                {req.profiles?.full_name || 'ID: ' + req.user_id.slice(0,8)} 
-                                                <span style={{ color: 'var(--color-accent)', marginLeft: '1rem' }}>${req.amount} USD</span>
-                                            </div>
-                                            <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
-                                                DATE: {new Date(req.created_at).toLocaleString()} | 
-                                                TO: {req.payout_address}
-                                            </div>
-                                        </div>
-                                        <div style={{ 
-                                            fontSize: '0.6rem', padding: '4px 10px', fontWeight: 900, 
-                                            backgroundColor: req.status === 'approved' ? '#00ccff' : '#ff4444', 
-                                            color: '#000', textTransform: 'uppercase' 
-                                        }}>
-                                            {req.status}
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3 }}>NO_HISTORY_AVAILABLE</div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* PROJECT_PAYMENT_AUDIT_TRAIL */}
-                        <div style={{ marginTop: '4rem', borderTop: '2px solid var(--color-border)', paddingTop: '2rem' }}>
-                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
-                                Project_Payment_Audit_Trail
-                                <button onClick={fetchGlobalPayments} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem' }}>[REFRESH]</button>
-                            </h2>
-                            {globalPayments.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.3, fontFamily: 'var(--font-mono)' }}>[NO_PAYMENTS_RECORDED_IN_LEDGER]</div>
-                            ) : (
-                                <div style={{ display: 'grid', gap: '0.75rem' }}>
-                                    {globalPayments.slice(0, 10).map(pay => (
-                                        <div key={pay.id} style={{ 
-                                            padding: '1.25rem', 
-                                            border: '1px solid #222', 
-                                            backgroundColor: '#0a0a0a',
-                                            display: 'flex', 
-                                            justifyContent: 'space-between', 
-                                            alignItems: 'center' 
-                                        }}>
-                                            <div>
-                                                <div style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '0.2rem' }}>{pay.project_name}</div>
-                                                <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>
-                                                    RECIPIENT: <span style={{ color: '#fff' }}>{pay.profiles?.full_name || 'ID: ' + pay.user_id.slice(0, 8)}</span> | 
-                                                    DATE: {new Date(pay.created_at).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                            <div style={{ color: 'var(--color-accent)', fontWeight: 900, fontFamily: 'var(--font-mono)' }}>+${pay.amount} USD</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* ===== USERS TAB (PHASE 6) ===== */}
+                {/* ===== USERS TAB ===== */}
                 {activeTab === 'users' && (
                     <div style={sectionBox}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h2 style={{ margin: 0 }}>USER_CONTROL_HUB</h2>
-                            <button 
-                                onClick={() => setFreelancerFilter(!freelancerFilter)}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    backgroundColor: freelancerFilter ? 'var(--color-accent)' : 'transparent',
-                                    color: freelancerFilter ? '#000' : 'var(--color-accent)',
-                                    border: '1px solid var(--color-accent)',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.6rem',
-                                    fontWeight: 900,
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {freelancerFilter ? 'VIEW_ALL_USERS' : 'FREELANCERS_ONLY'}
-                            </button>
                         </div>
                         <input 
                             placeholder="SEARCH_BY_EMAIL_OR_NAME" 
@@ -1059,46 +760,41 @@ const Admin = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {allUsers
                                 .filter(u => u.email?.toLowerCase().includes(userSearch.toLowerCase()) || u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
-                                .filter(u => freelancerFilter ? u.role === 'freelancer' : true)
                                 .map(u => (
                                 <div key={u.id} style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#111', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
                                         <div style={{ fontWeight: 900, marginBottom: '0.2rem' }}>
                                             {u.full_name || 'NO_NAME'} 
                                             {u.is_pro && <span style={{ color: 'var(--color-accent)', fontSize: '0.6rem', marginLeft: '0.5rem' }}>[PRO]</span>}
-                                            {u.role === 'freelancer' && <span style={{ color: '#00ccff', fontSize: '0.6rem', marginLeft: '0.5rem' }}>[FREELANCER]</span>}
                                         </div>
                                         <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{u.email}</div>
                                         <div style={{ fontSize: '0.8rem', fontWeight: 900, marginTop: '0.5rem', display: 'flex', gap: '1.5rem' }}>
                                             <span>COMPUTE: {u.credits || 0} CR</span>
-                                            {u.role === 'freelancer' && <span style={{ color: 'var(--color-accent)' }}>PAY_BAL: ${u.pay_balance || '0.00'}</span>}
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end', maxWidth: '350px' }}>
-                                        <button onClick={() => handleAdjustCredits(u.id, 50, 'ADMIN_GRANT')} style={{ ...buttonStyle, padding: '0.5rem', fontSize: '0.6rem' }}>+50 CR</button>
-                                        <button onClick={() => handleAdjustCredits(u.id, -50, 'ADMIN_REVOKE')} style={{ ...buttonStyle, backgroundColor: '#333', color: '#fff', padding: '0.5rem', fontSize: '0.6rem' }}>-50 CR</button>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end', maxWidth: '350px', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', backgroundColor: '#050505', padding: '0.5rem', border: '1px solid #1a1a1a' }}>
+                                            <input 
+                                                type="number" 
+                                                placeholder="± AMOUNT" 
+                                                value={creditAdjustment[u.id] || ''} 
+                                                onChange={e => setCreditAdjustment({...creditAdjustment, [u.id]: e.target.value})}
+                                                style={{ ...inputStyle, width: '80px', padding: '0.4rem', fontSize: '0.7rem' }}
+                                            />
+                                            <button 
+                                                onClick={() => {
+                                                    handleAdjustCredits(u.id, parseInt(creditAdjustment[u.id]), 'MANUAL_ADMIN_ADJUST');
+                                                    setCreditAdjustment({...creditAdjustment, [u.id]: ''});
+                                                }} 
+                                                style={{ ...buttonStyle, padding: '0.4rem 1rem', fontSize: '0.6rem' }}
+                                            >
+                                                ADJUST
+                                            </button>
+                                        </div>
                                         
-                                        <button onClick={() => handleTogglePro(u.id, !u.is_pro)} style={{ ...buttonStyle, backgroundColor: u.is_pro ? '#ff4444' : 'var(--color-accent)', padding: '0.5rem', fontSize: '0.6rem' }}>
+                                        <button onClick={() => handleTogglePro(u.id, !u.is_pro)} style={{ ...buttonStyle, backgroundColor: u.is_pro ? '#ff4444' : 'var(--color-accent)', padding: '0.75rem 1rem', fontSize: '0.6rem' }}>
                                             {u.is_pro ? 'STRIP_PRO' : 'GRANT_PRO'}
                                         </button>
-
-                                        <button onClick={() => handleToggleRole(u.id, u.role)} style={{ ...buttonStyle, backgroundColor: u.role === 'freelancer' ? '#ff4444' : '#00ccff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}>
-                                            {u.role === 'freelancer' ? 'REVOKE_FREELANCER' : 'SET_FREELANCER'}
-                                        </button>
-
-                                        {u.role === 'freelancer' && (
-                                            <>
-                                                <button 
-                                                    onClick={() => {
-                                                        setPayData({ ...payData, userId: u.id });
-                                                        setIsPayModalOpen(true);
-                                                    }}
-                                                    style={{ ...buttonStyle, backgroundColor: '#fff', color: '#000', padding: '0.5rem', fontSize: '0.6rem' }}
-                                                >
-                                                    RECORD_COMPLETION
-                                                </button>
-                                            </>
-                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1106,32 +802,18 @@ const Admin = () => {
                     </div>
                 )}
  
-                {/* ===== METRICS TAB (PHASE 6) ===== */}
-                {activeTab === 'metrics' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-                        <div style={sectionBox}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>USER_BASE_SYNC</div>
-                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.users}</div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_REGISTERED_OPERATIVES</div>
-                        </div>
-                        <div style={sectionBox}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>CREDIT_CIRCULATION</div>
-                            <div style={{ fontSize: '3rem', fontWeight: 900 }}>{metrics.totalCredits}</div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', marginTop: '0.5rem' }}>TOTAL_ACTIVE_COMPUTE_POWER</div>
-                        </div>
-                    </div>
-                )}
+
                 {/* ===== APPLICANTS TAB ===== */}
                 {activeTab === 'applicants' && (
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h2 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>Incoming Dossiers</h2>
+                            <h2 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>Incoming Applications</h2>
                             <button onClick={fetchApplicants} style={{ ...buttonStyle, padding: '0.5rem 1rem', fontSize: '0.7rem' }}>REFRESH</button>
                         </div>
-                        {applicants.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '4rem', border: '1px dashed var(--color-border)', opacity: 0.5 }}>[NO_APPLICATIONS_IN_ARCHIVE]</div>
+                        {applicants.filter(app => app.status === 'NEW' || app.status === 'REVIEWING').length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '4rem', border: '1px dashed var(--color-border)', opacity: 0.5 }}>[NO_PENDING_APPLICATIONS]</div>
                         ) : (
-                            applicants.map(app => (
+                            applicants.filter(app => app.status === 'NEW' || app.status === 'REVIEWING').map(app => (
                                 <div key={app.id} style={{ ...sectionBox, marginBottom: '0' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                                         <div>
@@ -1155,7 +837,7 @@ const Admin = () => {
                                         </div>
                                         <div style={{ fontSize: '0.6rem', opacity: 0.3 }}>{new Date(app.created_at).toLocaleDateString()}</div>
                                     </div>
-
+ 
                                     <div style={{ backgroundColor: '#111', padding: '1rem', border: '1px solid #222', marginBottom: '1.5rem' }}>
                                         <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>PORTFOLIO_DOCKET</label>
                                         <a href={app.portfolio_url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', textDecoration: 'underline', fontSize: '0.9rem' }}>{app.portfolio_url}</a>
@@ -1175,10 +857,20 @@ const Admin = () => {
                                         </div>
                                     )}
 
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={{ fontSize: '0.5rem', opacity: 0.4, display: 'block', marginBottom: '0.5rem' }}>INTERNAL_FEEDBACK_/_RESPONSE</label>
+                                        <textarea 
+                                            placeholder="Enter feedback for the applicant..." 
+                                            value={appFeedback[app.id] || app.feedback || ''} 
+                                            onChange={e => setAppFeedback({...appFeedback, [app.id]: e.target.value})}
+                                            style={{ ...inputStyle, minHeight: '80px', fontSize: '0.8rem' }}
+                                        />
+                                    </div>
+
                                     <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
                                         <select 
-                                            value={app.status} 
-                                            onChange={(e) => handleUpdateApplicantStatus(app.id, e.target.value, app.user_id)}
+                                            value={appStatusUpdates[app.id] || app.status} 
+                                            onChange={(e) => setAppStatusUpdates({...appStatusUpdates, [app.id]: e.target.value})}
                                             style={{ ...inputStyle, width: 'auto', flex: 1, padding: '0.5rem' }}
                                         >
                                             <option value="NEW">MARK_NEW</option>
@@ -1186,7 +878,13 @@ const Admin = () => {
                                             <option value="ACCEPTED">ACCEPTED</option>
                                             <option value="REJECTED">REJECTED</option>
                                         </select>
-                                        <button onClick={() => handleDeleteApplicant(app.id)} style={{ padding: '0.5rem 1.5rem', backgroundColor: '#333', color: '#ff4444', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>WIPE_RECORD</button>
+                                        <button 
+                                            onClick={() => handleUpdateApplicantStatus(app.id, appStatusUpdates[app.id] || app.status, app.user_id, appFeedback[app.id] || app.feedback)}
+                                            style={{ ...buttonStyle, padding: '0.5rem 1.5rem', fontSize: '0.7rem' }}
+                                        >
+                                            UPDATE_STATUS
+                                        </button>
+                                        <button onClick={() => handleDeleteApplicant(app.id)} style={{ padding: '0.5rem 1rem', backgroundColor: '#333', color: '#ff4444', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.6rem' }}>WIPE</button>
                                     </div>
                                 </div>
                             ))

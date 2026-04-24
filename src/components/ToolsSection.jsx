@@ -173,7 +173,7 @@ const ToolsSection = () => {
                             icon="🌌"
                             title="WALLPAPER LAB"
                             desc="Harness Flux-1 Schnell to render custom digital backdrops. Infinite variations, zero compromise."
-                            link="/arcade/wallpaper-lab"
+                            link="/tools/wallpaper-lab"
                             tag="AI_RENDERER"
                             isHot={true}
                         />
@@ -197,51 +197,32 @@ const ToolsSection = () => {
                             icon="⌨️"
                             title="TYPE RACER"
                             desc="Your keyboard is the weapon. Type design manifests and code snippets. Speed earns glory."
-                            link="/arcade/type-racer"
+                            link="/tools/type-racer"
                             tag="EXPERIMENT"
                         />
                         <ToolCard
                             icon="👁️"
                             title="HEX CODE HERO"
                             desc="Read the matrix. Three hex codes, one background color. Can you spot the difference?"
-                            link="/arcade/hex-code-hero"
+                            link="/tools/hex-code-hero"
                             tag="EXPERIMENT"
                         />
                         <ToolCard
                             icon="🎨"
                             title="PALETTE PICKER"
                             desc="Steal the aesthetic. Extract and generate cohesive color palettes from visual inputs."
-                            link="/arcade/palette-picker"
+                            link="/tools/palette-picker"
                             tag="UTILITY"
                         />
                         <ToolCard
                             icon="⏱️"
                             title="CHRONO STRIKE"
                             desc="Stop the clock exactly at 5.000s. A brutal test of internal timing and reflexes."
-                            link="/arcade/reflex"
+                            link="/tools/reflex"
                             tag="EXPERIMENT"
                         />
-                        <ToolCard
-                            icon="🗒️"
-                            title="PROMPT LAB"
-                            desc="A centralized repository of engineered visual directives for generative workflows."
-                            link="/prompts"
-                            tag="KNOWLEDGE_BASE"
-                        />
-                        <ToolCard
-                            icon="📱"
-                            title="SAFE ZONE PREVIEW"
-                            desc="Upload 9:16 frames and toggle TikTok/Reels UI overlays. Avoid 'Dead Zones' automatically."
-                            link="/lab/safe-zone"
-                            tag="UX_UTILITY"
-                        />
-                        <ToolCard
-                            icon="📊"
-                            title="PROJECT ESTIMATOR"
-                            desc="Calculate your investment in real-time. Lock in professional quotes for video, 3D, and design."
-                            link="/estimate"
-                            tag="FINANCE_TOOL"
-                        />
+
+
                     </div>
                 </div>
             </section>

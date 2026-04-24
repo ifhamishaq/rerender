@@ -11,13 +11,39 @@ const CareersPage = () => {
     const [filter, setFilter] = useState('ALL');
     const [isLoading, setIsLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [userApplications, setUserApplications] = useState({});
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         fetchJobs();
+        checkUserAuth();
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    const checkUserAuth = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            setUser(user);
+            fetchUserApplications(user.id);
+        }
+    };
+
+    const fetchUserApplications = async (userId) => {
+        const { data } = await supabase
+            .from('career_applications')
+            .select('role_id, status')
+            .eq('user_id', userId);
+        
+        if (data) {
+            const appMap = {};
+            data.forEach(app => {
+                if (app.role_id) appMap[app.role_id] = app.status;
+            });
+            setUserApplications(appMap);
+        }
+    };
 
     const fetchJobs = async () => {
         setIsLoading(true);
@@ -85,7 +111,11 @@ const CareersPage = () => {
                                             </div>
                                         </div>
                                         <div className="apple-apply-btn">
-                                            APPLY ↗
+                                            {userApplications[job.id] ? (
+                                                <span style={{ color: 'var(--color-accent)' }}>{userApplications[job.id].toUpperCase()}</span>
+                                            ) : (
+                                                'APPLY ↗'
+                                            )}
                                         </div>
                                     </div>
                                     

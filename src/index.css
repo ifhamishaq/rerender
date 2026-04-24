@@ -861,12 +861,12 @@ html.lenis body {
   position: absolute;
   z-index: 0;
   inset: 0;
-  backdrop-filter: blur(3px);
-  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 body.dark-mode .liquidGlass-effect {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .liquidGlass-tint {

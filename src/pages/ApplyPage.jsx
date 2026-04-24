@@ -85,7 +85,7 @@ const ApplyPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!user) return setError("Login required to submit dossiers.");
+        if (!user) return setError("Login required to submit applications.");
         setSubmitting(true);
         setError(null);
 
@@ -135,7 +135,7 @@ const ApplyPage = () => {
     if (!user) return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', fontStyle: 'italic', marginBottom: '2rem', color: 'var(--color-accent)' }}>Authentication Required</h1>
-            <p style={{ opacity: 0.6, marginBottom: '2rem', maxWidth: '400px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>You must be logged in to submit an application dossier.</p>
+            <p style={{ opacity: 0.6, marginBottom: '2rem', maxWidth: '400px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>You must be logged in to submit an application.</p>
             <button 
                 onClick={() => setIsAuthModalOpen(true)}
                 style={{ backgroundColor: 'var(--color-accent)', color: '#000', padding: '1rem 2rem', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer' }}
@@ -146,15 +146,67 @@ const ApplyPage = () => {
     );
 
     if (existingApplication) return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', fontStyle: 'italic', marginBottom: '2rem', color: 'var(--color-accent)' }}>Dossier Exists</h1>
-            <p style={{ opacity: 0.6, marginBottom: '1rem', maxWidth: '400px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>You have already submitted an application for this role.</p>
-            <div style={{ padding: '0.5rem 1.5rem', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '3rem' }}>
-                STATUS: {existingApplication.status.toUpperCase()}
-            </div>
-            <Link to="/dossier" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', border: '1px solid #333', padding: '1rem 2rem', color: '#fff', textDecoration: 'none' }}>
-                CHECK_FULL_STATUS
-            </Link>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', padding: '2rem', textAlign: 'center' }}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{ maxWidth: '600px', width: '100%' }}
+            >
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-accent)', marginBottom: '2rem', letterSpacing: '0.3em' }}>APPLICATION_ARCHIVE</div>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 8vw, 4rem)', fontWeight: 900, marginBottom: '2rem', color: 'var(--color-text)', textTransform: 'uppercase' }}>STATUS_REPORT</h1>
+                
+                <div style={{ 
+                    padding: '2.5rem', 
+                    backgroundColor: 'var(--color-surface)', 
+                    border: '1px solid var(--color-border)', 
+                    borderRadius: '24px',
+                    marginBottom: '3rem',
+                    textAlign: 'left'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', opacity: 0.5 }}>CURRENT_PHASE</span>
+                        <span style={{ 
+                            fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, 
+                            color: existingApplication.status === 'ACCEPTED' ? 'var(--color-accent)' : 
+                                   existingApplication.status === 'REJECTED' ? '#ff4444' : 'var(--color-text)',
+                            backgroundColor: 'rgba(255,255,255,0.03)',
+                            padding: '4px 12px',
+                            borderRadius: '100px',
+                            border: '1px solid var(--color-border)'
+                        }}>
+                            {existingApplication.status.toUpperCase()}
+                        </span>
+                    </div>
+
+                    {existingApplication.feedback && (
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.75rem', letterSpacing: '0.1em' }}>STUDIO_RESPONSE_/_FEEDBACK</label>
+                            <div style={{ 
+                                fontSize: '1rem', 
+                                lineHeight: 1.6, 
+                                color: 'var(--color-text)', 
+                                backgroundColor: 'rgba(255,255,255,0.02)',
+                                padding: '1.5rem',
+                                borderRadius: '12px',
+                                borderLeft: '3px solid var(--color-accent)'
+                            }}>
+                                {existingApplication.feedback}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                    <Link to="/careers" style={{ 
+                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
+                        backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', 
+                        padding: '1.25rem 2.5rem', borderRadius: '100px', textDecoration: 'none',
+                        transition: 'all 0.3s'
+                    }}>
+                        BACK_TO_CAREERS
+                    </Link>
+                </div>
+            </motion.div>
         </div>
     );
 
@@ -163,7 +215,7 @@ const ApplyPage = () => {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff', padding: '2rem', textAlign: 'center' }}>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                 <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '4rem', fontStyle: 'italic', marginBottom: '1rem', color: 'var(--color-accent)' }}>Sent</h1>
-                <p style={{ opacity: 0.6, marginBottom: '3rem', maxWidth: '400px', fontSize: '0.9rem' }}>We review dossiers every Monday. If we like your vibe, we'll reach out via Discord/Email.</p>
+                <p style={{ opacity: 0.6, marginBottom: '3rem', maxWidth: '400px', fontSize: '0.9rem' }}>We review applications every Monday. If we like your vibe, we'll reach out via Discord/Email.</p>
                 <Link to="/careers" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', border: '1px solid #333', padding: '1rem 2rem', color: '#fff', textDecoration: 'none' }}>
                     ← RETURN_TO_BASE
                 </Link>
@@ -171,84 +223,133 @@ const ApplyPage = () => {
         </div>
     );
 
-    const inputWrapperStyle = { marginBottom: '2.5rem', borderBottom: '1px solid #222', transition: 'border-color 0.3s' };
-    const labelStyle = { display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginBottom: '0.5rem', opacity: 0.3, letterSpacing: '2px' };
-    const inputStyle = { width: '100%', background: 'none', border: 'none', padding: '0.5rem 0 1rem', color: '#fff', fontSize: '1.2rem', outline: 'none', fontFamily: 'var(--font-sans)' };
+    const inputWrapperStyle = { 
+        marginBottom: '2rem', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '0.75rem' 
+    };
+
+    const labelStyle = { 
+        fontFamily: 'var(--font-mono)', 
+        fontSize: '0.65rem', 
+        opacity: 0.4, 
+        letterSpacing: '0.15em',
+        textTransform: 'uppercase',
+        marginLeft: '0.5rem'
+    };
+
+    const inputStyle = { 
+        width: '100%', 
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        padding: '1.25rem', 
+        borderRadius: '16px',
+        color: 'var(--color-text)', 
+        fontSize: '1rem', 
+        outline: 'none', 
+        fontFamily: 'var(--font-sans)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.02)'
+    };
 
     return (
-        <div style={{ backgroundColor: '#000', minHeight: '100vh', color: '#fff' }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '10rem 2rem 5rem' }}>
-                <header style={{ marginBottom: '5rem' }}>
+        <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', color: 'var(--color-text)' }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 2rem 100px' }}>
+                <header style={{ marginBottom: '6rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-accent)', letterSpacing: '0.2em' }}>MISSION_ONBOARDING</span>
+                        <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+                    </div>
                     <h1 style={{ 
-                        fontFamily: 'var(--font-serif)', 
-                        fontSize: 'clamp(4rem, 12vw, 8rem)', 
-                        fontWeight: 400, 
-                        fontStyle: 'italic',
-                        lineHeight: 0.8,
-                        marginBottom: '2rem',
-                        color: 'var(--color-accent)'
+                        fontFamily: 'var(--font-display)', 
+                        fontSize: 'clamp(3rem, 10vw, 6rem)', 
+                        fontWeight: 900, 
+                        lineHeight: 0.85,
+                        margin: 0,
+                        letterSpacing: '-0.04em',
+                        textTransform: 'uppercase'
                     }}>
-                        {job ? job.title : 'RE-RENDER'}
+                        {job ? job.title : 'RE—RENDER'}
                     </h1>
-                    <p style={{ opacity: 0.6, fontSize: '0.85rem', maxWidth: '500px', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>
-                        We review applications every Monday. If we like your vibe, we'll reach out via Discord/Email. RE-RENDER Agency.
+                    <p style={{ 
+                        color: 'var(--color-text-secondary)', 
+                        fontSize: '1rem', 
+                        maxWidth: '550px', 
+                        lineHeight: 1.6, 
+                        marginTop: '2.5rem',
+                        fontWeight: 500
+                    }}>
+                        Every Monday, we review incoming transmissions. If your technical profile matches our operational needs, we'll reach out via Discord or encrypted mail.
                     </p>
                 </header>
 
-                <form onSubmit={handleSubmit}>
-                    {/* Basic Info */}
-                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: '3rem' }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* Basic Info Row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                         <div style={inputWrapperStyle}>
-                            <label style={labelStyle}>FULL_NAME *</label>
+                            <label style={labelStyle}>OPERATIVE_NAME</label>
                             <input 
-                                required type="text" placeholder="MIHIR_S..." value={formData.full_name}
-                                onChange={e => setFormData({...formData, full_name: e.target.value})} style={inputStyle}
+                                required type="text" placeholder="e.g. Alex Rivers" value={formData.full_name}
+                                onChange={e => setFormData({...formData, full_name: e.target.value})} 
+                                style={inputStyle}
+                                onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                                onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                             />
                         </div>
                         <div style={inputWrapperStyle}>
-                            <label style={labelStyle}>EMAIL_ADDRESS (SESSION_LOCKED) *</label>
+                            <label style={labelStyle}>TRANSMISSION_POINT (LOCKED)</label>
                             <input 
-                                required type="email" placeholder="OPERATIVE@EMAIL.COM" value={formData.email}
+                                required type="email" value={formData.email}
                                 readOnly
                                 style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }}
                             />
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 768 ? '1fr 1fr' : '1fr', gap: '3rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                         <div style={inputWrapperStyle}>
-                            <label style={labelStyle}>LOCATION / TIMEZONE *</label>
+                            <label style={labelStyle}>GEOGRAPHIC_SECTOR / TIMEZONE</label>
                             <input 
-                                required type="text" placeholder="EST / LONDON / DUB..." value={formData.location_timezone}
-                                onChange={e => setFormData({...formData, location_timezone: e.target.value})} style={inputStyle}
+                                required type="text" placeholder="e.g. London, GMT+1" value={formData.location_timezone}
+                                onChange={e => setFormData({...formData, location_timezone: e.target.value})} 
+                                style={inputStyle}
+                                onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                                onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                             />
                         </div>
                         <div style={inputWrapperStyle}>
-                            <label style={labelStyle}>DISCORD_ID (OPTIONAL)</label>
+                            <label style={labelStyle}>DISCORD_IDENTIFIER</label>
                             <input 
-                                type="text" placeholder="MIHIR#0001" value={formData.discord_id}
-                                onChange={e => setFormData({...formData, discord_id: e.target.value})} style={inputStyle}
+                                type="text" placeholder="username#0000" value={formData.discord_id}
+                                onChange={e => setFormData({...formData, discord_id: e.target.value})} 
+                                style={inputStyle}
+                                onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                                onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                             />
                         </div>
                     </div>
 
                     {/* Role Selection */}
-                    <div style={{ marginBottom: '4rem' }}>
-                        <label style={labelStyle}>PRIMARY_ROLE *</label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+                    <div style={{ marginBottom: '4rem', marginTop: '1rem' }}>
+                        <label style={labelStyle}>PRIMARY_SPECIALIZATION</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1.5rem' }}>
                             {roles.map(role => (
                                 <button
                                     key={role} type="button"
                                     onClick={() => setFormData({...formData, primary_role: role})}
                                     style={{
-                                        padding: '0.8rem 1.5rem',
-                                        backgroundColor: formData.primary_role === role ? 'var(--color-accent)' : 'transparent',
-                                        color: formData.primary_role === role ? '#000' : '#fff',
-                                        border: '1px solid ' + (formData.primary_role === role ? 'var(--color-accent)' : '#222'),
-                                        fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer'
+                                        padding: '1rem 2rem',
+                                        backgroundColor: formData.primary_role === role ? 'var(--color-accent)' : 'var(--color-surface)',
+                                        color: formData.primary_role === role ? '#000' : 'var(--color-text)',
+                                        border: '1px solid ' + (formData.primary_role === role ? 'var(--color-accent)' : 'var(--color-border)'),
+                                        borderRadius: '12px',
+                                        fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer',
+                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        textTransform: 'uppercase'
                                     }}
                                 >
-                                    {role.toUpperCase()}
+                                    {role}
                                 </button>
                             ))}
                         </div>
@@ -257,58 +358,84 @@ const ApplyPage = () => {
                                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                                 required type="text" placeholder="SPECIFY ROLE..." 
                                 value={formData.other_role} onChange={e => setFormData({...formData, other_role: e.target.value})}
-                                style={{ ...inputStyle, borderBottom: '1px solid var(--color-accent)', marginTop: '1.5rem', fontSize: '1rem' }}
+                                style={{ ...inputStyle, borderColor: 'var(--color-accent)', marginTop: '1.5rem' }}
                             />
                         )}
                     </div>
 
                     {/* Expertise */}
                     <div style={inputWrapperStyle}>
-                        <label style={labelStyle}>SOFTWARE_PROFICIENCY *</label>
+                        <label style={labelStyle}>SOFTWARE_ARSENAL</label>
                         <textarea 
-                            required rows="3" placeholder="PREMIERE, AE, BLENDER, DAVINCI..." 
+                            required rows="3" placeholder="e.g. Premiere, AE, Blender, DaVinci, Figma..." 
                             value={formData.software_proficiency} onChange={e => setFormData({...formData, software_proficiency: e.target.value})}
-                            style={{ ...inputStyle, resize: 'none', fontSize: '1rem' }}
+                            style={{ ...inputStyle, resize: 'none', minHeight: '120px' }}
+                            onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                            onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                         />
                     </div>
 
                     <div style={inputWrapperStyle}>
-                        <label style={labelStyle}>WHY_RE-RENDER? *</label>
+                        <label style={labelStyle}>MOTIVATION / WHY RE—RENDER?</label>
                         <textarea 
-                            required rows="4" placeholder="TELL US ABOUT YOUR VIBE..." 
+                            required rows="4" placeholder="Briefly describe your creative philosophy..." 
                             value={formData.why_rerender} onChange={e => setFormData({...formData, why_rerender: e.target.value})}
-                            style={{ ...inputStyle, resize: 'none', fontSize: '1rem' }}
+                            style={{ ...inputStyle, resize: 'none', minHeight: '150px' }}
+                            onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                            onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                         />
                     </div>
 
                     <div style={inputWrapperStyle}>
-                        <label style={labelStyle}>LINK_TO_YOUR_PORTFOLIO *</label>
+                        <label style={labelStyle}>VISUAL_PORTFOLIO / SHOWREEL_LINK</label>
                         <input 
-                            required type="url" placeholder="HTTPS://..." 
+                            required type="url" placeholder="https://vimeo.com/... or https://behance.net/..." 
                             value={formData.portfolio_url} onChange={e => setFormData({...formData, portfolio_url: e.target.value})}
                             style={inputStyle}
+                            onFocus={e => { e.target.style.borderColor = 'var(--color-accent)'; e.target.style.transform = 'translateY(-2px)'; }}
+                            onBlur={e => { e.target.style.borderColor = 'var(--color-border)'; e.target.style.transform = 'translateY(0)'; }}
                         />
                     </div>
 
                     {error && (
-                        <p style={{ color: '#ff4444', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', marginBottom: '2rem' }}>
-                            [ERROR: {error.toUpperCase()}]
-                        </p>
+                        <div style={{ 
+                            padding: '1.5rem', 
+                            backgroundColor: 'rgba(255, 68, 68, 0.05)', 
+                            border: '1px solid rgba(255, 68, 68, 0.2)',
+                            borderRadius: '16px',
+                            color: '#ff4444',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.75rem',
+                            marginTop: '2rem'
+                        }}>
+                            [SYSTEM_ERROR: {error.toUpperCase()}]
+                        </div>
                     )}
 
-                    <div style={{ marginTop: '3rem' }}>
-                        <Magnetic strength={0.1}>
-                            <button 
-                                type="submit" disabled={submitting}
-                                style={{ 
-                                    backgroundColor: 'var(--color-accent)', color: '#000', padding: '1.5rem 0', 
-                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '1rem', width: '100%',
-                                    border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: submitting ? 0.5 : 1
-                                }}
-                            >
-                                {submitting ? 'TRANSMITTING...' : 'SEND_DOSSIER'}
-                            </button>
-                        </Magnetic>
+                    <div style={{ marginTop: '4rem' }}>
+                        <button 
+                            type="submit" disabled={submitting}
+                            style={{ 
+                                backgroundColor: 'var(--color-accent)', 
+                                color: '#000', 
+                                padding: '1.5rem', 
+                                borderRadius: '100px',
+                                fontFamily: 'var(--font-mono)', 
+                                fontWeight: 900, 
+                                fontSize: '1rem', 
+                                width: '100%',
+                                border: 'none', 
+                                cursor: 'pointer', 
+                                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', 
+                                opacity: submitting ? 0.5 : 1,
+                                boxShadow: '0 10px 40px rgba(57, 255, 20, 0.15)',
+                                textTransform: 'uppercase'
+                            }}
+                            onMouseEnter={e => { e.target.style.transform = 'scale(1.02)'; e.target.style.boxShadow = '0 15px 50px rgba(57, 255, 20, 0.25)'; }}
+                            onMouseLeave={e => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = '0 10px 40px rgba(57, 255, 20, 0.15)'; }}
+                        >
+                            {submitting ? 'TRANSMITTING...' : 'INITIATE_APPLICATION'}
+                        </button>
                     </div>
                 </form>
             </div>

@@ -86,13 +86,13 @@ const About = () => {
                         letterSpacing: '-0.03em',
                         maxWidth: '900px'
                     }}>
-                        HIGH-PERFORMANCE <br />
-                        <span style={{ color: 'var(--color-accent)' }}>CREATIVE COLLECTIVE.</span>
+                        THE <br />
+                        <span style={{ color: 'var(--color-accent)' }}>BUREAU.</span>
                     </h1>
                     
                     <div style={{ maxWidth: '800px' }}>
                         <p style={{ fontSize: '1.4rem', lineHeight: 1.4, color: 'var(--color-text)', fontWeight: 500, marginBottom: '2rem' }}>
-                            RE-RENDER is an elite creative studio engineered for the next generation of brands. We don't just design—we build unforgettable visual identities.
+                            We build unforgettable visual identities for the next generation of brands.
                         </p>
                     </div>
                 </div>

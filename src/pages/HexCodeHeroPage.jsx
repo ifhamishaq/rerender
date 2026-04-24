@@ -111,7 +111,7 @@ const HexCodeHero = () => {
     return (
         <main style={{ paddingTop: 'calc(var(--nav-height) + 4rem)', minHeight: '100vh', backgroundColor: gameState === 'playing' ? targetColor : '#F8F6F1', transition: 'background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1)', color: '#000' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}>
-                <Link to="/arcade" style={{
+                <Link to="/tools" style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                     fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900,
                     letterSpacing: '0.1em', color: gameState === 'playing' ? '#fff' : '#000',

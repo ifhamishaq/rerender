@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, Zap, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
+import { supabase } from '../utils/supabase';
 
 const ProjectEstimator = () => {
     // Top Level Categories
@@ -25,6 +26,9 @@ const ProjectEstimator = () => {
         };
         setSubType(defaults[c]);
     };
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState('');
 
     useEffect(() => {
         let min = 0;
@@ -60,6 +64,33 @@ const ProjectEstimator = () => {
 
         setEstimate({ min, max });
     }, [category, subType, style, duration, quantity, motionGraphics]);
+
+    const handleLockEstimate = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            category,
+            sub_type: subType,
+            style,
+            quantity_duration: category === 'video' && subType === 'long-form' ? `${duration} min` : `${quantity} units`,
+            estimate: `$${estimate.min}-$${estimate.max}`,
+            status: 'NEW'
+        };
+
+        setIsSubmitting(true);
+        try {
+            const { error } = await supabase.from('contact_submissions').insert([data]);
+            if (error) throw error;
+            setSubmitStatus('SUCCESS');
+        } catch (err) {
+            console.error('Submission error:', err);
+            setSubmitStatus('ERROR');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <section style={{
@@ -120,28 +151,28 @@ const ProjectEstimator = () => {
                                 {category === 'video' && (
                                     <>
                                         {['short-form', 'long-form'].map(t => (
-                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
+                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
                                         ))}
                                     </>
                                 )}
                                 {category === '3d' && (
                                     <>
                                         {['map', 'ads', 'env'].map(t => (
-                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono', fontSize: '0.7rem' }}>{t === 'env' ? 'ENVIRONMENTS' : t.toUpperCase()}</button>
+                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>{t === 'env' ? 'ENVIRONMENTS' : t.toUpperCase()}</button>
                                         ))}
                                     </>
                                 )}
                                 {category === 'web' && (
                                     <>
                                         {['basic', 'standard', 'advanced'].map(t => (
-                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
+                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
                                         ))}
                                     </>
                                 )}
                                 {category === 'graphics' && (
                                     <>
                                         {['poster', 'thumbnail'].map(t => (
-                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
+                                            <button key={t} onClick={() => setSubType(t)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--color-border)', background: subType === t ? 'var(--color-text)' : 'none', color: subType === t ? 'var(--color-bg)' : 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>{t.toUpperCase()}</button>
                                         ))}
                                     </>
                                 )}
@@ -214,21 +245,24 @@ const ProjectEstimator = () => {
                             </AnimatePresence>
                         </div>
 
-                        <form name="project-estimator-v2" method="POST" data-netlify="true" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <input type="hidden" name="form-name" value="project-estimator-v2" />
-                            <input type="hidden" name="category" value={category} />
-                            <input type="hidden" name="sub_type" value={subType} />
-                            <input type="hidden" name="style" value={style} />
-                            <input type="hidden" name="quantity_duration" value={category === 'video' && subType === 'long-form' ? `${duration} min` : `${quantity} units`} />
-                            <input type="hidden" name="estimate" value={`$${estimate.min}-$${estimate.max}`} />
-                            
-                            <input type="text" name="name" placeholder="YOUR NAME" required style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }} />
-                            <input type="email" name="email" placeholder="EMAIL ADDRESS" required style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }} />
-                            
-                            <button type="submit" style={{ width: '100%', padding: '1.25rem', backgroundColor: 'var(--color-accent)', color: '#000', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', boxShadow: '4px 4px 0px #000' }}>
-                                LOCK IN ESTIMATE →
-                            </button>
-                        </form>
+                        {submitStatus === 'SUCCESS' ? (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                                style={{ padding: '2rem', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}
+                            >
+                                ESTIMATE_LOCKED. WE WILL CONTACT YOU SHORTLY.
+                            </motion.div>
+                        ) : (
+                            <form onSubmit={handleLockEstimate} style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <input type="text" name="name" placeholder="YOUR NAME" required style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }} />
+                                <input type="email" name="email" placeholder="EMAIL ADDRESS" required style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }} />
+                                
+                                <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '1.25rem', backgroundColor: 'var(--color-accent)', color: '#000', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', boxShadow: '4px 4px 0px #000', opacity: isSubmitting ? 0.5 : 1 }}>
+                                    {isSubmitting ? 'PROCESSING...' : 'LOCK IN ESTIMATE →'}
+                                </button>
+                                {submitStatus === 'ERROR' && <div style={{ color: '#ff4444', fontSize: '0.65rem', textAlign: 'center', marginTop: '0.5rem' }}>CONNECTION_ERROR. PLEASE TRY AGAIN.</div>}
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>
