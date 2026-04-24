@@ -9,8 +9,8 @@ import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
 
-const VISION_MODEL = 'google/gemma-4-26b-a4b:free';
-const FALLBACK_MODEL = 'google/gemma-4-31b:free';
+const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
+const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
 
 const ACCENT = 'var(--color-accent)';
 

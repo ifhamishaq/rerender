@@ -7,8 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import LabPill from './LabPill';
 
-const MODEL = 'google/gemma-4-31b:free';
-const VISION_MODEL = 'google/gemma-4-26b-a4b:free';
+const MODEL = 'google/gemma-4-31b-it:free';
+const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
 const FALLBACK_MODEL = 'tencent/hy3-preview:free';
 
 // Mode-specific use-case templates

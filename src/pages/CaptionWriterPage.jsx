@@ -11,7 +11,7 @@ import LabPill from '../components/LabPill';
 
 const ACCENT = '#E8111A';
 
-const MODEL = 'google/gemma-4-31b:free';
+const MODEL = 'google/gemma-4-31b-it:free';
 const FALLBACK_MODEL = 'tencent/hy3-preview:free';
 
 const PLATFORMS = [
