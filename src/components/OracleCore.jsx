@@ -7,10 +7,10 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import LabPill from './LabPill';
 
-const MODEL = 'google/gemma-4-31b-it:free';
+const MODEL = 'baidu/qianfan-ocr-fast:free';
 const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
 const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
-const FALLBACK_MODEL = 'tencent/hy3-preview:free';
+const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
 
 // Mode-specific use-case templates
 const USE_CASE_SETS = {
@@ -121,13 +121,13 @@ const OracleCore = ({
 
         try {
             const apiMessages = hasImage ? [
-                { role: 'system', content: 'You are the RE-RENDER VISION ENGINE. Analyze the image and provide a creative breakdown. Focus on visual hierarchy and text clarity if applicable.' },
+                { role: 'system', content: 'You are a helpful creative partner. Talk like a normal human in plain English. Analyze the image and give me your honest, helpful thoughts. Use **bold text** to highlight important points.' },
                 { role: 'user', content: [
                     { type: 'text', text: messageText || 'Analyze this image.' },
                     { type: 'image_url', image_url: { url: currentImage.base64 } }
                 ]}
             ] : [
-                { role: 'system', content: 'You are the RE-RENDER AESTHETIC ORACLE. Expert creative director.' },
+                { role: 'system', content: 'You are a helpful creative director. Talk like a normal human in plain English. Your goal is to help the user re-render their vision into something world-class. Use **bold text** to highlight important points.' },
                 ...messages.filter(m => !m.image).slice(-5).map(m => ({ role: m.role, content: m.content })),
                 { role: 'user', content: messageText }
             ];

@@ -9,7 +9,7 @@ import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
 
-const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
+const VISION_MODEL = 'baidu/qianfan-ocr-fast:free';
 const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
 const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
 
@@ -68,13 +68,15 @@ const ThumbnailAnalyserPage = () => {
         setError(null);
 
         try {
-            const systemPrompt = `You are the RE-RENDER Visual Strategist. Analyze thumbnails for CTR performance.
+            const systemPrompt = `You are a helpful visual strategist. Your goal is to help the user optimize their thumbnail for clicks.
+            Talk in normal, plain English. Avoid sounding like a machine.
+            Use **double asterisks** for important highlights.
             JSON_SCHEMA: {
                 "predictedCTR": "X.X%",
                 "thumbnailGrade": "A+ | A | B | C | D",
-                "verdict": "One-line brutal honest verdict",
+                "verdict": "A brief, helpful, human-sounding verdict",
                 "metrics": { "contrast": 0-10, "faceDetails": 0-10, "textEmphasis": 0-10, "hook": 0-10 },
-                "improvements": ["Step 1", "Step 2", "Step 3"],
+                "improvements": ["Helpful tip 1", "Helpful tip 2", "Helpful tip 3"],
                 "heatmap": [ { "x": 0-100, "y": 0-100, "intensity": 0.1-1.0, "label": "string" } ]
             }`;
 

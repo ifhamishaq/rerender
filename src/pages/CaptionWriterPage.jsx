@@ -11,8 +11,8 @@ import LabPill from '../components/LabPill';
 
 const ACCENT = '#E8111A';
 
-const MODEL = 'google/gemma-4-31b-it:free';
-const FALLBACK_MODEL = 'tencent/hy3-preview:free';
+const MODEL = 'baidu/qianfan-ocr-fast:free';
+const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
@@ -63,20 +63,14 @@ const CaptionWriterPage = () => {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are a social media conversion expert. Generate platform-specific captions using psychological persuasion triggers.
+                        content: `You are a helpful social media expert. Your goal is to help the user grow their presence. 
+Talk in normal, friendly English. Avoid sounding like a robot. 
+Use **double asterisks** to highlight key psychological triggers or important words.
+
 RESPOND ONLY IN THIS EXACT JSON FORMAT:
 {"captions":[{"platform":"instagram","caption":"...","hashtags":"#tag1 #tag2 #tag3","psychology":"Curiosity Loop"},{"platform":"tiktok","caption":"...","hashtags":"#tag1 #tag2","psychology":"Trend Authority"},{"platform":"x","caption":"...","hashtags":"","psychology":"Pattern Interrupt"},{"platform":"youtube","caption":"...","hashtags":"","psychology":"Benefit Clarity"},{"platform":"linkedin","caption":"...","hashtags":"","psychology":"Social Proof"},{"platform":"facebook","caption":"...","hashtags":"","psychology":"Community Belonging"}]}
 
-CRITICAL RULES:
-- Apply triggers: Scarcity, Authority, Social Proof, Curiosity, or Liking.
-- Use structured, punchy sentences. Avoid repetitive long dashes.
-- Instagram: engaging, emoji-rich, with 5-8 relevant hashtags
-- TikTok: hook-first, trendy, short, with 3-4 hashtags
-- X/Twitter: concise (under 280 chars), punchy, no hashtags
-- YouTube: SEO-optimized description style, with tags
-- LinkedIn: professional, thought-leadership tone
-- Facebook: conversational, community-focused, shareable
-- Adapt tone to: ${tone}`
+Adapt tone to: ${tone}`
                     },
                     { role: 'user', content: `Write captions for this post: ${description}` }
                 ],
