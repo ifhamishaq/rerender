@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Copy, Check, Instagram, Twitter, Video } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Copy, Check, Instagram, Twitter, Video, Sparkles } from 'lucide-react';
 
 import { fetchOpenRouter, AI_COSTS, safeParseJSON } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
+import LabHeader from '../components/LabHeader';
+import LabLoader from '../components/LabLoader';
+import LabPill from '../components/LabPill';
 
-const RED = '#E8111A';
+const ACCENT = '#E8111A';
 
-const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const MODEL = 'openai/gpt-oss-20b:free'; // 3.6B active — lowest latency
-const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const MODEL = 'inclusionai/ling-2.6-1t:free';
+const FALLBACK_MODEL = 'inclusionai/ling-2.6-flash:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
@@ -21,6 +23,8 @@ const PLATFORMS = [
     { id: 'facebook', name: 'FACEBOOK', icon: <Instagram size={16} />, color: '#1877F2' }
 ];
 
+const TONES = ['professional', 'casual', 'witty', 'inspirational', 'edgy', 'gen-z'];
+
 const CaptionWriterPage = () => {
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [description, setDescription] = useState('');
@@ -28,8 +32,7 @@ const CaptionWriterPage = () => {
     const [captions, setCaptions] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [copied, setCopied] = useState(null);
-
-    const TONES = ['professional', 'casual', 'witty', 'inspirational', 'edgy', 'gen-z'];
+    const [error, setError] = useState(null);
 
     const handleGenerate = async () => {
         if (!description.trim() || isGenerating) return;
@@ -42,7 +45,7 @@ const CaptionWriterPage = () => {
 
         // CREDIT CHECK
         if (!profile || profile.credits < AI_COSTS.CAPTION) {
-            alert(`📉 OUT_OF_COMPUTE: Insufficient credits. Costs ${AI_COSTS.CAPTION} credit.`);
+            setError("📉 OUT_OF_COMPUTE: Insufficient credits. Costs 1 credit.");
             return;
         }
 
@@ -51,6 +54,8 @@ const CaptionWriterPage = () => {
         if (!success) return;
 
         setIsGenerating(true);
+        setError(null);
+        setCaptions(null);
 
         try {
             const body = {
@@ -95,11 +100,7 @@ CRITICAL RULES:
                 throw new Error("NO_JSON_FOUND");
             }
         } catch (err) {
-            console.error('Caption generation failed:', err);
-            const msg = err.message === "INVALID_JSON_FORMAT"
-                ? "AI_SYNTAX_ERROR: The model returned an invalid format. Retrying may help."
-                : "SYSTEM_OVERLOAD: AI nodes are currently congested. Please try again.";
-            alert(msg);
+            setError(err.message === "INVALID_JSON_FORMAT" ? "AI_SYNTAX_ERROR" : "SYSTEM_OVERLOAD");
         } finally {
             setIsGenerating(false);
         }
@@ -112,185 +113,177 @@ CRITICAL RULES:
     };
 
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: 'calc(var(--nav-height) + 2rem)' }}>
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
-                <Link to="/tools" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                    color: 'rgba(255,255,255,0.5)', textDecoration: 'none',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', marginBottom: '3rem',
-                    backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '0.6rem 1.25rem', borderRadius: '100px', fontWeight: 900,
-                    transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
-                >
-                    <ArrowLeft size={14} /> BACK_TO_LAB
-                </Link>
+        <div style={{
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
+            minHeight: '100vh',
+            fontFamily: 'var(--font-sans)',
+            paddingTop: '80px',
+            paddingBottom: '8rem'
+        }}>
+            <LabHeader 
+                title="CAPTION" 
+                subtitle="Writer." 
+                vol="02" 
+                credits={profile?.credits ?? 0} 
+                accentColor={ACCENT}
+            />
 
-                <div style={{ marginBottom: '5rem' }}>
-                    <div style={{ 
-                        fontSize: '0.6rem', fontFamily: 'var(--font-mono)', 
-                        color: RED, marginBottom: '1rem', letterSpacing: '0.4em', 
-                        fontWeight: 900, opacity: 0.8 
+            <main style={{
+                maxWidth: '1200px',
+                margin: '3rem auto',
+                padding: '0 2rem',
+                display: 'grid',
+                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
+                gap: window.innerWidth < 1000 ? '2rem' : '4rem'
+            }}>
+                {/* Column 01: Results / Canvas */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{
+                        width: '100%',
+                        minHeight: '400px',
+                        backgroundColor: 'var(--color-surface)',
+                        border: '2px solid var(--color-text)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: captions ? 'stretch' : 'center',
+                        justifyContent: captions ? 'flex-start' : 'center',
+                        padding: captions ? '0' : '2rem',
+                        boxShadow: '10px 10px 0px rgba(0,0,0,0.05)',
+                        position: 'relative'
                     }}>
-                        VOL_02 // NEURAL_COPY
-                    </div>
-                    <h1 style={{ 
-                        fontSize: 'clamp(3rem, 10vw, 6rem)', fontWeight: 900, 
-                        fontFamily: 'var(--font-display)', lineHeight: 0.85, 
-                        textTransform: 'uppercase', margin: 0, letterSpacing: '-0.04em' 
-                    }}>
-                        CAPTION<br />
-                        <span style={{ 
-                            fontFamily: 'Playfair Display', fontStyle: 'italic', 
-                            fontWeight: 400, color: '#fff', opacity: 0.9, textTransform: 'none' 
-                        }}>Writer.</span>
-                    </h1>
-                </div>
-
-                {/* Input Area */}
-                <div style={{ 
-                    borderRadius: '32px', padding: '3rem', 
-                    backgroundColor: 'rgba(255,255,255,0.02)', 
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(30px)',
-                    marginBottom: '3rem', position: 'relative',
-                    boxShadow: '0 30px 60px rgba(0,0,0,0.2)'
-                }}>
-                    <div style={{ 
-                        position: 'absolute', top: '-0.75rem', left: '2rem', 
-                        backgroundColor: RED, color: '#fff', 
-                        padding: '0.3rem 1rem', fontSize: '0.55rem', 
-                        fontFamily: 'var(--font-mono)', fontWeight: 900,
-                        borderRadius: '100px', letterSpacing: '0.1em'
-                    }}>SOURCE_CONTEXT</div>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Provide subject matter or creative direction..."
-                        rows={5}
-                        style={{
-                            width: '100%', padding: '0', backgroundColor: 'transparent',
-                            border: 'none', color: '#fff',
-                            fontFamily: 'Playfair Display', fontSize: '1.75rem', fontStyle: 'italic',
-                            resize: 'none', outline: 'none', lineHeight: 1.4,
-                            opacity: 0.9
-                        }}
-                    />
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', marginBottom: '4rem', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', backgroundColor: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        {TONES.map(t => (
-                            <button
-                                key={t}
-                                onClick={() => setTone(t)}
-                                style={{
-                                    padding: '0.6rem 1.25rem', border: 'none',
-                                    borderRadius: '100px',
-                                    backgroundColor: tone === t ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                    color: tone === t ? '#fff' : 'rgba(255,255,255,0.4)',
-                                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900,
-                                    cursor: 'pointer', textTransform: 'uppercase',
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                {t}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button onClick={handleGenerate} disabled={isGenerating || !description.trim()} style={{
-                        padding: '1rem 2.5rem', backgroundColor: (isGenerating || !description.trim()) ? 'rgba(255,255,255,0.05)' : RED,
-                        color: '#fff', border: 'none', borderRadius: '100px',
-                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-                        fontWeight: 900, cursor: isGenerating ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '1rem',
-                        textTransform: 'uppercase',
-                        boxShadow: (isGenerating || !description.trim()) ? 'none' : `0 10px 30px ${RED}44`,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}>
-                        {isGenerating ? <><RefreshCw size={16} className="spin" /> [ PROCESSING ]</> : '[ INITIALIZE_GEN ]'}
-                    </button>
-                </div>
-
-                {/* Results Section */}
-                <AnimatePresence>
-                    {captions && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
-                            {captions.captions?.map((c, i) => {
-                                const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
-                                return (
-                                    <div key={i} style={{ 
-                                        borderRadius: '24px', 
-                                        backgroundColor: 'rgba(255,255,255,0.02)', 
-                                        border: '1px solid rgba(255,255,255,0.08)',
-                                        backdropFilter: 'blur(20px)',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
-                                    }}>
-                                        <div style={{
-                                            padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            background: 'rgba(255,255,255,0.01)'
+                        {isGenerating ? (
+                            <LabLoader label="GENERATING_COPY..." />
+                        ) : captions ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0' }}>
+                                {captions.captions?.map((c, i) => {
+                                    const platform = PLATFORMS.find(p => p.id === c.platform) || PLATFORMS[0];
+                                    return (
+                                        <div key={i} style={{ 
+                                            borderBottom: i === captions.captions.length - 1 ? 'none' : '1px solid var(--color-border)',
+                                            padding: '2rem'
                                         }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                     <span style={{ color: platform.color }}>{platform.icon}</span>
-                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8 }}>
-                                                        {platform.name}
-                                                    </span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900 }}>{platform.name}</span>
+                                                    {c.psychology && (
+                                                        <span style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: ACCENT, fontWeight: 900 }}>// {c.psychology.toUpperCase()}</span>
+                                                    )}
                                                 </div>
-                                                {c.psychology && (
-                                                    <div style={{
-                                                        padding: '0.2rem 0.6rem', backgroundColor: 'rgba(255,255,255,0.05)',
-                                                        color: 'var(--color-accent)', fontSize: '0.55rem',
-                                                        fontFamily: 'var(--font-mono)', fontWeight: 900,
-                                                        letterSpacing: '0.05em', borderRadius: '4px'
-                                                    }}>
-                                                        {c.psychology.toUpperCase()}
-                                                    </div>
-                                                )}
+                                                <button 
+                                                    onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
+                                                    style={{ background: 'none', border: '1.5px solid var(--color-text)', padding: '0.4rem 0.8rem', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900 }}
+                                                >
+                                                    {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
+                                                </button>
                                             </div>
-                                            <button
-                                                onClick={() => copyCaption(c.caption + (c.hashtags ? '\n\n' + c.hashtags : ''))}
-                                                style={{ 
-                                                    background: 'rgba(255,255,255,0.05)', 
-                                                    border: 'none', 
-                                                    color: '#fff', 
-                                                    cursor: 'pointer', 
-                                                    padding: '0.4rem 0.8rem', 
-                                                    fontSize: '0.6rem', 
-                                                    fontFamily: 'var(--font-mono)', 
-                                                    fontWeight: 900, 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    gap: '0.4rem',
-                                                    borderRadius: '100px',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                            >
-                                                {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? <Check size={12} /> : <Copy size={12} />}
-                                                {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
-                                            </button>
-                                        </div>
-                                        <div style={{ padding: '2.5rem' }}>
-                                            <p style={{ fontSize: '1.15rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', color: '#fff', fontWeight: 500, opacity: 0.9 }}>{c.caption}</p>
+                                            <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{c.caption}</p>
                                             {c.hashtags && (
-                                                <p style={{ fontSize: '0.8rem', color: RED, marginTop: '2rem', fontFamily: 'var(--font-mono)', fontWeight: 900, letterSpacing: '0.05em' }}>{c.hashtags}</p>
+                                                <p style={{ marginTop: '1rem', color: ACCENT, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>{c.hashtags}</p>
                                             )}
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', opacity: 0.3 }}>
+                                <RefreshCw size={48} style={{ marginBottom: '1.5rem' }} />
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 900 }}>AWAITING_INPUT_CONTEXT</div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{
+                        display: 'flex',
+                        padding: '1.5rem',
+                        border: '1px solid var(--color-border)',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.65rem',
+                        color: 'var(--color-text-secondary)',
+                        gap: '2rem'
+                    }}>
+                        <div>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>NEURAL_MODEL:</span> {MODEL.split('/')[1].toUpperCase()}<br />
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>LATENCY:</span> {isGenerating ? 'CALCULATING' : 'IDLE'}
+                        </div>
+                        <div>
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>OUTPUT_FORMAT:</span> JSON_PURE<br />
+                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ACCURACY:</span> HIGH_RES
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div style={{ color: ACCENT, fontSize: '0.8rem', fontFamily: 'var(--font-mono)', fontWeight: 900, border: `1px solid ${ACCENT}`, padding: '1rem' }}>
+                            CRITICAL_ERROR: {error.toUpperCase()}
+                        </div>
                     )}
-                </AnimatePresence>
-            </div>
-            <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-        </main>
+                </div>
+
+                {/* Column 02: Controls */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                    
+                    {/* Description Area */}
+                    <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>INPUT_CONTEXT</div>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="WHAT ARE WE RE-RENDERING?"
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: '1.5px solid var(--color-text)',
+                                color: 'var(--color-text)',
+                                padding: '1.5rem',
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.85rem',
+                                outline: 'none',
+                                boxSizing: 'border-box',
+                                minHeight: '200px',
+                                resize: 'none'
+                            }}
+                        />
+                    </div>
+
+                    {/* Tones Area */}
+                    <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>VOICE_TONE</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            {TONES.map(t => (
+                                <LabPill key={t} active={tone === t} onClick={() => setTone(t)} accentColor={ACCENT}>{t}</LabPill>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Execute Button */}
+                    <button
+                        onClick={handleGenerate}
+                        disabled={isGenerating || !description.trim()}
+                        style={{
+                            width: '100%', padding: '1.5rem',
+                            backgroundColor: (isGenerating || !description.trim()) ? 'var(--color-border)' : 'var(--color-text)',
+                            color: (isGenerating || !description.trim()) ? 'var(--color-text-secondary)' : 'var(--color-bg)',
+                            border: 'none',
+                            fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.9rem',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
+                            letterSpacing: '0.1em'
+                        }}
+                    >
+                        {isGenerating ? <RefreshCw size={20} className="spin" /> : (
+                            <>
+                                <Sparkles size={18} />
+                                INITIALIZE_SYNTHESIS
+                            </>
+                        )}
+                        <style>{`
+                            .spin { animation: spin 1s linear infinite; }
+                            @keyframes spin { 100% { transform: rotate(360deg); } }
+                        `}</style>
+                    </button>
+                </div>
+            </main>
+        </div>
     );
 };
 
