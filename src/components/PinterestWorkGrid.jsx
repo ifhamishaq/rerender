@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { supabase } from '../utils/supabase';
 import portfolioData from '../data/portfolio.json';
 import VideoModal from './VideoModal';
 import WorkGridItem from './WorkGridItem';
@@ -11,24 +12,39 @@ const PinterestWorkGrid = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        // Curate Mihir's new high-end video reels, excluding 3D
-        const curated = portfolioData.filter(p => 
-            (p.videoUrl || p.video_url) && 
-            p.category?.toUpperCase() !== '3D'
-        );
-        
-        // Prioritize specific high-impact IDs (Mihir's top reels)
-        const prioritizedIds = ['lf-01', 'mg-03', 'mg-04', 'th-02', 'th-03', 'mg-05'];
-        const sorted = [...curated].sort((a, b) => {
-            const aIdx = prioritizedIds.indexOf(a.id);
-            const bIdx = prioritizedIds.indexOf(b.id);
-            if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-            if (aIdx !== -1) return -1;
-            if (bIdx !== -1) return 1;
-            return 0;
-        });
+        const fetchLiveProjects = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-        setProjects(sorted);
+                // Curate reels, excluding 3D and prioritizing high-impact IDs
+                const curated = [...portfolioData, ...(data || [])].filter(p => 
+                    (p.videoUrl || p.video_url) && 
+                    p.category?.toUpperCase() !== '3D' &&
+                    p.category?.toUpperCase() !== 'CGI / 3D'
+                );
+                
+                const categories = ['ALL', 'MOTION DESIGN', 'CGI / 3D', 'BRANDING', 'SOCIAL / ADS', 'AI LAB'];
+                const prioritizedIds = ['lf-01', 'mg-03', 'mg-04', 'th-02', 'th-03', 'mg-05'];
+                const sorted = curated.sort((a, b) => {
+                    const aIdx = prioritizedIds.indexOf(a.id);
+                    const bIdx = prioritizedIds.indexOf(b.id);
+                    if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+                    if (aIdx !== -1) return -1;
+                    if (bIdx !== -1) return 1;
+                    return 0;
+                });
+
+                setProjects(sorted);
+            } catch (err) {
+                console.error('Error fetching live projects:', err);
+                setProjects(portfolioData);
+            }
+        };
+
+        fetchLiveProjects();
     }, []);
 
     const handleProjectClick = (project) => {
