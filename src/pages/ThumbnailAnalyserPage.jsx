@@ -61,6 +61,7 @@ const ThumbnailAnalyserPage = () => {
             const systemPrompt = `You are a helpful creative director. Analyze this thumbnail with extreme nuance.
             Be fair: appreciate the strengths but be honest about the flaws.
             Talk in normal, plain English. Use **bold text** to highlight key points.
+            CRITICAL: NEVER use em-dashes (—).
             
             JSON_SCHEMA: {
                 "predictedCTR": "X.X%",
@@ -279,7 +280,7 @@ END OF REPORT
                                     <div style={{ position: 'absolute', top: '1rem', right: '1rem', fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', color: ACCENT }}>{analysis.thumbnailGrade}</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', opacity: 0.5 }}>PREDICTED_CTR</div>
                                     <div style={{ fontSize: '3.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis.predictedCTR}</div>
-                                    <p style={{ marginTop: '2rem', fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.8 }}>"{analysis.verdict}"</p>
+                                    <p style={{ marginTop: '2rem', fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.8 }}>"{analysis.verdict?.replace(/—/g, '-')}"</p>
                                 </div>
                             </div>
 

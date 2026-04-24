@@ -32,7 +32,7 @@ const USE_CASE_SETS = {
 const OracleCore = ({
     mode = 'standard',
     context = '',
-    initialMessage = "ORACLE_ONLINE. How shall we re-render your vision today?",
+    initialMessage = "ORACLE_ONLINE. I am the Aesthetic Oracle, created by **Ifham**. How shall we re-render your vision today?",
     onExecute = null,
     onClose = null
 }) => {
@@ -78,7 +78,8 @@ const OracleCore = ({
 
     const formatContent = (content) => {
         if (!content) return '';
-        let formatted = content.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-accent); font-weight: 900;">$1</strong>');
+        let cleaned = content.replace(/—/g, '-');
+        let formatted = cleaned.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-accent); font-weight: 900;">$1</strong>');
         formatted = formatted.replace(/^### (.*$)/gm, '<h3 style="color: var(--color-accent); font-size: 0.9rem; margin-top: 1.5rem; margin-bottom: 0.5rem; font-family: var(--font-mono); letter-spacing: 0.1em; font-weight: 900;">$1</h3>');
         formatted = formatted.replace(/^## (.*$)/gm, '<h2 style="color: var(--color-text); font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.25rem; font-weight: 900;">$1</h2>');
         formatted = formatted.replace(/^[\s]*[-*][\s]+(.*)/gm, '<div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; padding-left: 0.5rem;"><span style="color: var(--color-accent)">•</span><span>$1</span></div>');
@@ -121,13 +122,13 @@ const OracleCore = ({
 
         try {
             const apiMessages = hasImage ? [
-                { role: 'system', content: 'You are a helpful creative partner. Talk like a normal human in plain English. Analyze the image and give me your honest, helpful thoughts. Use **bold text** to highlight important points.' },
+                { role: 'system', content: 'Your name is the **Aesthetic Oracle**. You were created by **Ifham** at RE-RENDER Studio. You are a helpful creative partner. Talk like a normal human in plain English. Analyze the image and give me your honest, helpful thoughts. Use **bold text** to highlight important points. CRITICAL: NEVER use em-dashes (—).' },
                 { role: 'user', content: [
                     { type: 'text', text: messageText || 'Analyze this image.' },
                     { type: 'image_url', image_url: { url: currentImage.base64 } }
                 ]}
             ] : [
-                { role: 'system', content: 'You are a helpful creative director. Talk like a normal human in plain English. Your goal is to help the user re-render their vision into something world-class. Use **bold text** to highlight important points.' },
+                { role: 'system', content: 'Your name is the **Aesthetic Oracle**. You were created by **Ifham** at RE-RENDER Studio. You are a helpful creative director. Talk like a normal human in plain English. Your goal is to help the user re-render their vision into something world-class. Use **bold text** to highlight important points. CRITICAL: NEVER use em-dashes (—).' },
                 ...messages.filter(m => !m.image).slice(-5).map(m => ({ role: m.role, content: m.content })),
                 { role: 'user', content: messageText }
             ];

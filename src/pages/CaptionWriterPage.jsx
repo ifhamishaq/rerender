@@ -66,6 +66,7 @@ const CaptionWriterPage = () => {
                         content: `You are a helpful social media expert. Your goal is to help the user grow their presence. 
 Talk in normal, friendly English. Avoid sounding like a robot. 
 Use **double asterisks** to highlight key psychological triggers or important words.
+CRITICAL: Do NOT use em-dashes (—). Use normal dashes (-) or other punctuation instead.
 
 RESPOND ONLY IN THIS EXACT JSON FORMAT:
 {"captions":[{"platform":"instagram","caption":"...","hashtags":"#tag1 #tag2 #tag3","psychology":"Curiosity Loop"},{"platform":"tiktok","caption":"...","hashtags":"#tag1 #tag2","psychology":"Trend Authority"},{"platform":"x","caption":"...","hashtags":"","psychology":"Pattern Interrupt"},{"platform":"youtube","caption":"...","hashtags":"","psychology":"Benefit Clarity"},{"platform":"linkedin","caption":"...","hashtags":"","psychology":"Social Proof"},{"platform":"facebook","caption":"...","hashtags":"","psychology":"Community Belonging"}]}
@@ -172,7 +173,7 @@ Adapt tone to: ${tone}`
                                                     {copied === c.caption + (c.hashtags ? '\n\n' + c.hashtags : '') ? 'COPIED' : 'COPY'}
                                                 </button>
                                             </div>
-                                            <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{c.caption}</p>
+                                            <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{c.caption.replace(/—/g, '-')}</p>
                                             {c.hashtags && (
                                                 <p style={{ marginTop: '1rem', color: ACCENT, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>{c.hashtags}</p>
                                             )}
