@@ -7,7 +7,6 @@ const Admin = () => {
     const { user, profile, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('applicants');
-    const [isPinAuthorized, setIsPinAuthorized] = useState(true); 
 
     const [creditAdjustment, setCreditAdjustment] = useState({});
 
@@ -413,16 +412,6 @@ const Admin = () => {
         width: '100%',
         boxSizing: 'border-box',
         outline: 'none'
-    };
-
-    const modalOverlayStyle = {
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', 
-        zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-    };
-
-    const modalContentStyle = {
-        background: '#111', border: '1px solid var(--color-accent)', 
-        padding: '3rem', width: '100%', maxWidth: '500px', boxShadow: '0 0 50px rgba(0,255,157,0.1)'
     };
 
     const sectionBox = {

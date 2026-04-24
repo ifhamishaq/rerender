@@ -60,7 +60,8 @@ export const AuthProvider = ({ children }) => {
                     .from('profiles')
                     .insert([{ 
                         id: userId, 
-                        credits: 50
+                        credits: 50,
+                        role: 'user'
                     }])
                     .select()
                     .single();
