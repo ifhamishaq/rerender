@@ -57,7 +57,7 @@ export const safeParseJSON = (text) => {
     }
 };
 
-export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1000) => {
+export const fetchOpenRouter = async (body, options = {}, retries = 5, delay = 2000) => {
     const keys = getApiKeys();
     if (keys.length === 0) {
         throw new Error('MISSING_API_KEYS: Configure VITE_OPENROUTER_API_KEYS in environment.');
@@ -70,7 +70,7 @@ export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${key}`,
-                'HTTP-Referer': 'https://re-render.netlify.app', // Update with actual domain
+                'HTTP-Referer': 'https://re-render.netlify.app', 
                 'X-Title': options.title || 'RE-RENDER AI Suite',
                 'Content-Type': 'application/json',
                 ...options.headers
@@ -84,14 +84,14 @@ export const fetchOpenRouter = async (body, options = {}, retries = 3, delay = 1
             currentKeyIndex++; // Rotate key
             
             if (retries > 0) {
-                // Slower exponential backoff: 3s, 6s, 12s... for free models
-                const backoffDelay = delay * (keys.length > 1 ? 1.5 : 3);
+                // More aggressive backoff for 429s on free models: 5s, 12s, 30s...
+                const backoffDelay = delay * 2.5;
                 await new Promise(res => setTimeout(res, backoffDelay));
                 return fetchOpenRouter(body, options, retries - 1, backoffDelay);
             }
         }
 
-        // Handle Gateway Errors (502/503/504) — common with free models under load
+        // Handle Gateway Errors (502/503/504)
         if ([502, 503, 504].includes(response.status)) {
             if (retries > 0) {
                 console.warn(`[AI_GATEWAY] ${response.status} error. Retrying in ${delay}ms... (${retries} left)`);
