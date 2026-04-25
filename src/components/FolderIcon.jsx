@@ -53,9 +53,9 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                 {/* Floating Content (Video/Thumbnails) */}
                 <motion.div 
                     variants={{
-                        hover: { y: -20, rotateX: 5 }
+                        hover: { y: -45, rotateX: 10, scale: 1.05 }
                     }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                     style={{
                         position: 'absolute',
                         top: '15px',
@@ -111,30 +111,30 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: '65%', // Shorter so top of preview is visible
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
+                        height: '50%', // Lowered for more preview visibility
+                        background: 'linear-gradient(135deg, rgba(0, 102, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)', // Subtle Mac Blue tint
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                         borderRadius: '0 0 24px 24px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderTop: '2px solid rgba(0, 102, 255, 0.5)', // Iconic Mac Blue top-light bar
                         zIndex: 10,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-end',
-                        padding: '1.5rem',
-                        boxShadow: '0 -10px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
+                        padding: '1.2rem',
+                        boxShadow: '0 -10px 40px rgba(0, 102, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.05)'
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
                             <div style={{ 
                                 fontFamily: 'var(--font-mono)', 
-                                fontSize: '0.6rem', 
-                                color: 'var(--color-accent)', 
+                                fontSize: '0.55rem', 
+                                color: '#0066FF', // Mac Accent Blue
                                 fontWeight: 900,
-                                letterSpacing: '0.1em',
-                                marginBottom: '0.25rem'
+                                letterSpacing: '0.15em',
+                                marginBottom: '0.2rem'
                             }}>
                                 {projectCount.toString().padStart(2, '0')}_NODES
                             </div>
