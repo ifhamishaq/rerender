@@ -20,7 +20,7 @@ const PortfolioPage = () => {
     const [isIdModalOpen, setIsIdModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const categories = ['ALL', 'MOTION DESIGN', 'CGI / 3D', 'BRANDING', 'SOCIAL / ADS', 'AI LAB'];
+    const categories = ['ALL', 'THUMBNAILS', '3D MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
 
     useEffect(() => {
         fetchProjects();
@@ -103,10 +103,21 @@ const PortfolioPage = () => {
         }
         setIsLoading(false);
     };
-    // Group projects by category for folder previews
+    const normalizeCategory = (cat) => {
+        if (!cat) return 'OTHER';
+        const c = cat.toUpperCase().trim();
+        if (c.includes('THUMBNAIL')) return 'THUMBNAILS';
+        if (c.includes('3D') || c.includes('MOTION')) return '3D MOTION GRAPHICS';
+        if (c.includes('TALKING')) return 'TALKING HEADS';
+        if (c.includes('LONG') && c.includes('FORM')) return 'LONGFORM';
+        if (c.includes('LONGFORM')) return 'LONGFORM';
+        if (c.includes('AI')) return 'AI LAB';
+        return cat.toUpperCase();
+    };
+
     const getCategoryThumbs = (cat) => {
         return allProjects
-            .filter(p => p.category === cat)
+            .filter(p => normalizeCategory(p.category) === cat)
             .slice(0, 3)
             .map(p => p.videoUrl || p.video_url || p.thumbnail);
     };
@@ -118,7 +129,7 @@ const PortfolioPage = () => {
 
     const filteredProjects = activeCategory === 'ALL' 
         ? allProjects 
-        : allProjects.filter(p => p.category === activeCategory);
+        : allProjects.filter(p => normalizeCategory(p.category) === activeCategory);
 
     const handleProjectClick = (project) => {
         setSelectedProject(project);
@@ -231,7 +242,7 @@ const PortfolioPage = () => {
                                         key={cat}
                                         label={cat}
                                         thumbnails={getCategoryThumbs(cat)}
-                                        projectCount={allProjects.filter(p => p.category === cat).length}
+                                        projectCount={allProjects.filter(p => normalizeCategory(p.category) === cat).length}
                                         onClick={() => handleFolderClick(cat)}
                                     />
                                 ))}

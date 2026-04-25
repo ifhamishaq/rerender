@@ -19,14 +19,12 @@ const PinterestWorkGrid = () => {
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                // Curate reels, excluding 3D and prioritizing high-impact IDs
+                // Curate reels, prioritizing high-impact IDs
                 const curated = [...portfolioData, ...(data || [])].filter(p => 
-                    (p.videoUrl || p.video_url) && 
-                    p.category?.toUpperCase() !== '3D' &&
-                    p.category?.toUpperCase() !== 'CGI / 3D'
+                    (p.videoUrl || p.video_url || p.thumbnail)
                 );
                 
-                const categories = ['ALL', 'MOTION DESIGN', 'CGI / 3D', 'BRANDING', 'SOCIAL / ADS', 'AI LAB'];
+                const categories = ['ALL', 'THUMBNAILS', '3D MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
                 const prioritizedIds = ['lf-01', 'mg-03', 'mg-04', 'th-02', 'th-03', 'mg-05'];
                 const sorted = curated.sort((a, b) => {
                     const aIdx = prioritizedIds.indexOf(a.id);

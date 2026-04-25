@@ -36,7 +36,7 @@ const Admin = () => {
     const [submissions, setSubmissions] = useState([]);
     const [allProjects, setAllProjects] = useState([]);
     const [portfolioForm, setPortfolioForm] = useState({
-        title: '', category: 'MOTION DESIGN', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9'
+        title: '', category: 'THUMBNAILS', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9'
     });
     const [editingProjectId, setEditingProjectId] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -214,7 +214,7 @@ const Admin = () => {
         } else {
             setStatus(editingProjectId ? 'Project Updated!' : 'Project Added!');
             setEditingProjectId(null);
-            setPortfolioForm({ title: '', category: 'MOTION DESIGN', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' });
+            setPortfolioForm({ title: '', category: 'THUMBNAILS', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' });
             fetchPortfolio();
         }
     };
@@ -618,7 +618,7 @@ const Admin = () => {
                                 <div>
                                     <label style={labelStyle}>CATEGORY</label>
                                     <select value={portfolioForm.category} onChange={e => setPortfolioForm({...portfolioForm, category: e.target.value})} style={inputStyle}>
-                                        {['MOTION DESIGN', 'CGI / 3D', 'BRANDING', 'SOCIAL / ADS', 'AI LAB'].map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        {['THUMBNAILS', '3D MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'].map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>
@@ -653,7 +653,7 @@ const Admin = () => {
                             </div>
                             <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
                                 <button onClick={handleSaveProject} style={{ ...saveBtnStyle, flex: 1 }}>{editingProjectId ? 'PUSH_UPDATES' : 'EXECUTE_DEPLOY'}</button>
-                                {editingProjectId && <button onClick={() => { setEditingProjectId(null); setPortfolioForm({ title: '', category: 'MOTION DESIGN', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' }); }} style={{ background: '#222', border: 'none', color: '#fff', padding: '0 2rem', borderRadius: '4px', cursor: 'pointer' }}>CANCEL</button>}
+                                {editingProjectId && <button onClick={() => { setEditingProjectId(null); setPortfolioForm({ title: '', category: 'THUMBNAILS', video_url: '', youtubeid: '', thumbnail: '', client: '', aspectratio: '16/9' }); }} style={{ background: '#222', border: 'none', color: '#fff', padding: '0 2rem', borderRadius: '4px', cursor: 'pointer' }}>CANCEL</button>}
                             </div>
                         </div>
 
