@@ -19,9 +19,9 @@ const PinterestWorkGrid = () => {
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                // Curate reels, prioritizing high-impact IDs
+                // Curate reels only for the landing page (High-impact motion focus)
                 const curated = [...portfolioData, ...(data || [])].filter(p => 
-                    (p.videoUrl || p.video_url || p.thumbnail)
+                    (p.videoUrl || p.video_url)
                 );
                 
                 const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
