@@ -28,12 +28,12 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                 {/* Back Layer (The Folder Tab Shell) */}
                 <div style={{
                     position: 'absolute',
-                    top: '-15px',
-                    left: '0',
-                    width: '100px',
-                    height: '40px',
-                    backgroundColor: 'var(--color-surface)',
-                    borderRadius: '12px 12px 0 0',
+                    top: '-12px',
+                    left: '20px',
+                    width: '80px',
+                    height: '20px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '8px 8px 0 0',
                     border: '1px solid var(--color-border)',
                     borderBottom: 'none',
                     zIndex: 1
@@ -43,7 +43,7 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                 <div style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundColor: 'var(--color-surface)',
+                    backgroundColor: 'rgba(255,255,255,0.02)',
                     borderRadius: '24px',
                     border: '1px solid var(--color-border)',
                     zIndex: 2,
@@ -100,26 +100,30 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                     }} />
                 </motion.div>
 
-                {/* Glass Front Cover */}
+                {/* Glass Front Cover (The Pocket) */}
                 <motion.div 
                     variants={{
-                        hover: { rotateX: -15, y: 10 }
+                        hover: { rotateX: -25, y: 15 }
                     }}
                     transition={{ type: 'spring', stiffness: 200, damping: 25 }}
                     style={{
                         position: 'absolute',
-                        inset: 0,
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        borderRadius: '24px',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '65%', // Shorter so top of preview is visible
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        backdropFilter: 'blur(8px)',
+                        WebkitBackdropFilter: 'blur(8px)',
+                        borderRadius: '0 0 24px 24px',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                         zIndex: 10,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-end',
                         padding: '1.5rem',
-                        boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.2)'
+                        boxShadow: '0 -10px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -129,23 +133,25 @@ const FolderIcon = ({ label, thumbnails = [], projectCount = 0, onClick }) => {
                                 fontSize: '0.6rem', 
                                 color: 'var(--color-accent)', 
                                 fontWeight: 900,
-                                letterSpacing: '0.1em'
+                                letterSpacing: '0.1em',
+                                marginBottom: '0.25rem'
                             }}>
-                                {projectCount.toString().padStart(2, '0')} FILES
+                                {projectCount.toString().padStart(2, '0')}_NODES
                             </div>
                             <div style={{ 
                                 fontFamily: 'var(--font-display)', 
-                                fontSize: '1.2rem', 
+                                fontSize: '1.1rem', 
                                 fontWeight: 900,
                                 color: '#fff',
                                 textTransform: 'uppercase',
-                                letterSpacing: '-0.02em'
+                                letterSpacing: '0.02em',
+                                lineHeight: 1
                             }}>
                                 {label}
                             </div>
                         </div>
-                        <div style={{ opacity: 0.5 }}>
-                            <ChevronRight color="#fff" size={20} />
+                        <div style={{ opacity: 0.8 }}>
+                            <ChevronRight color="var(--color-accent)" size={18} />
                         </div>
                     </div>
                 </motion.div>
