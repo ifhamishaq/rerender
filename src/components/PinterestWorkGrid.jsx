@@ -26,7 +26,7 @@ const PinterestWorkGrid = () => {
                     p.category?.toUpperCase() !== 'THUMBNAILS'
                 );
                 
-                const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
+                const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM'];
                 const prioritizedIds = ['lf-01', 'mg-03', 'mg-04', 'th-02', 'th-03', 'mg-05'];
                 const sorted = curated.sort((a, b) => {
                     const aIdx = prioritizedIds.indexOf(a.id);

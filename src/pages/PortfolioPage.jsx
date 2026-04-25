@@ -20,7 +20,7 @@ const PortfolioPage = () => {
     const [isIdModalOpen, setIsIdModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
+    const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM'];
 
     useEffect(() => {
         fetchProjects();
