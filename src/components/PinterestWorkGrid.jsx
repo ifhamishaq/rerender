@@ -21,7 +21,9 @@ const PinterestWorkGrid = () => {
 
                 // Curate reels only for the landing page (High-impact motion focus)
                 const curated = [...portfolioData, ...(data || [])].filter(p => 
-                    (p.videoUrl || p.video_url)
+                    (p.videoUrl || p.video_url) && 
+                    p.category?.toUpperCase() !== 'THUMBNAIL' &&
+                    p.category?.toUpperCase() !== 'THUMBNAILS'
                 );
                 
                 const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
