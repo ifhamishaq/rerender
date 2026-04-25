@@ -618,7 +618,7 @@ const Admin = () => {
                                 <div>
                                     <label style={labelStyle}>CATEGORY</label>
                                     <select value={portfolioForm.category} onChange={e => setPortfolioForm({...portfolioForm, category: e.target.value})} style={inputStyle}>
-                                        {['THUMBNAILS', '3D MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'].map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        {['THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'].map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>

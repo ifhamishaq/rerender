@@ -20,7 +20,7 @@ const PortfolioPage = () => {
     const [isIdModalOpen, setIsIdModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const categories = ['ALL', 'THUMBNAILS', '3D MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
+    const categories = ['ALL', 'THUMBNAILS', '3D DESIGN', 'MOTION GRAPHICS', 'TALKING HEADS', 'LONGFORM', 'AI LAB'];
 
     useEffect(() => {
         fetchProjects();
@@ -107,7 +107,8 @@ const PortfolioPage = () => {
         if (!cat) return 'OTHER';
         const c = cat.toUpperCase().trim();
         if (c.includes('THUMBNAIL')) return 'THUMBNAILS';
-        if (c.includes('3D') || c.includes('MOTION')) return '3D MOTION GRAPHICS';
+        if (c.includes('3D') || c.includes('BLENDER')) return '3D DESIGN';
+        if (c.includes('MOTION')) return 'MOTION GRAPHICS';
         if (c.includes('TALKING')) return 'TALKING HEADS';
         if (c.includes('LONG') && c.includes('FORM')) return 'LONGFORM';
         if (c.includes('LONGFORM')) return 'LONGFORM';
