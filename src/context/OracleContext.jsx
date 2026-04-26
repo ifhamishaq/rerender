@@ -435,6 +435,126 @@ Be specific. No generic advice.` },
         }
     };
 
+    // --- Title & Hook Generator ---
+    const runTitleGenerator = async (topic) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Generate titles for: ${topic}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are an elite YouTube packager. Generate 10 hyper-clickable titles, 3 distinct 30-second hooks, and the optimal 2-3 word text overlay for the thumbnail. Do not use clickbait, use psychological curiosity.` },
+                { role: 'user', content: `Topic: ${topic}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- Description Writer ---
+    const runDescriptionWriter = async (input) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Write description for: ${input}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are an SEO specialist. Write a YouTube description that maximizes search ranking. Include an engaging summary, exact timestamps, a CTA, and standard link templates.` },
+                { role: 'user', content: `Video Details: ${input}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- Client Proposal Generator ---
+    const runProposalGenerator = async (input) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Generate proposal for: ${input}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are a senior creative freelancer. Write a high-converting, professional client proposal. Include Project Scope, Timeline, Pricing Breakdown (anchored to the given rate), and standard payment terms.` },
+                { role: 'user', content: `Client Details: ${input}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- 30-Day Content Calendar ---
+    const runContentCalendar = async (input) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Generate 30-day calendar for: ${input}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are a YouTube Content Strategist. Map out a 30-day content calendar designed to maximize returning viewers. Include 1 hero video, 3 standard videos, and Shorts ideas.` },
+                { role: 'user', content: `Niche & Goals: ${input}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- Client Brief Extractor ---
+    const runBriefExtractor = async (messyBrief) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Extract brief from: \n\n${messyBrief}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are a project manager. Extract the scattered information from this client message into a clean brief: Tone, Style, Key Deliverables, Deadlines, and 'Things to Avoid'.` },
+                { role: 'user', content: `Messy Message: ${messyBrief}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Extraction failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Extraction failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- Hook Rewriter ---
+    const runHookRewriter = async (hook) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+        addMessage({ role: 'user', type: 'text', content: `Rewrite hook: ${hook}` });
+
+        try {
+            const data = await fetchWithFallback([
+                { role: 'system', content: `Rewrite this hook 5 different ways: Curiosity, Controversy, Story-driven, Data-driven, and Fear-driven. Make the first 3 seconds impossible to click away from.` },
+                { role: 'user', content: `Original Hook: ${hook}` }
+            ]);
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Rewrite failed.' });
+        } catch (err) {
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Rewrite failed. Please try again.` });
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
     // --- Neural Loop ---
 
     const runNeuralLoop = async (prompt) => {
@@ -475,7 +595,8 @@ Be specific. No generic advice.` },
         projects, currentProject, status, error,
         createProject, loadProject, renameProject, deleteProject,
         chat, generateImage, analyzeImage,
-        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop
+        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop,
+        runTitleGenerator, runDescriptionWriter, runProposalGenerator, runContentCalendar, runBriefExtractor, runHookRewriter
     };
 
     return <OracleContext.Provider value={value}>{children}</OracleContext.Provider>;

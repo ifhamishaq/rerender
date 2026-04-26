@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
     Plus, MessageSquare, Trash2, Zap, Send, 
-    Image as ImageIcon, RefreshCw, Target, Search, Maximize2
+    Image as ImageIcon, RefreshCw, Target, Search, Maximize2,
+    Type, FileText, Briefcase, Calendar, FileDown, Edit3
 } from 'lucide-react';
 import { useOracle } from '../context/OracleContext';
 import { useAuth } from '../context/AuthContext';
@@ -101,7 +102,16 @@ const StoryboardCard = ({ scenes, projectTitle }) => {
 
 const AnalysisCard = ({ analysis, imageUrl }) => (
     <div style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-        <img src={imageUrl} style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flexShrink: 0 }}>
+            <div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>DESKTOP</div>
+                <img src={imageUrl} style={{ width: '200px', borderRadius: '8px', objectFit: 'cover' }} />
+            </div>
+            <div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>MOBILE (120px)</div>
+                <img src={imageUrl} style={{ width: '120px', borderRadius: '4px', objectFit: 'cover' }} />
+            </div>
+        </div>
         <div style={{ flex: 1 }}>
             <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{analysis.grade} <span style={{ fontSize: '1rem', opacity: 0.5 }}>({analysis.estimated_ctr})</span></div>
             
@@ -167,6 +177,12 @@ const OracleWorkspacePage = () => {
             if (activeForm.type === 'short_film') runShortFilmGenerator(inputText, 'cinematic', '60s');
             if (activeForm.type === 'storyboard') runStoryboardEngine(inputText);
             if (activeForm.type === 'audit') runViralBreakdown(inputText);
+            if (activeForm.type === 'title_gen') runTitleGenerator(inputText);
+            if (activeForm.type === 'desc_writer') runDescriptionWriter(inputText);
+            if (activeForm.type === 'proposal') runProposalGenerator(inputText);
+            if (activeForm.type === 'calendar') runContentCalendar(inputText);
+            if (activeForm.type === 'brief') runBriefExtractor(inputText);
+            if (activeForm.type === 'hook') runHookRewriter(inputText);
             setActiveForm(null);
         } else {
             chat(inputText || "Analyze this image.", pendingImage);
@@ -282,10 +298,16 @@ const OracleWorkspacePage = () => {
                                 
                                 {/* Smart Actions */}
                                 {!activeForm && (
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                                    <div data-lenis-prevent="true" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', whiteSpace: 'nowrap' }}>
                                         <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><MessageSquare size={12} /> STORYBOARD</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><ImageIcon size={12} /> STORYBOARD</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'title_gen' })}><Type size={12} /> TITLE_HOOK</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'desc_writer' })}><FileText size={12} /> DESC_WRITER</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'proposal' })}><Briefcase size={12} /> PROPOSAL</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'calendar' })}><Calendar size={12} /> CALENDAR</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'brief' })}><FileDown size={12} /> BRIEF_EXTRACTOR</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'hook' })}><Edit3 size={12} /> HOOK_REWRITER</LabPill>
                                     </div>
                                 )}
 
@@ -296,6 +318,12 @@ const OracleWorkspacePage = () => {
                                             {activeForm.type === 'short_film' && "Enter a topic or idea for your short film..."}
                                             {activeForm.type === 'storyboard' && "Paste your script to generate a visual storyboard..."}
                                             {activeForm.type === 'audit' && "Paste a URL or topic for viral analysis..."}
+                                            {activeForm.type === 'title_gen' && "Enter your video topic and niche..."}
+                                            {activeForm.type === 'desc_writer' && "Enter video title and bullet points..."}
+                                            {activeForm.type === 'proposal' && "Enter: Service Offered | Client Niche | Your Rate..."}
+                                            {activeForm.type === 'calendar' && "Enter: Niche | Channel Size | Your Goals..."}
+                                            {activeForm.type === 'brief' && "Paste the messy client message..."}
+                                            {activeForm.type === 'hook' && "Paste your opening hook line to rewrite..."}
                                         </span>
                                         <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
                                     </div>
