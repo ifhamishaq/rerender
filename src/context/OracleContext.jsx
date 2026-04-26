@@ -221,7 +221,7 @@ export const OracleProvider = ({ children }) => {
             const breakdownData = await fetchWithFallback([
                 { role: 'system', content: `You are a film director. Break this script into 4-6 visual scenes. Return ONLY valid JSON:
                 { "scenes": [
-                    { "id": 1, "title": "Scene Title", "description": "What happens", "camera": "Camera angle/movement", "emotion": "Mood", "imagePrompt": "Detailed image generation prompt" }
+                    { "id": 1, "title": "Scene Title", "description": "What happens", "camera": "Camera angle/movement", "emotion": "Mood", "imagePrompt": "Detailed visual description for a storyboard sketch" }
                 ]}` },
                 { role: 'user', content: script }
             ]);
@@ -245,7 +245,7 @@ export const OracleProvider = ({ children }) => {
                     const response = await fetch('/.netlify/functions/generate-wallpaper', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: initialScenes[i].imagePrompt, width: 1024, height: 576 })
+                        body: JSON.stringify({ prompt: initialScenes[i].imagePrompt + ', storyboard pencil sketch style, rough draft, black and white illustration, outline drawing, cinematic composition', width: 1024, height: 576 })
                     });
                     const data = await response.json();
                     
