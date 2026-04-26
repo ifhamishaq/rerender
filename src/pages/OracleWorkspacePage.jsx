@@ -13,8 +13,9 @@ import LabPill from '../components/LabPill';
 const OracleWorkspacePage = () => {
     const { 
         projects, currentProject, activeAsset, rightPanelTab, status, error,
-        setRightPanelTab, setActiveAsset, createProject, loadProject, chat, generateImage, analyzeAsset,
-        runNeuralLoop, runViralBreakdown, deleteAsset, downloadAsset
+        setRightPanelTab, setActiveAsset, createProject, loadProject, renameProject, deleteProject,
+        chat, generateImage, analyzeAsset, runNeuralLoop, runViralBreakdown, 
+        runStoryboardEngine, runShortFilmGenerator, deleteAsset, downloadAsset
     } = useOracle();
     const { user } = useAuth();
     const [inputText, setInputText] = useState('');
@@ -87,7 +88,8 @@ const OracleWorkspacePage = () => {
         <div style={{ 
             display: 'flex', 
             height: '100vh', 
-            backgroundColor: 'var(--color-bg)',
+            backgroundColor: '#0a0a0a', // Explicit deep black/obsidian
+            color: '#ffffff',
             overflow: 'hidden',
             position: 'fixed',
             top: 0,

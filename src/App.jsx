@@ -120,7 +120,7 @@ const AnimatedRoutes = () => {
           <Route path="/tools" element={<TransitionWipe><ToolsPage /></TransitionWipe>} />
           
           {/* Lab & Utility Routes */}
-          <Route path="/lab/oracle-workspace" element={<TransitionWipe><OracleWorkspacePage /></TransitionWipe>} />
+          <Route path="/lab/oracle-workspace" element={<OracleWorkspacePage />} />
           <Route path="/lab/oracle2.0" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/ai-agent" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
