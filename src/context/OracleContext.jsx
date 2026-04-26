@@ -87,10 +87,9 @@ export const OracleProvider = ({ children }) => {
     };
 
     // --- Core AI: Fallback Wrapper ---
-    const fetchWithFallback = async (messages, useImageModel = false) => {
-        const primaryModel = useImageModel ? 'baidu/qianfan-ocr-fast:free' : 'google/gemma-4-31b-it:free';
-        const fallbackModel = 'baidu/qianfan-ocr-fast:free'; // Always fast fallback
-
+    const fetchWithFallback = async (messages) => {
+        const primaryModel = 'baidu/qianfan-ocr-fast:free'; // Always fast
+        
         try {
             // Give primary model a 15-second timeout
             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
@@ -100,8 +99,8 @@ export const OracleProvider = ({ children }) => {
             ]);
             return data;
         } catch (err) {
-            console.warn(`[ORACLE] ${primaryModel} failed/timed out. Shifting to fallback (${fallbackModel})...`, err);
-            return await fetchOpenRouter({ model: fallbackModel, messages });
+            console.warn(`[ORACLE] ${primaryModel} failed/timed out. Retrying...`, err);
+            return await fetchOpenRouter({ model: primaryModel, messages });
         }
     };
 
