@@ -30,6 +30,51 @@ const OracleWorkspacePage = () => {
         setInputText('');
     };
 
+    const exportStoryboard = () => {
+        if (!currentProject?.assets) return;
+        const scenes = currentProject.assets.filter(a => a.sceneData);
+        if (scenes.length === 0) {
+            alert("No storyboard scenes found. Run STORYBOARD_GEN first.");
+            return;
+        }
+
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+                <head>
+                    <title>RE-RENDER STORYBOARD: ${currentProject.title}</title>
+                    <style>
+                        body { font-family: -apple-system, system-ui; padding: 40px; background: #fff; color: #000; }
+                        .header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 40px; }
+                        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+                        .scene { border: 1px solid #eee; padding: 20px; border-radius: 12px; }
+                        img { width: 100%; border-radius: 8px; margin-bottom: 15px; }
+                        .meta { font-family: monospace; font-size: 11px; opacity: 0.6; text-transform: uppercase; }
+                        .desc { margin-top: 10px; font-size: 14px; line-height: 1.5; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>${currentProject.title}</h1>
+                        <p class="meta">PRODUCTION_STORYBOARD // GENERATED_BY_ORACLE_2.0 // ${new Date().toLocaleDateString()}</p>
+                        <button class="no-print" onclick="window.print()" style="padding: 10px 20px; background: #000; color: #fff; border: none; border-radius: 4px; cursor: pointer;">PRINT_OR_SAVE_PDF</button>
+                    </div>
+                    <div class="grid">
+                        ${scenes.map(s => `
+                            <div class="scene">
+                                <img src="${s.url}" />
+                                <div class="meta">SCENE_${s.sceneData.id} // CAM: ${s.sceneData.camera} // EMO: ${s.sceneData.emotion}</div>
+                                <div class="desc">${s.sceneData.description}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </body>
+            </html>
+        `);
+        win.document.close();
+    };
+
     if (!user) {
         return (
             <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)' }}>
@@ -41,15 +86,15 @@ const OracleWorkspacePage = () => {
     return (
         <div style={{ 
             display: 'flex', 
-            height: 'calc(100vh - 28px)', // Full height minus Mac bar
+            height: '100vh', 
             backgroundColor: 'var(--color-bg)',
             overflow: 'hidden',
             position: 'fixed',
-            top: '28px',
+            top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 1000 // Ensure it covers everything
+            zIndex: 1000
         }}>
             {/* LEFT SIDEBAR: Project Navigator */}
             <aside style={{ 
@@ -88,23 +133,42 @@ const OracleWorkspacePage = () => {
                     {projects.map(p => (
                         <div 
                             key={p.id}
-                            onClick={() => loadProject(p)}
-                            style={{
-                                padding: '0.75rem',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem',
-                                marginBottom: '0.25rem',
-                                transition: 'all 0.2s ease'
-                            }}
+                            style={{ position: 'relative', group: 'true' }}
                         >
-                            <MessageSquare size={14} opacity={0.5} />
-                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {p.title}
-                            </span>
+                            <div 
+                                onClick={() => loadProject(p)}
+                                style={{
+                                    padding: '0.75rem',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    marginBottom: '0.25rem',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative'
+                                }}
+                            >
+                                <MessageSquare size={14} opacity={0.5} />
+                                <span 
+                                    onDoubleClick={() => {
+                                        const newTitle = prompt("RENAME_PROJECT:", p.title);
+                                        if (newTitle) renameProject(p.id, newTitle);
+                                    }}
+                                    style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}
+                                >
+                                    {p.title}
+                                </span>
+                                {currentProject?.id === p.id && (
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); if (confirm("DELETE_PROJECT?")) deleteProject(p.id); }}
+                                        style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', opacity: 0.4 }}
+                                    >
+                                        <Trash2 size={12} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -279,7 +343,18 @@ const OracleWorkspacePage = () => {
                 {/* Content */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
                     {rightPanelTab === 'sketchboard' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <button 
+                                onClick={exportStoryboard}
+                                style={{
+                                    width: '100%', padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-border)',
+                                    borderRadius: '8px', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem'
+                                }}
+                            >
+                                <Maximize2 size={12} /> EXPORT_STORYBOARD
+                            </button>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
                             {currentProject?.assets?.map(asset => (
                                 <div 
                                     key={asset.id} 
@@ -354,6 +429,13 @@ const OracleWorkspacePage = () => {
                                                     <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>{activeAsset.sceneData.emotion}</div>
                                                 </div>
                                             </div>
+                                            <button 
+                                                onClick={() => generateImage(activeAsset.sceneData.imagePrompt)}
+                                                disabled={status.isGenerating}
+                                                style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                            >
+                                                <RefreshCw size={14} className={status.isGenerating ? 'spin' : ''} /> REGENERATE_FRAME
+                                            </button>
                                         </div>
                                     ) : (
                                         <>

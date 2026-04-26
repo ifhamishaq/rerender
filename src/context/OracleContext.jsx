@@ -283,6 +283,30 @@ export const OracleProvider = ({ children }) => {
         }
     };
 
+    const renameProject = async (projectId, newTitle) => {
+        const updatedProjects = projects.map(p => p.id === projectId ? { ...p, title: newTitle } : p);
+        setProjects(updatedProjects);
+        if (currentProject?.id === projectId) setCurrentProject({ ...currentProject, title: newTitle });
+        
+        const { error } = await supabase
+            .from('oracle_sessions')
+            .update({ title: newTitle })
+            .eq('id', projectId);
+        if (error) console.error('[ORACLE_RENAME_ERR]', error);
+    };
+
+    const deleteProject = async (projectId) => {
+        const updatedProjects = projects.filter(p => p.id !== projectId);
+        setProjects(updatedProjects);
+        if (currentProject?.id === projectId) setCurrentProject(null);
+
+        const { error } = await supabase
+            .from('oracle_sessions')
+            .delete()
+            .eq('id', projectId);
+        if (error) console.error('[ORACLE_DELETE_ERR]', error);
+    };
+
     const deleteAsset = async (assetId) => {
         if (!currentProject) return;
         const updatedAssets = currentProject.assets.filter(a => a.id !== assetId);
@@ -387,6 +411,8 @@ export const OracleProvider = ({ children }) => {
         setActiveAsset,
         createProject,
         loadProject,
+        renameProject,
+        deleteProject,
         chat,
         generateImage,
         analyzeAsset,

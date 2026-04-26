@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { OracleProvider } from './context/OracleContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth, AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -148,23 +149,34 @@ const AnimatedRoutes = () => {
 
 const AppContent = () => {
     const { isAuthModalOpen, setIsAuthModalOpen } = useAuth();
+    const location = useLocation();
+    
+    // Simple, robust check
+    const isWorkspace = location.pathname === '/lab/oracle-workspace' || 
+                        location.pathname === '/lab/oracle2.0' ||
+                        location.pathname === '/lab/ai-agent';
 
     return (
-        <div className="app" style={{ position: 'relative', paddingTop: '28px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <MacTopBar />
-            <Cursor />
-            <ScrollProgress />
-            <Navbar />
+        <div className="app" style={{ 
+            position: 'relative', 
+            paddingTop: isWorkspace ? '0' : '28px', 
+            minHeight: '100vh', 
+            display: 'flex', 
+            flexDirection: 'column',
+            overflow: isWorkspace ? 'hidden' : 'visible'
+        }}>
+            {!isWorkspace && <MacTopBar />}
+            {!isWorkspace && <Cursor />}
+            {!isWorkspace && <ScrollProgress />}
+            {!isWorkspace && <Navbar />}
 
             <AnimatedRoutes />
 
-            <Footer />
+            {!isWorkspace && <Footer />}
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </div>
     );
 };
-
-import { OracleProvider } from './context/OracleContext';
 
 const App = () => {
     return (
