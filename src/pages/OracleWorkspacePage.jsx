@@ -404,7 +404,8 @@ const OracleWorkspacePage = () => {
                                 </div>
                             )}
                         </div>
-                    )}
+                    </div>
+                )}
 
                     {rightPanelTab === 'analysis' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
