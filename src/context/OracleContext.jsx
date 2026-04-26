@@ -155,24 +155,30 @@ export const OracleProvider = ({ children }) => {
         try {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt, width: 1024, height: 1024 })
             });
             const data = await response.json();
             
-            if (data.url) {
+            let finalUrl = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
+            
+            if (finalUrl) {
                 const imageMsg = {
                     role: 'assistant',
                     type: 'image',
                     content: prompt,
-                    url: data.url,
+                    url: finalUrl,
                     id: crypto.randomUUID(),
                     timestamp: new Date().toISOString()
                 };
                 addMessage(imageMsg);
                 return imageMsg;
+            } else {
+                throw new Error("No image URL returned from generator.");
             }
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **GENERATION_FAILED:** Could not generate image. Please try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isGenerating: false }));
         }
@@ -239,11 +245,15 @@ export const OracleProvider = ({ children }) => {
                 try {
                     const response = await fetch('/.netlify/functions/generate-wallpaper', {
                         method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ prompt: initialScenes[i].imagePrompt, width: 1024, height: 576 })
                     });
                     const data = await response.json();
-                    if (data.url) {
-                        initialScenes[i].imageUrl = data.url;
+                    
+                    let finalUrl = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
+                    
+                    if (finalUrl) {
+                        initialScenes[i].imageUrl = finalUrl;
                         
                         // Progressive Update
                         setCurrentProject(prev => {
