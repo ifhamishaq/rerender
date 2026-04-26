@@ -41,10 +41,15 @@ const OracleWorkspacePage = () => {
     return (
         <div style={{ 
             display: 'flex', 
-            height: 'calc(100vh - 28px - 64px)', // Deducting MacTopBar and Navbar roughly
+            height: 'calc(100vh - 28px)', // Full height minus Mac bar
             backgroundColor: 'var(--color-bg)',
             overflow: 'hidden',
-            borderTop: '1px solid var(--color-border)'
+            position: 'fixed',
+            top: '28px',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000 // Ensure it covers everything
         }}>
             {/* LEFT SIDEBAR: Project Navigator */}
             <aside style={{ 
@@ -135,6 +140,13 @@ const OracleWorkspacePage = () => {
                                             lineHeight: 1.6,
                                             whiteSpace: 'pre-wrap'
                                         }}>
+                                            {m.image && (
+                                                <img 
+                                                    src={m.image} 
+                                                    alt="Upload" 
+                                                    style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--color-border)' }} 
+                                                />
+                                            )}
                                             {m.content}
                                         </div>
                                     </div>
@@ -150,7 +162,6 @@ const OracleWorkspacePage = () => {
 
                         {/* Smart Actions & Input */}
                         <div style={{ padding: '2rem', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-                            {/* Contextual Actions */}
                             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                                 <LabPill onClick={() => chat("Generate a high-performance thumbnail idea for this niche.")}>
                                     <Target size={12} /> IDEA_GEN
@@ -160,11 +171,23 @@ const OracleWorkspacePage = () => {
                                         <ImageIcon size={12} /> GENERATE_ASSET
                                     </LabPill>
                                 )}
-                                {currentProject.assets.length > 0 && (
+                                {currentProject.assets?.length > 0 && (
                                     <LabPill onClick={() => runNeuralLoop(currentProject.assets[currentProject.assets.length - 1].prompt)}>
                                         <RefreshCw size={12} /> AUTO_OPTIMIZE (LOOP)
                                     </LabPill>
                                 )}
+                                <LabPill onClick={() => {
+                                    const idea = prompt("Describe your short film idea (e.g. 'Ronaldo discipline'):");
+                                    if (idea) runShortFilmGenerator(idea);
+                                }}>
+                                    <Zap size={12} /> SHORT_FILM
+                                </LabPill>
+                                <LabPill onClick={() => {
+                                    const script = prompt("Paste your script for visual storyboard:");
+                                    if (script) runStoryboardEngine(script);
+                                }}>
+                                    <MessageSquare size={12} /> STORYBOARD_GEN
+                                </LabPill>
                                 <LabPill onClick={() => {
                                     const url = prompt("Enter YouTube or Reel URL for audit:");
                                     if (url) runViralBreakdown(url);
@@ -174,6 +197,28 @@ const OracleWorkspacePage = () => {
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    <button 
+                                        onClick={() => document.getElementById('workspace-upload').click()}
+                                        style={{ background: 'none', border: '1px solid var(--color-border)', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: '8px' }}
+                                    >
+                                        <Plus size={18} />
+                                    </button>
+                                    <input 
+                                        id="workspace-upload"
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = () => chat("IMAGE_UPLOAD: " + file.name, reader.result);
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }} 
+                                        style={{ display: 'none' }} 
+                                    />
+                                </div>
                                 <textarea 
                                     value={inputText}
                                     onChange={(e) => setInputText(e.target.value)}
@@ -246,8 +291,15 @@ const OracleWorkspacePage = () => {
                                 >
                                     <img src={asset.url} alt="Gen" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
                                     <div style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900, color: 'var(--color-accent)' }}>
-                                            {asset.grade ? `GRADE_${asset.grade}` : 'PENDING_AUDIT'}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900, color: 'var(--color-accent)' }}>
+                                                {asset.sceneData ? `SCENE_${asset.sceneData.id}` : (asset.grade ? `GRADE_${asset.grade}` : 'PENDING_AUDIT')}
+                                            </div>
+                                            {asset.sceneData && (
+                                                <div style={{ fontSize: '0.6rem', opacity: 0.5, maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {asset.sceneData.camera} // {asset.sceneData.emotion}
+                                                </div>
+                                            )}
                                         </div>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <button 
@@ -286,24 +338,45 @@ const OracleWorkspacePage = () => {
                             ) : (
                                 <>
                                     <img src={activeAsset.url} style={{ width: '100%', borderRadius: '12px', border: '1px solid var(--color-border)' }} />
-                                    <button 
-                                        onClick={() => analyzeAsset(activeAsset)}
-                                        disabled={status.isAnalyzing}
-                                        style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer' }}
-                                    >
-                                        {status.isAnalyzing ? 'RUNNING_AUDIT...' : 'RUN_NEURAL_AUDIT'}
-                                    </button>
-                                    {activeAsset.analysis && (
+                                    {activeAsset.sceneData ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px' }}>
-                                                <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.5rem' }}>CTR_PROJECTION</div>
-                                                <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--color-accent)' }}>{activeAsset.ctr}</div>
+                                            <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                                <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.5rem' }}>SCENE_DESCRIPTION</div>
+                                                <div style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>{activeAsset.sceneData.description}</div>
                                             </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem' }}>VERDICT</div>
-                                                <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>{activeAsset.analysis.feedback || activeAsset.analysis.verdict}</div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div style={{ padding: '1rem', backgroundColor: 'rgba(0,0,0,0.01)', borderRadius: '8px' }}>
+                                                    <div style={{ fontSize: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5 }}>CAMERA</div>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>{activeAsset.sceneData.camera}</div>
+                                                </div>
+                                                <div style={{ padding: '1rem', backgroundColor: 'rgba(0,0,0,0.01)', borderRadius: '8px' }}>
+                                                    <div style={{ fontSize: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5 }}>EMOTION</div>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>{activeAsset.sceneData.emotion}</div>
+                                                </div>
                                             </div>
                                         </div>
+                                    ) : (
+                                        <>
+                                            <button 
+                                                onClick={() => analyzeAsset(activeAsset)}
+                                                disabled={status.isAnalyzing}
+                                                style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer' }}
+                                            >
+                                                {status.isAnalyzing ? 'RUNNING_AUDIT...' : 'RUN_NEURAL_AUDIT'}
+                                            </button>
+                                            {activeAsset.analysis && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                    <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px' }}>
+                                                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.5rem' }}>CTR_PROJECTION</div>
+                                                        <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--color-accent)' }}>{activeAsset.ctr}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem' }}>VERDICT</div>
+                                                        <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>{activeAsset.analysis.feedback || activeAsset.analysis.verdict}</div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </>
                             )}

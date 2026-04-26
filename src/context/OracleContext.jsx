@@ -90,19 +90,28 @@ export const OracleProvider = ({ children }) => {
 
     // --- Core AI Actions ---
 
-    const chat = async (messageText) => {
+    const chat = async (messageText, imageUrl = null) => {
         if (!currentProject || !user) return;
         
         setStatus(prev => ({ ...prev, isTyping: true }));
-        const updatedMessages = [...currentProject.messages, { role: 'user', content: messageText }];
+        const userMsg = { role: 'user', content: messageText, image: imageUrl };
+        const updatedMessages = [...currentProject.messages, userMsg];
         
         try {
+            const apiMessages = imageUrl ? [
+                { role: 'system', content: `You are Oracle. Analyze this image and text. Respond in simple English.` },
+                { role: 'user', content: [
+                    { type: 'text', text: messageText },
+                    { type: 'image_url', image_url: { url: imageUrl } }
+                ]}
+            ] : [
+                { role: 'system', content: `You are Oracle, the high-performance creative brain of RE-RENDER. Your goal is to guide users to viral creative results. Use **bold text** for key highlights. Use simple English.` },
+                ...updatedMessages.slice(-10).map(m => ({ role: m.role, content: m.content }))
+            ];
+
             const data = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `You are Oracle, the high-performance creative brain of RE-RENDER. Your goal is to guide users to viral creative results. Use **bold text** for key highlights.` },
-                    ...updatedMessages.slice(-10)
-                ]
+                model: imageUrl ? 'baidu/qianfan-ocr-fast:free' : 'google/gemma-4-31b-it:free',
+                messages: apiMessages
             });
 
             const reply = data.choices?.[0]?.message?.content || 'NO_RESPONSE';
@@ -293,6 +302,80 @@ export const OracleProvider = ({ children }) => {
         document.body.removeChild(link);
     };
 
+    const runStoryboardEngine = async (script) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+
+        try {
+            // Step 1: Breakdown Script into Scenes
+            const breakdownData = await fetchOpenRouter({
+                model: 'google/gemma-4-31b-it:free',
+                messages: [
+                    { role: 'system', content: `You are a film director. Breakdown this script into 4-6 visual scenes. 
+                    Return ONLY JSON: 
+                    { "scenes": [
+                        { "id": 1, "description": "...", "camera": "...", "emotion": "...", "imagePrompt": "..." }
+                    ]}` },
+                    { role: 'user', content: script }
+                ]
+            });
+
+            const breakdown = safeParseJSON(breakdownData.choices?.[0]?.message?.content);
+            if (!breakdown?.scenes) throw new Error("STORYBOARD_BREAKDOWN_FAILED");
+
+            chat(`🎬 **STORYBOARD_MODE**: Broken down into ${breakdown.scenes.length} scenes. Starting visualization...`);
+            
+            let storyboardAssets = [];
+            for (const scene of breakdown.scenes) {
+                setStatus(prev => ({ ...prev, isGenerating: true }));
+                const asset = await generateImage(scene.imagePrompt);
+                if (asset) {
+                    const finalAsset = { ...asset, sceneData: scene };
+                    storyboardAssets.push(finalAsset);
+                }
+            }
+
+            const updatedProject = {
+                ...currentProject,
+                assets: [...currentProject.assets, ...storyboardAssets]
+            };
+            setCurrentProject(updatedProject);
+            await saveProject(updatedProject);
+            
+            chat(`✅ **STORYBOARD_COMPLETE**: All frames generated. Check the **SKETCHBOARD** for your visual plan.`);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false, isGenerating: false }));
+        }
+    };
+
+    const runShortFilmGenerator = async (idea) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+
+        try {
+            // Step 1: Write Script
+            const scriptData = await fetchOpenRouter({
+                model: 'google/gemma-4-31b-it:free',
+                messages: [
+                    { role: 'system', content: `You are a viral scriptwriter. Write a 30-60 second high-impact script for a short film about: ${idea}. Keep it simple and cinematic.` },
+                    { role: 'user', content: idea }
+                ]
+            });
+
+            const script = scriptData.choices?.[0]?.message?.content || 'SCRIPT_GEN_FAILED';
+            chat(`🎬 **SHORT_FILM_SCRIPT**: \n\n${script}`);
+            
+            // Step 2: Pass to Storyboard Engine
+            await runStoryboardEngine(script);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
     const value = {
         projects,
         currentProject,
@@ -309,6 +392,8 @@ export const OracleProvider = ({ children }) => {
         analyzeAsset,
         runNeuralLoop,
         runViralBreakdown,
+        runStoryboardEngine,
+        runShortFilmGenerator,
         deleteAsset,
         downloadAsset
     };
