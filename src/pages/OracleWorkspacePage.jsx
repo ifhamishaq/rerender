@@ -167,7 +167,8 @@ const OracleWorkspacePage = () => {
         projects, currentProject, status, 
         createProject, loadProject, renameProject, deleteProject,
         chat, generateImage, analyzeImage,
-        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop
+        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop,
+        runRewriter, runProposalGenerator, runContentCalendar, runBriefExtractor
     } = useOracle();
     const { user } = useAuth();
     
