@@ -124,6 +124,7 @@ const OracleWorkspacePage = () => {
     const [activeForm, setActiveForm] = useState(null); // { type: 'short_film'|'storyboard'|'audit' }
     const [editingProjectId, setEditingProjectId] = useState(null);
     const [editTitle, setEditTitle] = useState('');
+    const [pendingImage, setPendingImage] = useState(null);
     const chatEndRef = useRef(null);
 
     useEffect(() => {
@@ -131,16 +132,18 @@ const OracleWorkspacePage = () => {
     }, [currentProject?.messages, status.isTyping]);
 
     const handleSend = () => {
-        if (!inputText.trim()) return;
+        if (!inputText.trim() && !pendingImage) return;
+        
         if (activeForm) {
             if (activeForm.type === 'short_film') runShortFilmGenerator(inputText, 'cinematic', '60s');
             if (activeForm.type === 'storyboard') runStoryboardEngine(inputText);
             if (activeForm.type === 'audit') runViralBreakdown(inputText);
             setActiveForm(null);
         } else {
-            chat(inputText);
+            chat(inputText || "Analyze this image.", pendingImage);
         }
         setInputText('');
+        setPendingImage(null);
     };
 
     if (!user) {
@@ -274,20 +277,29 @@ const OracleWorkspacePage = () => {
                                         const file = e.target.files?.[0];
                                         if (file) {
                                             const r = new FileReader();
-                                            r.onload = () => chat("Analyze this image.", r.result);
+                                            r.onload = () => setPendingImage(r.result);
                                             r.readAsDataURL(file);
                                         }
+                                        e.target.value = null; // reset
                                     }} />
                                     <button onClick={() => document.getElementById('img-upload').click()} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, padding: '0.5rem', cursor: 'pointer' }}>
                                         <ImageIcon size={20} />
                                     </button>
-                                    <textarea 
-                                        value={inputText} onChange={e => setInputText(e.target.value)}
-                                        onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                                        placeholder={activeForm ? "Type here..." : "Message Oracle..."}
-                                        style={{ flex: 1, background: 'none', border: 'none', color: 'var(--color-text)', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
-                                    />
-                                    <button onClick={handleSend} style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        {pendingImage && (
+                                            <div style={{ position: 'relative', width: 'fit-content', padding: '0.5rem 0' }}>
+                                                <img src={pendingImage} style={{ height: '60px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                                                <button onClick={() => setPendingImage(null)} style={{ position: 'absolute', top: 0, right: '-10px', background: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>✕</button>
+                                            </div>
+                                        )}
+                                        <textarea 
+                                            value={inputText} onChange={e => setInputText(e.target.value)}
+                                            onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                                            placeholder={activeForm ? "Type here..." : "Message Oracle..."}
+                                            style={{ width: '100%', background: 'none', border: 'none', color: 'var(--color-text)', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
+                                        />
+                                    </div>
+                                    <button onClick={handleSend} style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginBottom: '4px' }}>
                                         <Send size={16} />
                                     </button>
                                 </div>
