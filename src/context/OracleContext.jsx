@@ -433,6 +433,8 @@ Be specific. No generic advice.` },
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
+    };
+
     // --- Intelligent Rewriter ---
     const runRewriter = async (input) => {
         if (!user || !currentProject) return;
