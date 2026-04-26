@@ -177,12 +177,10 @@ const OracleWorkspacePage = () => {
             if (activeForm.type === 'short_film') runShortFilmGenerator(inputText, 'cinematic', '60s');
             if (activeForm.type === 'storyboard') runStoryboardEngine(inputText);
             if (activeForm.type === 'audit') runViralBreakdown(inputText);
-            if (activeForm.type === 'title_gen') runTitleGenerator(inputText);
-            if (activeForm.type === 'desc_writer') runDescriptionWriter(inputText);
+            if (activeForm.type === 'rewriter') runRewriter(inputText);
             if (activeForm.type === 'proposal') runProposalGenerator(inputText);
             if (activeForm.type === 'calendar') runContentCalendar(inputText);
             if (activeForm.type === 'brief') runBriefExtractor(inputText);
-            if (activeForm.type === 'hook') runHookRewriter(inputText);
             setActiveForm(null);
         } else {
             chat(inputText || "Analyze this image.", pendingImage);
@@ -302,12 +300,10 @@ const OracleWorkspacePage = () => {
                                         <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><ImageIcon size={12} /> STORYBOARD</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'title_gen' })}><Type size={12} /> TITLE_HOOK</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'desc_writer' })}><FileText size={12} /> DESC_WRITER</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'rewriter' })}><Edit3 size={12} /> REWRITER</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'proposal' })}><Briefcase size={12} /> PROPOSAL</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'calendar' })}><Calendar size={12} /> CALENDAR</LabPill>
                                         <LabPill onClick={() => setActiveForm({ type: 'brief' })}><FileDown size={12} /> BRIEF_EXTRACTOR</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'hook' })}><Edit3 size={12} /> HOOK_REWRITER</LabPill>
                                     </div>
                                 )}
 
@@ -318,12 +314,10 @@ const OracleWorkspacePage = () => {
                                             {activeForm.type === 'short_film' && "Enter a topic or idea for your short film..."}
                                             {activeForm.type === 'storyboard' && "Paste your script to generate a visual storyboard..."}
                                             {activeForm.type === 'audit' && "Paste a URL or topic for viral analysis..."}
-                                            {activeForm.type === 'title_gen' && "Enter your video topic and niche..."}
-                                            {activeForm.type === 'desc_writer' && "Enter video title and bullet points..."}
+                                            {activeForm.type === 'rewriter' && "Paste a hook, title, or topic to optimize & rewrite..."}
                                             {activeForm.type === 'proposal' && "Enter: Service Offered | Client Niche | Your Rate..."}
                                             {activeForm.type === 'calendar' && "Enter: Niche | Channel Size | Your Goals..."}
                                             {activeForm.type === 'brief' && "Paste the messy client message..."}
-                                            {activeForm.type === 'hook' && "Paste your opening hook line to rewrite..."}
                                         </span>
                                         <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
                                     </div>

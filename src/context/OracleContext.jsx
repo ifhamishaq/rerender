@@ -433,43 +433,26 @@ Be specific. No generic advice.` },
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
-    };
-
-    // --- Title & Hook Generator ---
-    const runTitleGenerator = async (topic) => {
+    // --- Intelligent Rewriter ---
+    const runRewriter = async (input) => {
         if (!user || !currentProject) return;
         setStatus(prev => ({ ...prev, isTyping: true }));
-        addMessage({ role: 'user', type: 'text', content: `Generate titles for: ${topic}` });
+        addMessage({ role: 'user', type: 'text', content: `Rewrite/Optimize: ${input}` });
 
         try {
             const data = await fetchWithFallback([
-                { role: 'system', content: `You are an elite YouTube packager. Generate 10 hyper-clickable titles, 3 distinct 30-second hooks, and the optimal 2-3 word text overlay for the thumbnail. Do not use clickbait, use psychological curiosity.` },
-                { role: 'user', content: `Topic: ${topic}` }
+                { role: 'system', content: `You are an elite YouTube copywriter. Analyze the user's input:
+- If it's a broad topic, generate 10 highly clickable titles and 3 video hooks.
+- If it's an opening hook/line, rewrite it 5 ways (curiosity, fear, story, data, controversial).
+- If it's bullet points, write a full SEO YouTube description with timestamps.
+- Otherwise, radically improve the text for maximum retention and click-through rate.
+Use simple English. Be bold. Do not use generic clickbait.` },
+                { role: 'user', content: input }
             ]);
-            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
+            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Rewrite failed.' });
         } catch (err) {
             console.error(err);
-            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
-        } finally {
-            setStatus(prev => ({ ...prev, isTyping: false }));
-        }
-    };
-
-    // --- Description Writer ---
-    const runDescriptionWriter = async (input) => {
-        if (!user || !currentProject) return;
-        setStatus(prev => ({ ...prev, isTyping: true }));
-        addMessage({ role: 'user', type: 'text', content: `Write description for: ${input}` });
-
-        try {
-            const data = await fetchWithFallback([
-                { role: 'system', content: `You are an SEO specialist. Write a YouTube description that maximizes search ranking. Include an engaging summary, exact timestamps, a CTA, and standard link templates.` },
-                { role: 'user', content: `Video Details: ${input}` }
-            ]);
-            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Generation failed.' });
-        } catch (err) {
-            console.error(err);
-            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Generation failed. Please try again.` });
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Rewrite failed. Please try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
@@ -535,25 +518,7 @@ Be specific. No generic advice.` },
         }
     };
 
-    // --- Hook Rewriter ---
-    const runHookRewriter = async (hook) => {
-        if (!user || !currentProject) return;
-        setStatus(prev => ({ ...prev, isTyping: true }));
-        addMessage({ role: 'user', type: 'text', content: `Rewrite hook: ${hook}` });
 
-        try {
-            const data = await fetchWithFallback([
-                { role: 'system', content: `Rewrite this hook 5 different ways: Curiosity, Controversy, Story-driven, Data-driven, and Fear-driven. Make the first 3 seconds impossible to click away from.` },
-                { role: 'user', content: `Original Hook: ${hook}` }
-            ]);
-            addMessage({ role: 'assistant', type: 'text', content: data.choices?.[0]?.message?.content || 'Rewrite failed.' });
-        } catch (err) {
-            console.error(err);
-            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Rewrite failed. Please try again.` });
-        } finally {
-            setStatus(prev => ({ ...prev, isTyping: false }));
-        }
-    };
 
     // --- Neural Loop ---
 
@@ -596,7 +561,7 @@ Be specific. No generic advice.` },
         createProject, loadProject, renameProject, deleteProject,
         chat, generateImage, analyzeImage,
         runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop,
-        runTitleGenerator, runDescriptionWriter, runProposalGenerator, runContentCalendar, runBriefExtractor, runHookRewriter
+        runRewriter, runProposalGenerator, runContentCalendar, runBriefExtractor
     };
 
     return <OracleContext.Provider value={value}>{children}</OracleContext.Provider>;
