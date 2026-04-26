@@ -14,35 +14,54 @@ const NotFound = () => {
             textAlign: 'center',
             fontFamily: 'var(--font-mono)'
         }}>
-            <h1 style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'clamp(5rem, 15vw, 12rem)',
-                lineHeight: 0.8,
-                margin: 0,
-                color: 'var(--color-accent)'
-            }}>
+            <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(5rem, 20vw, 15rem)',
+                    lineHeight: 0.8,
+                    margin: 0,
+                    color: 'var(--color-accent)',
+                    fontWeight: 900
+                }}
+            >
                 404
-            </h1>
-            <h2 style={{
-                fontSize: 'clamp(1rem, 3vw, 2rem)',
-                marginBottom: '2rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2em'
-            }}>
+            </motion.h1>
+            <motion.h2 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                style={{
+                    fontSize: 'clamp(1rem, 3vw, 2rem)',
+                    marginBottom: '1rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3em',
+                    fontWeight: 900
+                }}
+            >
                 Reality Not Found
-            </h2>
-            <p style={{ maxWidth: '400px', marginBottom: '3rem', color: '#888' }}>
+            </motion.h2>
+            <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ delay: 0.4 }}
+                style={{ maxWidth: '400px', marginBottom: '3rem', fontSize: '0.8rem', lineHeight: 1.6 }}
+            >
                 The page you are looking for has been glitch-shifted into the void or never existed.
-            </p>
+            </motion.p>
             <a href="/" style={{
                 padding: '1rem 3rem',
-                backgroundColor: '#FFFFFF',
-                color: '#121212',
-                fontWeight: 'bold',
+                backgroundColor: 'var(--color-text)',
+                color: 'var(--color-bg)',
+                fontWeight: 900,
                 textDecoration: 'none',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.7rem',
+                letterSpacing: '0.1em'
             }}>
-                Return to Base
+                RETURN_TO_BASE
             </a>
         </div>
     );

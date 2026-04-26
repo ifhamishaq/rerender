@@ -19,7 +19,7 @@ const LabPill = ({ active, onClick, children, accentColor = 'var(--color-text)' 
             whiteSpace: 'nowrap'
         }}
     >
-        {children.toUpperCase()}
+        {typeof children === 'string' ? children.toUpperCase() : children}
     </motion.button>
 );
 

@@ -17,6 +17,7 @@ import SmoothScroll from './components/SmoothScroll';
 
 // Pages
 import Home from './pages/Home';
+import OracleWorkspacePage from './pages/OracleWorkspacePage';
 import PortfolioPage from './pages/PortfolioPage';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
@@ -118,7 +119,9 @@ const AnimatedRoutes = () => {
           <Route path="/tools" element={<TransitionWipe><ToolsPage /></TransitionWipe>} />
           
           {/* Lab & Utility Routes */}
-          <Route path="/lab/ai-agent" element={<TransitionWipe><AILabPage /></TransitionWipe>} />
+          <Route path="/lab/oracle-workspace" element={<TransitionWipe><OracleWorkspacePage /></TransitionWipe>} />
+          <Route path="/lab/oracle2.0" element={<Navigate to="/lab/oracle-workspace" replace />} />
+          <Route path="/lab/ai-agent" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
           <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
 
@@ -161,16 +164,20 @@ const AppContent = () => {
     );
 };
 
+import { OracleProvider } from './context/OracleContext';
+
 const App = () => {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <Router>
-                    <SmoothScroll>
-                        <ScrollToTop />
-                        <AppContent />
-                    </SmoothScroll>
-                </Router>
+                <OracleProvider>
+                    <Router>
+                        <SmoothScroll>
+                            <ScrollToTop />
+                            <AppContent />
+                        </SmoothScroll>
+                    </Router>
+                </OracleProvider>
             </AuthProvider>
         </ThemeProvider>
     );
