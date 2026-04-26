@@ -102,9 +102,38 @@ const StoryboardCard = ({ scenes, projectTitle }) => {
 const AnalysisCard = ({ analysis, imageUrl }) => (
     <div style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
         <img src={imageUrl} style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }} />
-        <div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{analysis.grade} <span style={{ fontSize: '1rem', opacity: 0.5 }}>({analysis.ctr})</span></div>
-            <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{analysis.feedback}</div>
+        <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{analysis.grade} <span style={{ fontSize: '1rem', opacity: 0.5 }}>({analysis.estimated_ctr})</span></div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.7rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>FIRST IMPRESSION</div>
+                <div style={{ fontSize: '0.85rem' }}>{analysis.first_impression}</div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.7rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>EMOTIONAL RESPONSE</div>
+                <div style={{ fontSize: '0.85rem' }}>{analysis.emotional_response}</div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '0.25rem' }}>STRENGTHS</div>
+                    <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '0.8rem' }}>
+                        {analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                </div>
+                <div>
+                    <div style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 900, marginBottom: '0.25rem' }}>CRITICAL FIXES</div>
+                    <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '0.8rem' }}>
+                        {analysis.critical_fixes?.map((f, i) => <li key={i}>{f}</li>)}
+                    </ul>
+                </div>
+            </div>
+
+            <div style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '0.25rem' }}>NEURAL PROMPT</div>
+                <div style={{ fontSize: '0.75rem', fontStyle: 'italic', opacity: 0.7 }}>{analysis.neural_prompt}</div>
+            </div>
         </div>
     </div>
 );
