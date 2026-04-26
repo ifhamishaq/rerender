@@ -1,31 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { useAuth } from './AuthContext';
-import { fetchOpenRouter, safeParseJSON, AI_COSTS } from '../utils/ai';
+import { fetchOpenRouter, safeParseJSON } from '../utils/ai';
 
 const OracleContext = createContext();
 
 export const OracleProvider = ({ children }) => {
-    const { user, profile, spendCredits } = useAuth();
+    const { user } = useAuth();
     
-    // UI States
     const [projects, setProjects] = useState([]);
     const [currentProject, setCurrentProject] = useState(null);
-    const [activeAsset, setActiveAsset] = useState(null);
-    const [rightPanelTab, setRightPanelTab] = useState('sketchboard'); // 'sketchboard' | 'analysis' | 'prompt'
-    
-    // Loading States
-    const [status, setStatus] = useState({
-        isTyping: false,
-        isGenerating: false,
-        isAnalyzing: false,
-        loopIteration: 0
-    });
-
+    const [status, setStatus] = useState({ isTyping: false, isGenerating: false, isAnalyzing: false });
     const [error, setError] = useState(null);
 
-    // --- Persistence Logic ---
-    
+    // --- Persistence ---
+
     const fetchProjects = useCallback(async () => {
         if (!user) return;
         try {
@@ -34,24 +23,17 @@ export const OracleProvider = ({ children }) => {
                 .select('*')
                 .eq('user_id', user.id)
                 .order('last_active', { ascending: false });
-            
             if (data) setProjects(data);
-            if (error) {
-                console.warn('[ORACLE_DB_WARN]: Table might not exist yet. Please run migration.', error);
-                setError("DATABASE_OFFLINE: Please run the Supabase migration script.");
-            }
+            if (error) console.warn('[ORACLE_DB]', error.message);
         } catch (err) {
-            console.error('[ORACLE_FETCH_FATAL]', err);
+            console.error('[ORACLE_FETCH]', err);
         }
     }, [user]);
 
-    useEffect(() => {
-        fetchProjects();
-    }, [fetchProjects]);
+    useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
     const saveProject = async (project) => {
         if (!user || !project) return;
-        
         const { error } = await supabase
             .from('oracle_sessions')
             .upsert({
@@ -59,53 +41,70 @@ export const OracleProvider = ({ children }) => {
                 user_id: user.id,
                 title: project.title,
                 messages: project.messages,
-                assets: project.assets,
+                assets: project.assets || [],
                 last_active: new Date().toISOString()
             });
-        
-        if (error) console.error('[ORACLE_SAVE_ERR]', error);
+        if (error) console.error('[ORACLE_SAVE]', error);
         fetchProjects();
     };
 
-    const createProject = async (title = "Untitled Project") => {
+    // --- Project Management ---
+
+    const createProject = async (title = 'New Chat') => {
         const newProject = {
             id: crypto.randomUUID(),
             title,
-            messages: [{ role: 'assistant', content: "ORACLE_ONLINE. How shall we re-render your vision today?" }],
+            messages: [{ role: 'assistant', type: 'text', content: 'Hey! I am Oracle, your creative partner. What are we building today?' }],
             assets: []
         };
         setCurrentProject(newProject);
-        setActiveAsset(null);
         await saveProject(newProject);
     };
 
-    const loadProject = (project) => {
-        setCurrentProject(project);
-        if (project.assets?.length > 0) {
-            setActiveAsset(project.assets[project.assets.length - 1]);
-        } else {
-            setActiveAsset(null);
-        }
+    const loadProject = (project) => setCurrentProject(project);
+
+    const renameProject = async (projectId, newTitle) => {
+        setProjects(prev => prev.map(p => p.id === projectId ? { ...p, title: newTitle } : p));
+        if (currentProject?.id === projectId) setCurrentProject(prev => ({ ...prev, title: newTitle }));
+        await supabase.from('oracle_sessions').update({ title: newTitle }).eq('id', projectId);
     };
 
-    // --- Core AI Actions ---
+    const deleteProject = async (projectId) => {
+        setProjects(prev => prev.filter(p => p.id !== projectId));
+        if (currentProject?.id === projectId) setCurrentProject(null);
+        await supabase.from('oracle_sessions').delete().eq('id', projectId);
+    };
+
+    // --- Helper: Add message to current project ---
+
+    const addMessage = (msg) => {
+        setCurrentProject(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, messages: [...prev.messages, msg] };
+            saveProject(updated);
+            return updated;
+        });
+    };
+
+    // --- Core AI: Chat ---
 
     const chat = async (messageText, imageUrl = null) => {
         if (!currentProject || !user) return;
-        
         setStatus(prev => ({ ...prev, isTyping: true }));
-        const userMsg = { role: 'user', content: messageText, image: imageUrl };
+
+        const userMsg = { role: 'user', type: imageUrl ? 'image_upload' : 'text', content: messageText, image: imageUrl };
         const updatedMessages = [...currentProject.messages, userMsg];
-        
+        setCurrentProject(prev => ({ ...prev, messages: updatedMessages }));
+
         try {
             const apiMessages = imageUrl ? [
-                { role: 'system', content: `You are Oracle. Analyze this image and text. Respond in simple English.` },
+                { role: 'system', content: 'You are Oracle, a creative AI assistant. Analyze the uploaded image and respond helpfully. Use simple English.' },
                 { role: 'user', content: [
                     { type: 'text', text: messageText },
                     { type: 'image_url', image_url: { url: imageUrl } }
                 ]}
             ] : [
-                { role: 'system', content: `You are Oracle, the high-performance creative brain of RE-RENDER. Your goal is to guide users to viral creative results. Use **bold text** for key highlights. Use simple English.` },
+                { role: 'system', content: 'You are Oracle, a creative AI assistant built by RE-RENDER Studio. Help users create viral content, thumbnails, and creative assets. Use simple English. Use **bold** for key points. Be concise and helpful.' },
                 ...updatedMessages.slice(-10).map(m => ({ role: m.role, content: m.content }))
             ];
 
@@ -114,9 +113,10 @@ export const OracleProvider = ({ children }) => {
                 messages: apiMessages
             });
 
-            const reply = data.choices?.[0]?.message?.content || 'NO_RESPONSE';
-            const finalMessages = [...updatedMessages, { role: 'assistant', content: reply }];
+            const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not process that. Try again.';
+            const assistantMsg = { role: 'assistant', type: 'text', content: reply };
             
+            const finalMessages = [...updatedMessages, assistantMsg];
             const updatedProject = { ...currentProject, messages: finalMessages };
             setCurrentProject(updatedProject);
             await saveProject(updatedProject);
@@ -127,10 +127,14 @@ export const OracleProvider = ({ children }) => {
         }
     };
 
+    // --- Core AI: Generate Image ---
+
     const generateImage = async (prompt) => {
         if (!user || !currentProject) return;
         setStatus(prev => ({ ...prev, isGenerating: true }));
         
+        addMessage({ role: 'assistant', type: 'text', content: `Generating image: "${prompt}"...` });
+
         try {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
@@ -139,24 +143,16 @@ export const OracleProvider = ({ children }) => {
             const data = await response.json();
             
             if (data.url) {
-                const newAsset = {
-                    id: crypto.randomUUID(),
+                const imageMsg = {
+                    role: 'assistant',
+                    type: 'image',
+                    content: prompt,
                     url: data.url,
-                    prompt,
-                    grade: null,
-                    ctr: null,
-                    analysis: null,
+                    id: crypto.randomUUID(),
                     timestamp: new Date().toISOString()
                 };
-                
-                const updatedProject = {
-                    ...currentProject,
-                    assets: [...currentProject.assets, newAsset]
-                };
-                setCurrentProject(updatedProject);
-                setActiveAsset(newAsset);
-                await saveProject(updatedProject);
-                return newAsset;
+                addMessage(imageMsg);
+                return imageMsg;
             }
         } catch (err) {
             setError(err.message);
@@ -165,29 +161,24 @@ export const OracleProvider = ({ children }) => {
         }
     };
 
-    const analyzeAsset = async (asset) => {
-        if (!user || !asset) return;
+    // --- Core AI: Analyze Image ---
+
+    const analyzeImage = async (imageUrl) => {
+        if (!user || !currentProject) return;
         setStatus(prev => ({ ...prev, isAnalyzing: true }));
 
         try {
             const data = await fetchOpenRouter({
                 model: 'baidu/qianfan-ocr-fast:free',
                 messages: [
-                    { role: 'system', content: `You are NEURAL. Analyze this thumbnail. Return JSON: { "grade": "A|B|C", "ctr": "X.X%", "feedback": "...", "improvements": ["..."] }` },
-                    { role: 'user', content: [{ type: 'image_url', image_url: { url: asset.url } }] }
+                    { role: 'system', content: 'Analyze this thumbnail image. Return JSON: { "grade": "A|B|C", "ctr": "X.X%", "feedback": "...", "improvements": ["..."] }' },
+                    { role: 'user', content: [{ type: 'image_url', image_url: { url: imageUrl } }] }
                 ]
             });
 
             const analysis = safeParseJSON(data.choices?.[0]?.message?.content);
             if (analysis) {
-                const updatedAssets = currentProject.assets.map(a => 
-                    a.id === asset.id ? { ...a, grade: analysis.grade, ctr: analysis.ctr, analysis } : a
-                );
-                const updatedProject = { ...currentProject, assets: updatedAssets };
-                setCurrentProject(updatedProject);
-                setActiveAsset(updatedAssets.find(a => a.id === asset.id));
-                await saveProject(updatedProject);
-                return { ...asset, ...analysis }; // Return updated asset for loop
+                addMessage({ role: 'assistant', type: 'analysis', content: analysis, imageUrl });
             }
         } catch (err) {
             setError(err.message);
@@ -196,202 +187,75 @@ export const OracleProvider = ({ children }) => {
         }
     };
 
-    const runNeuralLoop = async (initialPrompt) => {
-        if (!user || !currentProject) return;
-        
-        let currentPrompt = initialPrompt;
-        let iteration = 0;
-        const MAX_ITERATIONS = 3;
-        const TARGET_GRADE = 'A';
-
-        while (iteration < MAX_ITERATIONS) {
-            iteration++;
-            setStatus(prev => ({ ...prev, loopIteration: iteration }));
-            
-            // 1. Generate
-            const asset = await generateImage(currentPrompt);
-            if (!asset) break;
-
-            // 2. Analyze
-            const updatedAsset = await analyzeAsset(asset);
-            if (!updatedAsset) break;
-
-            if (updatedAsset.grade === TARGET_GRADE) {
-                chat(`✅ **OPTIMIZATION_COMPLETE**: Target Grade A reached in ${iteration} iterations.`);
-                break;
-            }
-
-            if (iteration === MAX_ITERATIONS) {
-                chat(`⚠️ **LIMIT_REACHED**: Max iterations (${MAX_ITERATIONS}) met. Final Grade: ${updatedAsset.grade || 'N/A'}.`);
-                break;
-            }
-
-            // 3. Improve Prompt based on feedback
-            chat(`🔄 **ITERATING**: Grade ${updatedAsset.grade} detected. Refining prompt for better CTR...`);
-            
-            const promptData = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `You are an expert prompt engineer. Improve this image prompt based on feedback to reach Grade A clickability.` },
-                    { role: 'user', content: `Original Prompt: ${currentPrompt}\nFeedback: ${updatedAsset.analysis?.feedback || 'Increase contrast and subject focus.'}\nImprovements: ${updatedAsset.analysis?.improvements?.join(', ') || ''}` }
-                ]
-            });
-            
-            currentPrompt = promptData.choices?.[0]?.message?.content || currentPrompt;
-        }
-        
-        setStatus(prev => ({ ...prev, loopIteration: 0 }));
-    };
-
-    const runViralBreakdown = async (url) => {
-        if (!user || !currentProject) return;
-        setStatus(prev => ({ ...prev, isTyping: true }));
-
-        try {
-            const data = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `You are SYNTHESIS Viral Auditor. Analyze the provided URL strategy. 
-                    Structure your response as:
-                    ### ⚡ THE HOOK
-                    Explain why the first 3 seconds work.
-                    
-                    ### 🏗️ CONTENT STRUCTURE
-                    Break down the pacing and retention strategy.
-                    
-                    ### 🎯 THUMBNAIL STRATEGY
-                    Suggest how to replicate this visually.
-                    
-                    Use **bold highlights**. Keep it punchy and studio-grade.` },
-                    { role: 'user', content: `Analyze this content strategy: ${url}` }
-                ]
-            });
-
-            const reply = data.choices?.[0]?.message?.content || 'ANALYSIS_FAILED';
-            const updatedMessages = [...currentProject.messages, 
-                { role: 'user', content: `VIRAL_AUDIT: ${url}` },
-                { role: 'assistant', content: reply }
-            ];
-            
-            const updatedProject = { ...currentProject, messages: updatedMessages };
-            setCurrentProject(updatedProject);
-            await saveProject(updatedProject);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setStatus(prev => ({ ...prev, isTyping: false }));
-        }
-    };
-
-    const renameProject = async (projectId, newTitle) => {
-        const updatedProjects = projects.map(p => p.id === projectId ? { ...p, title: newTitle } : p);
-        setProjects(updatedProjects);
-        if (currentProject?.id === projectId) setCurrentProject({ ...currentProject, title: newTitle });
-        
-        const { error } = await supabase
-            .from('oracle_sessions')
-            .update({ title: newTitle })
-            .eq('id', projectId);
-        if (error) console.error('[ORACLE_RENAME_ERR]', error);
-    };
-
-    const deleteProject = async (projectId) => {
-        const updatedProjects = projects.filter(p => p.id !== projectId);
-        setProjects(updatedProjects);
-        if (currentProject?.id === projectId) setCurrentProject(null);
-
-        const { error } = await supabase
-            .from('oracle_sessions')
-            .delete()
-            .eq('id', projectId);
-        if (error) console.error('[ORACLE_DELETE_ERR]', error);
-    };
-
-    const deleteAsset = async (assetId) => {
-        if (!currentProject) return;
-        const updatedAssets = currentProject.assets.filter(a => a.id !== assetId);
-        const updatedProject = { ...currentProject, assets: updatedAssets };
-        setCurrentProject(updatedProject);
-        if (activeAsset?.id === assetId) setActiveAsset(updatedAssets[0] || null);
-        await saveProject(updatedProject);
-    };
-
-    const downloadAsset = (asset) => {
-        if (!asset) return;
-        const link = document.createElement('a');
-        link.href = asset.url;
-        link.download = `RE_RENDER_${asset.id.slice(0, 8)}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    // --- Storyboard Engine ---
 
     const runStoryboardEngine = async (script) => {
         if (!user || !currentProject) return;
         setStatus(prev => ({ ...prev, isTyping: true }));
 
+        addMessage({ role: 'assistant', type: 'text', content: 'Breaking down your script into visual scenes...' });
+
         try {
-            // Step 1: Breakdown Script into Scenes
             const breakdownData = await fetchOpenRouter({
                 model: 'google/gemma-4-31b-it:free',
                 messages: [
-                    { role: 'system', content: `You are a film director. Breakdown this script into 4-6 visual scenes. 
-                    Return ONLY JSON: 
+                    { role: 'system', content: `You are a film director. Break this script into 4-6 visual scenes. Return ONLY valid JSON:
                     { "scenes": [
-                        { "id": 1, "description": "...", "camera": "...", "emotion": "...", "imagePrompt": "..." }
+                        { "id": 1, "title": "Scene Title", "description": "What happens", "camera": "Camera angle/movement", "emotion": "Mood", "imagePrompt": "Detailed image generation prompt" }
                     ]}` },
                     { role: 'user', content: script }
                 ]
             });
 
             const breakdown = safeParseJSON(breakdownData.choices?.[0]?.message?.content);
-            if (!breakdown?.scenes) throw new Error("STORYBOARD_BREAKDOWN_FAILED");
+            if (!breakdown?.scenes) throw new Error('Could not break down the script. Try a simpler description.');
 
-            chat(`🎬 **STORYBOARD_MODE**: Broken down into ${breakdown.scenes.length} scenes. Starting visualization...`);
-            
-            let storyboardAssets = [];
+            addMessage({ role: 'assistant', type: 'text', content: `Found ${breakdown.scenes.length} scenes. Generating visuals now...` });
+
+            setStatus(prev => ({ ...prev, isGenerating: true }));
+
+            const completedScenes = [];
             for (const scene of breakdown.scenes) {
-                setStatus(prev => ({ ...prev, isGenerating: true }));
-                const asset = await generateImage(scene.imagePrompt);
-                if (asset) {
-                    const finalAsset = { ...asset, sceneData: scene };
-                    storyboardAssets.push(finalAsset);
+                try {
+                    const response = await fetch('/.netlify/functions/generate-wallpaper', {
+                        method: 'POST',
+                        body: JSON.stringify({ prompt: scene.imagePrompt, width: 1024, height: 576 })
+                    });
+                    const data = await response.json();
+                    completedScenes.push({ ...scene, imageUrl: data.url || null });
+                } catch {
+                    completedScenes.push({ ...scene, imageUrl: null });
                 }
             }
 
-            const updatedProject = {
-                ...currentProject,
-                assets: [...currentProject.assets, ...storyboardAssets]
-            };
-            setCurrentProject(updatedProject);
-            await saveProject(updatedProject);
-            
-            chat(`✅ **STORYBOARD_COMPLETE**: All frames generated. Check the **SKETCHBOARD** for your visual plan.`);
+            addMessage({ role: 'assistant', type: 'storyboard', content: completedScenes });
         } catch (err) {
-            setError(err.message);
+            addMessage({ role: 'assistant', type: 'text', content: 'Storyboard generation failed: ' + err.message });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false, isGenerating: false }));
         }
     };
 
-    const runShortFilmGenerator = async (idea) => {
+    // --- Short Film Generator ---
+
+    const runShortFilmGenerator = async (idea, style, duration) => {
         if (!user || !currentProject) return;
         setStatus(prev => ({ ...prev, isTyping: true }));
 
+        addMessage({ role: 'assistant', type: 'text', content: `Writing a ${duration} script about "${idea}" in ${style} style...` });
+
         try {
-            // Step 1: Write Script
             const scriptData = await fetchOpenRouter({
                 model: 'google/gemma-4-31b-it:free',
                 messages: [
-                    { role: 'system', content: `You are a viral scriptwriter. Write a 30-60 second high-impact script for a short film about: ${idea}. Keep it simple and cinematic.` },
+                    { role: 'system', content: `Write a ${duration} high-impact short film script. Style: ${style}. Keep it simple, cinematic, and visual. Use clear scene descriptions.` },
                     { role: 'user', content: idea }
                 ]
             });
 
-            const script = scriptData.choices?.[0]?.message?.content || 'SCRIPT_GEN_FAILED';
-            chat(`🎬 **SHORT_FILM_SCRIPT**: \n\n${script}`);
-            
-            // Step 2: Pass to Storyboard Engine
+            const script = scriptData.choices?.[0]?.message?.content || 'Script generation failed.';
+            addMessage({ role: 'assistant', type: 'text', content: script });
+
             await runStoryboardEngine(script);
         } catch (err) {
             setError(err.message);
@@ -400,28 +264,82 @@ export const OracleProvider = ({ children }) => {
         }
     };
 
+    // --- Viral Breakdown ---
+
+    const runViralBreakdown = async (url) => {
+        if (!user || !currentProject) return;
+        setStatus(prev => ({ ...prev, isTyping: true }));
+
+        addMessage({ role: 'user', type: 'text', content: `Analyze this: ${url}` });
+
+        try {
+            const data = await fetchOpenRouter({
+                model: 'google/gemma-4-31b-it:free',
+                messages: [
+                    { role: 'system', content: `You are a viral content strategist. Analyze the given URL/content idea. Structure your response as:
+
+**The Hook** — Why the first 3 seconds work
+**Content Structure** — Pacing and retention strategy  
+**Thumbnail Strategy** — How to make it click-worthy
+
+Use simple English. Be direct and helpful.` },
+                    { role: 'user', content: `Analyze: ${url}` }
+                ]
+            });
+
+            const reply = data.choices?.[0]?.message?.content || 'Analysis failed.';
+            addMessage({ role: 'assistant', type: 'text', content: reply });
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setStatus(prev => ({ ...prev, isTyping: false }));
+        }
+    };
+
+    // --- Neural Loop ---
+
+    const runNeuralLoop = async (prompt) => {
+        if (!user || !currentProject) return;
+        let currentPrompt = prompt;
+        const MAX = 3;
+
+        for (let i = 1; i <= MAX; i++) {
+            addMessage({ role: 'assistant', type: 'text', content: `Loop ${i}/${MAX}: Generating and analyzing...` });
+            
+            const asset = await generateImage(currentPrompt);
+            if (!asset) break;
+
+            await analyzeImage(asset.url);
+
+            // Check last analysis message
+            const lastMsg = currentProject.messages[currentProject.messages.length - 1];
+            if (lastMsg?.type === 'analysis' && lastMsg.content?.grade === 'A') {
+                addMessage({ role: 'assistant', type: 'text', content: `Grade A reached in ${i} loops. Done!` });
+                break;
+            }
+
+            if (i === MAX) {
+                addMessage({ role: 'assistant', type: 'text', content: `Reached ${MAX} loops. Check results above.` });
+                break;
+            }
+
+            // Improve prompt
+            const promptData = await fetchOpenRouter({
+                model: 'google/gemma-4-31b-it:free',
+                messages: [
+                    { role: 'system', content: 'Improve this image prompt based on feedback. Reply with ONLY the improved prompt.' },
+                    { role: 'user', content: `Prompt: ${currentPrompt}\nFeedback: ${lastMsg?.content?.feedback || 'Make it more eye-catching'}` }
+                ]
+            });
+            currentPrompt = promptData.choices?.[0]?.message?.content || currentPrompt;
+        }
+    };
+
     const value = {
-        projects,
-        currentProject,
-        activeAsset,
-        rightPanelTab,
-        status,
-        error,
-        setRightPanelTab,
-        setActiveAsset,
-        createProject,
-        loadProject,
-        renameProject,
-        deleteProject,
-        chat,
-        generateImage,
-        analyzeAsset,
-        runNeuralLoop,
-        runViralBreakdown,
-        runStoryboardEngine,
-        runShortFilmGenerator,
-        deleteAsset,
-        downloadAsset
+        projects, currentProject, status, error,
+        createProject, loadProject, renameProject, deleteProject,
+        chat, generateImage, analyzeImage,
+        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop
     };
 
     return <OracleContext.Provider value={value}>{children}</OracleContext.Provider>;

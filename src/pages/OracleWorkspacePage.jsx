@@ -1,72 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-    Plus, MessageSquare, History, Trash2, Edit3, 
-    Layout, BarChart3, Wand2, ChevronRight, Send, 
-    Image as ImageIcon, Zap, Target, RefreshCw, 
-    MoreHorizontal, Maximize2, Download, Search
+    Plus, MessageSquare, Trash2, Zap, Send, 
+    Image as ImageIcon, RefreshCw, Target, Search, Maximize2
 } from 'lucide-react';
 import { useOracle } from '../context/OracleContext';
 import { useAuth } from '../context/AuthContext';
 import LabPill from '../components/LabPill';
 
-const OracleWorkspacePage = () => {
-    const { 
-        projects, currentProject, activeAsset, rightPanelTab, status, error,
-        setRightPanelTab, setActiveAsset, createProject, loadProject, renameProject, deleteProject,
-        chat, generateImage, analyzeAsset, runNeuralLoop, runViralBreakdown, 
-        runStoryboardEngine, runShortFilmGenerator, deleteAsset, downloadAsset
-    } = useOracle();
-    const { user } = useAuth();
-    const [inputText, setInputText] = useState('');
-    const chatEndRef = useRef(null);
+// --- Components ---
 
+const TypewriterText = ({ text }) => {
+    const [display, setDisplay] = useState('');
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [currentProject?.messages, status.isTyping]);
+        let i = 0;
+        setDisplay('');
+        const interval = setInterval(() => {
+            setDisplay(text.substring(0, i));
+            i++;
+            if (i > text.length) clearInterval(interval);
+        }, 15); // Fast typing
+        return () => clearInterval(interval);
+    }, [text]);
+    return <span>{display}</span>;
+};
 
-    const handleSend = () => {
-        if (!inputText.trim()) return;
-        chat(inputText);
-        setInputText('');
-    };
-
-    const exportStoryboard = () => {
-        if (!currentProject?.assets) return;
-        const scenes = currentProject.assets.filter(a => a.sceneData);
-        if (scenes.length === 0) {
-            alert("No storyboard scenes found. Run STORYBOARD_GEN first.");
-            return;
-        }
-
+const StoryboardCard = ({ scenes, projectTitle }) => {
+    const exportPdf = () => {
         const win = window.open('', '_blank');
         win.document.write(`
             <html>
                 <head>
-                    <title>RE-RENDER STORYBOARD: ${currentProject.title}</title>
+                    <title>STORYBOARD: ${projectTitle}</title>
                     <style>
-                        body { font-family: -apple-system, system-ui; padding: 40px; background: #fff; color: #000; }
-                        .header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 40px; }
+                        body { font-family: -apple-system, sans-serif; padding: 40px; }
                         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-                        .scene { border: 1px solid #eee; padding: 20px; border-radius: 12px; }
-                        img { width: 100%; border-radius: 8px; margin-bottom: 15px; }
-                        .meta { font-family: monospace; font-size: 11px; opacity: 0.6; text-transform: uppercase; }
-                        .desc { margin-top: 10px; font-size: 14px; line-height: 1.5; }
+                        .scene { border: 1px solid #ccc; padding: 20px; border-radius: 12px; }
+                        img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+                        .meta { font-family: monospace; font-size: 11px; opacity: 0.6; }
                         @media print { .no-print { display: none; } }
                     </style>
                 </head>
                 <body>
-                    <div class="header">
-                        <h1>${currentProject.title}</h1>
-                        <p class="meta">PRODUCTION_STORYBOARD // GENERATED_BY_ORACLE_2.0 // ${new Date().toLocaleDateString()}</p>
-                        <button class="no-print" onclick="window.print()" style="padding: 10px 20px; background: #000; color: #fff; border: none; border-radius: 4px; cursor: pointer;">PRINT_OR_SAVE_PDF</button>
-                    </div>
+                    <h2>${projectTitle}</h2>
+                    <button class="no-print" onclick="window.print()">PRINT</button>
                     <div class="grid">
                         ${scenes.map(s => `
                             <div class="scene">
-                                <img src="${s.url}" />
-                                <div class="meta">SCENE_${s.sceneData.id} // CAM: ${s.sceneData.camera} // EMO: ${s.sceneData.emotion}</div>
-                                <div class="desc">${s.sceneData.description}</div>
+                                ${s.imageUrl ? `<img src="${s.imageUrl}" />` : '<div style="height:200px;background:#eee;"></div>'}
+                                <div class="meta">CAM: ${s.camera} // EMO: ${s.emotion}</div>
+                                <p>${s.description}</p>
                             </div>
                         `).join('')}
                     </div>
@@ -76,425 +59,206 @@ const OracleWorkspacePage = () => {
         win.document.close();
     };
 
-    if (!user) {
-        return (
-            <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)' }}>
-                🚨 [AUTH_REQUIRED] PLEASE_LOGIN_TO_ACCESS_WORKSPACE
+    return (
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border)', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 900 }}>🎬 VISUAL STORYBOARD ({scenes.length} SCENES)</div>
+                <button onClick={exportPdf} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Maximize2 size={12} /> EXPORT
+                </button>
             </div>
-        );
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+                {scenes.map((s, i) => (
+                    <div key={i} style={{ backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '0.75rem' }}>
+                        {s.imageUrl ? (
+                            <img src={s.imageUrl} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '4px', marginBottom: '0.5rem' }} />
+                        ) : (
+                            <div style={{ width: '100%', aspectRatio: '16/9', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem', fontSize: '0.6rem' }}>PENDING...</div>
+                        )}
+                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.25rem' }}>{s.camera} // {s.emotion}</div>
+                        <div style={{ fontSize: '0.75rem', lineHeight: 1.4 }}>{s.description}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const AnalysisCard = ({ analysis, imageUrl }) => (
+    <div style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+        <img src={imageUrl} style={{ width: '150px', borderRadius: '8px', objectFit: 'cover' }} />
+        <div>
+            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{analysis.grade} <span style={{ fontSize: '1rem', opacity: 0.5 }}>({analysis.ctr})</span></div>
+            <div style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{analysis.feedback}</div>
+        </div>
+    </div>
+);
+
+// --- Main Page ---
+
+const OracleWorkspacePage = () => {
+    const { 
+        projects, currentProject, status, 
+        createProject, loadProject, renameProject, deleteProject,
+        chat, generateImage, analyzeImage,
+        runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop
+    } = useOracle();
+    const { user } = useAuth();
+    
+    const [inputText, setInputText] = useState('');
+    const [activeForm, setActiveForm] = useState(null); // { type: 'short_film'|'storyboard'|'audit' }
+    const chatEndRef = useRef(null);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [currentProject?.messages, status.isTyping]);
+
+    const handleSend = () => {
+        if (!inputText.trim()) return;
+        if (activeForm) {
+            if (activeForm.type === 'short_film') runShortFilmGenerator(inputText, 'cinematic', '60s');
+            if (activeForm.type === 'storyboard') runStoryboardEngine(inputText);
+            if (activeForm.type === 'audit') runViralBreakdown(inputText);
+            setActiveForm(null);
+        } else {
+            chat(inputText);
+        }
+        setInputText('');
+    };
+
+    if (!user) {
+        return <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)' }}>🚨 LOGIN_REQUIRED</div>;
     }
 
     return (
-        <div style={{ 
-            display: 'flex', 
-            height: '100vh', 
-            backgroundColor: '#0a0a0a', // Explicit deep black/obsidian
-            color: '#ffffff',
-            overflow: 'hidden',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000
-        }}>
-            {/* LEFT SIDEBAR: Project Navigator */}
-            <aside style={{ 
-                width: '280px', 
-                borderRight: '1px solid var(--color-border)',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'rgba(255,255,255,0.01)'
-            }}>
+        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0a0a0a', color: '#fff', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }}>
+            {/* SIDEBAR */}
+            <aside style={{ width: '280px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', backgroundColor: 'rgba(255,255,255,0.02)' }}>
                 <div style={{ padding: '1.5rem' }}>
-                    <button 
-                        onClick={() => createProject()}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            backgroundColor: 'var(--color-text)',
-                            color: 'var(--color-bg)',
-                            border: 'none',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.7rem',
-                            fontWeight: 900,
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <Plus size={14} /> NEW_PROJECT
+                    <button onClick={() => createProject()} style={{ width: '100%', padding: '0.75rem', backgroundColor: '#fff', color: '#000', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
+                        <Plus size={14} /> NEW_CHAT
                     </button>
                 </div>
-
                 <div style={{ flex: 1, overflowY: 'auto', padding: '0 1rem' }}>
                     <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '1rem', paddingLeft: '0.5rem' }}>HISTORY</div>
                     {projects.map(p => (
-                        <div 
-                            key={p.id}
-                            style={{ position: 'relative', group: 'true' }}
-                        >
-                            <div 
-                                onClick={() => loadProject(p)}
-                                style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.75rem',
-                                    marginBottom: '0.25rem',
-                                    transition: 'all 0.2s ease',
-                                    position: 'relative'
-                                }}
-                            >
-                                <MessageSquare size={14} opacity={0.5} />
-                                <span 
-                                    onDoubleClick={() => {
-                                        const newTitle = prompt("RENAME_PROJECT:", p.title);
-                                        if (newTitle) renameProject(p.id, newTitle);
-                                    }}
-                                    style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}
-                                >
-                                    {p.title}
-                                </span>
-                                {currentProject?.id === p.id && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); if (confirm("DELETE_PROJECT?")) deleteProject(p.id); }}
-                                        style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', opacity: 0.4 }}
-                                    >
-                                        <Trash2 size={12} />
-                                    </button>
-                                )}
-                            </div>
+                        <div key={p.id} onClick={() => loadProject(p)} style={{ padding: '0.75rem', borderRadius: '6px', cursor: 'pointer', backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                            <MessageSquare size={14} opacity={0.5} />
+                            <span onDoubleClick={() => { const t = prompt("RENAME:", p.title); if(t) renameProject(p.id, t); }} style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{p.title}</span>
+                            {currentProject?.id === p.id && (
+                                <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', opacity: 0.5 }}><Trash2 size={12} /></button>
+                            )}
                         </div>
                     ))}
                 </div>
             </aside>
 
-            {/* CENTER: Chat Canvas */}
+            {/* CHAT CANVAS */}
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 {!currentProject ? (
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
                         <Zap size={40} color="var(--color-accent)" />
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.5 }}>SELECT_OR_CREATE_PROJECT_TO_BEGIN</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.5 }}>SELECT_OR_CREATE_PROJECT</div>
                     </div>
                 ) : (
                     <>
-                        {/* Messages Area */}
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 10%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             {currentProject.messages.map((m, i) => (
-                                <div key={i} style={{ display: 'flex', gap: '1.5rem', maxWidth: '800px', margin: m.role === 'user' ? '0 0 0 auto' : '0' }}>
+                                <div key={i} style={{ display: 'flex', gap: '1.5rem', width: '100%', maxWidth: '800px', margin: m.role === 'user' ? '0 0 0 auto' : '0 auto' }}>
                                     {m.role === 'assistant' && (
-                                        <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            <Zap size={16} />
-                                        </div>
+                                        <div style={{ width: '32px', height: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={16} /></div>
                                     )}
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.55rem', fontWeight: 900, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5, textAlign: m.role === 'user' ? 'right' : 'left' }}>
-                                            {m.role === 'user' ? 'CLIENT_NODE' : 'ORACLE_CORE'}
-                                        </div>
-                                        <div style={{ 
-                                            backgroundColor: m.role === 'user' ? 'rgba(0,0,0,0.02)' : 'transparent',
-                                            border: m.role === 'user' ? '1px solid var(--color-border)' : 'none',
-                                            padding: m.role === 'user' ? '1rem' : '0',
-                                            fontSize: '0.95rem',
-                                            lineHeight: 1.6,
-                                            whiteSpace: 'pre-wrap'
-                                        }}>
-                                            {m.image && (
-                                                <img 
-                                                    src={m.image} 
-                                                    alt="Upload" 
-                                                    style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--color-border)' }} 
-                                                />
+                                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                                        {m.role === 'user' && <div style={{ fontSize: '0.6rem', fontWeight: 900, marginBottom: '0.5rem', opacity: 0.5, textAlign: 'right' }}>YOU</div>}
+                                        
+                                        <div style={{ backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'transparent', padding: m.role === 'user' ? '1rem' : '0', borderRadius: '12px', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                            {/* TEXT */}
+                                            {m.type === 'text' && (m.role === 'assistant' && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : m.content)}
+                                            
+                                            {/* UPLOADED IMAGE */}
+                                            {m.type === 'image_upload' && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                    <img src={m.image} style={{ maxWidth: '300px', borderRadius: '8px' }} />
+                                                    {m.content}
+                                                </div>
                                             )}
-                                            {m.content}
+
+                                            {/* GENERATED IMAGE */}
+                                            {m.type === 'image' && (
+                                                <div style={{ display: 'inline-block', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                                    <img src={m.url} style={{ maxWidth: '400px', borderRadius: '8px', marginBottom: '1rem' }} />
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button onClick={() => analyzeImage(m.url)} style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-accent)', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>ANALYZE</button>
+                                                        <button onClick={() => runNeuralLoop(m.content)} style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>NEURAL_LOOP</button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* STORYBOARD */}
+                                            {m.type === 'storyboard' && <StoryboardCard scenes={m.content} projectTitle={currentProject.title} />}
+
+                                            {/* ANALYSIS */}
+                                            {m.type === 'analysis' && <AnalysisCard analysis={m.content} imageUrl={m.imageUrl} />}
                                         </div>
                                     </div>
                                 </div>
                             ))}
-                            {status.isTyping && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900 }}>
-                                    <RefreshCw size={12} className="spin" /> SYNTHESIZING...
-                                </div>
-                            )}
+                            {status.isTyping && <div style={{ margin: '0 auto', width: '100%', maxWidth: '800px', display: 'flex', gap: '1.5rem' }}><div style={{ width: '32px', height: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={16} /></div><div style={{ opacity: 0.5, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RefreshCw size={14} className="spin" /> SYNTHESIZING...</div></div>}
                             <div ref={chatEndRef} />
                         </div>
 
-                        {/* Smart Actions & Input */}
-                        <div style={{ padding: '2rem', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-                            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                                <LabPill onClick={() => chat("Generate a high-performance thumbnail idea for this niche.")}>
-                                    <Target size={12} /> IDEA_GEN
-                                </LabPill>
-                                {currentProject.messages.length > 2 && (
-                                    <LabPill onClick={() => generateImage("A high-fidelity thumbnail for " + currentProject.title)}>
-                                        <ImageIcon size={12} /> GENERATE_ASSET
-                                    </LabPill>
+                        {/* INPUT AREA */}
+                        <div style={{ padding: '2rem 10%', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
+                            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                                
+                                {/* Smart Actions */}
+                                {!activeForm && (
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                                        <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><MessageSquare size={12} /> STORYBOARD</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT</LabPill>
+                                    </div>
                                 )}
-                                {currentProject.assets?.length > 0 && (
-                                    <LabPill onClick={() => runNeuralLoop(currentProject.assets[currentProject.assets.length - 1].prompt)}>
-                                        <RefreshCw size={12} /> AUTO_OPTIMIZE (LOOP)
-                                    </LabPill>
-                                )}
-                                <LabPill onClick={() => {
-                                    const idea = prompt("Describe your short film idea (e.g. 'Ronaldo discipline'):");
-                                    if (idea) runShortFilmGenerator(idea);
-                                }}>
-                                    <Zap size={12} /> SHORT_FILM
-                                </LabPill>
-                                <LabPill onClick={() => {
-                                    const script = prompt("Paste your script for visual storyboard:");
-                                    if (script) runStoryboardEngine(script);
-                                }}>
-                                    <MessageSquare size={12} /> STORYBOARD_GEN
-                                </LabPill>
-                                <LabPill onClick={() => {
-                                    const url = prompt("Enter YouTube or Reel URL for audit:");
-                                    if (url) runViralBreakdown(url);
-                                }}>
-                                    <Search size={12} /> VIRAL_AUDIT
-                                </LabPill>
-                            </div>
 
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <button 
-                                        onClick={() => document.getElementById('workspace-upload').click()}
-                                        style={{ background: 'none', border: '1px solid var(--color-border)', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: '8px' }}
-                                    >
-                                        <Plus size={18} />
+                                {/* Inline Form Hint */}
+                                {activeForm && (
+                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--color-accent)' }}>
+                                            {activeForm.type === 'short_film' && "Enter a topic or idea for your short film..."}
+                                            {activeForm.type === 'storyboard' && "Paste your script to generate a visual storyboard..."}
+                                            {activeForm.type === 'audit' && "Paste a URL or topic for viral analysis..."}
+                                        </span>
+                                        <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', backgroundColor: 'rgba(255,255,255,0.02)', padding: '0.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                    <input type="file" id="img-upload" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const r = new FileReader();
+                                            r.onload = () => chat("Analyze this image.", r.result);
+                                            r.readAsDataURL(file);
+                                        }
+                                    }} />
+                                    <button onClick={() => document.getElementById('img-upload').click()} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.5, padding: '0.5rem', cursor: 'pointer' }}>
+                                        <ImageIcon size={20} />
                                     </button>
-                                    <input 
-                                        id="workspace-upload"
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.onload = () => chat("IMAGE_UPLOAD: " + file.name, reader.result);
-                                                reader.readAsDataURL(file);
-                                            }
-                                        }} 
-                                        style={{ display: 'none' }} 
+                                    <textarea 
+                                        value={inputText} onChange={e => setInputText(e.target.value)}
+                                        onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                                        placeholder={activeForm ? "Type here..." : "Message Oracle..."}
+                                        style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
                                     />
+                                    <button onClick={handleSend} style={{ backgroundColor: '#fff', color: '#000', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                        <Send size={16} />
+                                    </button>
                                 </div>
-                                <textarea 
-                                    value={inputText}
-                                    onChange={(e) => setInputText(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                                    placeholder="INPUT_DIRECTIVE..."
-                                    style={{
-                                        flex: 1, backgroundColor: 'transparent', border: '1px solid var(--color-border)',
-                                        padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', outline: 'none', resize: 'none',
-                                        maxHeight: '120px', borderRadius: '8px'
-                                    }}
-                                />
-                                <button 
-                                    onClick={handleSend}
-                                    style={{
-                                        backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none',
-                                        width: '45px', height: '45px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-                                    }}
-                                >
-                                    <Send size={18} />
-                                </button>
                             </div>
                         </div>
                     </>
                 )}
             </main>
-
-            {/* RIGHT PANEL: Dynamic Inspector */}
-            <aside style={{ 
-                width: '400px', 
-                borderLeft: '1px solid var(--color-border)',
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
-                {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
-                    {[
-                        { id: 'sketchboard', icon: <Layout size={14} />, label: 'SKETCH' },
-                        { id: 'analysis', icon: <BarChart3 size={14} />, label: 'NEURAL' },
-                        { id: 'prompt', icon: <Wand2 size={14} />, label: 'LAB' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setRightPanelTab(tab.id)}
-                            style={{
-                                flex: 1, padding: '1rem 0.5rem', background: 'none', border: 'none',
-                                color: rightPanelTab === tab.id ? 'var(--color-accent)' : 'var(--color-text)',
-                                opacity: rightPanelTab === tab.id ? 1 : 0.5,
-                                borderBottom: rightPanelTab === tab.id ? '2px solid var(--color-accent)' : 'none',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer'
-                            }}
-                        >
-                            {tab.icon} {tab.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-                    {rightPanelTab === 'sketchboard' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <button 
-                                onClick={exportStoryboard}
-                                style={{
-                                    width: '100%', padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid var(--color-border)',
-                                    borderRadius: '8px', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', fontWeight: 900, cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem'
-                                }}
-                            >
-                                <Maximize2 size={12} /> EXPORT_STORYBOARD
-                            </button>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-                            {currentProject?.assets?.map(asset => (
-                                <div 
-                                    key={asset.id} 
-                                    onClick={() => setActiveAsset(asset)}
-                                    style={{ 
-                                        borderRadius: '12px', overflow: 'hidden', border: activeAsset?.id === asset.id ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
-                                        cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative'
-                                    }}
-                                >
-                                    <img src={asset.url} alt="Gen" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
-                                    <div style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 900, color: 'var(--color-accent)' }}>
-                                                {asset.sceneData ? `SCENE_${asset.sceneData.id}` : (asset.grade ? `GRADE_${asset.grade}` : 'PENDING_AUDIT')}
-                                            </div>
-                                            {asset.sceneData && (
-                                                <div style={{ fontSize: '0.6rem', opacity: 0.5, maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {asset.sceneData.camera} // {asset.sceneData.emotion}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); downloadAsset(asset); }}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', opacity: 0.5 }}
-                                            >
-                                                <Download size={14} />
-                                            </button>
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); deleteAsset(asset.id); }}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', opacity: 0.5, color: 'var(--color-accent)' }}
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            {status.isGenerating && (
-                                <div style={{ aspectRatio: '16/9', borderRadius: '12px', border: '1px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.01)' }}>
-                                    <RefreshCw className="spin" opacity={0.3} />
-                                </div>
-                            )}
-                            {(!currentProject?.assets?.length && !status.isGenerating) && (
-                                <div style={{ padding: '4rem 0', textAlign: 'center', opacity: 0.3, fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>
-                                    NO_ASSETS_GENERATED_YET
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                    {rightPanelTab === 'analysis' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            {!activeAsset ? (
-                                <div style={{ padding: '4rem 0', textAlign: 'center', opacity: 0.3, fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>SELECT_ASSET_TO_ANALYZE</div>
-                            ) : (
-                                <>
-                                    <img src={activeAsset.url} style={{ width: '100%', borderRadius: '12px', border: '1px solid var(--color-border)' }} />
-                                    {activeAsset.sceneData ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-                                                <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.5rem' }}>SCENE_DESCRIPTION</div>
-                                                <div style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>{activeAsset.sceneData.description}</div>
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <div style={{ padding: '1rem', backgroundColor: 'rgba(0,0,0,0.01)', borderRadius: '8px' }}>
-                                                    <div style={{ fontSize: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5 }}>CAMERA</div>
-                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>{activeAsset.sceneData.camera}</div>
-                                                </div>
-                                                <div style={{ padding: '1rem', backgroundColor: 'rgba(0,0,0,0.01)', borderRadius: '8px' }}>
-                                                    <div style={{ fontSize: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5 }}>EMOTION</div>
-                                                    <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>{activeAsset.sceneData.emotion}</div>
-                                                </div>
-                                            </div>
-                                            <button 
-                                                onClick={() => generateImage(activeAsset.sceneData.imagePrompt)}
-                                                disabled={status.isGenerating}
-                                                style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                                            >
-                                                <RefreshCw size={14} className={status.isGenerating ? 'spin' : ''} /> REGENERATE_FRAME
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <button 
-                                                onClick={() => analyzeAsset(activeAsset)}
-                                                disabled={status.isAnalyzing}
-                                                style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-accent)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer' }}
-                                            >
-                                                {status.isAnalyzing ? 'RUNNING_AUDIT...' : 'RUN_NEURAL_AUDIT'}
-                                            </button>
-                                            {activeAsset.analysis && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                                    <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px' }}>
-                                                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.5rem' }}>CTR_PROJECTION</div>
-                                                        <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--color-accent)' }}>{activeAsset.ctr}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem' }}>VERDICT</div>
-                                                        <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>{activeAsset.analysis.feedback || activeAsset.analysis.verdict}</div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    )}
-
-                    {rightPanelTab === 'prompt' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            {!activeAsset ? (
-                                <div style={{ padding: '4rem 0', textAlign: 'center', opacity: 0.3, fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>SELECT_ASSET_TO_VIEW_METADATA</div>
-                            ) : (
-                                <>
-                                    <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-                                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.75rem' }}>ENGINE_PROMPT</div>
-                                        <div style={{ fontSize: '0.85rem', opacity: 0.8, fontStyle: 'italic' }}>"{activeAsset.prompt}"</div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        <div style={{ fontSize: '0.7rem', fontWeight: 900 }}>METADATA</div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                            <span style={{ opacity: 0.5 }}>ID:</span>
-                                            <span style={{ fontFamily: 'var(--font-mono)' }}>{activeAsset.id.slice(0, 8)}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                            <span style={{ opacity: 0.5 }}>TIMESTAMP:</span>
-                                            <span>{new Date(activeAsset.timestamp).toLocaleTimeString()}</span>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </aside>
             <style>{`
                 .spin { animation: spin 1s linear infinite; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
