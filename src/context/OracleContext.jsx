@@ -86,6 +86,25 @@ export const OracleProvider = ({ children }) => {
         });
     };
 
+    // --- Core AI: Fallback Wrapper ---
+    const fetchWithFallback = async (messages, useImageModel = false) => {
+        const primaryModel = useImageModel ? 'baidu/qianfan-ocr-fast:free' : 'google/gemma-4-31b-it:free';
+        const fallbackModel = 'baidu/qianfan-ocr-fast:free'; // Always fast fallback
+
+        try {
+            // Give primary model a 15-second timeout
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+            const data = await Promise.race([
+                fetchOpenRouter({ model: primaryModel, messages }),
+                timeoutPromise
+            ]);
+            return data;
+        } catch (err) {
+            console.warn(`[ORACLE] ${primaryModel} failed/timed out. Shifting to fallback (${fallbackModel})...`, err);
+            return await fetchOpenRouter({ model: fallbackModel, messages });
+        }
+    };
+
     // --- Core AI: Chat ---
 
     const chat = async (messageText, imageUrl = null) => {
@@ -108,10 +127,7 @@ export const OracleProvider = ({ children }) => {
                 ...updatedMessages.slice(-10).map(m => ({ role: m.role, content: m.content }))
             ];
 
-            const data = await fetchOpenRouter({
-                model: imageUrl ? 'baidu/qianfan-ocr-fast:free' : 'google/gemma-4-31b-it:free',
-                messages: apiMessages
-            });
+            const data = await fetchWithFallback(apiMessages, !!imageUrl);
 
             const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not process that. Try again.';
             const assistantMsg = { role: 'assistant', type: 'text', content: reply };
@@ -196,16 +212,13 @@ export const OracleProvider = ({ children }) => {
         addMessage({ role: 'assistant', type: 'text', content: 'Breaking down your script into visual scenes...' });
 
         try {
-            const breakdownData = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `You are a film director. Break this script into 4-6 visual scenes. Return ONLY valid JSON:
-                    { "scenes": [
-                        { "id": 1, "title": "Scene Title", "description": "What happens", "camera": "Camera angle/movement", "emotion": "Mood", "imagePrompt": "Detailed image generation prompt" }
-                    ]}` },
-                    { role: 'user', content: script }
-                ]
-            });
+            const breakdownData = await fetchWithFallback([
+                { role: 'system', content: `You are a film director. Break this script into 4-6 visual scenes. Return ONLY valid JSON:
+                { "scenes": [
+                    { "id": 1, "title": "Scene Title", "description": "What happens", "camera": "Camera angle/movement", "emotion": "Mood", "imagePrompt": "Detailed image generation prompt" }
+                ]}` },
+                { role: 'user', content: script }
+            ]);
 
             const breakdown = safeParseJSON(breakdownData.choices?.[0]?.message?.content);
             if (!breakdown?.scenes) throw new Error('Could not break down the script. Try a simpler description.');
@@ -214,21 +227,36 @@ export const OracleProvider = ({ children }) => {
 
             setStatus(prev => ({ ...prev, isGenerating: true }));
 
-            const completedScenes = [];
-            for (const scene of breakdown.scenes) {
+            const initialScenes = breakdown.scenes.map(s => ({ ...s, imageUrl: null }));
+            const msgId = crypto.randomUUID();
+            
+            addMessage({ id: msgId, role: 'assistant', type: 'storyboard', content: initialScenes });
+            setStatus(prev => ({ ...prev, isTyping: false, isGenerating: true }));
+
+            // Progressive Generation
+            for (let i = 0; i < initialScenes.length; i++) {
                 try {
                     const response = await fetch('/.netlify/functions/generate-wallpaper', {
                         method: 'POST',
-                        body: JSON.stringify({ prompt: scene.imagePrompt, width: 1024, height: 576 })
+                        body: JSON.stringify({ prompt: initialScenes[i].imagePrompt, width: 1024, height: 576 })
                     });
                     const data = await response.json();
-                    completedScenes.push({ ...scene, imageUrl: data.url || null });
-                } catch {
-                    completedScenes.push({ ...scene, imageUrl: null });
+                    if (data.url) {
+                        initialScenes[i].imageUrl = data.url;
+                        
+                        // Progressive Update
+                        setCurrentProject(prev => {
+                            if (!prev) return prev;
+                            const newMessages = prev.messages.map(m => m.id === msgId ? { ...m, content: [...initialScenes] } : m);
+                            const updated = { ...prev, messages: newMessages };
+                            saveProject(updated);
+                            return updated;
+                        });
+                    }
+                } catch (e) {
+                    console.error("Scene Gen Error", e);
                 }
             }
-
-            addMessage({ role: 'assistant', type: 'storyboard', content: completedScenes });
         } catch (err) {
             addMessage({ role: 'assistant', type: 'text', content: 'Storyboard generation failed: ' + err.message });
         } finally {
@@ -245,13 +273,10 @@ export const OracleProvider = ({ children }) => {
         addMessage({ role: 'assistant', type: 'text', content: `Writing a ${duration} script about "${idea}" in ${style} style...` });
 
         try {
-            const scriptData = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `Write a ${duration} high-impact short film script. Style: ${style}. Keep it simple, cinematic, and visual. Use clear scene descriptions.` },
-                    { role: 'user', content: idea }
-                ]
-            });
+            const scriptData = await fetchWithFallback([
+                { role: 'system', content: `Write a ${duration} high-impact short film script. Style: ${style}. Keep it simple, cinematic, and visual. Use clear scene descriptions.` },
+                { role: 'user', content: idea }
+            ]);
 
             const script = scriptData.choices?.[0]?.message?.content || 'Script generation failed.';
             addMessage({ role: 'assistant', type: 'text', content: script });
@@ -273,19 +298,16 @@ export const OracleProvider = ({ children }) => {
         addMessage({ role: 'user', type: 'text', content: `Analyze this: ${url}` });
 
         try {
-            const data = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: `You are a viral content strategist. Analyze the given URL/content idea. Structure your response as:
+            const data = await fetchWithFallback([
+                { role: 'system', content: `You are a viral content strategist. Analyze the given URL/content idea. Structure your response as:
 
 **The Hook** — Why the first 3 seconds work
 **Content Structure** — Pacing and retention strategy  
 **Thumbnail Strategy** — How to make it click-worthy
 
 Use simple English. Be direct and helpful.` },
-                    { role: 'user', content: `Analyze: ${url}` }
-                ]
-            });
+                { role: 'user', content: `Analyze: ${url}` }
+            ]);
 
             const reply = data.choices?.[0]?.message?.content || 'Analysis failed.';
             addMessage({ role: 'assistant', type: 'text', content: reply });
@@ -324,13 +346,10 @@ Use simple English. Be direct and helpful.` },
             }
 
             // Improve prompt
-            const promptData = await fetchOpenRouter({
-                model: 'google/gemma-4-31b-it:free',
-                messages: [
-                    { role: 'system', content: 'Improve this image prompt based on feedback. Reply with ONLY the improved prompt.' },
-                    { role: 'user', content: `Prompt: ${currentPrompt}\nFeedback: ${lastMsg?.content?.feedback || 'Make it more eye-catching'}` }
-                ]
-            });
+            const promptData = await fetchWithFallback([
+                { role: 'system', content: 'Improve this image prompt based on feedback. Reply with ONLY the improved prompt.' },
+                { role: 'user', content: `Prompt: ${currentPrompt}\nFeedback: ${lastMsg?.content?.feedback || 'Make it more eye-catching'}` }
+            ]);
             currentPrompt = promptData.choices?.[0]?.message?.content || currentPrompt;
         }
     };

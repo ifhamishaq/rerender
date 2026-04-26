@@ -10,6 +10,21 @@ import LabPill from '../components/LabPill';
 
 // --- Components ---
 
+const MarkdownText = ({ text }) => {
+    if (!text) return null;
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return (
+        <span>
+            {parts.map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i} style={{ color: 'var(--color-accent)', fontWeight: 900 }}>{part.slice(2, -2)}</strong>;
+                }
+                return <span key={i}>{part}</span>;
+            })}
+        </span>
+    );
+};
+
 const TypewriterText = ({ text }) => {
     const [display, setDisplay] = useState('');
     useEffect(() => {
@@ -22,7 +37,7 @@ const TypewriterText = ({ text }) => {
         }, 15); // Fast typing
         return () => clearInterval(interval);
     }, [text]);
-    return <span>{display}</span>;
+    return <MarkdownText text={display} />;
 };
 
 const StoryboardCard = ({ scenes, projectTitle }) => {
@@ -107,6 +122,8 @@ const OracleWorkspacePage = () => {
     
     const [inputText, setInputText] = useState('');
     const [activeForm, setActiveForm] = useState(null); // { type: 'short_film'|'storyboard'|'audit' }
+    const [editingProjectId, setEditingProjectId] = useState(null);
+    const [editTitle, setEditTitle] = useState('');
     const chatEndRef = useRef(null);
 
     useEffect(() => {
@@ -131,21 +148,41 @@ const OracleWorkspacePage = () => {
     }
 
     return (
-        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0a0a0a', color: '#fff', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }}>
+        <div style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden' }}>
             {/* SIDEBAR */}
             <aside style={{ width: '280px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', backgroundColor: 'rgba(255,255,255,0.02)' }}>
                 <div style={{ padding: '1.5rem' }}>
-                    <button onClick={() => createProject()} style={{ width: '100%', padding: '0.75rem', backgroundColor: '#fff', color: '#000', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
+                    <button onClick={() => createProject()} style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
                         <Plus size={14} /> NEW_CHAT
                     </button>
                 </div>
-                <div style={{ flex: 1, overflowY: 'auto', padding: '0 1rem' }}>
+                <div data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '0 1rem' }}>
                     <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '1rem', paddingLeft: '0.5rem' }}>HISTORY</div>
                     {projects.map(p => (
-                        <div key={p.id} onClick={() => loadProject(p)} style={{ padding: '0.75rem', borderRadius: '6px', cursor: 'pointer', backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                        <div key={p.id} onClick={() => { if(editingProjectId !== p.id) loadProject(p); }} style={{ padding: '0.75rem', borderRadius: '6px', cursor: 'pointer', backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
                             <MessageSquare size={14} opacity={0.5} />
-                            <span onDoubleClick={() => { const t = prompt("RENAME:", p.title); if(t) renameProject(p.id, t); }} style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{p.title}</span>
-                            {currentProject?.id === p.id && (
+                            {editingProjectId === p.id ? (
+                                <input 
+                                    autoFocus
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    onBlur={() => {
+                                        if (editTitle.trim() && editTitle !== p.title) renameProject(p.id, editTitle.trim());
+                                        setEditingProjectId(null);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            if (editTitle.trim() && editTitle !== p.title) renameProject(p.id, editTitle.trim());
+                                            setEditingProjectId(null);
+                                        }
+                                        if (e.key === 'Escape') setEditingProjectId(null);
+                                    }}
+                                    style={{ flex: 1, background: 'var(--color-bg)', border: '1px solid var(--color-accent)', color: 'var(--color-text)', fontSize: '0.8rem', padding: '0.25rem', borderRadius: '4px', outline: 'none' }}
+                                />
+                            ) : (
+                                <span onDoubleClick={() => { setEditTitle(p.title); setEditingProjectId(p.id); }} style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{p.title}</span>
+                            )}
+                            {currentProject?.id === p.id && editingProjectId !== p.id && (
                                 <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', opacity: 0.5 }}><Trash2 size={12} /></button>
                             )}
                         </div>
@@ -162,18 +199,18 @@ const OracleWorkspacePage = () => {
                     </div>
                 ) : (
                     <>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 10%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '2rem 10%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             {currentProject.messages.map((m, i) => (
                                 <div key={i} style={{ display: 'flex', gap: '1.5rem', width: '100%', maxWidth: '800px', margin: m.role === 'user' ? '0 0 0 auto' : '0 auto' }}>
                                     {m.role === 'assistant' && (
-                                        <div style={{ width: '32px', height: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={16} /></div>
+                                        <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={16} /></div>
                                     )}
                                     <div style={{ flex: 1, overflow: 'hidden' }}>
                                         {m.role === 'user' && <div style={{ fontSize: '0.6rem', fontWeight: 900, marginBottom: '0.5rem', opacity: 0.5, textAlign: 'right' }}>YOU</div>}
                                         
                                         <div style={{ backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'transparent', padding: m.role === 'user' ? '1rem' : '0', borderRadius: '12px', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                                             {/* TEXT */}
-                                            {m.type === 'text' && (m.role === 'assistant' && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : m.content)}
+                                            {m.type === 'text' && (m.role === 'assistant' && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : <MarkdownText text={m.content} />)}
                                             
                                             {/* UPLOADED IMAGE */}
                                             {m.type === 'image_upload' && (
@@ -189,7 +226,7 @@ const OracleWorkspacePage = () => {
                                                     <img src={m.url} style={{ maxWidth: '400px', borderRadius: '8px', marginBottom: '1rem' }} />
                                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         <button onClick={() => analyzeImage(m.url)} style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-accent)', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>ANALYZE</button>
-                                                        <button onClick={() => runNeuralLoop(m.content)} style={{ padding: '0.5rem 1rem', backgroundColor: '#fff', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>NEURAL_LOOP</button>
+                                                        <button onClick={() => runNeuralLoop(m.content)} style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>NEURAL_LOOP</button>
                                                     </div>
                                                 </div>
                                             )}
@@ -203,7 +240,7 @@ const OracleWorkspacePage = () => {
                                     </div>
                                 </div>
                             ))}
-                            {status.isTyping && <div style={{ margin: '0 auto', width: '100%', maxWidth: '800px', display: 'flex', gap: '1.5rem' }}><div style={{ width: '32px', height: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={16} /></div><div style={{ opacity: 0.5, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RefreshCw size={14} className="spin" /> SYNTHESIZING...</div></div>}
+                            {status.isTyping && <div style={{ margin: '0 auto', width: '100%', maxWidth: '800px', display: 'flex', gap: '1.5rem' }}><div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={16} /></div><div style={{ opacity: 0.5, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RefreshCw size={14} className="spin" /> SYNTHESIZING...</div></div>}
                             <div ref={chatEndRef} />
                         </div>
 
@@ -228,7 +265,7 @@ const OracleWorkspacePage = () => {
                                             {activeForm.type === 'storyboard' && "Paste your script to generate a visual storyboard..."}
                                             {activeForm.type === 'audit' && "Paste a URL or topic for viral analysis..."}
                                         </span>
-                                        <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
+                                        <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
                                     </div>
                                 )}
 
@@ -241,16 +278,16 @@ const OracleWorkspacePage = () => {
                                             r.readAsDataURL(file);
                                         }
                                     }} />
-                                    <button onClick={() => document.getElementById('img-upload').click()} style={{ background: 'none', border: 'none', color: '#fff', opacity: 0.5, padding: '0.5rem', cursor: 'pointer' }}>
+                                    <button onClick={() => document.getElementById('img-upload').click()} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, padding: '0.5rem', cursor: 'pointer' }}>
                                         <ImageIcon size={20} />
                                     </button>
                                     <textarea 
                                         value={inputText} onChange={e => setInputText(e.target.value)}
                                         onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                                         placeholder={activeForm ? "Type here..." : "Message Oracle..."}
-                                        style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
+                                        style={{ flex: 1, background: 'none', border: 'none', color: 'var(--color-text)', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
                                     />
-                                    <button onClick={handleSend} style={{ backgroundColor: '#fff', color: '#000', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                    <button onClick={handleSend} style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                         <Send size={16} />
                                     </button>
                                 </div>

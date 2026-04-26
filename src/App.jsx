@@ -165,7 +165,7 @@ const AppContent = () => {
             flexDirection: 'column',
             overflow: isWorkspace ? 'hidden' : 'visible'
         }}>
-            {!isWorkspace && <MacTopBar />}
+            <MacTopBar />
             {!isWorkspace && <Cursor />}
             {!isWorkspace && <ScrollProgress />}
             {!isWorkspace && <Navbar />}
