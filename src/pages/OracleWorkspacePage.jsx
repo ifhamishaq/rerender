@@ -148,6 +148,18 @@ const AnalysisCard = ({ analysis, imageUrl }) => (
     </div>
 );
 
+// --- Sequential Guided Forms ---
+
+const FORMS = {
+    short_film: { steps: ["What is the core premise or idea for the film?", "What is the visual style? (e.g., Cyberpunk, Cinematic)", "What is the target duration? (e.g., 60 seconds)"] },
+    storyboard: { steps: ["Paste your script to generate a visual storyboard..."] },
+    audit: { steps: ["Paste a URL or topic for viral analysis..."] },
+    rewriter: { steps: ["Paste a hook, title, or topic to optimize & rewrite..."] },
+    proposal: { steps: ["What specific service are you proposing?", "What is the client's industry or niche?", "What is your target project rate ($)?"] },
+    calendar: { steps: ["What is your channel's core niche?", "Roughly how many subscribers do you have?", "What is your main goal? (e.g., Growth, Monetization)"] },
+    brief: { steps: ["Paste the messy client message to extract a clean brief..."] }
+};
+
 // --- Main Page ---
 
 const OracleWorkspacePage = () => {
@@ -174,13 +186,26 @@ const OracleWorkspacePage = () => {
         if (!inputText.trim() && !pendingImage) return;
         
         if (activeForm) {
-            if (activeForm.type === 'short_film') runShortFilmGenerator(inputText, 'cinematic', '60s');
-            if (activeForm.type === 'storyboard') runStoryboardEngine(inputText);
-            if (activeForm.type === 'audit') runViralBreakdown(inputText);
-            if (activeForm.type === 'rewriter') runRewriter(inputText);
-            if (activeForm.type === 'proposal') runProposalGenerator(inputText);
-            if (activeForm.type === 'calendar') runContentCalendar(inputText);
-            if (activeForm.type === 'brief') runBriefExtractor(inputText);
+            const currentForm = FORMS[activeForm.type];
+            const newAnswers = [...(activeForm.answers || []), inputText.trim()];
+            
+            if (newAnswers.length < currentForm.steps.length) {
+                setActiveForm({ ...activeForm, stepIndex: (activeForm.stepIndex || 0) + 1, answers: newAnswers });
+                setInputText('');
+                return; // Wait for next step
+            }
+
+            // All steps complete, trigger generation
+            const finalAnswers = newAnswers;
+            
+            if (activeForm.type === 'short_film') runShortFilmGenerator(finalAnswers[0], finalAnswers[1], finalAnswers[2]);
+            if (activeForm.type === 'storyboard') runStoryboardEngine(finalAnswers[0]);
+            if (activeForm.type === 'audit') runViralBreakdown(finalAnswers[0]);
+            if (activeForm.type === 'rewriter') runRewriter(finalAnswers[0]);
+            if (activeForm.type === 'proposal') runProposalGenerator(`Service: ${finalAnswers[0]}, Niche: ${finalAnswers[1]}, Rate: ${finalAnswers[2]}`);
+            if (activeForm.type === 'calendar') runContentCalendar(`Niche: ${finalAnswers[0]}, Size: ${finalAnswers[1]}, Goals: ${finalAnswers[2]}`);
+            if (activeForm.type === 'brief') runBriefExtractor(finalAnswers[0]);
+            
             setActiveForm(null);
         } else {
             chat(inputText || "Analyze this image.", pendingImage);
@@ -310,15 +335,16 @@ const OracleWorkspacePage = () => {
                                 {/* Inline Form Hint */}
                                 {activeForm && (
                                     <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: 'var(--color-accent)' }}>
-                                            {activeForm.type === 'short_film' && "Enter a topic or idea for your short film..."}
-                                            {activeForm.type === 'storyboard' && "Paste your script to generate a visual storyboard..."}
-                                            {activeForm.type === 'audit' && "Paste a URL or topic for viral analysis..."}
-                                            {activeForm.type === 'rewriter' && "Paste a hook, title, or topic to optimize & rewrite..."}
-                                            {activeForm.type === 'proposal' && "Enter: Service Offered | Client Niche | Your Rate..."}
-                                            {activeForm.type === 'calendar' && "Enter: Niche | Channel Size | Your Goals..."}
-                                            {activeForm.type === 'brief' && "Paste the messy client message..."}
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            {FORMS[activeForm.type]?.steps?.length > 1 && (
+                                                <span style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900, fontSize: '0.7rem' }}>
+                                                    STEP {(activeForm.stepIndex || 0) + 1}/{FORMS[activeForm.type].steps.length}
+                                                </span>
+                                            )}
+                                            <span style={{ color: 'var(--color-accent)' }}>
+                                                {FORMS[activeForm.type]?.steps[activeForm.stepIndex || 0]}
+                                            </span>
+                                        </div>
                                         <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
                                     </div>
                                 )}
