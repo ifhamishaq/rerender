@@ -137,7 +137,8 @@ export const OracleProvider = ({ children }) => {
             setCurrentProject(updatedProject);
             await saveProject(updatedProject);
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Oracle is currently experiencing high traffic (Too Many Requests). Please wait a moment and try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
@@ -258,7 +259,8 @@ export const OracleProvider = ({ children }) => {
                 }
             }
         } catch (err) {
-            addMessage({ role: 'assistant', type: 'text', content: 'Storyboard generation failed: ' + err.message });
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Storyboard generation failed due to high traffic or rate limits. Please wait a moment and try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false, isGenerating: false }));
         }
@@ -283,7 +285,8 @@ export const OracleProvider = ({ children }) => {
 
             await runStoryboardEngine(script);
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Script generation failed due to high traffic or rate limits. Please try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
@@ -312,7 +315,8 @@ Use simple English. Be direct and helpful.` },
             const reply = data.choices?.[0]?.message?.content || 'Analysis failed.';
             addMessage({ role: 'assistant', type: 'text', content: reply });
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **NETWORK_CONGESTION:** Analysis failed due to high traffic or rate limits. Please try again.` });
         } finally {
             setStatus(prev => ({ ...prev, isTyping: false }));
         }
