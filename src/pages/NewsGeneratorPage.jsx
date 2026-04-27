@@ -304,7 +304,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
+        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -322,6 +322,30 @@ const NewsGeneratorPage = () => {
                     }
                     .news-sidebar::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: var(--color-accent);
+                    }
+
+                    @media (max-width: 1024px) {
+                        .workspace-container {
+                            flex-direction: column !important;
+                            overflow-y: auto !important;
+                            padding-top: 60px !important;
+                        }
+                        .news-sidebar, .design-sidebar {
+                            width: 100% !important;
+                            height: auto !important;
+                            border: none !important;
+                            padding: 1.5rem !important;
+                        }
+                        .preview-area {
+                            min-height: 100vh !important;
+                            padding: 2rem 1rem !important;
+                        }
+                        .poster-canvas {
+                            width: 100% !important;
+                            max-width: 432px !important;
+                            height: auto !important;
+                            aspect-ratio: auto !important;
+                        }
                     }
                 `}
             </style>
@@ -412,7 +436,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Preview Area */}
-            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
+            <div className="preview-area" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
                 {!selectedNews && !isGenerating ? (
                     <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
@@ -422,6 +446,7 @@ const NewsGeneratorPage = () => {
                         {/* Visual Poster */}
                         <div 
                             ref={posterRef}
+                            className="poster-canvas"
                             style={{ 
                                 ...getCanvasDimensions(),
                                 flexShrink: 0,
@@ -588,7 +613,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div style={{ width: '300px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }} className="custom-scrollbar">
+            <div className="design-sidebar" style={{ width: '300px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }} className="custom-scrollbar">
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
@@ -750,7 +775,7 @@ const NewsGeneratorPage = () => {
                         </div>
 
                         <a 
-                            href="https://www.paypal.com/paypalme/yourhandle/50" 
+                            href="https://www.paypal.com/paypalme/ImadWani96/50" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             style={{ width: '100%', padding: '1rem', backgroundColor: '#0070ba', color: '#FFF', borderRadius: '12px', textAlign: 'center', textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem' }}

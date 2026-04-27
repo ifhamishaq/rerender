@@ -55,26 +55,27 @@ const PricingPage = () => {
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                         gap: '2rem'
                     }}>
-                        {[
                             {
                                 tier: 'STARTER',
                                 price: 'From $150',
-                                desc: 'Perfect for solo creators, one-off projects, and small brand deliverables.',
-                                features: ['1 deliverable', '2 revisions', '5-day turnaround', 'Basic grading/design'],
+                                desc: 'Perfect for solo creators and small deliverables.',
+                                features: ['1 deliverable', '2 revisions', 'Basic design'],
                                 highlight: false
                             },
                             {
-                                tier: 'PROFESSIONAL',
-                                price: 'From $500',
-                                desc: 'For brands that need recurring, high-quality work with a consistent visual identity.',
-                                features: ['3–5 deliverables', 'Unlimited revisions', 'Priority turnaround', 'Full creative direction', 'Source files included'],
-                                highlight: true
+                                tier: 'ORACLE PRO',
+                                price: '$50',
+                                desc: 'LIFETIME access to professional AI Design tools in the Lab.',
+                                features: ['No watermarks forever', '4K High-Res Exports', 'All aspect ratios unlocked', 'Priority AI generation'],
+                                highlight: true,
+                                buttonText: 'GET LIFETIME PRO →',
+                                link: 'https://www.paypal.com/paypalme/ImadWani96/50'
                             },
                             {
                                 tier: 'STUDIO',
                                 price: 'Custom',
-                                desc: 'Full-scale campaigns, web builds, and long-term retainer partnerships.',
-                                features: ['Dedicated studio time', 'Strategy sessions', 'Multi-format delivery', 'NDA available', 'Monthly retainer option'],
+                                desc: 'Full-scale campaigns and long-term partnerships.',
+                                features: ['Dedicated studio time', 'NDA available', 'Monthly retainer option'],
                                 highlight: false
                             }
                         ].map((plan, i) => (
@@ -155,7 +156,9 @@ const PricingPage = () => {
                                     ))}
                                 </ul>
                                 <a
-                                    href="/get-in-touch#inquiry"
+                                    href={plan.link || "/get-in-touch#inquiry"}
+                                    target={plan.link ? "_blank" : "_self"}
+                                    rel={plan.link ? "noopener noreferrer" : ""}
                                     style={{
                                         display: 'block',
                                         textAlign: 'center',
@@ -183,7 +186,7 @@ const PricingPage = () => {
                                         }
                                     }}
                                 >
-                                    START A PROJECT →
+                                    {plan.buttonText || 'START A PROJECT →'}
                                 </a>
                             </motion.div>
                         ))}
