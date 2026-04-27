@@ -423,7 +423,6 @@ const NewsGeneratorPage = () => {
 
                 {/* Scrollable News List */}
                 <div 
-                    onWheel={(e) => e.stopPropagation()}
                     style={{ 
                         flex: 1, 
                         overflowY: 'auto', 
@@ -466,7 +465,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Preview Area */}
-            <div className="preview-area" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1rem 2rem 1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
+            <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1rem 2rem 1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
                 {!selectedNews && !isGenerating ? (
                     <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
@@ -671,7 +670,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div className="design-sidebar" style={{ width: '300px', flexShrink: 0, height: '100vh', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }}>
+            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: '100vh', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
