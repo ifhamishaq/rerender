@@ -547,8 +547,8 @@ const NewsGeneratorPage = () => {
                                     fontWeight: 'normal',
                                     textTransform: 'uppercase', 
                                     textShadow: textGlow ? `0 0 8px ${brandColor}, 0 0 12px ${brandColor}` : (useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)'), 
-                                    paintOrder: 'stroke fill',
-                                    WebkitTextStroke: useStroke ? `3px #000` : 'none',
+                                    paintOrder: useStroke ? 'stroke fill' : 'normal',
+                                    WebkitTextStroke: useStroke ? `3px #000` : '0px transparent',
                                     wordWrap: 'break-word', 
                                     letterSpacing: `${letterSpacing}em` 
                                 }}>
