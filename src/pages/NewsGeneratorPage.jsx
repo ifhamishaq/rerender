@@ -197,7 +197,7 @@ const NewsGeneratorPage = () => {
         try {
             // 1. Ask Oracle to generate a hook and a background image prompt
             const promptData = await fetchOpenRouter({
-                model: 'baidu/qianfan-ocr-fast:free',
+                model: 'nvidia/nemotron-3-super:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
                     1. Write a punchy, viral 5-10 word text hook for an image overlay. No emojis in the TEXT hook. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
@@ -273,7 +273,7 @@ const NewsGeneratorPage = () => {
         setIsGenerating(true);
         try {
             const promptData = await fetchOpenRouter({
-                model: 'baidu/qianfan-ocr-fast:free',
+                model: 'nvidia/nemotron-3-super:free',
                 messages: [
                     { role: 'system', content: `Give me a DIFFERENT viral 5-10 word text hook for this news. Surround 2-3 words with asterisks. Format: TEXT: [hook]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -294,7 +294,7 @@ const NewsGeneratorPage = () => {
         setIsGenerating(true);
         try {
             const promptData = await fetchOpenRouter({
-                model: 'baidu/qianfan-ocr-fast:free',
+                model: 'nvidia/nemotron-3-super:free',
                 messages: [
                     { role: 'system', content: `Write a long, engaging Instagram caption for this news with emojis and hashtags. Format: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -474,7 +474,7 @@ const NewsGeneratorPage = () => {
                         width: '320px', flexShrink: 0, height: 'calc(100vh - 60px)', borderRight: '2px solid var(--color-text)', 
                         display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
                         overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px',
-                        maxHeight: 'calc(100vh - 60px)', scrollbarWidth: 'thin'
+                        scrollbarWidth: 'none', msOverflowStyle: 'none'
                     }}
                 >
                     <header style={{ marginBottom: '2rem' }}>
