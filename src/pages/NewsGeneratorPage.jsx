@@ -58,6 +58,10 @@ const NewsGeneratorPage = () => {
     const [lineHeight, setLineHeight] = useState(0.85);
     const [textGlow, setTextGlow] = useState(false);
     const [view, setView] = useState('news'); // 'news' or 'gallery'
+    const [recentLogos, setRecentLogos] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('news_gen_recent_logos')) || []; }
+        catch (e) { return []; }
+    });
     const [gallery, setGallery] = useState(() => {
         try { return JSON.parse(localStorage.getItem('news_gen_gallery')) || []; }
         catch (e) { return []; }
@@ -97,7 +101,15 @@ const NewsGeneratorPage = () => {
         localStorage.setItem('news_generator_settings', JSON.stringify(settings));
         
         if (logo) {
-            try { localStorage.setItem('news_gen_persistent_logo', logo); }
+            try { 
+                localStorage.setItem('news_gen_persistent_logo', logo); 
+                // Add to recent if not exists
+                if (!recentLogos.includes(logo)) {
+                    const updated = [logo, ...recentLogos].slice(0, 5);
+                    setRecentLogos(updated);
+                    localStorage.setItem('news_gen_recent_logos', JSON.stringify(updated));
+                }
+            }
             catch (e) { console.warn('Logo too large for localStorage'); }
         } else {
             localStorage.removeItem('news_gen_persistent_logo');
@@ -433,7 +445,8 @@ const NewsGeneratorPage = () => {
                     style={{ 
                         width: '320px', flexShrink: 0, height: 'calc(100vh - 60px)', borderRight: '2px solid var(--color-text)', 
                         display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
-                        overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px'
+                        overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px',
+                        maxHeight: 'calc(100vh - 60px)', scrollbarWidth: 'thin'
                     }}
                 >
                     <header style={{ marginBottom: '2rem' }}>
@@ -898,15 +911,41 @@ const NewsGeneratorPage = () => {
                             </div>
 
                             <div style={{ flex: 1, paddingBottom: '3rem' }}>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
-                                    <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
-                                    <label style={{ padding: '0.6rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--color-text)' }}>
-                                        <Camera size={18} />
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '1.2rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
+                                
+                                <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }} />
+                                    <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '45px', height: '45px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                                    <label style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-text)', color: '#000', borderRadius: '4px', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer', textTransform: 'uppercase', textAlign: 'center' }}>
+                                        UPLOAD_LOGO
                                         <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
                                     </label>
+                                    {logo && (
+                                        <button onClick={() => setLogo(null)} style={{ padding: '0.8rem', border: '2px solid var(--color-text)', backgroundColor: 'transparent', color: 'var(--color-text)', borderRadius: '4px', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer' }}>✕</button>
+                                    )}
                                 </div>
+
+                                {recentLogos.length > 1 && (
+                                    <div style={{ marginTop: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.8rem', letterSpacing: '0.1em' }}>RECENT_LOGOS</div>
+                                        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                            {recentLogos.map((lg, i) => (
+                                                <div 
+                                                    key={i} 
+                                                    onClick={() => setLogo(lg)}
+                                                    style={{ 
+                                                        width: '36px', height: '36px', borderRadius: '50%', border: logo === lg ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', 
+                                                        backgroundImage: `url(${lg})`, backgroundSize: 'cover', cursor: 'pointer', transition: 'all 0.2s', opacity: logo === lg ? 1 : 0.4,
+                                                        boxShadow: logo === lg ? `0 0 10px ${brandColor}44` : 'none'
+                                                    }} 
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </>
