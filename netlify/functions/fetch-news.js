@@ -14,7 +14,7 @@ exports.handler = async function (event, context) {
             };
         }
 
-        const url = `https://api.freenewsapi.io/v1/news?lang=en`;
+        const url = `https://api.freenewsapi.io/v1/news?language=en&country=us`;
 
         const response = await fetch(url, {
             headers: {
