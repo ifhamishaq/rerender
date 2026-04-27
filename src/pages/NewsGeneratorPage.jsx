@@ -359,12 +359,19 @@ const NewsGeneratorPage = () => {
                 logging: false,
                 allowTaint: true,
                 onclone: (clonedDoc) => {
+                    // Reset the zoom/scale on the container in the clone
+                    const workspace = clonedDoc.querySelector('.poster-workspace');
+                    if (workspace) {
+                        workspace.style.zoom = "1";
+                        workspace.style.transform = "none";
+                    }
+
                     // Forcefully remove watermark in the capture clone if Pro
                     if (isLifetime) {
                         const wm = clonedDoc.querySelector('[data-watermark="oracle"]');
                         if (wm) wm.style.display = 'none';
                     }
-                    // Fix potential color shifting by ensuring backgrounds are solid
+                    
                     const poster = clonedDoc.querySelector('.poster-canvas');
                     if (poster) {
                         poster.style.boxShadow = 'none';
@@ -404,17 +411,18 @@ const NewsGeneratorPage = () => {
 
     const getFontSize = () => {
         const totalChars = textSegments.reduce((acc, s) => acc + s.text.length, 0);
-        let baseSize = 8.5; // Increased for HD base
-        if (totalChars > 50) baseSize = 4.5;
-        else if (totalChars > 35) baseSize = 5.5;
-        else if (totalChars > 20) baseSize = 7.0;
+        // Base sizes calibrated for 1080px width
+        let baseSize = 130; 
+        if (totalChars > 50) baseSize = 75;
+        else if (totalChars > 35) baseSize = 90;
+        else if (totalChars > 20) baseSize = 110;
         
         // Multiplier based on aspect ratio width
         let widthMultiplier = 1;
-        if (aspectRatio === '9/16') widthMultiplier = 0.8;
-        if (aspectRatio === '16/9') widthMultiplier = 1.4;
+        if (aspectRatio === '9/16') widthMultiplier = 0.85;
+        if (aspectRatio === '16/9') widthMultiplier = 1.3;
         
-        return `${(baseSize + (fontSizeAdjustment / 5)) * widthMultiplier}rem`;
+        return `${(baseSize + (fontSizeAdjustment * 5)) * widthMultiplier}px`;
     };
 
     const handleHeadlineEdit = (val) => {
@@ -633,12 +641,13 @@ const NewsGeneratorPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2.5rem', width: '100%', maxWidth: '800px' }}
                     >
-                        <div style={{ 
-                            border: '2px solid var(--color-text)', 
-                            boxShadow: '20px 20px 0px rgba(0,0,0,0.1)', 
-                            overflow: 'hidden', 
+                        <div className="poster-workspace" style={{ 
+                            position: 'relative', 
+                            padding: '1rem',
+                            backgroundColor: 'rgba(0,0,0,0.1)',
+                            borderRadius: '16px',
                             flexShrink: 0,
-                            zoom: isMobile ? 0.3 : 0.45 // Scale down for preview while keeping HD internal dimensions
+                            zoom: isMobile ? 0.3 : 0.45 
                         }}>
                             <div 
                                 ref={posterRef}
@@ -711,12 +720,15 @@ const NewsGeneratorPage = () => {
                                                 <div style={{ 
                                                     width: '90px', height: '90px', borderRadius: '50%', border: '4px solid #FFF', 
                                                     overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', 
-                                                    boxShadow: '0 0 30px rgba(255,255,255,0.2)',
-                                                    backgroundImage: `url(${logo})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    backgroundRepeat: 'no-repeat'
-                                                }} />
+                                                    boxShadow: '0 0 30px rgba(255,255,255,0.2)', position: 'relative'
+                                                }}>
+                                                    <img 
+                                                        crossOrigin="anonymous" 
+                                                        src={logo} 
+                                                        alt="Logo" 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                    />
+                                                </div>
                                             ) : (
                                                 <div style={{ width: '90px', height: '90px', borderRadius: '50%', backgroundColor: brandColor, border: '4px solid #FFF', flexShrink: 0 }} />
                                             )}
