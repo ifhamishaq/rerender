@@ -711,9 +711,6 @@ const NewsGeneratorPage = () => {
                     </>
                 )}
             </div>
-                    </>
-                )}
-            </div>
         </div>
     );
 };
