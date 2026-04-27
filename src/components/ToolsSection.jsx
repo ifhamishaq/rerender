@@ -186,6 +186,14 @@ const ToolsSection = () => {
                             isHot={true}
                         />
                         <ToolCard
+                            icon="📰"
+                            title="AUTO CONTENT GENERATOR"
+                            desc="Fetches real-time trending news and instantly creates a viral social media poster with AI imagery and bold text overlays."
+                            link="/lab/news-generator"
+                            tag="AI_TOOL"
+                            isHot={true}
+                        />
+                        <ToolCard
                             icon="🖼️"
                             title="THUMBNAIL ANALYSER"
                             desc="Upload any thumbnail — AI Vision scores click-through potential, analyzes composition, and gives 3 improvements."

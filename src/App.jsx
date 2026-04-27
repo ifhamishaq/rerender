@@ -36,6 +36,7 @@ import HexCodeHeroPage from './pages/HexCodeHeroPage';
 import PalettePickerPage from './pages/PalettePickerPage';
 import TypeRacerPage from './pages/TypeRacerPage';
 import ReflexGamePage from './pages/ReflexGamePage';
+import NewsGeneratorPage from './pages/NewsGeneratorPage';
 import ContractPage from './pages/ContractPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
@@ -125,6 +126,7 @@ const AnimatedRoutes = () => {
           <Route path="/lab/ai-agent" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
           <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
+          <Route path="/lab/news-generator" element={<TransitionWipe><NewsGeneratorPage /></TransitionWipe>} />
 
           {/* Tools / Creative Lab Routes */}
           <Route path="/tools/wallpaper-lab" element={<TransitionWipe><WallpaperLab /></TransitionWipe>} />
