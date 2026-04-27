@@ -54,8 +54,6 @@ const NewsGeneratorPage = () => {
             } else if (data.error) {
                 throw new Error(data.error);
             }
-                throw new Error(data.error);
-            }
         } catch (err) {
             console.error("Error fetching news:", err);
             // Fallback mock

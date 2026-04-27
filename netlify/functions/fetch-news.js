@@ -5,11 +5,12 @@ exports.handler = async function (event, context) {
     }
 
     try {
-        const apiKey = process.env.VITE_FREENEWS_API_KEY;
+        const apiKey = process.env.VITE_FREENEWS_API_KEY || process.env.FREENEWS_API_KEY;
 
         if (!apiKey) {
             return {
                 statusCode: 500,
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ error: "Missing FreeNews API Key in Environment Variables" })
             };
         }
@@ -18,16 +19,16 @@ exports.handler = async function (event, context) {
 
         const response = await fetch(url, {
             headers: {
-                'x-api-key': apiKey // Some APIs prefer header, but let's pass it in query too just in case
+                'x-api-key': apiKey
             }
         });
         
-        // If the fetch fails with a non-2xx status code
         if (!response.ok) {
             const errText = await response.text();
             console.error("FreeNewsAPI Error Response:", errText);
             return {
                 statusCode: response.status,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
                 body: JSON.stringify({ error: `API Error: ${response.status} ${response.statusText}`, details: errText })
             };
         }
@@ -46,6 +47,7 @@ exports.handler = async function (event, context) {
         console.error("FreeNewsAPI Proxy Error:", error.message || error);
         return {
             statusCode: 500,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({ error: 'Failed to fetch news from API.', details: error.message || String(error) })
         };
     }
