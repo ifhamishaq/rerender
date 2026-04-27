@@ -436,6 +436,7 @@ const NewsGeneratorPage = () => {
                         style={{ 
                             padding: '0.4rem 0.8rem', borderRadius: '20px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 
                         }}
+                    >
                         <ChevronLeft size={16} /> BACK_TO_TOOLS
                     </button>
                 </div>
