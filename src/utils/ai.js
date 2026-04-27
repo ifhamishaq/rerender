@@ -15,12 +15,12 @@ export const AI_COSTS = {
  * Optimized order: Most reliable/high-RPM models first to minimize retry delays.
  */
 const FREE_MODEL_POOL = [
-    "google/gemini-flash-1.5-8b:free",       // Extremely High RPM, near-instant
+    "google/gemma-4-31b-it:free",            // Verified SOTA
     "nvidia/nemotron-3-super-120b-a12b:free", // Flagship Quality
-    "google/gemma-4-31b-it:free",            // SOTA Instruct
     "openai/gpt-oss-120b:free",              // High Reasoning
     "tencent/hy3-preview:free",
-    "minimax/minimax-m2.5:free"
+    "minimax/minimax-m2.5:free",
+    "mistralai/mistral-7b-instruct:free"     // Stable Fallback
 ];
 
 const getApiKeys = () => {
@@ -82,31 +82,28 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
         // Handle Rate Limiting (429) or Congestion (503)
         if (response.status === 429 || response.status === 503) {
             console.warn(`[AI_ROTATE] Model/Key limited. Switching...`);
-            
-            // Advance indices immediately for the next try
             currentKeyIndex++;
             if (isFreeModel) currentModelIndex++;
 
             if (retries > 0) {
-                // Shortened backoff for free models to improve UX speed
                 const backoff = isFreeModel ? 800 : 2000; 
                 await new Promise(r => setTimeout(r, backoff));
                 return fetchOpenRouter(body, options, retries - 1);
             }
         }
 
-        // Handle Bad Request (400) - Likely invalid Model ID
-        if (response.status === 400) {
+        // Handle Bad Request (400) or Not Found (404) - Likely invalid/deprecated Model ID
+        if (response.status === 400 || response.status === 404) {
             const data = await response.json().catch(() => ({}));
             const msg = data.error?.message || '';
-            if (msg.includes('not a valid model ID') || msg.includes('does not exist')) {
-                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Moving to next...`);
+            if (msg.includes('not a valid model ID') || msg.includes('does not exist') || msg.includes('No endpoints found')) {
+                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Rotating...`);
                 if (isFreeModel && retries > 0) {
                     currentModelIndex++; 
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
-            throw new Error(msg || 'Bad Request');
+            throw new Error(msg || `Error ${response.status}`);
         }
 
         if (!response.ok) {
