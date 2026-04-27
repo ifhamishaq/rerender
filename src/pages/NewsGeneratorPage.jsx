@@ -204,7 +204,24 @@ const NewsGeneratorPage = () => {
                         </button>
                     ))}
                 </div>
-                {loadingNews ? <div style={{ opacity: 0.5 }}>Fetching latest news...</div> : (
+                {loadingNews ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <motion.div 
+                                key={i}
+                                initial={{ opacity: 0.2 }}
+                                animate={{ opacity: [0.2, 0.5, 0.2] }}
+                                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+                                style={{ 
+                                    height: '80px', 
+                                    backgroundColor: 'rgba(255,255,255,0.05)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(255,255,255,0.02)'
+                                }}
+                            />
+                        ))}
+                    </div>
+                ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {news.map((n, i) => (
                             <div key={i} onClick={() => generatePost(n)} style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', cursor: 'pointer', border: '1px solid transparent', transition: 'border 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.border = '1px solid var(--color-accent)'} onMouseLeave={(e) => e.currentTarget.style.border = '1px solid transparent'}>
