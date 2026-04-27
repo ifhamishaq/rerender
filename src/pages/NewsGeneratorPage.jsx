@@ -130,7 +130,7 @@ const NewsGeneratorPage = () => {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, width: 1024, height: 768 }) // 4:3 ratio
+                body: JSON.stringify({ prompt, width: 768, height: 1024 }) // 3:4 ratio
             });
             const data = await response.json();
             const url = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
@@ -229,7 +229,7 @@ const NewsGeneratorPage = () => {
                             style={{ 
                                 width: '100%', 
                                 maxWidth: '500px', 
-                                aspectRatio: '4/3', 
+                                aspectRatio: '3/4', 
                                 backgroundColor: '#111', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden',
