@@ -143,6 +143,44 @@ const NewsGeneratorPage = () => {
         }
     };
 
+    const regenerateHook = async () => {
+        if (!selectedNews) return;
+        setIsGenerating(true);
+        try {
+            const promptData = await fetchOpenRouter({
+                model: 'baidu/qianfan-ocr-fast:free',
+                messages: [
+                    { role: 'system', content: `Give me a DIFFERENT viral 5-10 word text hook for this news. Surround 2-3 words with asterisks. Format: TEXT: [hook]` },
+                    { role: 'user', content: `Headline: ${selectedNews.title}` }
+                ]
+            });
+            const reply = promptData.choices?.[0]?.message?.content || '';
+            const hookMatch = reply.match(/TEXT:\s*(.+)/i);
+            if (hookMatch) {
+                const hook = hookMatch[1].trim().toUpperCase();
+                const words = hook.split(' ');
+                setTextSegments(words.map(w => ({ text: w.replace(/\*/g, ''), highlight: w.includes('*') })));
+            }
+        } catch (err) { console.error(err); } finally { setIsGenerating(false); }
+    };
+
+    const regenerateCaption = async () => {
+        if (!selectedNews) return;
+        setIsGenerating(true);
+        try {
+            const promptData = await fetchOpenRouter({
+                model: 'baidu/qianfan-ocr-fast:free',
+                messages: [
+                    { role: 'system', content: `Write a long, engaging Instagram caption for this news with emojis and hashtags. Format: CAPTION: [caption]` },
+                    { role: 'user', content: `Headline: ${selectedNews.title}` }
+                ]
+            });
+            const reply = promptData.choices?.[0]?.message?.content || '';
+            const captionMatch = reply.match(/CAPTION:\s*([\s\S]+)/i);
+            if (captionMatch) setCaption(captionMatch[1].trim());
+        } catch (err) { console.error(err); } finally { setIsGenerating(false); }
+    };
+
     const handleLogoUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -284,8 +322,14 @@ const NewsGeneratorPage = () => {
                                     <option value="'Bebas Neue', cursive">Bebas Neue</option>
                                 </select>
                                 
-                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                    <ImageIcon size={14} /> REGENERATE_IMG
+                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <ImageIcon size={14} /> IMAGE
+                                </button>
+                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <Type size={14} /> HOOK
+                                </button>
+                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <AlignLeft size={14} /> CAPTION
                                 </button>
                             </div>
                             
