@@ -1185,7 +1185,17 @@ const NewsGeneratorPage = () => {
                             >
                                 SUBMIT_FOR_VERIFICATION
                             </button>
-                            {/* Hidden HD Anchor: For Pixel-Perfect Export */}
+                        </div>
+
+                        <button onClick={() => setShowUnlockModal(false)} style={{ border: 'none', backgroundColor: 'transparent', color: 'var(--color-text)', opacity: 0.5, fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                            MAYBE_LATER
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Hidden HD Anchor: For Pixel-Perfect Export (Always available when image exists) */}
+            {bgImage && (
                 <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
                     <PosterContent 
                         posterRef={hdPosterRef}
@@ -1209,13 +1219,6 @@ const NewsGeneratorPage = () => {
                         isLifetime={isLifetime}
                         isHDEquivalent={true} // Locked at 1.0 scale
                     />
-                </div>
-            </div>
-
-                        <button onClick={() => setShowUnlockModal(false)} style={{ border: 'none', backgroundColor: 'transparent', color: 'var(--color-text)', opacity: 0.5, fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
-                            MAYBE_LATER
-                        </button>
-                    </div>
                 </div>
             )}
         </div>
