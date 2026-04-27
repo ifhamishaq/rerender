@@ -162,9 +162,9 @@ const NewsGeneratorPage = () => {
             return;
         }
 
-        const success = await spendCredits(10, 'NEWS_GENERATOR');
+        const success = await spendCredits(50, 'NEWS_GENERATOR');
         if (!success) {
-            alert('Insufficient credits. This costs 10 credits.');
+            alert('Insufficient credits. This costs 50 credits.');
             return;
         }
 
@@ -316,6 +316,13 @@ const NewsGeneratorPage = () => {
 
     const exportImage = async () => {
         if (!posterRef.current || !bgImage) return;
+        
+        const success = await spendCredits(50, 'NEWS_EXPORT');
+        if (!success) {
+            alert('Insufficient credits to export HD Post. (Requires 50 Credits)');
+            return;
+        }
+
         setIsExporting(true);
         try {
             const canvas = await html2canvas(posterRef.current, { 
@@ -374,63 +381,60 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div className="workspace-container" style={{ display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '60px', minHeight: '100vh', width: '100%', position: 'relative' }}>
+        <div className="workspace-root" style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
                     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@700&display=swap');
 
-                    .news-sidebar::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
-                        width: 6px;
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 4px;
                     }
-                    .news-sidebar::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
-                        background: rgba(255,255,255,0.02);
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: rgba(255,255,255,0.01);
                     }
-                    .news-sidebar::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
                         background: rgba(255,255,255,0.1);
                         border-radius: 10px;
                     }
-                    .news-sidebar::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: var(--color-accent);
                     }
-                    .workspace-container div {
+                    .workspace-root div {
                         scrollbar-width: thin;
                         scrollbar-color: rgba(255,255,255,0.1) transparent;
                     }
-
+                    .spin { animation: spin 1s linear infinite; }
+                    @keyframes spin { 100% { transform: rotate(360deg); } }
+                    
                     @media (max-width: 1024px) {
-                        .workspace-container {
+                        .workspace-main {
                             flex-direction: column !important;
                             overflow-y: auto !important;
-                            padding-top: 60px !important;
-                            position: relative !important;
-                            height: auto !important;
                         }
                         .news-sidebar, .design-sidebar {
                             width: 100% !important;
                             height: auto !important;
                             border: none !important;
-                            padding: 1.5rem !important;
-                        }
-                        .preview-area {
-                            min-height: 80vh !important;
-                            padding: 2rem 1rem !important;
-                        }
-                        .poster-canvas {
-                            width: 100% !important;
-                            max-width: 432px !important;
-                            height: auto !important;
-                            aspect-ratio: auto !important;
-                        }
-                        html, body {
-                            overflow: auto !important;
+                            position: relative !important;
+                            top: 0 !important;
                         }
                     }
                 `}
             </style>
 
-            {/* Sidebar News Feed */}
-            <div className="news-sidebar custom-scrollbar" style={{ width: '280px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)', zIndex: 5, overflowY: 'auto' }}>
+            <div className="workspace-main" style={{ flex: 1, display: 'flex', overflow: 'hidden', paddingTop: '60px' }}>
+                {/* Sidebar News Feed */}
+                <motion.div 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="news-sidebar custom-scrollbar" 
+                    style={{ 
+                        width: '300px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', 
+                        display: 'flex', flexDirection: 'column', padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.01)', 
+                        overflowY: 'auto', zIndex: 10 
+                    }}
+                >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                     <button 
                         onClick={() => navigate('/tools')} 
@@ -546,10 +550,10 @@ const NewsGeneratorPage = () => {
                         )}
                     </div>
                 )}
-            </div>
+                </motion.div>
 
-            {/* Main Preview Area */}
-            <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1.5rem 4rem 1.5rem', backgroundColor: 'var(--color-bg)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(232,17,26,0.03) 0%, transparent 100%)' }}>
+                {/* Main Preview Area */}
+                <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1.5rem', backgroundColor: 'var(--color-bg)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 100%)', position: 'relative' }}>
                 {!selectedNews && !isGenerating ? (
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -705,8 +709,18 @@ const NewsGeneratorPage = () => {
                 )}
             </div>
 
-            {/* Right Sidebar: Design Controls */}
-            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', color: 'var(--color-text)', zIndex: 5 }}>
+                {/* Right Sidebar: Design Controls */}
+                <motion.div 
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="design-sidebar custom-scrollbar" 
+                    style={{ 
+                        width: '320px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', 
+                        backgroundColor: 'rgba(255,255,255,0.01)', padding: '1.5rem', display: 'flex', 
+                        flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', 
+                        color: 'var(--color-text)', zIndex: 10 
+                    }}
+                >
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
@@ -863,6 +877,7 @@ const NewsGeneratorPage = () => {
                         </div>
                     </>
                 )}
+                </motion.div>
             </div>
 
             {/* Monetization Modal */}
