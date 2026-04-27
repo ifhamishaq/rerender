@@ -27,6 +27,7 @@ const NewsGeneratorPage = () => {
     const [brandColor, setBrandColor] = useState('#E8111A');
     const [logo, setLogo] = useState(null);
     const [category, setCategory] = useState('all');
+    const [bgPrompt, setBgPrompt] = useState('abstract modern background');
     
     const posterRef = useRef(null);
 
@@ -102,9 +103,10 @@ const NewsGeneratorPage = () => {
             const captionMatch = reply.match(/CAPTION:\s*([\s\S]+)/i);
 
             const hook = hookMatch ? hookMatch[1].trim().toUpperCase() : article.title.toUpperCase();
-            const bgPrompt = promptMatch ? promptMatch[1].trim() : "abstract modern background";
+            const generatedPrompt = promptMatch ? promptMatch[1].trim() : "abstract modern background";
             const newCaption = captionMatch ? captionMatch[1].trim() : "Read more about this trending news!";
 
+            setBgPrompt(generatedPrompt);
             setCaption(newCaption);
 
             // Split hook into manageable segments for easy highlighting
@@ -115,7 +117,7 @@ const NewsGeneratorPage = () => {
             }));
 
             // 2. Generate Image
-            await generateImage(bgPrompt);
+            await generateImage(generatedPrompt);
 
         } catch (err) {
             console.error(err);
@@ -274,7 +276,7 @@ const NewsGeneratorPage = () => {
                                     <option value="'Bebas Neue', cursive">Bebas Neue</option>
                                 </select>
                                 
-                                <button onClick={() => generateImage("abstract modern background")} disabled={isGenerating} style={{ padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                     <ImageIcon size={14} /> REGENERATE_IMG
                                 </button>
                             </div>
