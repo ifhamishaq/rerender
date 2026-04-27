@@ -126,7 +126,7 @@ const AnimatedRoutes = () => {
           <Route path="/lab/ai-agent" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
           <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
-          <Route path="/lab/news-generator" element={<TransitionWipe><NewsGeneratorPage /></TransitionWipe>} />
+          <Route path="/lab/news-generator" element={<NewsGeneratorPage />} />
 
           {/* Tools / Creative Lab Routes */}
           <Route path="/tools/wallpaper-lab" element={<TransitionWipe><WallpaperLab /></TransitionWipe>} />
