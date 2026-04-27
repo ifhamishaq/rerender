@@ -466,7 +466,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Preview Area */}
-            <div className="preview-area" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
+            <div className="preview-area" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1rem 2rem 1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
                 {!selectedNews && !isGenerating ? (
                     <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
