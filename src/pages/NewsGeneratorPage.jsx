@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, Download, RefreshCw, Type, Image as ImageIcon, AlignLeft } from 'lucide-react';
+import { Camera, Download, RefreshCw, Type, Image as ImageIcon, AlignLeft, ChevronLeft } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
@@ -10,6 +10,7 @@ import { fetchOpenRouter } from '../utils/ai';
 
 const NewsGeneratorPage = () => {
     const { user, spendCredits } = useAuth();
+    const navigate = useNavigate();
     const [news, setNews] = useState([]);
     const [loadingNews, setLoadingNews] = useState(false);
     
@@ -290,9 +291,19 @@ const NewsGeneratorPage = () => {
 
             {/* Sidebar News Feed */}
             <div className="news-sidebar" style={{ width: '280px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)' }}>
-                    <RefreshCw size={18} className={loadingNews ? 'spin' : ''} /> TRENDING NEWS
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                    <button 
+                        onClick={() => navigate('/lab/oracle-workspace')} 
+                        style={{ 
+                            width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)', cursor: 'pointer' 
+                        }}
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--color-text)', margin: 0 }}>
+                        <RefreshCw size={16} className={loadingNews ? 'spin' : ''} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} /> TRENDING NEWS
+                    </h2>
+                </div>
 
                 {/* Categories */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
