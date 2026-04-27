@@ -619,18 +619,24 @@ const NewsGeneratorPage = () => {
                                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
 
                                 <div style={{ position: 'absolute', top: `${textPosition}%`, transform: 'translateY(-50%)', zIndex: 2, padding: '2rem 0', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{ position: 'relative', width: '100%', marginBottom: '1.2rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'relative', width: '100%', marginBottom: '1.5rem', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <div style={{ position: 'absolute', top: '50%', left: '10%', width: '35%', height: '1.5px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'absolute', top: '50%', right: '10%', width: '35%', height: '1.5px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                             {logo ? (
-                                                <div style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid #FFF', overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', boxShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
-                                                    <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                                                </div>
+                                                <div style={{ 
+                                                    width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #FFF', 
+                                                    overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', 
+                                                    boxShadow: '0 0 15px rgba(255,255,255,0.2)',
+                                                    backgroundImage: `url(${logo})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    backgroundRepeat: 'no-repeat'
+                                                }} />
                                             ) : (
-                                                <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
                                             )}
-                                            <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '6px', textShadow: '0 2px 4px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
+                                            <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
                                         </div>
                                     </div>
 
