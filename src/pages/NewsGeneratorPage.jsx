@@ -54,19 +54,33 @@ const NewsGeneratorPage = () => {
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [transactionId, setTransactionId] = useState('');
     const [isLifetime, setIsLifetime] = useState(false); // Should eventually come from DB
+    const [letterSpacing, setLetterSpacing] = useState(-0.02);
+    const [lineHeight, setLineHeight] = useState(0.95);
     
-    // Save settings to localStorage
+    // Save/Load settings to localStorage
     useEffect(() => {
-        try {
-            localStorage.setItem('news_gen_handle', handle);
-            localStorage.setItem('news_gen_brandColor', brandColor);
-            if (logo && logo.startsWith('data:') && logo.length < 2000000) { // Limit to 2MB
-                localStorage.setItem('news_gen_logo', logo);
-            }
-        } catch (e) {
-            console.warn("LocalStorage quota exceeded, branding not saved.");
+        const saved = localStorage.getItem('news_generator_settings');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.handle) setHandle(parsed.handle);
+                if (parsed.brandColor) setBrandColor(parsed.brandColor);
+                if (parsed.logo) setLogo(parsed.logo);
+                if (parsed.fontFamily) setFontFamily(parsed.fontFamily);
+                if (parsed.aspectRatio) setAspectRatio(parsed.aspectRatio);
+                if (parsed.textPosition) setTextPosition(parsed.textPosition);
+                if (parsed.fontSizeAdjustment) setFontSizeAdjustment(parsed.fontSizeAdjustment);
+                if (parsed.useStroke) setUseStroke(parsed.useStroke);
+                if (parsed.letterSpacing !== undefined) setLetterSpacing(parsed.letterSpacing);
+                if (parsed.lineHeight !== undefined) setLineHeight(parsed.lineHeight);
+            } catch (e) { console.error('Load Error:', e); }
         }
-    }, [handle, brandColor, logo]);
+    }, []);
+
+    useEffect(() => {
+        const settings = { handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight };
+        localStorage.setItem('news_generator_settings', JSON.stringify(settings));
+    }, [handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight]);
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(caption);
@@ -510,14 +524,14 @@ const NewsGeneratorPage = () => {
                                     fontSize: getFontSize(), 
                                     width: '100%', 
                                     boxSizing: 'border-box', 
-                                    lineHeight: 0.95, 
+                                    lineHeight: lineHeight, 
                                     fontWeight: 900,
                                     textTransform: 'uppercase', 
                                     textShadow: useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)', 
                                     paintOrder: 'stroke fill',
                                     WebkitTextStroke: useStroke ? `3px #000` : 'none',
                                     wordWrap: 'break-word', 
-                                    letterSpacing: '-0.02em' 
+                                    letterSpacing: `${letterSpacing}em` 
                                 }}>
                                     {textSegments.map((seg, i) => (
                                         <span 
@@ -657,7 +671,17 @@ const NewsGeneratorPage = () => {
                                 <input type="range" min="10" max="90" value={textPosition} onChange={(e) => setTextPosition(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
                             </div>
 
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>LETTER_SPACING ({letterSpacing}em)</div>
+                                    <input type="range" min="-0.1" max="0.2" step="0.01" value={letterSpacing} onChange={(e) => setLetterSpacing(parseFloat(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
 
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>LINE_HEIGHT ({lineHeight})</div>
+                                    <input type="range" min="0.7" max="1.5" step="0.05" value={lineHeight} onChange={(e) => setLineHeight(parseFloat(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                            </div>
 
                             <div>
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>FONT_FAMILY</div>
