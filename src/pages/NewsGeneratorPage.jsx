@@ -400,6 +400,8 @@ const NewsGeneratorPage = () => {
                             flex-direction: column !important;
                             overflow-y: auto !important;
                             padding-top: 60px !important;
+                            position: relative !important;
+                            height: auto !important;
                         }
                         .news-sidebar, .design-sidebar {
                             width: 100% !important;
@@ -408,7 +410,7 @@ const NewsGeneratorPage = () => {
                             padding: 1.5rem !important;
                         }
                         .preview-area {
-                            min-height: 100vh !important;
+                            min-height: 80vh !important;
                             padding: 2rem 1rem !important;
                         }
                         .poster-canvas {
@@ -416,6 +418,9 @@ const NewsGeneratorPage = () => {
                             max-width: 432px !important;
                             height: auto !important;
                             aspect-ratio: auto !important;
+                        }
+                        html, body {
+                            overflow: auto !important;
                         }
                     }
                 `}
@@ -539,14 +544,22 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Preview Area */}
-            <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1rem 2rem 1rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
+            <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1.5rem 4rem 1.5rem', backgroundColor: 'var(--color-bg)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(232,17,26,0.03) 0%, transparent 100%)' }}>
                 {!selectedNews && !isGenerating ? (
-                    <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 0.5, scale: 1 }}
+                        style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.2em', fontSize: '0.8rem' }}
+                    >
                         SELECT_NEWS_ARTICLE_TO_BEGIN
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-                        <div style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.8)', flexShrink: 0 }}>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2.5rem', width: '100%', maxWidth: '800px' }}
+                    >
+                        <div style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)', flexShrink: 0, transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
                             <div 
                                 ref={posterRef}
                                 className="poster-canvas"
@@ -561,7 +574,7 @@ const NewsGeneratorPage = () => {
                                 onMouseLeave={() => setIsDraggingBg(false)}
                                 style={{ 
                                     ...getCanvasDimensions(),
-                                    backgroundColor: '#111', 
+                                    backgroundColor: '#050505', 
                                     overflow: 'hidden',
                                     position: 'relative',
                                     display: 'flex',
@@ -589,7 +602,7 @@ const NewsGeneratorPage = () => {
                                     />
                                 ) : (
                                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
-                                        <RefreshCw className="spin" size={24} opacity={0.5} />
+                                        <RefreshCw className="spin" size={24} color="var(--color-accent)" />
                                     </div>
                                 )}
 
@@ -734,28 +747,28 @@ const NewsGeneratorPage = () => {
                         </div>
 
                         {/* Moved Caption to Middle */}
-                        <div style={{ width: getCanvasDimensions().width, marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>POST_CAPTION</div>
+                        <div style={{ width: '100%', maxWidth: '600px', padding: '2rem', backgroundColor: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.4, fontWeight: 900, color: 'var(--color-text)', letterSpacing: '0.1em' }}>POST_CAPTION</div>
                                 <button 
                                     onClick={copyToClipboard}
                                     style={{ 
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', fontWeight: 800,
+                                        display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.7rem', fontWeight: 900,
                                         color: copied ? 'var(--color-accent)' : 'var(--color-text)', cursor: 'pointer',
-                                        backgroundColor: 'transparent', border: 'none'
+                                        backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem 1rem', borderRadius: '30px', transition: 'all 0.2s'
                                     }}
                                 >
-                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                                    {copied ? <Check size={14} /> : <Copy size={14} />}
                                     {copied ? 'COPIED' : 'COPY'}
                                 </button>
                             </div>
-                            <div style={{ padding: '1rem', backgroundColor: 'var(--color-surface)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.8rem', lineHeight: 1.6, color: 'var(--color-text)', whiteSpace: 'pre-wrap' }}>
+                            <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--color-text)', whiteSpace: 'pre-wrap', fontFamily: 'Inter, sans-serif' }}>
                                 {caption || 'Caption will appear here...'}
                             </div>
                         </div>
                         {/* Spacer for bottom scroll */}
                         <div style={{ height: '4rem' }} />
-                    </div>
+                    </motion.div>
                 )}
             </div>
 
