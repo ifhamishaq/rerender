@@ -131,7 +131,7 @@ const NewsGeneratorPage = () => {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, width: 1080, height: 1440 }) // 3:4 ratio HD
+                body: JSON.stringify({ prompt, width: 1080, height: 1350 }) // 4:5 ratio HD
             });
             const data = await response.json();
             const url = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
@@ -277,7 +277,7 @@ const NewsGeneratorPage = () => {
                             style={{ 
                                 width: '100%', 
                                 maxWidth: '500px', 
-                                aspectRatio: '3/4', 
+                                aspectRatio: '4/5', 
                                 backgroundColor: '#111', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden',
@@ -309,8 +309,9 @@ const NewsGeneratorPage = () => {
 
                             {/* Text Content */}
                             <div style={{ position: 'relative', zIndex: 2, padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.3)', width: '80%', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                                    <div style={{ marginTop: '-15px', backgroundColor: '#000', padding: '0 10px', borderRadius: '20px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ position: 'relative', width: '80%', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                                    <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.2rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
                                         {logo ? (
                                             <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
                                         ) : (
