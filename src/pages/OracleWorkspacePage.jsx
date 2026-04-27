@@ -295,7 +295,7 @@ const OracleWorkspacePage = () => {
                                         
                                         <div style={{ backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'transparent', padding: m.role === 'user' ? '1rem' : '0', borderRadius: '12px', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                                             {/* TEXT */}
-                                            {m.type === 'text' && (m.role === 'assistant' && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : <MarkdownText text={m.content} />)}
+                                            {m.type === 'text' && (m.role === 'assistant' && m.isNew && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : <MarkdownText text={m.content} />)}
                                             
                                             {/* UPLOADED IMAGE */}
                                             {m.type === 'image_upload' && (

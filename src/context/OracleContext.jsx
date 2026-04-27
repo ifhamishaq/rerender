@@ -61,7 +61,13 @@ export const OracleProvider = ({ children }) => {
         await saveProject(newProject);
     };
 
-    const loadProject = (project) => setCurrentProject(project);
+    const loadProject = (project) => {
+        const cleanedProject = {
+            ...project,
+            messages: project.messages.map(m => ({ ...m, isNew: false }))
+        };
+        setCurrentProject(cleanedProject);
+    };
 
     const renameProject = async (projectId, newTitle) => {
         setProjects(prev => prev.map(p => p.id === projectId ? { ...p, title: newTitle } : p));
@@ -80,7 +86,8 @@ export const OracleProvider = ({ children }) => {
     const addMessage = (msg) => {
         setCurrentProject(prev => {
             if (!prev) return prev;
-            const updated = { ...prev, messages: [...prev.messages, msg] };
+            const newMsg = { ...msg, isNew: true };
+            const updated = { ...prev, messages: [...prev.messages, newMsg] };
             saveProject(updated);
             return updated;
         });
