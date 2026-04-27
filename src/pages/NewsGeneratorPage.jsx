@@ -23,13 +23,22 @@ const NewsGeneratorPage = () => {
     // Text Editor State
     const [textSegments, setTextSegments] = useState([]); // [{text: 'MOST GEN Z', highlight: false}, ...]
     const [fontFamily, setFontFamily] = useState('Impact, sans-serif');
-    const [handle, setHandle] = useState('YOUR_HANDLE');
-    const [brandColor, setBrandColor] = useState('#E8111A');
-    const [logo, setLogo] = useState(null);
+    const [handle, setHandle] = useState(() => localStorage.getItem('news_gen_handle') || 'YOUR_HANDLE');
+    const [brandColor, setBrandColor] = useState(() => localStorage.getItem('news_gen_brandColor') || '#E8111A');
+    const [logo, setLogo] = useState(() => localStorage.getItem('news_gen_logo') || null);
     const [category, setCategory] = useState('all');
     const [bgPrompt, setBgPrompt] = useState('abstract modern background');
     const [fontSizeAdjustment, setFontSizeAdjustment] = useState(0);
     const [overlayOpacity, setOverlayOpacity] = useState(0.95);
+    
+    // Save settings to localStorage
+    useEffect(() => {
+        localStorage.setItem('news_gen_handle', handle);
+        localStorage.setItem('news_gen_brandColor', brandColor);
+        if (logo && logo.startsWith('data:')) {
+            localStorage.setItem('news_gen_logo', logo);
+        }
+    }, [handle, brandColor, logo]);
     
     const posterRef = useRef(null);
 
@@ -192,6 +201,15 @@ const NewsGeneratorPage = () => {
         }
     };
 
+    const handleCustomBgUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => setBgImage(event.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
+
     const toggleHighlight = (index) => {
         const newSegments = [...textSegments];
         newSegments[index].highlight = !newSegments[index].highlight;
@@ -239,6 +257,8 @@ const NewsGeneratorPage = () => {
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
+                    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@700&display=swap');
+
                     .news-sidebar::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
                         width: 6px;
                     }
@@ -447,8 +467,12 @@ const NewsGeneratorPage = () => {
                             <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>QUICK_REGENERATE</div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <ImageIcon size={14} /> IMAGE
+                                    <ImageIcon size={14} /> AI_IMAGE
                                 </button>
+                                <label style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <Camera size={14} /> CUSTOM_BG
+                                    <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
+                                </label>
                                 <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
                                     <Type size={14} /> HOOK
                                 </button>
@@ -473,6 +497,7 @@ const NewsGeneratorPage = () => {
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>FONT_FAMILY</div>
                                 <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ width: '100%', padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px' }}>
                                     <option value="Impact, sans-serif">Impact (Bold)</option>
+                                    <option value="'Oswald', sans-serif">Oswald (Bold)</option>
                                     <option value="'Arial Black', sans-serif">Arial Black</option>
                                     <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
                                     <option value="'Bebas Neue', cursive">Bebas Neue</option>
