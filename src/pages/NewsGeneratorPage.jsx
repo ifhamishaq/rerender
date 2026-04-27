@@ -345,7 +345,7 @@ const NewsGeneratorPage = () => {
                                         ) : (
                                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: brandColor }} />
                                         )}
-                                        @{handle}
+                                        <span style={{ fontWeight: 800, lineHeight: 1, display: 'flex', alignItems: 'center' }}>@{handle}</span>
                                     </div>
                                 </div>
 
