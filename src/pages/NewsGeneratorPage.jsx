@@ -356,10 +356,10 @@ const NewsGeneratorPage = () => {
                     <button 
                         onClick={() => navigate('/lab/oracle-workspace')} 
                         style={{ 
-                            width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)', cursor: 'pointer' 
+                            padding: '0.4rem 0.8rem', borderRadius: '20px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 
                         }}
                     >
-                        <ChevronLeft size={18} />
+                        <ChevronLeft size={16} /> BACK_TO_TOOLS
                     </button>
                     <h2 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--color-text)', margin: 0 }}>
                         <RefreshCw size={16} className={loadingNews ? 'spin' : ''} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} /> TRENDING NEWS
@@ -677,18 +677,6 @@ const NewsGeneratorPage = () => {
                                         <option value="german">German</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
-                                    <input type="checkbox" checked={includeHashtags} onChange={(e) => setIncludeHashtags(e.target.checked)} /> HASHTAGS
-                                </label>
-                                <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
-                                    <input type="checkbox" checked={useStroke} onChange={(e) => setUseStroke(e.target.checked)} /> STROKE
-                                </label>
-                                <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
-                                    <input type="checkbox" checked={showWatermark} onChange={(e) => setShowWatermark(e.target.checked)} /> WATERMARK
-                                </label>
                             </div>
 
                             <div>
