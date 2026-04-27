@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Download, RefreshCw, Type, Image as ImageIcon } from 'lucide-react';
+import { Camera, Download, RefreshCw, Type, Image as ImageIcon, AlignLeft } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
