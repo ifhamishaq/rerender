@@ -28,6 +28,8 @@ const NewsGeneratorPage = () => {
     const [logo, setLogo] = useState(null);
     const [category, setCategory] = useState('all');
     const [bgPrompt, setBgPrompt] = useState('abstract modern background');
+    const [fontSizeAdjustment, setFontSizeAdjustment] = useState(0);
+    const [overlayOpacity, setOverlayOpacity] = useState(0.95);
     
     const posterRef = useRef(null);
 
@@ -219,10 +221,17 @@ const NewsGeneratorPage = () => {
 
     const getFontSize = () => {
         const totalChars = textSegments.reduce((acc, s) => acc + s.text.length, 0);
-        if (totalChars > 50) return '1.8rem';
-        if (totalChars > 35) return '2.3rem';
-        if (totalChars > 20) return '2.9rem';
-        return '3.5rem';
+        let baseSize = 3.5;
+        if (totalChars > 50) baseSize = 1.8;
+        else if (totalChars > 35) baseSize = 2.3;
+        else if (totalChars > 20) baseSize = 2.9;
+        
+        return `${baseSize + (fontSizeAdjustment / 10)}rem`;
+    };
+
+    const handleHeadlineEdit = (val) => {
+        const words = val.toUpperCase().split(' ');
+        setTextSegments(words.map(w => ({ text: w, highlight: false })));
     };
 
     return (
@@ -348,6 +357,26 @@ const NewsGeneratorPage = () => {
                                 </button>
                             </div>
                             
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>EDIT_HEADLINE</div>
+                                <textarea 
+                                    value={textSegments.map(s => s.text).join(' ')}
+                                    onChange={(e) => handleHeadlineEdit(e.target.value)}
+                                    style={{ width: '100%', padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', fontSize: '0.8rem', minHeight: '60px', fontFamily: 'inherit' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.3rem' }}>FONT_SIZE</div>
+                                    <input type="range" min="-10" max="20" value={fontSizeAdjustment} onChange={(e) => setFontSizeAdjustment(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.3rem' }}>OVERLAY_DARKNESS</div>
+                                    <input type="range" min="0" max="100" value={overlayOpacity * 100} onChange={(e) => setOverlayOpacity(parseInt(e.target.value) / 100)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                            </div>
+                            
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Your Handle" style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }} />
                                 <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'transparent' }} />
@@ -392,19 +421,19 @@ const NewsGeneratorPage = () => {
                             )}
 
                             {/* Dark Gradient Overlay */}
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', zIndex: 1 }} />
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.8}) 50%, transparent 100%)`, zIndex: 1 }} />
 
                             {/* Text Content */}
                             <div style={{ position: 'relative', zIndex: 2, padding: '3rem 1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ position: 'relative', width: '95%', marginBottom: '1.8rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
-                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.3rem 1rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '4px 12px', height: '28px', boxSizing: 'border-box', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                                         {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
                                         ) : (
                                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: brandColor }} />
                                         )}
-                                        <span style={{ color: '#FFF', fontWeight: 800, lineHeight: 1, display: 'flex', alignItems: 'center' }}>@{handle}</span>
+                                        <span style={{ color: '#FFF', fontWeight: 800, lineHeight: '20px', height: '20px', display: 'block' }}>@{handle}</span>
                                     </div>
                                 </div>
 
