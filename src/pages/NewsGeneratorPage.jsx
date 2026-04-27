@@ -546,52 +546,55 @@ const NewsGeneratorPage = () => {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-                        {/* Visual Poster */}
-                        <div 
-                            ref={posterRef}
-                            className="poster-canvas"
-                            onMouseDown={(e) => {
-                                if (e.target === e.currentTarget || e.target.parentElement === e.currentTarget) {
-                                    setIsDraggingBg(true);
-                                    setDragStart({ x: e.clientX, y: e.clientY });
-                                }
-                            }}
-                            onMouseMove={handleDragMove}
-                            onMouseUp={() => setIsDraggingBg(false)}
-                            onMouseLeave={() => setIsDraggingBg(false)}
-                            style={{ 
-                                ...getCanvasDimensions(),
-                                flexShrink: 0,
-                                backgroundColor: '#111', 
-                                borderRadius: '12px', 
-                                overflow: 'hidden',
-                                position: 'relative',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'flex-start',
-                                boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
-                                cursor: isDraggingBg ? 'grabbing' : 'grab',
-                                userSelect: 'none'
-                            }}
-                        >
-                            {bgImage ? (
-                                <div style={{ 
-                                    position: 'absolute', 
-                                    top: 0, left: 0, 
-                                    width: '100%', height: '100%', 
-                                    backgroundImage: `url(${bgImage})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-                                    zIndex: 0 
-                                }} />
-                            ) : (
-                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
-                                    <RefreshCw className="spin" size={24} opacity={0.5} />
-                                </div>
-                            )}
+                        <div style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.8)', flexShrink: 0 }}>
+                            <div 
+                                ref={posterRef}
+                                className="poster-canvas"
+                                onMouseDown={(e) => {
+                                    if (e.target.tagName !== 'SPAN') {
+                                        setIsDraggingBg(true);
+                                        setDragStart({ x: e.clientX, y: e.clientY });
+                                    }
+                                }}
+                                onMouseMove={handleDragMove}
+                                onMouseUp={() => setIsDraggingBg(false)}
+                                onMouseLeave={() => setIsDraggingBg(false)}
+                                style={{ 
+                                    ...getCanvasDimensions(),
+                                    backgroundColor: '#111', 
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'flex-start',
+                                    cursor: isDraggingBg ? 'grabbing' : 'grab',
+                                    userSelect: 'none'
+                                }}
+                            >
+                                {bgImage ? (
+                                    <img 
+                                        crossOrigin="anonymous"
+                                        src={bgImage} 
+                                        alt="Background" 
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: `${bgPosY}%`, 
+                                            left: `${bgPosX}%`, 
+                                            width: '100%', 
+                                            height: '100%', 
+                                            objectFit: 'cover',
+                                            transform: 'translate(-50%, -50%)',
+                                            zIndex: 0 
+                                        }} 
+                                    />
+                                ) : (
+                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
+                                        <RefreshCw className="spin" size={24} opacity={0.5} />
+                                    </div>
+                                )}
 
-                            {/* Dark Gradient Overlay */}
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
+                                {/* Dark Gradient Overlay */}
+                                <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
 
                             {/* Text Content */}
                             <div style={{ 
