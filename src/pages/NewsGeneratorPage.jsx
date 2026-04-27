@@ -522,19 +522,16 @@ const NewsGeneratorPage = () => {
                                 flexDirection: 'column', 
                                 alignItems: 'center' 
                             }}>
-                                <div style={{ 
-                                    backgroundColor: 'rgba(0,0,0,0.9)', 
-                                    padding: '6px 16px', 
-                                    borderRadius: '30px', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '8px', 
-                                    marginBottom: '2rem',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
-                                }}>
-                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FF0000', boxShadow: '0 0 10px #FF0000' }} />
-                                    <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '0.05em', textTransform: 'lowercase', fontFamily: 'var(--font-mono)' }}>@{handle}</span>
+                                <div style={{ position: 'relative', width: '100%', marginBottom: '2.5rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1.5px', backgroundColor: 'rgba(255,255,255,0.4)', zIndex: 0 }} />
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', height: '32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        {logo ? (
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF', flexShrink: 0, backgroundColor: '#000' }} />
+                                        ) : (
+                                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
+                                        )}
+                                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px', textShadow: '0 2px 4px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
+                                    </div>
                                 </div>
 
                                 <div style={{ 
@@ -665,6 +662,8 @@ const NewsGeneratorPage = () => {
                                 {caption || 'Caption will appear here...'}
                             </div>
                         </div>
+                        {/* Spacer for bottom scroll */}
+                        <div style={{ height: '4rem' }} />
                     </div>
                 )}
             </div>
@@ -786,17 +785,15 @@ const NewsGeneratorPage = () => {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
-                                        <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
-                                        <label style={{ padding: '0.6rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--color-text)' }}>
-                                            <Camera size={18} />
-                                            <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
-                                        </label>
-                                    </div>
+                            <div style={{ flex: 1, paddingBottom: '3rem' }}>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
+                                    <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
+                                    <label style={{ padding: '0.6rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--color-text)' }}>
+                                        <Camera size={18} />
+                                        <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
+                                    </label>
                                 </div>
                             </div>
                         </div>
