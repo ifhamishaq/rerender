@@ -657,27 +657,7 @@ const NewsGeneratorPage = () => {
                                 <input type="range" min="10" max="90" value={textPosition} onChange={(e) => setTextPosition(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>AI_TONE</div>
-                                    <select value={tone} onChange={(e) => setTone(e.target.value)} style={{ width: '100%', padding: '0.5rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.7rem' }}>
-                                        <option value="shocking">Shocking</option>
-                                        <option value="professional">Professional</option>
-                                        <option value="humorous">Humorous</option>
-                                        <option value="sarcastic">Sarcastic</option>
-                                    </select>
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>LANGUAGE</div>
-                                    <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '0.5rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.7rem' }}>
-                                        <option value="english">English</option>
-                                        <option value="hindi">Hindi</option>
-                                        <option value="spanish">Spanish</option>
-                                        <option value="arabic">Arabic</option>
-                                        <option value="german">German</option>
-                                    </select>
-                                </div>
-                            </div>
+
 
                             <div>
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>FONT_FAMILY</div>
