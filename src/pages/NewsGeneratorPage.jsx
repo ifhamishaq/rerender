@@ -54,7 +54,6 @@ const NewsGeneratorPage = () => {
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [transactionId, setTransactionId] = useState('');
     const [isLifetime, setIsLifetime] = useState(false); // Should eventually come from DB
-    const [fontFamily, setFontFamily] = useState('Impact, sans-serif');
     const [letterSpacing, setLetterSpacing] = useState(-0.05);
     const [lineHeight, setLineHeight] = useState(0.85);
     const [textGlow, setTextGlow] = useState(false);
