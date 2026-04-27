@@ -82,7 +82,7 @@ const NewsGeneratorPage = () => {
                 model: 'baidu/qianfan-ocr-fast:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
-                    1. Write a 10-15 word highly engaging text hook for an image overlay. Format it like this: TEXT: [hook]
+                    1. Write a very short, punchy 3-7 word highly engaging text hook for an image overlay. Format it like this: TEXT: [hook]
                     2. Write a 5-10 word visual prompt for an AI image generator to create the background. Format it like this: PROMPT: [visual prompt]
                     3. Write a caption with hashtags. Format it like this: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${article.title}\nDescription: ${article.description}` }
@@ -122,7 +122,7 @@ const NewsGeneratorPage = () => {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, width: 1024, height: 1280 }) // Portrait ratio
+                body: JSON.stringify({ prompt, width: 1024, height: 768 }) // 4:3 ratio
             });
             const data = await response.json();
             const url = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
@@ -201,7 +201,7 @@ const NewsGeneratorPage = () => {
                             style={{ 
                                 width: '100%', 
                                 maxWidth: '500px', 
-                                aspectRatio: '4/5', 
+                                aspectRatio: '4/3', 
                                 backgroundColor: '#111', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden',
@@ -221,7 +221,7 @@ const NewsGeneratorPage = () => {
                             )}
 
                             {/* Dark Gradient Overlay */}
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 40%, transparent 100%)', zIndex: 1 }} />
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', zIndex: 1 }} />
 
                             {/* Text Content */}
                             <div style={{ position: 'relative', zIndex: 2, padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -232,7 +232,7 @@ const NewsGeneratorPage = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ fontFamily, fontSize: '2.5rem', lineHeight: 1.1, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
+                                <div style={{ fontFamily, fontSize: '2.2rem', lineHeight: 1.1, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
                                     {textSegments.map((seg, i) => (
                                         <span 
                                             key={i} 
