@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Camera, Download, RefreshCw, Type, Image as ImageIcon, AlignLeft, ChevronLeft } from 'lucide-react';
