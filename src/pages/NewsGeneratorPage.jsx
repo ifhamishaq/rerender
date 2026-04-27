@@ -64,6 +64,7 @@ const NewsGeneratorPage = () => {
     });
     const [bgPosX, setBgPosX] = useState(50);
     const [bgPosY, setBgPosY] = useState(50);
+    const [bgZoom, setBgZoom] = useState(100);
     const [isDraggingBg, setIsDraggingBg] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     
@@ -600,8 +601,9 @@ const NewsGeneratorPage = () => {
                                             width: '100%', 
                                             height: '100%', 
                                             objectFit: 'cover',
-                                            transform: 'translate(-50%, -50%)',
-                                            zIndex: 0 
+                                            transform: `translate(-50%, -50%) scale(${bgZoom / 100})`,
+                                            zIndex: 0,
+                                            transition: isDraggingBg ? 'none' : 'transform 0.1s ease-out'
                                         }} 
                                     />
                                 ) : (
@@ -742,20 +744,36 @@ const NewsGeneratorPage = () => {
                             </div>
 
                             <div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <Move size={12} /> TEXT_POSITION
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <Move size={12} /> IMAGE_CONTROLS
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            setBgPosX(50);
+                                            setBgPosY(50);
+                                            setBgZoom(100);
+                                        }}
+                                        style={{ fontSize: '0.6rem', padding: '0.2rem 0.6rem', borderRadius: '4px', border: '1px solid var(--color-border)', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', cursor: 'pointer', fontWeight: 900 }}
+                                    >
+                                        RESET_DEFAULT
+                                    </button>
                                 </div>
-                                <input type="range" min="10" max="90" value={textPosition} onChange={(e) => setTextPosition(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>IMAGE_X ({bgPosX}%)</div>
-                                    <input type="range" min="0" max="100" value={bgPosX} onChange={(e) => setBgPosX(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>IMAGE_Y ({bgPosY}%)</div>
-                                    <input type="range" min="0" max="100" value={bgPosY} onChange={(e) => setBgPosY(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.4rem' }}>POS_X ({bgPosX}%)</div>
+                                            <input type="range" min="0" max="100" value={bgPosX} onChange={(e) => setBgPosX(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.4rem' }}>POS_Y ({bgPosY}%)</div>
+                                            <input type="range" min="0" max="100" value={bgPosY} onChange={(e) => setBgPosY(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.4rem' }}>ZOOM ({bgZoom}%)</div>
+                                        <input type="range" min="50" max="300" value={bgZoom} onChange={(e) => setBgZoom(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                    </div>
                                 </div>
                             </div>
 
