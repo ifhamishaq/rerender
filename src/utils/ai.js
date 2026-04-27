@@ -12,7 +12,7 @@ export const AI_COSTS = {
 
 // High-performance free models on OpenRouter (vetted for April 2026)
 const FREE_MODEL_POOL = [
-    "nvidia/nemotron-3-super:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
     "google/gemma-4-31b:free",
     "openai/gpt-oss-120b:free",
     "tencent/hy3-preview:free",

@@ -197,7 +197,7 @@ const NewsGeneratorPage = () => {
         try {
             // 1. Ask Oracle to generate a hook and a background image prompt
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super:free',
+                model: 'nvidia/nemotron-3-super-120b-a12b:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
                     1. Write a punchy, viral 5-10 word text hook for an image overlay. No emojis in the TEXT hook. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
@@ -273,7 +273,7 @@ const NewsGeneratorPage = () => {
         setIsGenerating(true);
         try {
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super:free',
+                model: 'nvidia/nemotron-3-super-120b-a12b:free',
                 messages: [
                     { role: 'system', content: `Give me a DIFFERENT viral 5-10 word text hook for this news. Surround 2-3 words with asterisks. Format: TEXT: [hook]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -294,7 +294,7 @@ const NewsGeneratorPage = () => {
         setIsGenerating(true);
         try {
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super:free',
+                model: 'nvidia/nemotron-3-super-120b-a12b:free',
                 messages: [
                     { role: 'system', content: `Write a long, engaging Instagram caption for this news with emojis and hashtags. Format: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -612,9 +612,11 @@ const NewsGeneratorPage = () => {
                 {/* Main Preview Area */}
                 <div className="preview-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '4rem 2rem', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
                     
-                    <header style={{ width: '100%', maxWidth: '1000px', marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-text)', paddingBottom: '1rem' }}>
-                        <div>
-                            <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>POST_STUDIO</h1>
+                    <header style={{ width: '100%', maxWidth: '1000px', marginBottom: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#FF4F00', letterSpacing: '0.4em', textTransform: 'uppercase' }}>DREAM_OF_NETHERLANDS</div>
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '4px solid var(--color-text)', paddingBottom: '1rem' }}>
+                            <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.06em', lineHeight: 0.9 }}>POST_STUDIO</h1>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.3 }}>VOL. 26.04</div>
                         </div>
                     </header>
                 {!selectedNews && !isGenerating ? (
@@ -741,28 +743,43 @@ const NewsGeneratorPage = () => {
                             </div>
                         </div>
 
-                        <div style={{ width: getCanvasDimensions().width, marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
-                                    <ImageIcon size={14} /> AI_IMAGE
-                                </button>
-                                <label style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
-                                    <Camera size={14} /> CUSTOM_BG
+                        <div style={{ width: getCanvasDimensions().width, marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <motion.button 
+                                    whileHover={{ scale: 1.02, backgroundColor: '#FF4F00', color: '#FFF' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => generateImage(bgPrompt)} 
+                                    disabled={isGenerating} 
+                                    style={{ padding: '1.2rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}
+                                >
+                                    <ImageIcon size={18} /> AI_IMAGE
+                                </motion.button>
+                                <motion.label 
+                                    whileHover={{ scale: 1.02, border: '1px solid #FF4F00' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    style={{ padding: '1.2rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}
+                                >
+                                    <Camera size={18} /> CUSTOM_BG
                                     <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
-                                </label>
+                                </motion.label>
                             </div>
                             
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--color-surface)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}>
                                 <input 
                                     type="text" 
                                     placeholder="Paste Image URL..." 
                                     value={bgUrl}
                                     onChange={(e) => setBgUrl(e.target.value)}
                                     onBlur={() => bgUrl && setBgImage(bgUrl)}
-                                    style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '0.7rem' }}
+                                    style={{ flex: 1, padding: '0.8rem', backgroundColor: 'transparent', color: 'var(--color-text)', border: 'none', outline: 'none', fontSize: '0.8rem', fontWeight: 500 }}
                                 />
-                                <button onClick={regenerateHook} disabled={isGenerating} style={{ padding: '0.6rem 1rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
-                                    <Type size={14} /> HOOK
+                                <div style={{ width: '1px', backgroundColor: 'var(--color-border)', margin: '0.5rem 0' }} />
+                                <button 
+                                    onClick={regenerateHook} 
+                                    disabled={isGenerating} 
+                                    style={{ padding: '0.8rem 1.5rem', backgroundColor: 'transparent', color: '#FF4F00', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}
+                                >
+                                    <Type size={16} /> REGENERATE_HOOK
                                 </button>
                             </div>
                         </div>
