@@ -96,9 +96,11 @@ const NewsGeneratorPage = () => {
         const settings = { handle, brandColor, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow };
         localStorage.setItem('news_generator_settings', JSON.stringify(settings));
         
-        if (logo && logo.startsWith('data:')) {
+        if (logo) {
             try { localStorage.setItem('news_gen_persistent_logo', logo); }
             catch (e) { console.warn('Logo too large for localStorage'); }
+        } else {
+            localStorage.removeItem('news_gen_persistent_logo');
         }
     }, [handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow]);
 
@@ -422,7 +424,6 @@ const NewsGeneratorPage = () => {
                     }
                 `}
             </style>
-
             <div className="workspace-main" style={{ flex: 1, display: 'flex', overflow: 'hidden', paddingTop: '60px' }}>
                 {/* Sidebar News Feed */}
                 <motion.div 
@@ -430,35 +431,39 @@ const NewsGeneratorPage = () => {
                     animate={{ x: 0, opacity: 1 }}
                     className="news-sidebar custom-scrollbar" 
                     style={{ 
-                        width: '300px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', 
-                        display: 'flex', flexDirection: 'column', padding: '1.5rem', backgroundColor: 'rgba(255,255,255,0.01)', 
+                        width: '320px', flexShrink: 0, height: '100%', borderRight: '2px solid var(--color-text)', 
+                        display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
                         overflowY: 'auto', zIndex: 10 
                     }}
                 >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
-                    <button 
-                        onClick={() => navigate('/tools')} 
-                        style={{ 
-                            padding: '0.4rem 0.8rem', borderRadius: '20px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 
-                        }}
-                    >
-                        <ChevronLeft size={16} /> BACK_TO_TOOLS
-                    </button>
-                </div>
+                    <header style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em', margin: 0, opacity: 0.8 }}>NEWS_FEED</h2>
+                    </header>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2rem' }}>
+                        <button 
+                            onClick={() => navigate('/tools')} 
+                            style={{ 
+                                padding: '0.6rem 1rem', borderRadius: '4px', backgroundColor: 'transparent', border: '2px solid var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase'
+                            }}
+                        >
+                            <ChevronLeft size={16} /> BACK
+                        </button>
+                    </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid var(--color-text)' }}>
                     <button 
                         onClick={() => setView('news')}
-                        style={{ padding: '0.5rem 0', flex: 1, border: 'none', background: 'none', color: view === 'news' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.7rem', borderBottom: view === 'news' ? '2px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'news' ? 1 : 0.5 }}
+                        style={{ padding: '0.75rem 0', flex: 1, border: 'none', background: 'none', color: view === 'news' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.75rem', borderBottom: view === 'news' ? '4px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'news' ? 1 : 0.4, transition: 'all 0.2s' }}
                     >
-                        TRENDING_NEWS
+                        NEWS
                     </button>
                     <button 
                         onClick={() => setView('gallery')}
-                        style={{ padding: '0.5rem 0', flex: 1, border: 'none', background: 'none', color: view === 'gallery' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.7rem', borderBottom: view === 'gallery' ? '2px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'gallery' ? 1 : 0.5 }}
+                        style={{ padding: '0.75rem 0', flex: 1, border: 'none', background: 'none', color: view === 'gallery' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.75rem', borderBottom: view === 'gallery' ? '4px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'gallery' ? 1 : 0.4, transition: 'all 0.2s' }}
                     >
-                        MY_GALLERY ({gallery.length})
+                        GALLERY ({gallery.length})
                     </button>
                 </div>
 
@@ -553,7 +558,13 @@ const NewsGeneratorPage = () => {
                 </motion.div>
 
                 {/* Main Preview Area */}
-                <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 1.5rem', backgroundColor: 'var(--color-bg)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 100%)', position: 'relative' }}>
+                <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 2rem', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
+                    
+                    <header style={{ width: '100%', maxWidth: '1000px', marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-text)', paddingBottom: '1rem' }}>
+                        <div>
+                            <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>POST_STUDIO</h1>
+                        </div>
+                    </header>
                 {!selectedNews && !isGenerating ? (
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -568,7 +579,7 @@ const NewsGeneratorPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2.5rem', width: '100%', maxWidth: '800px' }}
                     >
-                        <div style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                        <div style={{ border: '2px solid var(--color-text)', boxShadow: '20px 20px 0px rgba(0,0,0,0.1)', overflow: 'hidden', flexShrink: 0 }}>
                             <div 
                                 ref={posterRef}
                                 className="poster-canvas"
@@ -721,13 +732,15 @@ const NewsGeneratorPage = () => {
                     animate={{ x: 0, opacity: 1 }}
                     className="design-sidebar custom-scrollbar" 
                     style={{ 
-                        width: '320px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', 
-                        backgroundColor: 'rgba(255,255,255,0.01)', padding: '1.5rem', display: 'flex', 
-                        flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', 
+                        width: '350px', flexShrink: 0, height: '100%', borderLeft: '2px solid var(--color-text)', 
+                        backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', 
+                        flexDirection: 'column', gap: '2rem', overflowY: 'auto', overflowX: 'hidden', 
                         color: 'var(--color-text)', zIndex: 10 
                     }}
                 >
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
+                    <header style={{ marginBottom: '1.5rem' }}>
+                        <h2 style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em', margin: 0, opacity: 0.8 }}>DIRECTOR_KIT</h2>
+                    </header>
                 
                 {selectedNews && (
                     <>
