@@ -44,11 +44,13 @@ const NewsGeneratorPage = () => {
                 return;
             }
 
-            // Attempt to fetch from real API
-            const res = await fetch(`https://api.freenewsapi.com/v1/top-headlines?lang=en&key=${apiKey}`);
+            // Attempt to fetch from our serverless proxy
+            const res = await fetch('/.netlify/functions/fetch-news');
             const data = await res.json();
             if (data.articles) {
                 setNews(data.articles.slice(0, 10));
+            } else if (data.error) {
+                throw new Error(data.error);
             }
         } catch (err) {
             console.error("Error fetching news:", err);
