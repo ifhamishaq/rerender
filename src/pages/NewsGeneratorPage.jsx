@@ -383,7 +383,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div className="workspace-root" style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden' }}>
+        <div className="workspace-root" style={{ minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflowX: 'hidden' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -412,7 +412,6 @@ const NewsGeneratorPage = () => {
                     @media (max-width: 1024px) {
                         .workspace-main {
                             flex-direction: column !important;
-                            overflow-y: auto !important;
                         }
                         .news-sidebar, .design-sidebar {
                             width: 100% !important;
@@ -424,16 +423,17 @@ const NewsGeneratorPage = () => {
                     }
                 `}
             </style>
-            <div className="workspace-main" style={{ flex: 1, display: 'flex', overflow: 'hidden', paddingTop: '60px' }}>
+
+            <div className="workspace-main" style={{ flex: 1, display: 'flex', overflow: 'visible', paddingTop: '60px' }}>
                 {/* Sidebar News Feed */}
                 <motion.div 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     className="news-sidebar custom-scrollbar" 
                     style={{ 
-                        width: '320px', flexShrink: 0, height: '100%', borderRight: '2px solid var(--color-text)', 
+                        width: '320px', flexShrink: 0, height: 'calc(100vh - 60px)', borderRight: '2px solid var(--color-text)', 
                         display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
-                        overflowY: 'auto', zIndex: 10 
+                        overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px'
                     }}
                 >
                     <header style={{ marginBottom: '2rem' }}>
@@ -558,7 +558,7 @@ const NewsGeneratorPage = () => {
                 </motion.div>
 
                 {/* Main Preview Area */}
-                <div className="preview-area custom-scrollbar" style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', padding: '4rem 2rem', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
+                <div className="preview-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '4rem 2rem', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
                     
                     <header style={{ width: '100%', maxWidth: '1000px', marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-text)', paddingBottom: '1rem' }}>
                         <div>
@@ -730,12 +730,11 @@ const NewsGeneratorPage = () => {
                 <motion.div 
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="design-sidebar custom-scrollbar" 
+                    className="design-sidebar" 
                     style={{ 
-                        width: '350px', flexShrink: 0, height: '100%', borderLeft: '2px solid var(--color-text)', 
+                        width: '350px', flexShrink: 0, borderLeft: '2px solid var(--color-text)', 
                         backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', 
-                        flexDirection: 'column', gap: '2rem', overflowY: 'auto', overflowX: 'hidden', 
-                        color: 'var(--color-text)', zIndex: 10 
+                        flexDirection: 'column', gap: '2rem', color: 'var(--color-text)', zIndex: 10 
                     }}
                 >
                     <header style={{ marginBottom: '1.5rem' }}>
