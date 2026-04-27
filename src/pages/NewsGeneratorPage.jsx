@@ -23,6 +23,9 @@ const NewsGeneratorPage = () => {
     // Text Editor State
     const [textSegments, setTextSegments] = useState([]); // [{text: 'MOST GEN Z', highlight: false}, ...]
     const [fontFamily, setFontFamily] = useState('Impact, sans-serif');
+    const [handle, setHandle] = useState('YOUR_HANDLE');
+    const [brandColor, setBrandColor] = useState('#E8111A');
+    const [logo, setLogo] = useState(null);
     
     const posterRef = useRef(null);
 
@@ -84,7 +87,7 @@ const NewsGeneratorPage = () => {
                 model: 'baidu/qianfan-ocr-fast:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
-                    1. Write a very short, punchy 3-7 word highly engaging text hook for an image overlay. Format it like this: TEXT: [hook]
+                    1. Write a very short, punchy 3-7 word highly engaging text hook for an image overlay. Surround the 1 or 2 most important words with asterisks to highlight them (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
                     2. Write a 5-10 word visual prompt for an AI image generator to create the background. Format it like this: PROMPT: [visual prompt]
                     3. Write a caption with hashtags. Format it like this: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${article.title}\nDescription: ${article.description}` }
@@ -105,7 +108,10 @@ const NewsGeneratorPage = () => {
 
             // Split hook into manageable segments for easy highlighting
             const words = hook.split(' ');
-            setTextSegments(words.map(w => ({ text: w, highlight: false })));
+            setTextSegments(words.map(w => {
+                const isHighlighted = w.includes('*');
+                return { text: w.replace(/\*/g, ''), highlight: isHighlighted };
+            }));
 
             // 2. Generate Image
             await generateImage(bgPrompt);
@@ -131,6 +137,15 @@ const NewsGeneratorPage = () => {
             setBgImage(url);
         } catch (err) {
             console.error("Image gen error", err);
+        }
+    };
+
+    const handleLogoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => setLogo(ev.target.result);
+            reader.readAsDataURL(file);
         }
     };
 
@@ -184,17 +199,28 @@ const NewsGeneratorPage = () => {
                 ) : (
                     <>
                         {/* Editor Controls */}
-                        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                            <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
-                                <option value="Impact, sans-serif">Impact (Bold)</option>
-                                <option value="'Arial Black', sans-serif">Arial Black</option>
-                                <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
-                                <option value="'Bebas Neue', cursive">Bebas Neue</option>
-                            </select>
+                        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
+                                    <option value="Impact, sans-serif">Impact (Bold)</option>
+                                    <option value="'Arial Black', sans-serif">Arial Black</option>
+                                    <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                                    <option value="'Bebas Neue', cursive">Bebas Neue</option>
+                                </select>
+                                
+                                <button onClick={() => generateImage("abstract modern background")} disabled={isGenerating} style={{ padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <ImageIcon size={14} /> REGENERATE_IMG
+                                </button>
+                            </div>
                             
-                            <button onClick={() => generateImage("abstract modern background")} disabled={isGenerating} style={{ padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                <ImageIcon size={14} /> REGENERATE_IMG
-                            </button>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Your Handle" style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }} />
+                                <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'transparent' }} />
+                                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                    <Camera size={14} style={{ marginRight: '0.5rem' }} /> LOGO
+                                    <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
+                                </label>
+                            </div>
                         </div>
 
                         {/* Visual Poster */}
@@ -229,8 +255,12 @@ const NewsGeneratorPage = () => {
                             <div style={{ position: 'relative', zIndex: 2, padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.3)', width: '80%', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
                                     <div style={{ marginTop: '-15px', backgroundColor: '#000', padding: '0 10px', borderRadius: '20px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--color-accent)' }} />
-                                        @YOUR_HANDLE
+                                        {logo ? (
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: brandColor }} />
+                                        )}
+                                        @{handle}
                                     </div>
                                 </div>
 
@@ -240,7 +270,7 @@ const NewsGeneratorPage = () => {
                                             key={i} 
                                             onClick={() => toggleHighlight(i)}
                                             style={{ 
-                                                color: seg.highlight ? 'var(--color-accent)' : '#FFF', 
+                                                color: seg.highlight ? brandColor : '#FFF', 
                                                 cursor: 'pointer',
                                                 display: 'inline-block',
                                                 margin: '0 0.3rem'
