@@ -56,6 +56,7 @@ const NewsGeneratorPage = () => {
     const [isLifetime, setIsLifetime] = useState(false); // Should eventually come from DB
     const [letterSpacing, setLetterSpacing] = useState(-0.02);
     const [lineHeight, setLineHeight] = useState(0.95);
+    const [textGlow, setTextGlow] = useState(false);
     
     // Save/Load settings to localStorage
     useEffect(() => {
@@ -71,6 +72,7 @@ const NewsGeneratorPage = () => {
                 if (parsed.textPosition) setTextPosition(parsed.textPosition);
                 if (parsed.fontSizeAdjustment) setFontSizeAdjustment(parsed.fontSizeAdjustment);
                 if (parsed.useStroke) setUseStroke(parsed.useStroke);
+                if (parsed.textGlow) setTextGlow(parsed.textGlow);
                 if (parsed.letterSpacing !== undefined) setLetterSpacing(parsed.letterSpacing);
                 if (parsed.lineHeight !== undefined) setLineHeight(parsed.lineHeight);
             } catch (e) { console.error('Load Error:', e); }
@@ -78,9 +80,9 @@ const NewsGeneratorPage = () => {
     }, []);
 
     useEffect(() => {
-        const settings = { handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight };
+        const settings = { handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow };
         localStorage.setItem('news_generator_settings', JSON.stringify(settings));
-    }, [handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight]);
+    }, [handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow]);
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(caption);
@@ -527,7 +529,7 @@ const NewsGeneratorPage = () => {
                                     lineHeight: lineHeight, 
                                     fontWeight: 900,
                                     textTransform: 'uppercase', 
-                                    textShadow: useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)', 
+                                    textShadow: textGlow ? `0 0 10px ${brandColor}, 0 0 20px ${brandColor}, 0 4px 10px rgba(0,0,0,0.8)` : (useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)'), 
                                     paintOrder: 'stroke fill',
                                     WebkitTextStroke: useStroke ? `3px #000` : 'none',
                                     wordWrap: 'break-word', 
@@ -681,6 +683,32 @@ const NewsGeneratorPage = () => {
                                     <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>LINE_HEIGHT ({lineHeight})</div>
                                     <input type="range" min="0.7" max="1.5" step="0.05" value={lineHeight} onChange={(e) => setLineHeight(parseFloat(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
                                 </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                <button 
+                                    onClick={() => setUseStroke(!useStroke)}
+                                    style={{ 
+                                        flex: 1, padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)',
+                                        backgroundColor: useStroke ? 'var(--color-text)' : 'var(--color-surface)',
+                                        color: useStroke ? 'var(--color-bg)' : 'var(--color-text)',
+                                        fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s'
+                                    }}
+                                >
+                                    TEXT_STROKE
+                                </button>
+                                <button 
+                                    onClick={() => setTextGlow(!textGlow)}
+                                    style={{ 
+                                        flex: 1, padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)',
+                                        backgroundColor: textGlow ? brandColor : 'var(--color-surface)',
+                                        color: textGlow ? '#000' : 'var(--color-text)',
+                                        fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s',
+                                        boxShadow: textGlow ? `0 0 15px ${brandColor}` : 'none'
+                                    }}
+                                >
+                                    NEON_GLOW
+                                </button>
                             </div>
 
                             <div>
