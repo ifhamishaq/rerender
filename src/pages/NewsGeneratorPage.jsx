@@ -42,7 +42,7 @@ const NewsGeneratorPage = () => {
     const [fontSizeAdjustment, setFontSizeAdjustment] = useState(0);
     const [overlayOpacity, setOverlayOpacity] = useState(0.95);
     const [aspectRatio, setAspectRatio] = useState('4/5');
-    const [textPosition, setTextPosition] = useState(85); // % from top
+    const [textPosition, setTextPosition] = useState(75); // % from top
     const [useStroke, setUseStroke] = useState(false);
     const [showWatermark, setShowWatermark] = useState(false);
     const [exportScale, setExportScale] = useState(3);
@@ -54,8 +54,9 @@ const NewsGeneratorPage = () => {
     const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [transactionId, setTransactionId] = useState('');
     const [isLifetime, setIsLifetime] = useState(false); // Should eventually come from DB
-    const [letterSpacing, setLetterSpacing] = useState(-0.02);
-    const [lineHeight, setLineHeight] = useState(0.95);
+    const [fontFamily, setFontFamily] = useState('Impact, sans-serif');
+    const [letterSpacing, setLetterSpacing] = useState(-0.05);
+    const [lineHeight, setLineHeight] = useState(0.85);
     const [textGlow, setTextGlow] = useState(false);
     
     // Save/Load settings to localStorage
@@ -152,6 +153,12 @@ const NewsGeneratorPage = () => {
 
         setSelectedNews(article);
         setIsGenerating(true);
+        setBgImage(null);
+        setCaption('');
+        setTextSegments([]);
+        setBgPrompt('');
+        setTextPosition(75); // Reset to bottom
+        setFontSizeAdjustment(5); // Reset to large sizing
 
         try {
             // 1. Ask Oracle to generate a hook and a background image prompt
@@ -509,16 +516,19 @@ const NewsGeneratorPage = () => {
                                 flexDirection: 'column', 
                                 alignItems: 'center' 
                             }}>
-                                <div style={{ position: 'relative', width: '100%', marginBottom: '2rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1.5px', backgroundColor: 'rgba(255,255,255,0.4)', zIndex: 0 }} />
-                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', height: '32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                        {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF', flexShrink: 0 }} />
-                                        ) : (
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
-                                        )}
-                                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>@{handle}</span>
-                                    </div>
+                                <div style={{ 
+                                    backgroundColor: 'rgba(0,0,0,0.9)', 
+                                    padding: '6px 16px', 
+                                    borderRadius: '30px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '8px', 
+                                    marginBottom: '2rem',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+                                }}>
+                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FF0000', boxShadow: '0 0 10px #FF0000' }} />
+                                    <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '0.05em', textTransform: 'lowercase', fontFamily: 'var(--font-mono)' }}>@{handle}</span>
                                 </div>
 
                                 <div style={{ 
@@ -527,8 +537,9 @@ const NewsGeneratorPage = () => {
                                     width: '100%', 
                                     boxSizing: 'border-box', 
                                     lineHeight: lineHeight, 
-                                    fontWeight: 900,
+                                    fontWeight: 'normal',
                                     textTransform: 'uppercase', 
+                                    textShadow: textGlow ? `0 0 8px ${brandColor}, 0 0 12px ${brandColor}` : (useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)'), 
                                     paintOrder: 'stroke fill',
                                     WebkitTextStroke: useStroke ? `3px #000` : 'none',
                                     wordWrap: 'break-word', 
