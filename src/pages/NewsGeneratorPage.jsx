@@ -297,6 +297,7 @@ const NewsGeneratorPage = () => {
                             style={{ 
                                 width: '500px', 
                                 height: '625px', 
+                                flexShrink: 0,
                                 backgroundColor: '#111', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden',
