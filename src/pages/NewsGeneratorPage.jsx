@@ -463,9 +463,9 @@ const NewsGeneratorPage = () => {
                                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1.5px', backgroundColor: 'rgba(255,255,255,0.4)', zIndex: 0 }} />
                                     <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', height: '32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                         {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF' }} />
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF', flexShrink: 0 }} />
                                         ) : (
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF' }} />
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
                                         )}
                                         <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>@{handle}</span>
                                     </div>
