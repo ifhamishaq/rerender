@@ -179,10 +179,28 @@ const NewsGeneratorPage = () => {
 
     return (
         <div style={{ display: 'flex', height: '100vh', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
+            {/* Inject custom scrollbar styling for this page */}
+            <style>
+                {`
+                    .news-sidebar::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .news-sidebar::-webkit-scrollbar-track {
+                        background: rgba(255,255,255,0.02);
+                    }
+                    .news-sidebar::-webkit-scrollbar-thumb {
+                        background: rgba(255,255,255,0.1);
+                        border-radius: 10px;
+                    }
+                    .news-sidebar::-webkit-scrollbar-thumb:hover {
+                        background: var(--color-accent);
+                    }
+                `}
+            </style>
             {/* Sidebar News Feed */}
-            <div style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', overflowY: 'auto', padding: '2rem' }}>
+            <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', overflowY: 'auto', padding: '2rem' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <RefreshCw size={18} /> TRENDING NEWS
+                    <RefreshCw size={18} className={loadingNews ? 'spin' : ''} /> TRENDING NEWS
                 </h2>
 
                 {/* Categories */}
