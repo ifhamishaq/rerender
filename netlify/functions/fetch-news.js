@@ -1,58 +1,75 @@
 exports.handler = async function (event, context) {
-    // Only allow GET requests for this proxy
     if (event.httpMethod !== 'GET') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
-        const apiKey = process.env.VITE_FREENEWS_API_KEY || process.env.FREENEWS_API_KEY;
-
-        if (!apiKey) {
-            return {
-                statusCode: 500,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: "Missing FreeNews API Key in Environment Variables" })
-            };
-        }
-
         const topic = event.queryStringParameters?.topic || '';
-        let url = `https://api.freenewsapi.io/v1/news?language=en&country=us`;
-        if (topic && topic !== 'all') {
-            url += `&category=${encodeURIComponent(topic)}`;
-        }
-
-        const response = await fetch(url, {
-            headers: {
-                'x-api-key': apiKey
-            }
-        });
         
-        if (!response.ok) {
-            const errText = await response.text();
-            console.error("FreeNewsAPI Error Response:", errText);
-            return {
-                statusCode: response.status,
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-                body: JSON.stringify({ error: `API Error: ${response.status} ${response.statusText}`, details: errText })
-            };
+        // Collect all FreeNews keys (_1, _2, _3 fallback logic)
+        const freeNewsKeys = [
+            process.env.VITE_FREENEWS_API_KEY || process.env.FREENEWS_API_KEY,
+            process.env.VITE_FREENEWS_API_KEY_1 || process.env.FREENEWS_API_KEY_1,
+            process.env.VITE_FREENEWS_API_KEY_2 || process.env.FREENEWS_API_KEY_2,
+            process.env.VITE_FREENEWS_API_KEY_3 || process.env.FREENEWS_API_KEY_3
+        ].filter(Boolean);
+
+        const gnewsKey = process.env.VITE_GNEWS_API_KEY || process.env.GNEWS_API_KEY;
+
+        // 1. Try FreeNews keys in sequence
+        for (const key of freeNewsKeys) {
+            try {
+                let url = `https://api.freenewsapi.io/v1/news?language=en&country=us`;
+                if (topic && topic !== 'all') url += `&category=${encodeURIComponent(topic)}`;
+
+                const response = await fetch(url, { headers: { 'x-api-key': key } });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        statusCode: 200,
+                        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    };
+                } else if (response.status === 429 || response.status === 401) {
+                    console.warn(`Key failed with status ${response.status}. Trying next key...`);
+                    continue; // Try next key
+                }
+            } catch (e) {
+                console.error("FreeNews key attempt failed:", e);
+            }
         }
 
-        const data = await response.json();
+        // 2. Final Fallback: GNews
+        if (gnewsKey) {
+            try {
+                let url = `https://gnews.io/api/v4/top-headlines?lang=en&country=us&token=${gnewsKey}`;
+                if (topic && topic !== 'all') url += `&topic=${encodeURIComponent(topic)}`;
+
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        statusCode: 200,
+                        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ articles: data.articles })
+                    };
+                }
+            } catch (e) {
+                console.error("GNews fallback failed:", e);
+            }
+        }
 
         return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            statusCode: 503,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'All news sources exhausted or unavailable.' })
         };
     } catch (error) {
-        console.error("FreeNewsAPI Proxy Error:", error.message || error);
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Failed to fetch news from API.', details: error.message || String(error) })
+            body: JSON.stringify({ error: 'Server Error', details: error.message })
         };
     }
 };
