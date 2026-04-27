@@ -57,6 +57,11 @@ const NewsGeneratorPage = () => {
     const [letterSpacing, setLetterSpacing] = useState(-0.05);
     const [lineHeight, setLineHeight] = useState(0.85);
     const [textGlow, setTextGlow] = useState(false);
+    const [view, setView] = useState('news'); // 'news' or 'gallery'
+    const [gallery, setGallery] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('news_gen_gallery')) || []; }
+        catch (e) { return []; }
+    });
     
     // Save/Load settings to localStorage
     useEffect(() => {
@@ -298,13 +303,28 @@ const NewsGeneratorPage = () => {
         try {
             const canvas = await html2canvas(posterRef.current, { 
                 useCORS: true, 
-                allowTaint: true, 
-                backgroundColor: '#000000',
-                scale: exportScale 
+                scale: exportScale,
+                backgroundColor: null
             });
+            const img = canvas.toDataURL('image/png');
+            
+            // Save to gallery
+            const newDesign = {
+                id: Date.now(),
+                title: selectedNews?.title || 'Untitled',
+                bgImage: bgImage, // Keep as base64 for local gallery
+                textSegments: textSegments,
+                caption: caption,
+                aspectRatio,
+                date: new Date().toLocaleDateString()
+            };
+            const updatedGallery = [newDesign, ...gallery].slice(0, 20); // Keep last 20
+            setGallery(updatedGallery);
+            localStorage.setItem('news_gen_gallery', JSON.stringify(updatedGallery));
+
             const link = document.createElement('a');
-            link.download = 'news-post.png';
-            link.href = canvas.toDataURL('image/png');
+            link.download = `ORACLE_${Date.now()}.png`;
+            link.href = img;
             link.click();
         } catch (err) {
             console.error("Export error", err);
@@ -399,13 +419,26 @@ const NewsGeneratorPage = () => {
                     >
                         <ChevronLeft size={16} /> BACK_TO_TOOLS
                     </button>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--color-text)', margin: 0 }}>
-                        <RefreshCw size={16} className={loadingNews ? 'spin' : ''} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} /> TRENDING NEWS
-                    </h2>
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+                    <button 
+                        onClick={() => setView('news')}
+                        style={{ padding: '0.5rem 0', flex: 1, border: 'none', background: 'none', color: view === 'news' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.7rem', borderBottom: view === 'news' ? '2px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'news' ? 1 : 0.5 }}
+                    >
+                        TRENDING_NEWS
+                    </button>
+                    <button 
+                        onClick={() => setView('gallery')}
+                        style={{ padding: '0.5rem 0', flex: 1, border: 'none', background: 'none', color: view === 'gallery' ? 'var(--color-accent)' : 'var(--color-text)', fontWeight: 900, fontSize: '0.7rem', borderBottom: view === 'gallery' ? '2px solid var(--color-accent)' : 'none', cursor: 'pointer', opacity: view === 'gallery' ? 1 : 0.5 }}
+                    >
+                        MY_GALLERY ({gallery.length})
+                    </button>
                 </div>
 
-                {/* Categories */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                {view === 'news' ? (
+                    <>
+                        {/* Categories */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.5rem' }}>
                     {['all', 'business', 'technology', 'sports', 'entertainment', 'science', 'health'].map(cat => (
                         <button 
                             key={cat}
@@ -470,6 +503,26 @@ const NewsGeneratorPage = () => {
                         </div>
                     )}
                 </div>
+                </>
+                ) : (
+                    <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {gallery.length === 0 ? (
+                            <div style={{ opacity: 0.4, fontSize: '0.8rem', textAlign: 'center', marginTop: '2rem' }}>NO_SAVED_DESIGNS</div>
+                        ) : (
+                            gallery.map((item, idx) => (
+                                <div key={idx} onClick={() => loadFromGallery(item)} style={{ padding: '0.8rem', backgroundColor: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', cursor: 'pointer', display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                                    <div style={{ width: '50px', height: '60px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, backgroundColor: '#000' }}>
+                                        <img src={item.bgImage} alt="Thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 800, fontSize: '0.75rem', marginBottom: '0.2rem', color: 'var(--color-text)' }}>{item.title}</div>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.5 }}>{item.date}</div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Main Preview Area */}
