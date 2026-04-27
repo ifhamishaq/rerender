@@ -1,6 +1,6 @@
 /**
  * AI Utility for RE-RENDER
- * Handles multi-key rotation, exponential backoff, and 429 error resilience.
+ * Handles multi-key rotation and 429 error resilience.
  */
 
 export const AI_COSTS = {
@@ -11,39 +11,18 @@ export const AI_COSTS = {
 };
 
 const getApiKeys = () => {
-    // Collect all potential key sources
-    const pluralKeys = import.meta.env.VITE_OPENROUTER_API_KEYS || '';
-    const singularKey = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-    
-    // Split comma-separated lists and merge
-    let keys = [
-        ...pluralKeys.split(','),
-        ...singularKey.split(',')
-    ].map(k => k.trim()).filter(Boolean);
-
-    // Add suffixed keys for individual account stacking
-    const suffixed = [
-        import.meta.env.VITE_OPENROUTER_API_KEY_1,
-        import.meta.env.VITE_OPENROUTER_API_KEY_2,
-        import.meta.env.VITE_OPENROUTER_API_KEY_3,
-        import.meta.env.VITE_OPENROUTER_API_KEY_4
-    ].filter(Boolean);
-
-    return [...new Set([...keys, ...suffixed])];
+    const keysStr = import.meta.env.VITE_OPENROUTER_API_KEYS || import.meta.env.VITE_OPENROUTER_API_KEY || '';
+    return keysStr.split(',').map(k => k.trim()).filter(Boolean);
 };
 
 let currentKeyIndex = 0;
 
-/**
- * Robust JSON extraction from AI strings.
- */
 export const safeParseJSON = (text) => {
     if (!text) return null;
     let cleaned = text.replace(/```json|```/g, '').trim();
     const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     if (!jsonMatch) return null;
     cleaned = jsonMatch[0];
-
     try {
         return JSON.parse(cleaned);
     } catch (e) {
@@ -58,15 +37,11 @@ export const safeParseJSON = (text) => {
     }
 };
 
-export const fetchOpenRouter = async (body, options = {}, retries = 5, delay = 2000) => {
+export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
     const keys = getApiKeys();
-    
-    if (keys.length === 0) {
-        console.error("AI_ERROR: No OpenRouter keys found in environment variables.");
-        throw new Error('MISSING_API_KEYS');
-    }
+    if (keys.length === 0) throw new Error('MISSING_API_KEYS');
 
-    // Pick key based on rotation index
+    // Use current key
     const key = keys[currentKeyIndex % keys.length];
     
     try {
@@ -75,43 +50,31 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5, delay = 2
             headers: {
                 'Authorization': `Bearer ${key}`,
                 'HTTP-Referer': 'https://re-render.netlify.app', 
-                'X-Title': options.title || 'RE-RENDER AI Suite',
-                'Content-Type': 'application/json',
-                ...options.headers
+                'X-Title': 'RE-RENDER',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
         });
 
-        // Handle Rate Limiting (429) - ROTATE KEY
         if (response.status === 429) {
-            console.warn(`[AI_ROTATE] Key ${currentKeyIndex % keys.length} limited. Trying next...`);
-            currentKeyIndex++; 
-            
+            console.warn("[AI] Rate limited. Rotating key...");
+            currentKeyIndex++;
             if (retries > 0) {
-                await new Promise(res => setTimeout(res, delay * 2));
-                return fetchOpenRouter(body, options, retries - 1, delay * 2);
+                await new Promise(r => setTimeout(r, 2000));
+                return fetchOpenRouter(body, options, retries - 1);
             }
         }
 
         if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            const errorMsg = errData.error?.message || `HTTP_${response.status}`;
-            
-            // Handle model congestion
-            if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
-                if (retries > 0) {
-                    await new Promise(res => setTimeout(res, delay));
-                    return fetchOpenRouter(body, options, retries - 1, delay * 2);
-                }
-            }
-            throw new Error(errorMsg);
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error?.message || `API Error ${response.status}`);
         }
 
         return await response.json();
     } catch (err) {
         if (retries > 0 && err.message !== 'MISSING_API_KEYS') {
-            await new Promise(res => setTimeout(res, delay));
-            return fetchOpenRouter(body, options, retries - 1, delay * 2);
+            await new Promise(r => setTimeout(r, 2000));
+            return fetchOpenRouter(body, options, retries - 1);
         }
         throw err;
     }
