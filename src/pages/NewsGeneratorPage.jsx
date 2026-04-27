@@ -253,10 +253,10 @@ const NewsGeneratorPage = () => {
 
     const getFontSize = () => {
         const totalChars = textSegments.reduce((acc, s) => acc + s.text.length, 0);
-        let baseSize = 3.5;
-        if (totalChars > 50) baseSize = 1.8;
-        else if (totalChars > 35) baseSize = 2.3;
-        else if (totalChars > 20) baseSize = 2.9;
+        let baseSize = 4.2;
+        if (totalChars > 50) baseSize = 2.2;
+        else if (totalChars > 35) baseSize = 2.8;
+        else if (totalChars > 20) baseSize = 3.5;
         
         return `${baseSize + (fontSizeAdjustment / 10)}rem`;
     };
@@ -419,20 +419,20 @@ const NewsGeneratorPage = () => {
                             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.8}) 50%, transparent 100%)`, zIndex: 1 }} />
 
                             {/* Text Content */}
-                            <div style={{ position: 'relative', zIndex: 2, padding: '3rem 1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ position: 'relative', width: '95%', marginBottom: '1.8rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.2)', zIndex: 0 }} />
-                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '4px 12px', height: '32px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            <div style={{ position: 'relative', zIndex: 2, padding: '3rem 0', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ position: 'relative', width: '100%', marginBottom: '2rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1.5px', backgroundColor: 'rgba(255,255,255,0.4)', zIndex: 0 }} />
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', height: '32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                         {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF' }} />
                                         ) : (
-                                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: brandColor }} />
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF' }} />
                                         )}
-                                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', height: '28px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>@{handle}</span>
+                                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>@{handle}</span>
                                     </div>
                                 </div>
 
-                                <div style={{ fontFamily, fontSize: getFontSize(), width: '100%', padding: '0 0.5rem', boxSizing: 'border-box', lineHeight: 1.1, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.5)', wordWrap: 'break-word' }}>
+                                <div style={{ fontFamily, fontSize: getFontSize(), width: '100%', boxSizing: 'border-box', lineHeight: 0.95, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.8)', wordWrap: 'break-word', letterSpacing: '-0.02em' }}>
                                     {textSegments.map((seg, i) => (
                                         <span 
                                             key={i} 
@@ -441,7 +441,7 @@ const NewsGeneratorPage = () => {
                                                 color: seg.highlight ? brandColor : '#FFF', 
                                                 cursor: 'pointer',
                                                 display: 'inline-block',
-                                                margin: '0 0.3rem'
+                                                margin: '0 0.2rem'
                                             }}
                                         >
                                             {seg.text}
