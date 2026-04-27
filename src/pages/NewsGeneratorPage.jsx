@@ -615,7 +615,9 @@ const NewsGeneratorPage = () => {
                                     <div style={{ position: 'absolute', top: '50%', right: '10%', width: '35%', height: '1.5px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                     <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                         {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid #FFF', flexShrink: 0, backgroundColor: '#000', boxShadow: '0 0 15px rgba(255,255,255,0.2)' }} />
+                                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid #FFF', overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', boxShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
+                                                <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                            </div>
                                         ) : (
                                             <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: brandColor, border: '2px solid #FFF', flexShrink: 0 }} />
                                         )}
