@@ -78,11 +78,19 @@ const NewsGeneratorPage = () => {
                 if (parsed.lineHeight !== undefined) setLineHeight(parsed.lineHeight);
             } catch (e) { console.error('Load Error:', e); }
         }
+        
+        const savedLogo = localStorage.getItem('news_gen_persistent_logo');
+        if (savedLogo) setLogo(savedLogo);
     }, []);
 
     useEffect(() => {
-        const settings = { handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow };
+        const settings = { handle, brandColor, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow };
         localStorage.setItem('news_generator_settings', JSON.stringify(settings));
+        
+        if (logo && logo.startsWith('data:')) {
+            try { localStorage.setItem('news_gen_persistent_logo', logo); }
+            catch (e) { console.warn('Logo too large for localStorage'); }
+        }
     }, [handle, brandColor, logo, fontFamily, aspectRatio, textPosition, fontSizeAdjustment, useStroke, letterSpacing, lineHeight, textGlow]);
 
     const copyToClipboard = () => {
@@ -638,12 +646,33 @@ const NewsGeneratorPage = () => {
                                 COST: 50 CREDITS PER EXPORT
                             </div>
                         </div>
+
+                        {/* Moved Caption to Middle */}
+                        <div style={{ width: getCanvasDimensions().width, marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>POST_CAPTION</div>
+                                <button 
+                                    onClick={copyToClipboard}
+                                    style={{ 
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', fontWeight: 800,
+                                        color: copied ? 'var(--color-accent)' : 'var(--color-text)', cursor: 'pointer',
+                                        backgroundColor: 'transparent', border: 'none'
+                                    }}
+                                >
+                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                                    {copied ? 'COPIED' : 'COPY'}
+                                </button>
+                            </div>
+                            <div style={{ padding: '1rem', backgroundColor: 'var(--color-surface)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.8rem', lineHeight: 1.6, color: 'var(--color-text)', whiteSpace: 'pre-wrap' }}>
+                                {caption || 'Caption will appear here...'}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div className="design-sidebar" style={{ width: '300px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }} className="custom-scrollbar">
+            <div className="design-sidebar" style={{ width: '300px', flexShrink: 0, height: '100vh', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
@@ -759,7 +788,8 @@ const NewsGeneratorPage = () => {
                                 </div>
                             </div>
 
-                            <div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
@@ -769,25 +799,6 @@ const NewsGeneratorPage = () => {
                                         <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
                                     </label>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>POST_CAPTION</div>
-                                <button 
-                                    onClick={copyToClipboard}
-                                    style={{ 
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', fontWeight: 800,
-                                        color: copied ? 'var(--color-accent)' : 'var(--color-text)', cursor: 'pointer'
-                                    }}
-                                >
-                                    {copied ? <Check size={12} /> : <Copy size={12} />}
-                                    {copied ? 'COPIED' : 'COPY'}
-                                </button>
-                            </div>
-                            <div style={{ padding: '1rem', backgroundColor: 'var(--color-surface)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.75rem', lineHeight: 1.5, maxHeight: '150px', overflowY: 'auto', color: 'var(--color-text)' }}>
-                                {caption || 'Caption will appear here...'}
                             </div>
                         </div>
                     </>
