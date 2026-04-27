@@ -629,8 +629,8 @@ const NewsGeneratorPage = () => {
 
                                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
 
-                                <div style={{ position: 'absolute', top: `${textPosition}%`, transform: 'translateY(-50%)', zIndex: 2, padding: '2rem 0', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{ position: 'relative', width: '100%', marginBottom: '1.5rem', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ position: 'absolute', top: `${textPosition}%`, transform: 'translateY(-50%)', zIndex: 2, padding: '2rem 0', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'relative', width: '100%', marginBottom: '16px', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <div style={{ position: 'absolute', top: '50%', left: '10%', width: '35%', height: '1.5px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'absolute', top: '50%', right: '10%', width: '35%', height: '1.5px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -752,9 +752,24 @@ const NewsGeneratorPage = () => {
                             <div style={{ fontSize: '0.65rem', opacity: 0.4 }}>* Click words on the poster to toggle highlights.</div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div>
+                        <div>
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <AlignLeft size={12} /> TEXT_SETTINGS
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.4rem' }}>VERTICAL_POSITION ({textPosition}%)</div>
+                                        <input type="range" min="10" max="90" value={textPosition} onChange={(e) => setTextPosition(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '0.6rem', opacity: 0.4, marginBottom: '0.4rem' }}>FONT_SIZE_ADJUST</div>
+                                        <input type="range" min="-20" max="30" value={fontSizeAdjustment} onChange={(e) => setFontSizeAdjustment(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <Maximize size={12} /> ASPECT_RATIO
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -763,10 +778,10 @@ const NewsGeneratorPage = () => {
                                             key={ratio}
                                             onClick={() => setAspectRatio(ratio)}
                                             style={{ 
-                                                flex: 1, padding: '0.5rem', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800,
+                                                flex: 1, padding: '0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 900,
                                                 backgroundColor: aspectRatio === ratio ? 'var(--color-accent)' : 'var(--color-surface)',
                                                 color: aspectRatio === ratio ? '#000' : 'var(--color-text)',
-                                                border: '1px solid var(--color-border)', cursor: 'pointer'
+                                                border: '1px solid var(--color-border)', cursor: 'pointer', transition: 'all 0.2s'
                                             }}
                                         >
                                             {ratio}
@@ -775,6 +790,7 @@ const NewsGeneratorPage = () => {
                                 </div>
                             </div>
 
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
                                 <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
