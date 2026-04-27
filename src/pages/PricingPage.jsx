@@ -66,7 +66,7 @@ const PricingPage = () => {
                                 tier: 'ORACLE PRO',
                                 price: '$50',
                                 desc: 'LIFETIME access to professional AI Design tools in the Lab.',
-                                features: ['No watermarks forever', '4K High-Res Exports', 'All aspect ratios unlocked', 'Priority AI generation'],
+                                features: ['No watermarks forever', '4K High-Res Exports', 'All aspect ratios unlocked', 'Pay via PayPal or Wise'],
                                 highlight: true,
                                 buttonText: 'GET LIFETIME PRO →',
                                 link: 'https://www.paypal.com/paypalme/ImadWani96/50'

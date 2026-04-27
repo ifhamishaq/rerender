@@ -529,26 +529,29 @@ const NewsGeneratorPage = () => {
                                     lineHeight: lineHeight, 
                                     fontWeight: 900,
                                     textTransform: 'uppercase', 
-                                    textShadow: textGlow ? `0 0 10px ${brandColor}, 0 0 20px ${brandColor}, 0 4px 10px rgba(0,0,0,0.8)` : (useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)'), 
                                     paintOrder: 'stroke fill',
                                     WebkitTextStroke: useStroke ? `3px #000` : 'none',
                                     wordWrap: 'break-word', 
                                     letterSpacing: `${letterSpacing}em` 
                                 }}>
-                                    {textSegments.map((seg, i) => (
-                                        <span 
-                                            key={i} 
-                                            onClick={() => toggleHighlight(i)}
-                                            style={{ 
-                                                color: seg.highlight ? brandColor : '#FFF', 
-                                                cursor: 'pointer',
-                                                display: 'inline-block',
-                                                margin: '0 0.2rem'
-                                            }}
-                                        >
-                                            {seg.text}
-                                        </span>
-                                    ))}
+                                    {textSegments.map((seg, i) => {
+                                        const color = seg.highlight ? brandColor : '#FFF';
+                                        return (
+                                            <span 
+                                                key={i} 
+                                                onClick={() => toggleHighlight(i)}
+                                                style={{ 
+                                                    color: color, 
+                                                    cursor: 'pointer',
+                                                    display: 'inline-block',
+                                                    margin: '0 0.2rem',
+                                                    textShadow: textGlow ? `0 0 8px ${color}, 0 4px 10px rgba(0,0,0,0.8)` : (useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)')
+                                                }}
+                                            >
+                                                {seg.text}
+                                            </span>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -794,14 +797,24 @@ const NewsGeneratorPage = () => {
                             <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.5, marginTop: '0.2rem' }}>LIFETIME_ACCESS</div>
                         </div>
 
-                        <a 
-                            href="https://www.paypal.com/paypalme/ImadWani96/50" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            style={{ width: '100%', padding: '1rem', backgroundColor: '#0070ba', color: '#FFF', borderRadius: '12px', textAlign: 'center', textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem' }}
-                        >
-                            PAY_WITH_PAYPAL
-                        </a>
+                        <div style={{ display: 'flex', gap: '0.8rem' }}>
+                            <a 
+                                href="https://www.paypal.com/paypalme/ImadWani96/50" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ flex: 1, padding: '1rem', backgroundColor: '#0070ba', color: '#FFF', borderRadius: '12px', textAlign: 'center', textDecoration: 'none', fontWeight: 900, fontSize: '0.8rem' }}
+                            >
+                                PAYPAL
+                            </a>
+                            <a 
+                                href="https://wise.com/pay/business/imaddudinwani?utm_source=open_link" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ flex: 1, padding: '1rem', backgroundColor: '#00b9ff', color: '#FFF', borderRadius: '12px', textAlign: 'center', textDecoration: 'none', fontWeight: 900, fontSize: '0.8rem' }}
+                            >
+                                WISE
+                            </a>
+                        </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>ENTER_TRANSACTION_ID</div>
