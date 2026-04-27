@@ -89,9 +89,9 @@ const NewsGeneratorPage = () => {
                 model: 'baidu/qianfan-ocr-fast:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
-                    1. Write a very short, punchy 3-7 word highly engaging text hook for an image overlay. Surround the 1 or 2 most important words with asterisks to highlight them (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
+                    1. Write a punchy, viral 5-10 word text hook for an image overlay. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
                     2. Write a 5-10 word visual prompt for an AI image generator to create the background. Format it like this: PROMPT: [visual prompt]
-                    3. Write a caption with hashtags. Format it like this: CAPTION: [caption]` },
+                    3. Write a long, engaging caption with emojis and trending hashtags. Format it like this: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${article.title}\nDescription: ${article.description}` }
                 ]
             });
@@ -177,6 +177,14 @@ const NewsGeneratorPage = () => {
         } finally {
             setIsExporting(false);
         }
+    };
+
+    const getFontSize = () => {
+        const totalChars = textSegments.reduce((acc, s) => acc + s.text.length, 0);
+        if (totalChars > 50) return '1.5rem';
+        if (totalChars > 35) return '1.9rem';
+        if (totalChars > 20) return '2.3rem';
+        return '2.8rem';
     };
 
     return (
@@ -328,8 +336,8 @@ const NewsGeneratorPage = () => {
                             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', zIndex: 1 }} />
 
                             {/* Text Content */}
-                            <div style={{ position: 'relative', zIndex: 2, padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ position: 'relative', width: '90%', marginBottom: '1.5rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ position: 'relative', zIndex: 2, padding: '1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ position: 'relative', width: '95%', marginBottom: '1.5rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
                                     <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.3rem 1rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                                         {logo ? (
@@ -341,7 +349,7 @@ const NewsGeneratorPage = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ fontFamily, fontSize: '2.2rem', lineHeight: 1.1, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
+                                <div style={{ fontFamily, fontSize: getFontSize(), width: '100%', padding: '0 0.5rem', boxSizing: 'border-box', lineHeight: 1.1, textTransform: 'uppercase', textShadow: '0 4px 10px rgba(0,0,0,0.5)', wordWrap: 'break-word' }}>
                                     {textSegments.map((seg, i) => (
                                         <span 
                                             key={i} 
