@@ -26,29 +26,30 @@ const NewsGeneratorPage = () => {
     const [handle, setHandle] = useState('YOUR_HANDLE');
     const [brandColor, setBrandColor] = useState('#E8111A');
     const [logo, setLogo] = useState(null);
+    const [category, setCategory] = useState('all');
     
     const posterRef = useRef(null);
 
     useEffect(() => {
-        fetchNews();
-    }, []);
+        fetchNews(category);
+    }, [category]);
 
-    const fetchNews = async () => {
+    const fetchNews = async (currentCategory = 'all') => {
         setLoadingNews(true);
         try {
             const apiKey = import.meta.env.VITE_FREENEWS_API_KEY;
             if (!apiKey) {
                 // Mock Data if no API key
                 setNews([
-                    { title: "Gen Z Job Seekers Bring Parents to Interviews", description: "A new study shows an alarming trend in hiring." },
-                    { title: "Tech Stocks Rally After AI Announcements", description: "Major tech companies see surges after new AI models." },
-                    { title: "Global Coffee Shortage Drives Prices Up", description: "Climate change affects coffee belt regions severely." }
+                    { title: `[${currentCategory.toUpperCase()}] Gen Z Job Seekers Bring Parents to Interviews`, description: "A new study shows an alarming trend in hiring." },
+                    { title: `[${currentCategory.toUpperCase()}] Tech Stocks Rally After AI Announcements`, description: "Major tech companies see surges after new AI models." },
+                    { title: `[${currentCategory.toUpperCase()}] Global Coffee Shortage Drives Prices Up`, description: "Climate change affects coffee belt regions severely." }
                 ]);
                 return;
             }
 
             // Attempt to fetch from our serverless proxy
-            const res = await fetch('/.netlify/functions/fetch-news');
+            const res = await fetch(`/.netlify/functions/fetch-news?topic=${currentCategory}`);
             const data = await res.json();
             if (data.data) {
                 setNews(data.data.slice(0, 10));
@@ -178,6 +179,31 @@ const NewsGeneratorPage = () => {
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <RefreshCw size={18} /> TRENDING NEWS
                 </h2>
+
+                {/* Categories */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    {['all', 'business', 'finance', 'tech', 'sport', 'entertainment'].map(cat => (
+                        <button 
+                            key={cat}
+                            onClick={() => setCategory(cat)}
+                            style={{
+                                padding: '0.25rem 0.75rem',
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                fontWeight: 800,
+                                borderRadius: '20px',
+                                border: '1px solid',
+                                borderColor: category === cat ? 'var(--color-accent)' : 'var(--color-border)',
+                                backgroundColor: category === cat ? 'var(--color-accent)' : 'transparent',
+                                color: category === cat ? '#FFF' : 'var(--color-text-secondary)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
                 {loadingNews ? <div style={{ opacity: 0.5 }}>Fetching latest news...</div> : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {news.map((n, i) => (

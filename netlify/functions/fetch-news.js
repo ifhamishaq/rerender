@@ -15,7 +15,11 @@ exports.handler = async function (event, context) {
             };
         }
 
-        const url = `https://api.freenewsapi.io/v1/news?language=en&country=us`;
+        const topic = event.queryStringParameters?.topic || '';
+        let url = `https://api.freenewsapi.io/v1/news?language=en&country=us`;
+        if (topic && topic !== 'all') {
+            url += `&topic=${encodeURIComponent(topic)}`;
+        }
 
         const response = await fetch(url, {
             headers: {
