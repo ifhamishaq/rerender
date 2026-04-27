@@ -10,13 +10,12 @@ export const AI_COSTS = {
     GEN_IMAGE: 10
 };
 
-// High-performance free models on OpenRouter (vetted for April 2026)
+// Verified high-performance free models on OpenRouter (Updated April 2026)
 const FREE_MODEL_POOL = [
     "nvidia/nemotron-3-super-120b-a12b:free",
-    "google/gemma-4-31b:free",
+    "google/gemma-4-31b-it:free",
     "openai/gpt-oss-120b:free",
     "tencent/hy3-preview:free",
-    "inclusionai/ling-2.6-1t:free",
     "minimax/minimax-m2.5:free",
     "google/gemini-flash-1.5-8b:free"
 ];
@@ -59,7 +58,7 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
     // Use current rotation indices
     const key = keys[currentKeyIndex % keys.length];
     
-    // If the requested model is a 'free' model, we can rotate it if it fails
+    // If the requested model is a 'free' model, we rotate through the pool
     const isFreeModel = body.model?.endsWith(':free');
     const modelToUse = isFreeModel ? FREE_MODEL_POOL[currentModelIndex % FREE_MODEL_POOL.length] : body.model;
 
@@ -77,34 +76,42 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
             body: JSON.stringify(requestBody)
         });
 
-        // Handle Rate Limiting (429) or Congestion (503/etc)
-        if (response.status === 429 || response.status === 503 || response.status === 408) {
-            console.warn(`[AI_ROTATE] Model/Key limited. Switching sources...`);
-            
-            // Rotate both model and key to maximize chances of success
+        // Handle Rate Limiting (429) or Congestion (503)
+        if (response.status === 429 || response.status === 503) {
+            console.warn(`[AI_ROTATE] Model/Key limited. Switching...`);
             currentKeyIndex++;
             if (isFreeModel) currentModelIndex++;
-
             if (retries > 0) {
-                // Exponential-ish backoff
-                await new Promise(r => setTimeout(r, 2000 + (Math.random() * 1000)));
+                await new Promise(r => setTimeout(r, 2000));
                 return fetchOpenRouter(body, options, retries - 1);
             }
+        }
+
+        // Handle Bad Request (400) - Likely invalid Model ID
+        if (response.status === 400) {
+            const data = await response.json().catch(() => ({}));
+            const msg = data.error?.message || '';
+            if (msg.includes('not a valid model ID') || msg.includes('does not exist')) {
+                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Removing from pool...`);
+                if (isFreeModel && retries > 0) {
+                    currentModelIndex++; // Try next model immediately
+                    return fetchOpenRouter(body, options, retries - 1);
+                }
+            }
+            throw new Error(msg || 'Bad Request');
         }
 
         if (!response.ok) {
             const data = await response.json().catch(() => ({}));
             const errorMsg = data.error?.message || `API Error ${response.status}`;
             
-            // If model is "overloaded", rotate and retry
             if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
-                currentModelIndex++;
+                if (isFreeModel) currentModelIndex++;
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 1500));
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
-            
             throw new Error(errorMsg);
         }
 
