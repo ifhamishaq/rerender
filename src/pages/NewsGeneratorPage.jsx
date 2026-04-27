@@ -410,14 +410,14 @@ const NewsGeneratorPage = () => {
                             {/* Text Content */}
                             <div style={{ position: 'relative', zIndex: 2, padding: '3rem 1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <div style={{ position: 'relative', width: '95%', marginBottom: '1.8rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
-                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '4px 12px', height: '28px', boxSizing: 'border-box', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.2)', zIndex: 0 }} />
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '4px 12px', height: '32px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                         {logo ? (
-                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                                            <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
                                         ) : (
-                                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: brandColor }} />
+                                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: brandColor }} />
                                         )}
-                                        <span style={{ color: '#FFF', fontWeight: 800, lineHeight: '20px', height: '20px', display: 'block' }}>@{handle}</span>
+                                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', height: '28px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>@{handle}</span>
                                     </div>
                                 </div>
 
@@ -440,32 +440,48 @@ const NewsGeneratorPage = () => {
                             </div>
                         </div>
 
+                        {/* Quick Regeneration Tools */}
+                        <div style={{ width: '432px', marginTop: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                <ImageIcon size={14} /> AI_IMAGE
+                            </button>
+                            <label style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                <Camera size={14} /> CUSTOM_BG
+                                <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
+                            </label>
+                            <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                <Type size={14} /> HOOK
+                            </button>
+                            <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                <AlignLeft size={14} /> CAPTION
+                            </button>
+                        </div>
+
                         {/* HD Export Button */}
                         <button 
                             onClick={exportImage} 
                             disabled={isExporting || !bgImage}
                             style={{ 
-                                width: '100%',
+                                width: '432px',
+                                marginTop: '1rem',
                                 padding: '1.2rem', 
                                 backgroundColor: 'var(--color-accent)', 
-                                color: '#FFF', 
+                                color: '#000', 
                                 border: 'none', 
                                 borderRadius: '12px', 
                                 fontWeight: 900, 
-                                fontSize: '1rem',
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                gap: '0.8rem', 
                                 cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.8rem',
-                                boxShadow: '0 10px 20px rgba(232, 17, 26, 0.3)',
-                                transition: 'all 0.3s'
+                                fontSize: '1rem',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                                opacity: (isExporting || !bgImage) ? 0.5 : 1
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                         >
-                            {isExporting ? <RefreshCw className="spin" size={20} /> : <Download size={20} />}
-                            {isExporting ? 'EXPORTING_HD...' : 'DOWNLOAD_HD_POST'}
+                            {isExporting ? <RefreshCw className="spin" size={18} /> : <Download size={18} />}
+                            {isExporting ? 'EXPORTING_HD...' : 'DOWNLOAD HD POST'}
                         </button>
                     </div>
                 )}
@@ -478,26 +494,6 @@ const NewsGeneratorPage = () => {
                 {selectedNews && (
                     <>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>QUICK_REGENERATE</div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <ImageIcon size={14} /> AI_IMAGE
-                                </button>
-                                <label style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <Camera size={14} /> CUSTOM_BG
-                                    <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
-                                </label>
-                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <Type size={14} /> HOOK
-                                </button>
-                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <AlignLeft size={14} /> CAPTION
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>HEADLINE_EDITOR</div>
                             <textarea 
                                 value={textSegments.map(s => s.text).join(' ')}
                                 onChange={(e) => handleHeadlineEdit(e.target.value)}
