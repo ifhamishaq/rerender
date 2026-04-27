@@ -266,7 +266,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: '#050505', color: '#fff', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -289,8 +289,8 @@ const NewsGeneratorPage = () => {
             </style>
 
             {/* Sidebar News Feed */}
-            <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)' }}>
                     <RefreshCw size={18} className={loadingNews ? 'spin' : ''} /> TRENDING NEWS
                 </h2>
 
@@ -342,9 +342,10 @@ const NewsGeneratorPage = () => {
                                     transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
                                     style={{ 
                                         height: '80px', 
-                                        backgroundColor: 'rgba(255,255,255,0.05)', 
+                                        backgroundColor: 'var(--color-surface)', 
                                         borderRadius: '8px',
-                                        border: '1px solid rgba(255,255,255,0.02)'
+                                        border: '1px solid var(--color-border)',
+                                        opacity: 0.3
                                     }}
                                 />
                             ))}
@@ -352,9 +353,9 @@ const NewsGeneratorPage = () => {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {news.map((n, i) => (
-                                <div key={i} onClick={() => generatePost(n)} style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', cursor: 'pointer', border: '1px solid transparent', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.border = '1px solid var(--color-accent)'} onMouseLeave={(e) => e.currentTarget.style.border = '1px solid transparent'}>
-                                    <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem' }}>{n.title}</div>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{n.description?.substring(0, 80)}...</div>
+                                <div key={i} onClick={() => generatePost(n)} style={{ padding: '1rem', backgroundColor: 'var(--color-surface)', borderRadius: '8px', cursor: 'pointer', border: '1px solid var(--color-border)', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent)'} onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}>
+                                    <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>{n.title}</div>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, color: 'var(--color-text-secondary)' }}>{n.description?.substring(0, 80)}...</div>
                                 </div>
                             ))}
                         </div>
@@ -363,7 +364,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Preview Area */}
-            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '2rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '2rem', backgroundColor: 'var(--color-surface)', backgroundImage: 'radial-gradient(circle at center, rgba(0,0,0,0.05) 0%, transparent 100%)' }}>
                 {!selectedNews && !isGenerating ? (
                     <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
@@ -471,44 +472,44 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div style={{ width: '350px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto' }} className="custom-scrollbar">
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8 }}>DESIGN_CONTROLS</h3>
+            <div style={{ width: '350px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto', color: 'var(--color-text)' }} className="custom-scrollbar">
+                <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
                     <>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>QUICK_REGENERATE</div>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>QUICK_REGENERATE</div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
                                     <ImageIcon size={14} /> AI_IMAGE
                                 </button>
-                                <label style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                <label style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
                                     <Camera size={14} /> CUSTOM_BG
                                     <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
                                 </label>
-                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
                                     <Type size={14} /> HOOK
                                 </button>
-                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
                                     <AlignLeft size={14} /> CAPTION
                                 </button>
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>HEADLINE_EDITOR</div>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, color: 'var(--color-text-secondary)' }}>HEADLINE_EDITOR</div>
                             <textarea 
                                 value={textSegments.map(s => s.text).join(' ')}
                                 onChange={(e) => handleHeadlineEdit(e.target.value)}
-                                style={{ width: '100%', padding: '0.8rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '0.8rem', minHeight: '80px', fontFamily: 'inherit', lineHeight: 1.4 }}
+                                style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '0.8rem', minHeight: '80px', fontFamily: 'inherit', lineHeight: 1.4 }}
                             />
                             <div style={{ fontSize: '0.65rem', opacity: 0.4 }}>* Click words on the poster to toggle highlights.</div>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>FONT_FAMILY</div>
-                                <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ width: '100%', padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px' }}>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>FONT_FAMILY</div>
+                                <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ width: '100%', padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px' }}>
                                     <option value="Impact, sans-serif">Impact (Bold)</option>
                                     <option value="'Oswald', sans-serif">Oswald (Bold)</option>
                                     <option value="'Arial Black', sans-serif">Arial Black</option>
@@ -519,21 +520,21 @@ const NewsGeneratorPage = () => {
 
                             <div style={{ display: 'flex', gap: '1.5rem' }}>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>FONT_SIZE</div>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>FONT_SIZE</div>
                                     <input type="range" min="-10" max="30" value={fontSizeAdjustment} onChange={(e) => setFontSizeAdjustment(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>OVERLAY</div>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>OVERLAY</div>
                                     <input type="range" min="0" max="100" value={overlayOpacity * 100} onChange={(e) => setOverlayOpacity(parseInt(e.target.value) / 100)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
                                 </div>
                             </div>
 
                             <div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>BRANDING</div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>BRANDING</div>
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
+                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
                                     <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
-                                    <label style={{ padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer' }}>
+                                    <label style={{ padding: '0.6rem', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--color-text)' }}>
                                         <Camera size={18} />
                                         <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
                                     </label>
@@ -542,8 +543,8 @@ const NewsGeneratorPage = () => {
                         </div>
 
                         <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '1rem' }}>POST_CAPTION</div>
-                            <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.75rem', lineHeight: 1.5, maxHeight: '200px', overflowY: 'auto' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '1rem', color: 'var(--color-text-secondary)' }}>POST_CAPTION</div>
+                            <div style={{ padding: '1rem', backgroundColor: 'var(--color-surface)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.75rem', lineHeight: 1.5, maxHeight: '200px', overflowY: 'auto', color: 'var(--color-text)' }}>
                                 {caption || 'Caption will appear here...'}
                             </div>
                         </div>
