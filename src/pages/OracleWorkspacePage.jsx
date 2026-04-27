@@ -26,18 +26,31 @@ const MarkdownText = ({ text }) => {
     );
 };
 
+const seenTexts = new Set();
+
 const TypewriterText = ({ text }) => {
-    const [display, setDisplay] = useState('');
+    const [display, setDisplay] = useState(seenTexts.has(text) ? text : '');
+    
     useEffect(() => {
+        if (seenTexts.has(text)) {
+            setDisplay(text);
+            return;
+        }
+        
         let i = 0;
-        setDisplay('');
         const interval = setInterval(() => {
-            setDisplay(text.substring(0, i));
-            i++;
-            if (i > text.length) clearInterval(interval);
-        }, 15); // Fast typing
+            i += 4; // Much faster typing (4 chars per tick)
+            if (i >= text.length) {
+                setDisplay(text);
+                seenTexts.add(text);
+                clearInterval(interval);
+            } else {
+                setDisplay(text.substring(0, i));
+            }
+        }, 10); 
         return () => clearInterval(interval);
     }, [text]);
+    
     return <MarkdownText text={display} />;
 };
 
