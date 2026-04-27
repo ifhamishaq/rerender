@@ -131,7 +131,7 @@ const NewsGeneratorPage = () => {
             const response = await fetch('/.netlify/functions/generate-wallpaper', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, width: 768, height: 1024 }) // 3:4 ratio
+                body: JSON.stringify({ prompt, width: 1080, height: 1440 }) // 3:4 ratio HD
             });
             const data = await response.json();
             const url = data.url || (data.images && data.images[0]?.url) || data.output || data[0]?.url;
@@ -160,7 +160,12 @@ const NewsGeneratorPage = () => {
         if (!posterRef.current || !bgImage) return;
         setIsExporting(true);
         try {
-            const canvas = await html2canvas(posterRef.current, { useCORS: true, allowTaint: true, backgroundColor: '#000000' });
+            const canvas = await html2canvas(posterRef.current, { 
+                useCORS: true, 
+                allowTaint: true, 
+                backgroundColor: '#000000',
+                scale: 3 // Forces 3x resolution for export
+            });
             const link = document.createElement('a');
             link.download = 'news-post.png';
             link.href = canvas.toDataURL('image/png');
