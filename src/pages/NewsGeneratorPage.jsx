@@ -367,7 +367,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10, height: '100vh', width: '100vw' }}>
+        <div className="workspace-container" style={{ display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '60px', minHeight: '100vh', width: '100%', position: 'relative' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -385,10 +385,6 @@ const NewsGeneratorPage = () => {
                     }
                     .news-sidebar::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: var(--color-accent);
-                    }
-                    html, body {
-                        overflow: hidden !important;
-                        height: 100% !important;
                     }
                     .workspace-container div {
                         scrollbar-width: thin;
@@ -427,7 +423,7 @@ const NewsGeneratorPage = () => {
             </style>
 
             {/* Sidebar News Feed */}
-            <div className="news-sidebar" style={{ width: '280px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)' }}>
+            <div className="news-sidebar" style={{ width: '280px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)', zIndex: 5 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                     <button 
                         onClick={() => navigate('/tools')} 
@@ -773,7 +769,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', color: 'var(--color-text)' }}>
+            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', color: 'var(--color-text)', zIndex: 5 }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
