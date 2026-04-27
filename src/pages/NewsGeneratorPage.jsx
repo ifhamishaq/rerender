@@ -62,6 +62,10 @@ const NewsGeneratorPage = () => {
         try { return JSON.parse(localStorage.getItem('news_gen_gallery')) || []; }
         catch (e) { return []; }
     });
+    const [bgPosX, setBgPosX] = useState(50);
+    const [bgPosY, setBgPosY] = useState(50);
+    const [isDraggingBg, setIsDraggingBg] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     
     // Save/Load settings to localStorage
     useEffect(() => {
@@ -295,6 +299,15 @@ const NewsGeneratorPage = () => {
         const newSegments = [...textSegments];
         newSegments[index].highlight = !newSegments[index].highlight;
         setTextSegments(newSegments);
+    };
+
+    const handleDragMove = (e) => {
+        if (!isDraggingBg) return;
+        const dx = (e.clientX - dragStart.x) / 5;
+        const dy = (e.clientY - dragStart.y) / 5;
+        setBgPosX(prev => Math.max(0, Math.min(100, prev + dx)));
+        setBgPosY(prev => Math.max(0, Math.min(100, prev + dy)));
+        setDragStart({ x: e.clientX, y: e.clientY });
     };
 
     const exportImage = async () => {
@@ -537,6 +550,15 @@ const NewsGeneratorPage = () => {
                         <div 
                             ref={posterRef}
                             className="poster-canvas"
+                            onMouseDown={(e) => {
+                                if (e.target === e.currentTarget || e.target.parentElement === e.currentTarget) {
+                                    setIsDraggingBg(true);
+                                    setDragStart({ x: e.clientX, y: e.clientY });
+                                }
+                            }}
+                            onMouseMove={handleDragMove}
+                            onMouseUp={() => setIsDraggingBg(false)}
+                            onMouseLeave={() => setIsDraggingBg(false)}
                             style={{ 
                                 ...getCanvasDimensions(),
                                 flexShrink: 0,
@@ -547,7 +569,9 @@ const NewsGeneratorPage = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'flex-start',
-                                boxShadow: '0 30px 60px rgba(0,0,0,0.8)'
+                                boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+                                cursor: isDraggingBg ? 'grabbing' : 'grab',
+                                userSelect: 'none'
                             }}
                         >
                             {bgImage ? (
@@ -557,7 +581,7 @@ const NewsGeneratorPage = () => {
                                     width: '100%', height: '100%', 
                                     backgroundImage: `url(${bgImage})`,
                                     backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
+                                    backgroundPosition: `${bgPosX}% ${bgPosY}%`,
                                     zIndex: 0 
                                 }} />
                             ) : (
@@ -773,6 +797,17 @@ const NewsGeneratorPage = () => {
                                     <Move size={12} /> TEXT_POSITION
                                 </div>
                                 <input type="range" min="10" max="90" value={textPosition} onChange={(e) => setTextPosition(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>IMAGE_X ({bgPosX}%)</div>
+                                    <input type="range" min="0" max="100" value={bgPosX} onChange={(e) => setBgPosX(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem', color: 'var(--color-text-secondary)' }}>IMAGE_Y ({bgPosY}%)</div>
+                                    <input type="range" min="0" max="100" value={bgPosY} onChange={(e) => setBgPosY(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
