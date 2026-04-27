@@ -14,9 +14,24 @@ exports.handler = async function (event, context) {
             };
         }
 
-        const url = `https://api.freenewsapi.com/v1/top-headlines?lang=en&key=${apiKey}`;
+        const url = `https://api.freenewsapi.io/v1/news?lang=en`;
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: {
+                'x-api-key': apiKey // Some APIs prefer header, but let's pass it in query too just in case
+            }
+        });
+        
+        // If the fetch fails with a non-2xx status code
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error("FreeNewsAPI Error Response:", errText);
+            return {
+                statusCode: response.status,
+                body: JSON.stringify({ error: `API Error: ${response.status} ${response.statusText}`, details: errText })
+            };
+        }
+
         const data = await response.json();
 
         return {
@@ -28,10 +43,10 @@ exports.handler = async function (event, context) {
             body: JSON.stringify(data)
         };
     } catch (error) {
-        console.error("FreeNewsAPI Proxy Error:", error);
+        console.error("FreeNewsAPI Proxy Error:", error.message || error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to fetch news from API.' })
+            body: JSON.stringify({ error: 'Failed to fetch news from API.', details: error.message || String(error) })
         };
     }
 };

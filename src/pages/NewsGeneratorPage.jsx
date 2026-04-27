@@ -47,9 +47,13 @@ const NewsGeneratorPage = () => {
             // Attempt to fetch from our serverless proxy
             const res = await fetch('/.netlify/functions/fetch-news');
             const data = await res.json();
-            if (data.articles) {
+            if (data.data) {
+                setNews(data.data.slice(0, 10));
+            } else if (data.articles) {
                 setNews(data.articles.slice(0, 10));
             } else if (data.error) {
+                throw new Error(data.error);
+            }
                 throw new Error(data.error);
             }
         } catch (err) {
