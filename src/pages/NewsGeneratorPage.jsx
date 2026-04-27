@@ -235,7 +235,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ display: 'flex', height: '100vh', width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -254,6 +254,7 @@ const NewsGeneratorPage = () => {
                     }
                 `}
             </style>
+
             {/* Sidebar News Feed */}
             <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -328,65 +329,14 @@ const NewsGeneratorPage = () => {
                 </div>
             </div>
 
-            {/* Main Canvas Area */}
-            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', padding: '2rem' }}>
+            {/* Main Preview Area */}
+            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '2rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
                 {!selectedNews && !isGenerating ? (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
                     </div>
                 ) : (
-                    <>
-                        {/* Editor Controls */}
-                        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
-                                    <option value="Impact, sans-serif">Impact (Bold)</option>
-                                    <option value="'Arial Black', sans-serif">Arial Black</option>
-                                    <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
-                                    <option value="'Bebas Neue', cursive">Bebas Neue</option>
-                                </select>
-                                
-                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <ImageIcon size={14} /> IMAGE
-                                </button>
-                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <Type size={14} /> HOOK
-                                </button>
-                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem' }}>
-                                    <AlignLeft size={14} /> CAPTION
-                                </button>
-                            </div>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>EDIT_HEADLINE</div>
-                                <textarea 
-                                    value={textSegments.map(s => s.text).join(' ')}
-                                    onChange={(e) => handleHeadlineEdit(e.target.value)}
-                                    style={{ width: '100%', padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', fontSize: '0.8rem', minHeight: '60px', fontFamily: 'inherit' }}
-                                />
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.3rem' }}>FONT_SIZE</div>
-                                    <input type="range" min="-10" max="20" value={fontSizeAdjustment} onChange={(e) => setFontSizeAdjustment(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.3rem' }}>OVERLAY_DARKNESS</div>
-                                    <input type="range" min="0" max="100" value={overlayOpacity * 100} onChange={(e) => setOverlayOpacity(parseInt(e.target.value) / 100)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
-                                </div>
-                            </div>
-                            
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Your Handle" style={{ flex: 1, padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px' }} />
-                                <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'transparent' }} />
-                                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                                    <Camera size={14} style={{ marginRight: '0.5rem' }} /> LOGO
-                                    <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
-                                </label>
-                            </div>
-                        </div>
-
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
                         {/* Visual Poster */}
                         <div 
                             ref={posterRef}
@@ -401,7 +351,7 @@ const NewsGeneratorPage = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'flex-end',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                                boxShadow: '0 30px 60px rgba(0,0,0,0.8)'
                             }}
                         >
                             {bgImage ? (
@@ -456,25 +406,107 @@ const NewsGeneratorPage = () => {
                             </div>
                         </div>
 
-                        {/* Export Controls */}
-                        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                            <button onClick={exportImage} disabled={isExporting} style={{ flex: 1, padding: '1rem', backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
-                                {isExporting ? <RefreshCw className="spin" size={18} /> : <Download size={18} />}
-                                EXPORT_POSTER
-                            </button>
-                        </div>
-                        
-                        <div style={{ width: '100%', maxWidth: '500px', marginTop: '1rem', fontSize: '0.8rem', opacity: 0.5, textAlign: 'center' }}>
-                            Click on any word in the poster to highlight it.
+                        {/* HD Export Button */}
+                        <button 
+                            onClick={exportImage} 
+                            disabled={isExporting || !bgImage}
+                            style={{ 
+                                width: '100%',
+                                padding: '1.2rem', 
+                                backgroundColor: 'var(--color-accent)', 
+                                color: '#FFF', 
+                                border: 'none', 
+                                borderRadius: '12px', 
+                                fontWeight: 900, 
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.8rem',
+                                boxShadow: '0 10px 20px rgba(232, 17, 26, 0.3)',
+                                transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
+                            {isExporting ? <RefreshCw className="spin" size={20} /> : <Download size={20} />}
+                            {isExporting ? 'EXPORTING_HD...' : 'DOWNLOAD_HD_POST'}
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Right Sidebar: Design Controls */}
+            <div style={{ width: '350px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto' }} className="custom-scrollbar">
+                <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8 }}>DESIGN_CONTROLS</h3>
+                
+                {selectedNews && (
+                    <>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>QUICK_REGENERATE</div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <ImageIcon size={14} /> IMAGE
+                                </button>
+                                <button onClick={regenerateHook} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <Type size={14} /> HOOK
+                                </button>
+                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem' }}>
+                                    <AlignLeft size={14} /> CAPTION
+                                </button>
+                            </div>
                         </div>
 
-                        {/* AI Generated Caption */}
-                        <div style={{ width: '100%', maxWidth: '500px', marginTop: '2rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                            <div style={{ fontSize: '0.7rem', fontWeight: 900, opacity: 0.5, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Type size={12} /> AI_SUGGESTED_CAPTION
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>HEADLINE_EDITOR</div>
+                            <textarea 
+                                value={textSegments.map(s => s.text).join(' ')}
+                                onChange={(e) => handleHeadlineEdit(e.target.value)}
+                                style={{ width: '100%', padding: '0.8rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '0.8rem', minHeight: '80px', fontFamily: 'inherit', lineHeight: 1.4 }}
+                            />
+                            <div style={{ fontSize: '0.65rem', opacity: 0.4 }}>* Click words on the poster to toggle highlights.</div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>FONT_FAMILY</div>
+                                <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ width: '100%', padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px' }}>
+                                    <option value="Impact, sans-serif">Impact (Bold)</option>
+                                    <option value="'Arial Black', sans-serif">Arial Black</option>
+                                    <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                                    <option value="'Bebas Neue', cursive">Bebas Neue</option>
+                                </select>
                             </div>
-                            <div style={{ fontSize: '0.9rem', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                                {caption}
+
+                            <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>FONT_SIZE</div>
+                                    <input type="range" min="-10" max="30" value={fontSizeAdjustment} onChange={(e) => setFontSizeAdjustment(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>OVERLAY</div>
+                                    <input type="range" min="0" max="100" value={overlayOpacity * 100} onChange={(e) => setOverlayOpacity(parseInt(e.target.value) / 100)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '0.8rem' }}>BRANDING</div>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <input type="text" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle" style={{ flex: 1, padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '0.8rem' }} />
+                                    <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} style={{ width: '40px', height: '40px', padding: '0', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: 'transparent' }} />
+                                    <label style={{ padding: '0.6rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer' }}>
+                                        <Camera size={18} />
+                                        <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800, marginBottom: '1rem' }}>POST_CAPTION</div>
+                            <div style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px dashed var(--color-border)', borderRadius: '8px', fontSize: '0.75rem', lineHeight: 1.5, maxHeight: '200px', overflowY: 'auto' }}>
+                                {caption || 'Caption will appear here...'}
                             </div>
                         </div>
                     </>
