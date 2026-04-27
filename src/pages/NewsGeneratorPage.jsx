@@ -429,7 +429,7 @@ const NewsGeneratorPage = () => {
             </style>
 
             {/* Sidebar News Feed */}
-            <div className="news-sidebar" style={{ width: '280px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)', zIndex: 5 }}>
+            <div className="news-sidebar custom-scrollbar" style={{ width: '280px', flexShrink: 0, height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)', zIndex: 5, overflowY: 'auto' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                     <button 
                         onClick={() => navigate('/tools')} 
