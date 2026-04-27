@@ -219,10 +219,10 @@ const NewsGeneratorPage = () => {
 
     const getFontSize = () => {
         const totalChars = textSegments.reduce((acc, s) => acc + s.text.length, 0);
-        if (totalChars > 50) return '1.5rem';
-        if (totalChars > 35) return '1.9rem';
-        if (totalChars > 20) return '2.3rem';
-        return '2.8rem';
+        if (totalChars > 50) return '1.8rem';
+        if (totalChars > 35) return '2.3rem';
+        if (totalChars > 20) return '2.9rem';
+        return '3.5rem';
     };
 
     return (
@@ -230,23 +230,23 @@ const NewsGeneratorPage = () => {
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
-                    .news-sidebar::-webkit-scrollbar {
+                    .news-sidebar::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
                         width: 6px;
                     }
-                    .news-sidebar::-webkit-scrollbar-track {
+                    .news-sidebar::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
                         background: rgba(255,255,255,0.02);
                     }
-                    .news-sidebar::-webkit-scrollbar-thumb {
+                    .news-sidebar::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
                         background: rgba(255,255,255,0.1);
                         border-radius: 10px;
                     }
-                    .news-sidebar::-webkit-scrollbar-thumb:hover {
+                    .news-sidebar::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: var(--color-accent);
                     }
                 `}
             </style>
             {/* Sidebar News Feed */}
-            <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', overflowY: 'auto', padding: '2rem' }}>
+            <div className="news-sidebar" style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <RefreshCw size={18} className={loadingNews ? 'spin' : ''} /> TRENDING NEWS
                 </h2>
@@ -275,33 +275,48 @@ const NewsGeneratorPage = () => {
                         </button>
                     ))}
                 </div>
-                {loadingNews ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <motion.div 
-                                key={i}
-                                initial={{ opacity: 0.2 }}
-                                animate={{ opacity: [0.2, 0.5, 0.2] }}
-                                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
-                                style={{ 
-                                    height: '80px', 
-                                    backgroundColor: 'rgba(255,255,255,0.05)', 
-                                    borderRadius: '8px',
-                                    border: '1px solid rgba(255,255,255,0.02)'
-                                }}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {news.map((n, i) => (
-                            <div key={i} onClick={() => generatePost(n)} style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', cursor: 'pointer', border: '1px solid transparent', transition: 'border 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.border = '1px solid var(--color-accent)'} onMouseLeave={(e) => e.currentTarget.style.border = '1px solid transparent'}>
-                                <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem' }}>{n.title}</div>
-                                <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{n.description?.substring(0, 80)}...</div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+
+                {/* Scrollable News List */}
+                <div 
+                    onWheel={(e) => e.stopPropagation()}
+                    style={{ 
+                        flex: 1, 
+                        overflowY: 'auto', 
+                        paddingRight: '0.5rem',
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        gap: '1rem' 
+                    }}
+                    className="custom-scrollbar"
+                >
+                    {loadingNews ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <motion.div 
+                                    key={i}
+                                    initial={{ opacity: 0.2 }}
+                                    animate={{ opacity: [0.2, 0.5, 0.2] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+                                    style={{ 
+                                        height: '80px', 
+                                        backgroundColor: 'rgba(255,255,255,0.05)', 
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(255,255,255,0.02)'
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {news.map((n, i) => (
+                                <div key={i} onClick={() => generatePost(n)} style={{ padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', cursor: 'pointer', border: '1px solid transparent', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.border = '1px solid var(--color-accent)'} onMouseLeave={(e) => e.currentTarget.style.border = '1px solid transparent'}>
+                                    <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem' }}>{n.title}</div>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>{n.description?.substring(0, 80)}...</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Main Canvas Area */}
@@ -380,8 +395,8 @@ const NewsGeneratorPage = () => {
                             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', zIndex: 1 }} />
 
                             {/* Text Content */}
-                            <div style={{ position: 'relative', zIndex: 2, padding: '1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ position: 'relative', width: '95%', marginBottom: '1.5rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ position: 'relative', zIndex: 2, padding: '3rem 1rem', width: '100%', boxSizing: 'border-box', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ position: 'relative', width: '95%', marginBottom: '1.8rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
                                     <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.3rem 1rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                                         {logo ? (
