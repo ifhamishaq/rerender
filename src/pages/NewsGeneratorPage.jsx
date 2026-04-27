@@ -9,6 +9,150 @@ import { supabase } from '../utils/supabase';
 // Helper for calling Oracle AI for text generation
 import { fetchOpenRouter } from '../utils/ai';
 
+const PosterContent = ({ 
+    posterRef, 
+    dimensions, 
+    bgImage, 
+    bgPosX, 
+    bgPosY, 
+    bgZoom, 
+    isDraggingBg, 
+    handleDragMove, 
+    setIsDraggingBg, 
+    setDragStart,
+    overlayOpacity,
+    textPosition,
+    logo,
+    handle,
+    brandColor,
+    fontFamily,
+    fontSize,
+    lineHeight,
+    letterSpacing,
+    textGlow,
+    useStroke,
+    textSegments,
+    toggleHighlight,
+    isLifetime,
+    setShowUnlockModal,
+    isHDEquivalent = false
+}) => {
+    return (
+        <div 
+            ref={posterRef}
+            className="poster-canvas"
+            onMouseDown={(e) => {
+                if (setIsDraggingBg && e.target.tagName !== 'SPAN') {
+                    setIsDraggingBg(true);
+                    setDragStart({ x: e.clientX, y: e.clientY });
+                }
+            }}
+            onMouseMove={handleDragMove}
+            onMouseUp={() => setIsDraggingBg && setIsDraggingBg(false)}
+            onMouseLeave={() => setIsDraggingBg && setIsDraggingBg(false)}
+            style={{ 
+                ...dimensions,
+                backgroundColor: '#050505', 
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                cursor: isDraggingBg ? 'grabbing' : 'grab',
+                userSelect: 'none',
+                // Critical: Force 1.0 scale and high-res dimensions for the HD capture clone
+                transform: isHDEquivalent ? 'none' : undefined,
+                zoom: isHDEquivalent ? '1' : undefined
+            }}
+        >
+            {bgImage ? (
+                <img 
+                    crossOrigin="anonymous"
+                    src={bgImage} 
+                    alt="Background" 
+                    style={{ 
+                        position: 'absolute', 
+                        top: `${bgPosY}%`, 
+                        left: `${bgPosX}%`, 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        transform: `translate(-50%, -50%) scale(${bgZoom / 100})`,
+                        zIndex: 0,
+                        transition: isDraggingBg ? 'none' : 'transform 0.1s ease-out'
+                    }} 
+                />
+            ) : (
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
+                    <RefreshCw className="spin" size={24} color="var(--color-accent)" />
+                </div>
+            )}
+
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
+
+            <div 
+                className="poster-text-container"
+                style={{ 
+                    position: 'absolute', 
+                    top: `${textPosition}%`, 
+                    transform: 'translateY(-50%)', 
+                    zIndex: 2, 
+                    padding: '0 80px', 
+                    width: '100%', 
+                    boxSizing: 'border-box', 
+                    textAlign: 'center', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                }}
+            >
+                <div style={{ position: 'relative', width: '100%', marginBottom: '60px', minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', top: '50%', left: '10%', width: '30%', height: '3px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
+                    <div style={{ position: 'absolute', top: '50%', right: '10%', width: '30%', height: '3px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
+                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 30px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {logo ? (
+                            <div style={{ 
+                                width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', 
+                                borderRadius: '50%', border: '4px solid #FFF', 
+                                overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', 
+                                boxShadow: '0 0 30px rgba(255,255,255,0.2)', position: 'relative',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <img 
+                                    crossOrigin="anonymous" 
+                                    src={logo} 
+                                    alt="Logo" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                                />
+                            </div>
+                        ) : (
+                            <div style={{ width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', borderRadius: '50%', backgroundColor: brandColor, border: '4px solid #FFF', flexShrink: 0 }} />
+                        )}
+                        <span style={{ color: '#FFF', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '15px', textShadow: '0 4px 8px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
+                    </div>
+                </div>
+
+                <div style={{ fontFamily, fontSize, width: '100%', boxSizing: 'border-box', lineHeight: lineHeight, fontWeight: 'normal', textTransform: 'uppercase', textShadow: textGlow ? `0 0 12px ${brandColor}, 0 0 20px ${brandColor}` : (useStroke ? 'none' : '0 10px 25px rgba(0,0,0,0.8)'), paintOrder: useStroke ? 'stroke fill' : 'normal', WebkitTextStroke: useStroke ? `8px #000` : '0px transparent', wordWrap: 'break-word', letterSpacing: `${letterSpacing}em` }}>
+                    {textSegments.map((seg, i) => (
+                        <span key={i} onClick={() => toggleHighlight && toggleHighlight(i)} style={{ color: seg.highlight ? brandColor : '#FFF', cursor: 'pointer', display: 'inline-block', margin: '0 0.5rem', textShadow: textGlow ? `0 0 15px ${seg.highlight ? brandColor : '#FFF'}, 0 10px 25px rgba(0,0,0,0.8)` : (useStroke ? 'none' : '0 10px 25px rgba(0,0,0,0.8)') }}>{seg.text}</span>
+                    ))}
+                </div>
+            </div>
+
+            {!isLifetime && (
+                <div 
+                    data-watermark="oracle"
+                    style={{ position: 'absolute', bottom: '40px', right: '40px', zIndex: 3, display: 'flex', alignItems: 'center', gap: '15px' }}
+                >
+                    <div style={{ opacity: 0.4, fontSize: '1.2rem', fontWeight: 900, color: '#FFF', letterSpacing: '0.2em' }}>MADE_WITH_ORACLE</div>
+                    <button onClick={() => setShowUnlockModal && setShowUnlockModal(true)} style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '20px' }}>✕</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const NewsGeneratorPage = () => {
     const { user, profile, spendCredits } = useAuth();
     const navigate = useNavigate();
@@ -138,6 +282,7 @@ const NewsGeneratorPage = () => {
     };
     
     const posterRef = useRef(null);
+    const hdPosterRef = useRef(null);
 
     useEffect(() => {
         fetchNews(category);
@@ -381,42 +526,20 @@ const NewsGeneratorPage = () => {
 
         setIsExporting(true);
         try {
-            // High-fidelity capture settings
-            const canvas = await html2canvas(posterRef.current, { 
+            // High-fidelity capture from the HIDDEN HD Anchor (hdPosterRef)
+            // This anchor is 1080px wide and has NO zoom/scaling applied.
+            const canvas = await html2canvas(hdPosterRef.current, { 
                 useCORS: true, 
-                scale: 2, // 2x for retina quality without bloating file size
+                scale: 2, 
                 backgroundColor: '#000',
                 imageTimeout: 0,
                 logging: false,
                 allowTaint: true,
                 onclone: (clonedDoc) => {
-                    // Reset the zoom/scale on the container in the clone
-                    const workspace = clonedDoc.querySelector('.poster-workspace');
-                    if (workspace) {
-                        workspace.style.zoom = "1";
-                        workspace.style.transform = "none";
-                    }
-
                     // Forcefully remove watermark in the capture clone if Pro
                     if (isLifetime) {
                         const wm = clonedDoc.querySelector('[data-watermark="oracle"]');
                         if (wm) wm.style.display = 'none';
-                    }
-
-                    // LOCK ALIGNMENT: Convert percentage top to hard pixels to prevent drift
-                    const textContainer = clonedDoc.querySelector('.poster-text-container');
-                    if (textContainer && posterRef.current) {
-                        const rect = posterRef.current.getBoundingClientRect();
-                        const scale = 1080 / rect.width; // Normalize to 1080px base
-                        const exactTop = (rect.height * (textPosition / 100));
-                        textContainer.style.top = `${exactTop}px`;
-                        textContainer.style.transform = 'translateY(-50%)';
-                    }
-                    
-                    const poster = clonedDoc.querySelector('.poster-canvas');
-                    if (poster) {
-                        poster.style.boxShadow = 'none';
-                        poster.style.border = 'none';
                     }
                 }
             });
@@ -690,115 +813,33 @@ const NewsGeneratorPage = () => {
                             flexShrink: 0,
                             zoom: isMobile ? 0.3 : 0.45 
                         }}>
-                            <div 
-                                ref={posterRef}
-                                className="poster-canvas"
-                                onMouseDown={(e) => {
-                                    if (e.target.tagName !== 'SPAN') {
-                                        setIsDraggingBg(true);
-                                        setDragStart({ x: e.clientX, y: e.clientY });
-                                    }
-                                }}
-                                onMouseMove={handleDragMove}
-                                onMouseUp={() => setIsDraggingBg(false)}
-                                onMouseLeave={() => setIsDraggingBg(false)}
-                                style={{ 
-                                    ...getCanvasDimensions(),
-                                    backgroundColor: '#050505', 
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'flex-start',
-                                    cursor: isDraggingBg ? 'grabbing' : 'grab',
-                                    userSelect: 'none'
-                                }}
-                            >
-                                {bgImage ? (
-                                    <img 
-                                        crossOrigin="anonymous"
-                                        src={bgImage} 
-                                        alt="Background" 
-                                        style={{ 
-                                            position: 'absolute', 
-                                            top: `${bgPosY}%`, 
-                                            left: `${bgPosX}%`, 
-                                            width: '100%', 
-                                            height: '100%', 
-                                            objectFit: 'cover',
-                                            transform: `translate(-50%, -50%) scale(${bgZoom / 100})`,
-                                            zIndex: 0,
-                                            transition: isDraggingBg ? 'none' : 'transform 0.1s ease-out'
-                                        }} 
-                                    />
-                                ) : (
-                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
-                                        <RefreshCw className="spin" size={24} color="var(--color-accent)" />
-                                    </div>
-                                )}
-
-                                <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
-
-                                <div 
-                                    className="poster-text-container"
-                                    style={{ 
-                                        position: 'absolute', 
-                                        top: `${textPosition}%`, 
-                                        transform: 'translateY(-50%)', 
-                                        zIndex: 2, 
-                                        padding: '0 80px', 
-                                        width: '100%', 
-                                        boxSizing: 'border-box', 
-                                        textAlign: 'center', 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center' 
-                                    }}
-                                >
-                                    <div style={{ position: 'relative', width: '100%', marginBottom: '60px', minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <div style={{ position: 'absolute', top: '50%', left: '10%', width: '30%', height: '3px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
-                                        <div style={{ position: 'absolute', top: '50%', right: '10%', width: '30%', height: '3px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
-                                        <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 30px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                            {logo ? (
-                                                <div style={{ 
-                                                    width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', 
-                                                    borderRadius: '50%', border: '4px solid #FFF', 
-                                                    overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', 
-                                                    boxShadow: '0 0 30px rgba(255,255,255,0.2)', position: 'relative',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }}>
-                                                    <img 
-                                                        crossOrigin="anonymous" 
-                                                        src={logo} 
-                                                        alt="Logo" 
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div style={{ width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', borderRadius: '50%', backgroundColor: brandColor, border: '4px solid #FFF', flexShrink: 0 }} />
-                                            )}
-                                            <span style={{ color: '#FFF', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '15px', textShadow: '0 4px 8px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
-                                        </div>
-                                    </div>
-
-                                    <div style={{ fontFamily, fontSize: getFontSize(), width: '100%', boxSizing: 'border-box', lineHeight: lineHeight, fontWeight: 'normal', textTransform: 'uppercase', textShadow: textGlow ? `0 0 12px ${brandColor}, 0 0 20px ${brandColor}` : (useStroke ? 'none' : '0 10px 25px rgba(0,0,0,0.8)'), paintOrder: useStroke ? 'stroke fill' : 'normal', WebkitTextStroke: useStroke ? `8px #000` : '0px transparent', wordWrap: 'break-word', letterSpacing: `${letterSpacing}em` }}>
-                                        {textSegments.map((seg, i) => (
-                                            <span key={i} onClick={() => toggleHighlight(i)} style={{ color: seg.highlight ? brandColor : '#FFF', cursor: 'pointer', display: 'inline-block', margin: '0 0.5rem', textShadow: textGlow ? `0 0 15px ${seg.highlight ? brandColor : '#FFF'}, 0 10px 25px rgba(0,0,0,0.8)` : (useStroke ? 'none' : '0 10px 25px rgba(0,0,0,0.8)') }}>{seg.text}</span>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {!isLifetime && (
-                                    <div 
-                                        data-watermark="oracle"
-                                        style={{ position: 'absolute', bottom: '40px', right: '40px', zIndex: 3, display: 'flex', alignItems: 'center', gap: '15px' }}
-                                    >
-                                        <div style={{ opacity: 0.4, fontSize: '1.2rem', fontWeight: 900, color: '#FFF', letterSpacing: '0.2em' }}>MADE_WITH_ORACLE</div>
-                                        <button onClick={() => setShowUnlockModal(true)} style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '20px' }}>✕</button>
-                                    </div>
-                                )}
-                            </div>
+                            <PosterContent 
+                                posterRef={posterRef}
+                                dimensions={getCanvasDimensions()}
+                                bgImage={bgImage}
+                                bgPosX={bgPosX}
+                                bgPosY={bgPosY}
+                                bgZoom={bgZoom}
+                                isDraggingBg={isDraggingBg}
+                                handleDragMove={handleDragMove}
+                                setIsDraggingBg={setIsDraggingBg}
+                                setDragStart={setDragStart}
+                                overlayOpacity={overlayOpacity}
+                                textPosition={textPosition}
+                                logo={logo}
+                                handle={handle}
+                                brandColor={brandColor}
+                                fontFamily={fontFamily}
+                                fontSize={getFontSize()}
+                                lineHeight={lineHeight}
+                                letterSpacing={letterSpacing}
+                                textGlow={textGlow}
+                                useStroke={useStroke}
+                                textSegments={textSegments}
+                                toggleHighlight={toggleHighlight}
+                                isLifetime={isLifetime}
+                                setShowUnlockModal={setShowUnlockModal}
+                            />
                         </div>
 
                         <div style={{ width: '100%', maxWidth: getCanvasDimensions().width, marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxSizing: 'border-box' }}>
@@ -1144,7 +1185,32 @@ const NewsGeneratorPage = () => {
                             >
                                 SUBMIT_FOR_VERIFICATION
                             </button>
-                        </div>
+                            {/* Hidden HD Anchor: For Pixel-Perfect Export */}
+                <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+                    <PosterContent 
+                        posterRef={hdPosterRef}
+                        dimensions={getCanvasDimensions()}
+                        bgImage={bgImage}
+                        bgPosX={bgPosX}
+                        bgPosY={bgPosY}
+                        bgZoom={bgZoom}
+                        overlayOpacity={overlayOpacity}
+                        textPosition={textPosition}
+                        logo={logo}
+                        handle={handle}
+                        brandColor={brandColor}
+                        fontFamily={fontFamily}
+                        fontSize={getFontSize()}
+                        lineHeight={lineHeight}
+                        letterSpacing={letterSpacing}
+                        textGlow={textGlow}
+                        useStroke={useStroke}
+                        textSegments={textSegments}
+                        isLifetime={isLifetime}
+                        isHDEquivalent={true} // Locked at 1.0 scale
+                    />
+                </div>
+            </div>
 
                         <button onClick={() => setShowUnlockModal(false)} style={{ border: 'none', backgroundColor: 'transparent', color: 'var(--color-text)', opacity: 0.5, fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
                             MAYBE_LATER
