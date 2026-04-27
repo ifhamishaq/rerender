@@ -12,6 +12,7 @@ import { fetchOpenRouter } from '../utils/ai';
 const NewsGeneratorPage = () => {
     const { user, profile, spendCredits } = useAuth();
     const navigate = useNavigate();
+    const isMobile = window.innerWidth < 768;
     const [news, setNews] = useState([]);
     const [loadingNews, setLoadingNews] = useState(false);
     
