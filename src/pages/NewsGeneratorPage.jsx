@@ -334,7 +334,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10, height: '100vh' }}>
+        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10, height: '100vh', width: '100vw' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -352,6 +352,14 @@ const NewsGeneratorPage = () => {
                     }
                     .news-sidebar::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: var(--color-accent);
+                    }
+                    html, body {
+                        overflow: hidden !important;
+                        height: 100% !important;
+                    }
+                    .workspace-container div {
+                        scrollbar-width: thin;
+                        scrollbar-color: rgba(255,255,255,0.1) transparent;
                     }
 
                     @media (max-width: 1024px) {
@@ -384,7 +392,7 @@ const NewsGeneratorPage = () => {
             <div className="news-sidebar" style={{ width: '280px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', padding: '1.2rem', backgroundColor: 'var(--color-bg)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
                     <button 
-                        onClick={() => navigate('/lab/oracle-workspace')} 
+                        onClick={() => navigate('/tools')} 
                         style={{ 
                             padding: '0.4rem 0.8rem', borderRadius: '20px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 
                         }}
