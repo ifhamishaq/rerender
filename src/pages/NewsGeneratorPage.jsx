@@ -51,6 +51,9 @@ const NewsGeneratorPage = () => {
     const [tone, setTone] = useState('shocking');
     const [language, setLanguage] = useState('english');
     const [includeHashtags, setIncludeHashtags] = useState(true);
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
+    const [transactionId, setTransactionId] = useState('');
+    const [isLifetime, setIsLifetime] = useState(false); // Should eventually come from DB
     
     // Save settings to localStorage
     useEffect(() => {
@@ -287,7 +290,12 @@ const NewsGeneratorPage = () => {
         else if (totalChars > 35) baseSize = 2.8;
         else if (totalChars > 20) baseSize = 3.5;
         
-        return `${baseSize + (fontSizeAdjustment / 10)}rem`;
+        // Multiplier based on aspect ratio width
+        let widthMultiplier = 1;
+        if (aspectRatio === '9/16') widthMultiplier = 0.8;
+        if (aspectRatio === '16/9') widthMultiplier = 1.4;
+        
+        return `${(baseSize + (fontSizeAdjustment / 10)) * widthMultiplier}rem`;
     };
 
     const handleHeadlineEdit = (val) => {
@@ -478,9 +486,11 @@ const NewsGeneratorPage = () => {
                                     width: '100%', 
                                     boxSizing: 'border-box', 
                                     lineHeight: 0.95, 
+                                    fontWeight: 900,
                                     textTransform: 'uppercase', 
                                     textShadow: useStroke ? 'none' : '0 4px 10px rgba(0,0,0,0.8)', 
-                                    WebkitTextStroke: useStroke ? `2px #000` : 'none',
+                                    paintOrder: 'stroke fill',
+                                    WebkitTextStroke: useStroke ? `3px #000` : 'none',
                                     wordWrap: 'break-word', 
                                     letterSpacing: '-0.02em' 
                                 }}>
@@ -501,23 +511,34 @@ const NewsGeneratorPage = () => {
                                 </div>
                             </div>
 
-                            {showWatermark && (
-                                <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 3, opacity: 0.3, fontSize: '0.6rem', fontWeight: 900, color: '#FFF', letterSpacing: '0.2em' }}>
-                                    MADE_WITH_ORACLE
+                            {!isLifetime && (
+                                <div style={{ position: 'absolute', bottom: '1.5rem', right: '1.5rem', zIndex: 3, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ opacity: 0.4, fontSize: '0.65rem', fontWeight: 900, color: '#FFF', letterSpacing: '0.2em' }}>
+                                        MADE_WITH_ORACLE
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowUnlockModal(true)}
+                                        style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
                             )}
                         </div>
 
                         {/* Quick Regeneration Tools */}
-                        <div style={{ width: getCanvasDimensions().width, marginTop: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
-                                <ImageIcon size={14} /> AI_IMAGE
-                            </button>
-                            <label style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
-                                <Camera size={14} /> CUSTOM_BG
-                                <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
-                            </label>
-                            <div style={{ flex: '1 1 100%', display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ width: getCanvasDimensions().width, marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <button onClick={() => generateImage(bgPrompt)} disabled={isGenerating} style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                    <ImageIcon size={14} /> AI_IMAGE
+                                </button>
+                                <label style={{ flex: '1 1 45%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>
+                                    <Camera size={14} /> CUSTOM_BG
+                                    <input type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
+                                </label>
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input 
                                     type="text" 
                                     placeholder="Paste Image URL..." 
@@ -529,38 +550,39 @@ const NewsGeneratorPage = () => {
                                 <button onClick={regenerateHook} disabled={isGenerating} style={{ padding: '0.6rem 1rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
                                     <Type size={14} /> HOOK
                                 </button>
-                                <button onClick={regenerateCaption} disabled={isGenerating} style={{ padding: '0.6rem 1rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700 }}>
-                                    <AlignLeft size={14} /> CAPTION
-                                </button>
                             </div>
                         </div>
 
                         {/* HD Export Button */}
-                        <button 
-                            onClick={exportImage} 
-                            disabled={isExporting || !bgImage}
-                            style={{ 
-                                width: getCanvasDimensions().width,
-                                marginTop: '1rem',
-                                padding: '1.2rem', 
-                                backgroundColor: 'var(--color-accent)', 
-                                color: '#000', 
-                                border: 'none', 
-                                borderRadius: '12px', 
-                                fontWeight: 900, 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                gap: '0.8rem', 
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                                opacity: (isExporting || !bgImage) ? 0.5 : 1
-                            }}
-                        >
-                            {isExporting ? <RefreshCw className="spin" size={18} /> : <Download size={18} />}
-                            {isExporting ? 'EXPORTING_HD...' : `DOWNLOAD ${aspectRatio} POST`}
-                        </button>
+                        <div style={{ width: getCanvasDimensions().width, marginTop: '1rem' }}>
+                            <button 
+                                onClick={exportImage} 
+                                disabled={isExporting || !bgImage}
+                                style={{ 
+                                    width: '100%',
+                                    padding: '1.2rem', 
+                                    backgroundColor: 'var(--color-accent)', 
+                                    color: '#000', 
+                                    border: 'none', 
+                                    borderRadius: '12px', 
+                                    fontWeight: 900, 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    gap: '0.8rem', 
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                                    opacity: (isExporting || !bgImage) ? 0.5 : 1
+                                }}
+                            >
+                                {isExporting ? <RefreshCw className="spin" size={18} /> : <Download size={18} />}
+                                {isExporting ? 'EXPORTING_HD...' : `DOWNLOAD ${aspectRatio} POST`}
+                            </button>
+                            <div style={{ fontSize: '0.6rem', textAlign: 'center', marginTop: '0.5rem', opacity: 0.5, letterSpacing: '0.05em' }}>
+                                COST: 50 CREDITS PER EXPORT
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
@@ -712,6 +734,58 @@ const NewsGeneratorPage = () => {
                     </>
                 )}
             </div>
+
+            {/* Monetization Modal */}
+            {showUnlockModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>REMOVE_WATERMARK</h2>
+                            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>Unlock lifetime watermark removal and professional export scaling for a one-time fee.</p>
+                        </div>
+                        
+                        <div style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)' }}>$50</div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.5, marginTop: '0.2rem' }}>LIFETIME_ACCESS</div>
+                        </div>
+
+                        <a 
+                            href="https://www.paypal.com/paypalme/yourhandle/50" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ width: '100%', padding: '1rem', backgroundColor: '#0070ba', color: '#FFF', borderRadius: '12px', textAlign: 'center', textDecoration: 'none', fontWeight: 900, fontSize: '0.9rem' }}
+                        >
+                            PAY_WITH_PAYPAL
+                        </a>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <div style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>ENTER_TRANSACTION_ID</div>
+                            <input 
+                                type="text" 
+                                value={transactionId}
+                                onChange={(e) => setTransactionId(e.target.value)}
+                                placeholder="Txn: 123456789..."
+                                style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '0.8rem' }}
+                            />
+                            <button 
+                                onClick={async () => {
+                                    if (!transactionId) return alert('Please enter Transaction ID');
+                                    await supabase.from('admin_requests').insert({ user_id: user.id, type: 'WATERMARK_REMOVAL', txn_id: transactionId });
+                                    alert('Request submitted! Our team will verify and activate your lifetime access.');
+                                    setShowUnlockModal(false);
+                                }}
+                                style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-accent)', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 900, cursor: 'pointer' }}
+                            >
+                                SUBMIT_FOR_VERIFICATION
+                            </button>
+                        </div>
+
+                        <button onClick={() => setShowUnlockModal(false)} style={{ border: 'none', backgroundColor: 'transparent', color: 'var(--color-text)', opacity: 0.5, fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                            MAYBE_LATER
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
