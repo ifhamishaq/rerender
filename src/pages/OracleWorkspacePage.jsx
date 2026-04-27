@@ -183,7 +183,7 @@ const OracleWorkspacePage = () => {
         runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop,
         runRewriter, runProposalGenerator, runContentCalendar, runBriefExtractor
     } = useOracle();
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     
     const [inputText, setInputText] = useState('');
     const [activeForm, setActiveForm] = useState(null); // { type: 'short_film'|'storyboard'|'audit' }
@@ -236,7 +236,13 @@ const OracleWorkspacePage = () => {
         <div style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden' }}>
             {/* SIDEBAR */}
             <aside style={{ width: '280px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ padding: '1.5rem' }}>
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.5 }}>BALANCE</span>
+                        <span style={{ color: 'var(--color-accent)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                            <Zap size={14} /> {profile?.credits || 0}
+                        </span>
+                    </div>
                     <button onClick={() => createProject()} style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
                         <Plus size={14} /> NEW_CHAT
                     </button>
@@ -336,13 +342,13 @@ const OracleWorkspacePage = () => {
                                 {/* Smart Actions */}
                                 {!activeForm && (
                                     <div data-lenis-prevent="true" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', whiteSpace: 'nowrap' }}>
-                                        <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><ImageIcon size={12} /> STORYBOARD</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'rewriter' })}><Edit3 size={12} /> REWRITER</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'proposal' })}><Briefcase size={12} /> PROPOSAL</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'calendar' })}><Calendar size={12} /> CALENDAR</LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'brief' })}><FileDown size={12} /> BRIEF_EXTRACTOR</LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><ImageIcon size={12} /> STORYBOARD <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡25</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'rewriter' })}><Edit3 size={12} /> REWRITER <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'proposal' })}><Briefcase size={12} /> PROPOSAL <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'calendar' })}><Calendar size={12} /> CALENDAR <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                        <LabPill onClick={() => setActiveForm({ type: 'brief' })}><FileDown size={12} /> BRIEF_EXTRACTOR <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
                                     </div>
                                 )}
 

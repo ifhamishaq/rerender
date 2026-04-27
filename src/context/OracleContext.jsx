@@ -6,7 +6,7 @@ import { fetchOpenRouter, safeParseJSON } from '../utils/ai';
 const OracleContext = createContext();
 
 export const OracleProvider = ({ children }) => {
-    const { user } = useAuth();
+    const { user, spendCredits } = useAuth();
     
     const [projects, setProjects] = useState([]);
     const [currentProject, setCurrentProject] = useState(null);
@@ -115,6 +115,13 @@ export const OracleProvider = ({ children }) => {
 
     const chat = async (messageText, imageUrl = null) => {
         if (!currentProject || !user) return;
+        
+        const success = await spendCredits(1, 'ORACLE_CHAT');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** Standard chat costs 1 credit. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
 
         const userMsg = { role: 'user', type: imageUrl ? 'image_upload' : 'text', content: messageText, image: imageUrl };
@@ -211,6 +218,13 @@ You exist to make content that dominates.` },
 
     const generateImage = async (prompt) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(10, 'ORACLE_IMAGE_GEN');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** Image generation costs 10 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isGenerating: true }));
         
         addMessage({ role: 'assistant', type: 'text', content: `Generating image: "${prompt}"...` });
@@ -251,6 +265,13 @@ You exist to make content that dominates.` },
 
     const analyzeImage = async (imageUrl) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(10, 'ORACLE_THUMBNAIL_GRADE');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** Thumbnail Grading costs 10 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isAnalyzing: true }));
 
         try {
@@ -291,6 +312,13 @@ Be honest. Most thumbnails are C tier.` },
 
     const runStoryboardEngine = async (script) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(25, 'ORACLE_STORYBOARD');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** Storyboard generation costs 25 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
 
         addMessage({ role: 'assistant', type: 'text', content: 'Breaking down your script into visual scenes...' });
@@ -373,6 +401,13 @@ Not every plot beat. The KEY moments.` },
 
     const runShortFilmGenerator = async (idea, style, duration) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_SHORT_FILM');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
 
         addMessage({ role: 'assistant', type: 'text', content: `Writing a ${duration} script about "${idea}" in ${style} style...` });
@@ -407,6 +442,13 @@ to look away from.` },
 
     const runViralBreakdown = async (url) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_VIRAL_AUDIT');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
 
         addMessage({ role: 'user', type: 'text', content: `Analyze this: ${url}` });
@@ -445,6 +487,13 @@ Be specific. No generic advice.` },
     // --- Intelligent Rewriter ---
     const runRewriter = async (input) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_REWRITER');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
         addMessage({ role: 'user', type: 'text', content: `Rewrite/Optimize: ${input}` });
 
@@ -470,6 +519,13 @@ Use simple English. Be bold. Do not use generic clickbait.` },
     // --- Client Proposal Generator ---
     const runProposalGenerator = async (input) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_PROPOSAL');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
         addMessage({ role: 'user', type: 'text', content: `Generate proposal for: ${input}` });
 
@@ -490,6 +546,13 @@ Use simple English. Be bold. Do not use generic clickbait.` },
     // --- 30-Day Content Calendar ---
     const runContentCalendar = async (input) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_CALENDAR');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
         addMessage({ role: 'user', type: 'text', content: `Generate 30-day calendar for: ${input}` });
 
@@ -510,6 +573,13 @@ Use simple English. Be bold. Do not use generic clickbait.` },
     // --- Client Brief Extractor ---
     const runBriefExtractor = async (messyBrief) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(5, 'ORACLE_BRIEF');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** This action costs 5 credits. Please recharge your account.` });
+            return;
+        }
+        
         setStatus(prev => ({ ...prev, isTyping: true }));
         addMessage({ role: 'user', type: 'text', content: `Extract brief from: \n\n${messyBrief}` });
 
@@ -533,6 +603,13 @@ Use simple English. Be bold. Do not use generic clickbait.` },
 
     const runNeuralLoop = async (prompt) => {
         if (!user || !currentProject) return;
+        
+        const success = await spendCredits(50, 'ORACLE_NEURAL_LOOP');
+        if (!success) {
+            addMessage({ role: 'assistant', type: 'text', content: `🚨 **INSUFFICIENT CREDITS:** The Neural Loop costs 50 credits to execute. Please recharge your account.` });
+            return;
+        }
+        
         let currentPrompt = prompt;
         const MAX = 3;
 
