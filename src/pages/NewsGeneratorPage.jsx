@@ -334,7 +334,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
+        <div className="workspace-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10, height: '100vh' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
@@ -669,7 +669,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Right Sidebar: Design Controls */}
-            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: '100vh', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', color: 'var(--color-text)' }}>
+            <div className="design-sidebar custom-scrollbar" style={{ width: '300px', flexShrink: 0, height: '100%', borderLeft: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', overflowX: 'hidden', color: 'var(--color-text)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, letterSpacing: '0.1em', opacity: 0.8, color: 'var(--color-text)' }}>DESIGN_CONTROLS</h3>
                 
                 {selectedNews && (
