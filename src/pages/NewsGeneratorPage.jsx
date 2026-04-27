@@ -103,15 +103,18 @@ const NewsGeneratorPage = () => {
         
         if (logo) {
             try { 
-                localStorage.setItem('news_gen_persistent_logo', logo); 
-                // Add to recent if not exists
+                // Only store if it's a reasonably small string
+                if (logo.length < 500000) {
+                    localStorage.setItem('news_gen_persistent_logo', logo); 
+                }
+                
                 if (!recentLogos.includes(logo)) {
                     const updated = [logo, ...recentLogos].slice(0, 5);
                     setRecentLogos(updated);
                     localStorage.setItem('news_gen_recent_logos', JSON.stringify(updated));
                 }
             }
-            catch (e) { console.warn('Logo too large for localStorage'); }
+            catch (e) { /* Silent fail for storage limits */ }
         } else {
             localStorage.removeItem('news_gen_persistent_logo');
         }
@@ -310,7 +313,35 @@ const NewsGeneratorPage = () => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (ev) => setLogo(ev.target.result);
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 256;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height *= maxDim / width;
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width *= maxDim / height;
+                            height = maxDim;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressed = canvas.toDataURL('image/png', 0.8);
+                    setLogo(compressed);
+                };
+                img.src = ev.target.result;
+            };
             reader.readAsDataURL(file);
         }
     };
@@ -370,6 +401,16 @@ const NewsGeneratorPage = () => {
                     if (isLifetime) {
                         const wm = clonedDoc.querySelector('[data-watermark="oracle"]');
                         if (wm) wm.style.display = 'none';
+                    }
+
+                    // LOCK ALIGNMENT: Convert percentage top to hard pixels to prevent drift
+                    const textContainer = clonedDoc.querySelector('.poster-text-container');
+                    if (textContainer && posterRef.current) {
+                        const rect = posterRef.current.getBoundingClientRect();
+                        const scale = 1080 / rect.width; // Normalize to 1080px base
+                        const exactTop = (rect.height * (textPosition / 100));
+                        textContainer.style.top = `${exactTop}px`;
+                        textContainer.style.transform = 'translateY(-50%)';
                     }
                     
                     const poster = clonedDoc.querySelector('.poster-canvas');
@@ -698,39 +739,44 @@ const NewsGeneratorPage = () => {
 
                                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '60%', background: `linear-gradient(to top, rgba(0,0,0,${overlayOpacity}) 0%, rgba(0,0,0,${overlayOpacity * 0.7}) 40%, transparent 100%)`, zIndex: 1 }} />
 
-                                <div style={{ 
-                                    position: 'absolute', 
-                                    top: `${textPosition}%`, 
-                                    transform: 'translateY(-50%)', 
-                                    zIndex: 2, 
-                                    padding: '0 80px', // Scaled for HD
-                                    width: '100%', 
-                                    boxSizing: 'border-box', 
-                                    textAlign: 'center', 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center' 
-                                }}>
-                                    <div style={{ position: 'relative', width: '100%', marginBottom: '40px', minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div 
+                                    className="poster-text-container"
+                                    style={{ 
+                                        position: 'absolute', 
+                                        top: `${textPosition}%`, 
+                                        transform: 'translateY(-50%)', 
+                                        zIndex: 2, 
+                                        padding: '0 80px', 
+                                        width: '100%', 
+                                        boxSizing: 'border-box', 
+                                        textAlign: 'center', 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center' 
+                                    }}
+                                >
+                                    <div style={{ position: 'relative', width: '100%', marginBottom: '60px', minHeight: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <div style={{ position: 'absolute', top: '50%', left: '10%', width: '30%', height: '3px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'absolute', top: '50%', right: '10%', width: '30%', height: '3px', background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.6))', zIndex: 0 }} />
                                         <div style={{ position: 'relative', zIndex: 1, backgroundColor: 'transparent', padding: '0 30px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                             {logo ? (
                                                 <div style={{ 
-                                                    width: '90px', height: '90px', borderRadius: '50%', border: '4px solid #FFF', 
+                                                    width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', 
+                                                    borderRadius: '50%', border: '4px solid #FFF', 
                                                     overflow: 'hidden', flexShrink: 0, backgroundColor: '#000', 
-                                                    boxShadow: '0 0 30px rgba(255,255,255,0.2)', position: 'relative'
+                                                    boxShadow: '0 0 30px rgba(255,255,255,0.2)', position: 'relative',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                 }}>
                                                     <img 
                                                         crossOrigin="anonymous" 
                                                         src={logo} 
                                                         alt="Logo" 
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
                                                     />
                                                 </div>
                                             ) : (
-                                                <div style={{ width: '90px', height: '90px', borderRadius: '50%', backgroundColor: brandColor, border: '4px solid #FFF', flexShrink: 0 }} />
+                                                <div style={{ width: '90px', height: '90px', minWidth: '90px', minHeight: '90px', borderRadius: '50%', backgroundColor: brandColor, border: '4px solid #FFF', flexShrink: 0 }} />
                                             )}
                                             <span style={{ color: '#FFF', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '15px', textShadow: '0 4px 8px rgba(0,0,0,0.8)', fontFamily: 'var(--font-sans)' }}>@{handle}</span>
                                         </div>
