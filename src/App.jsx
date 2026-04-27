@@ -156,7 +156,8 @@ const AppContent = () => {
     // Simple, robust check
     const isWorkspace = location.pathname === '/lab/oracle-workspace' || 
                         location.pathname === '/lab/oracle2.0' ||
-                        location.pathname === '/lab/ai-agent';
+                        location.pathname === '/lab/ai-agent' ||
+                        location.pathname === '/lab/news-generator';
 
     return (
         <div className="app" style={{ 
