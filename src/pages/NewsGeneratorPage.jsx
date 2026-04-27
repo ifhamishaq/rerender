@@ -289,7 +289,15 @@ const NewsGeneratorPage = () => {
                             }}
                         >
                             {bgImage ? (
-                                <img crossOrigin="anonymous" src={bgImage} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} alt="Background" />
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    top: 0, left: 0, 
+                                    width: '100%', height: '100%', 
+                                    backgroundImage: `url(${bgImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    zIndex: 0 
+                                }} />
                             ) : (
                                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
                                     <RefreshCw className="spin" size={24} opacity={0.5} />
