@@ -743,10 +743,10 @@ const NewsGeneratorPage = () => {
                             </div>
                         </div>
 
-                        <div style={{ width: getCanvasDimensions().width, marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ width: '100%', maxWidth: getCanvasDimensions().width, marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxSizing: 'border-box' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                                 <motion.button 
-                                    whileHover={{ scale: 1.02, backgroundColor: '#FF4F00', color: '#FFF' }}
+                                    whileHover={{ scale: 1.01, backgroundColor: '#FF4F00', color: '#FFF' }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => generateImage(bgPrompt)} 
                                     disabled={isGenerating} 
@@ -755,7 +755,7 @@ const NewsGeneratorPage = () => {
                                     <ImageIcon size={18} /> AI_IMAGE
                                 </motion.button>
                                 <motion.label 
-                                    whileHover={{ scale: 1.02, border: '1px solid #FF4F00' }}
+                                    whileHover={{ scale: 1.01, border: '1px solid #FF4F00' }}
                                     whileTap={{ scale: 0.98 }}
                                     style={{ padding: '1.2rem', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.1em' }}
                                 >
@@ -764,37 +764,39 @@ const NewsGeneratorPage = () => {
                                 </motion.label>
                             </div>
                             
-                            <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--color-surface)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: 'var(--color-surface)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}>
                                 <input 
                                     type="text" 
                                     placeholder="Paste Image URL..." 
                                     value={bgUrl}
                                     onChange={(e) => setBgUrl(e.target.value)}
                                     onBlur={() => bgUrl && setBgImage(bgUrl)}
-                                    style={{ flex: 1, padding: '0.8rem', backgroundColor: 'transparent', color: 'var(--color-text)', border: 'none', outline: 'none', fontSize: '0.8rem', fontWeight: 500 }}
+                                    style={{ flex: '1 1 300px', padding: '0.8rem', backgroundColor: 'transparent', color: 'var(--color-text)', border: 'none', outline: 'none', fontSize: '0.8rem', fontWeight: 500 }}
                                 />
-                                <div style={{ width: '1px', backgroundColor: 'var(--color-border)', margin: '0.5rem 0' }} />
+                                <div style={{ width: '1px', backgroundColor: 'var(--color-border)', margin: '0.5rem 0', display: isMobile ? 'none' : 'block' }} />
                                 <button 
                                     onClick={regenerateHook} 
                                     disabled={isGenerating} 
-                                    style={{ padding: '0.8rem 1.5rem', backgroundColor: 'transparent', color: '#FF4F00', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}
+                                    style={{ flex: isMobile ? '1 1 100%' : '0 0 auto', padding: '0.8rem 1.5rem', backgroundColor: 'transparent', color: '#FF4F00', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}
                                 >
                                     <Type size={16} /> REGENERATE_HOOK
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ width: getCanvasDimensions().width, marginTop: '1rem' }}>
-                            <button 
+                        <div style={{ width: '100%', maxWidth: getCanvasDimensions().width, marginTop: '1rem', boxSizing: 'border-box' }}>
+                            <motion.button 
+                                whileHover={{ scale: 1.01, boxShadow: '0 15px 40px rgba(255,79,0,0.3)' }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={exportImage} 
                                 disabled={isExporting || !bgImage}
                                 style={{ 
-                                    width: '100%', padding: '1.2rem', backgroundColor: 'var(--color-accent)', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', opacity: (isExporting || !bgImage) ? 0.5 : 1
+                                    width: '100%', padding: '1.4rem', backgroundColor: '#FF4F00', color: '#FFF', border: 'none', borderRadius: '4px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', opacity: (isExporting || !bgImage) ? 0.5 : 1, transition: 'all 0.3s ease'
                                 }}
                             >
-                                {isExporting ? <RefreshCw className="spin" size={18} /> : <Download size={18} />}
-                                {isExporting ? 'EXPORTING_HD...' : `DOWNLOAD ${aspectRatio} POST`}
-                            </button>
+                                {isExporting ? <RefreshCw className="spin" size={20} /> : <Download size={20} />}
+                                {isExporting ? 'PREPARING_ASSETS...' : `DOWNLOAD ${aspectRatio} POST`}
+                            </motion.button>
                             <div style={{ fontSize: '0.6rem', textAlign: 'center', marginTop: '0.5rem', opacity: 0.5, letterSpacing: '0.05em' }}>
                                 COST: 50 CREDITS PER EXPORT
                             </div>
