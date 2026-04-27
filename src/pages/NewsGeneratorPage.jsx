@@ -293,9 +293,8 @@ const NewsGeneratorPage = () => {
                         <div 
                             ref={posterRef}
                             style={{ 
-                                width: '100%', 
-                                maxWidth: '500px', 
-                                aspectRatio: '4/5', 
+                                width: '500px', 
+                                height: '625px', 
                                 backgroundColor: '#111', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden',
@@ -327,9 +326,9 @@ const NewsGeneratorPage = () => {
 
                             {/* Text Content */}
                             <div style={{ position: 'relative', zIndex: 2, padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ position: 'relative', width: '80%', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                                    <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
-                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.2rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <div style={{ position: 'relative', width: '90%', marginBottom: '1.5rem', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(255,255,255,0.3)', zIndex: 0 }} />
+                                    <div style={{ position: 'relative', zIndex: 1, backgroundColor: '#000', padding: '0.3rem 1rem', borderRadius: '20px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                                         {logo ? (
                                             <img crossOrigin="anonymous" src={logo} alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
                                         ) : (
