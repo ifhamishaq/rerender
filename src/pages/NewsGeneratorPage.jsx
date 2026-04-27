@@ -173,9 +173,9 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ display: 'flex', height: 'calc(100vh - 80px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px' }}>
+        <div style={{ display: 'flex', height: '100vh', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
             {/* Sidebar News Feed */}
-            <div style={{ width: '350px', borderRight: '1px solid var(--color-border)', overflowY: 'auto', padding: '2rem' }}>
+            <div style={{ width: '350px', flexShrink: 0, height: '100%', borderRight: '1px solid var(--color-border)', overflowY: 'auto', padding: '2rem' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <RefreshCw size={18} /> TRENDING NEWS
                 </h2>
@@ -234,7 +234,7 @@ const NewsGeneratorPage = () => {
             </div>
 
             {/* Main Canvas Area */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', padding: '2rem' }}>
+            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', padding: '2rem' }}>
                 {!selectedNews && !isGenerating ? (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                         SELECT_NEWS_ARTICLE_TO_BEGIN
