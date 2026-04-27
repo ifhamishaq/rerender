@@ -262,7 +262,7 @@ const NewsGeneratorPage = () => {
 
                 {/* Categories */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                    {['all', 'business', 'finance', 'tech', 'sport', 'entertainment'].map(cat => (
+                    {['all', 'business', 'technology', 'sports', 'entertainment', 'science', 'health'].map(cat => (
                         <button 
                             key={cat}
                             onClick={() => setCategory(cat)}
