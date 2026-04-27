@@ -143,7 +143,7 @@ const NewsGeneratorPage = () => {
                 model: 'baidu/qianfan-ocr-fast:free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
-                    1. Write a punchy, viral 5-10 word text hook for an image overlay. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
+                    1. Write a punchy, viral 5-10 word text hook for an image overlay. No emojis in the TEXT hook. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
                     2. Write a 5-10 word visual prompt for an AI image generator to create the background. Format it like this: PROMPT: [visual prompt]
                     3. Write a long, engaging caption with emojis${includeHashtags ? ' and trending hashtags' : ''}. Format it like this: CAPTION: [caption]
                     
