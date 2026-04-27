@@ -10,14 +10,17 @@ export const AI_COSTS = {
     GEN_IMAGE: 10
 };
 
-// Verified high-performance free models on OpenRouter (Updated April 2026)
+/**
+ * Verified high-performance free models on OpenRouter (Updated April 2026)
+ * Optimized order: Most reliable/high-RPM models first to minimize retry delays.
+ */
 const FREE_MODEL_POOL = [
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "google/gemma-4-31b-it:free",
-    "openai/gpt-oss-120b:free",
+    "google/gemini-flash-1.5-8b:free",       // Extremely High RPM, near-instant
+    "nvidia/nemotron-3-super-120b-a12b:free", // Flagship Quality
+    "google/gemma-4-31b-it:free",            // SOTA Instruct
+    "openai/gpt-oss-120b:free",              // High Reasoning
     "tencent/hy3-preview:free",
-    "minimax/minimax-m2.5:free",
-    "google/gemini-flash-1.5-8b:free"
+    "minimax/minimax-m2.5:free"
 ];
 
 const getApiKeys = () => {
@@ -79,10 +82,15 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
         // Handle Rate Limiting (429) or Congestion (503)
         if (response.status === 429 || response.status === 503) {
             console.warn(`[AI_ROTATE] Model/Key limited. Switching...`);
+            
+            // Advance indices immediately for the next try
             currentKeyIndex++;
             if (isFreeModel) currentModelIndex++;
+
             if (retries > 0) {
-                await new Promise(r => setTimeout(r, 2000));
+                // Shortened backoff for free models to improve UX speed
+                const backoff = isFreeModel ? 800 : 2000; 
+                await new Promise(r => setTimeout(r, backoff));
                 return fetchOpenRouter(body, options, retries - 1);
             }
         }
@@ -92,9 +100,9 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
             const data = await response.json().catch(() => ({}));
             const msg = data.error?.message || '';
             if (msg.includes('not a valid model ID') || msg.includes('does not exist')) {
-                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Removing from pool...`);
+                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Moving to next...`);
                 if (isFreeModel && retries > 0) {
-                    currentModelIndex++; // Try next model immediately
+                    currentModelIndex++; 
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
@@ -108,7 +116,7 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
             if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
                 if (isFreeModel) currentModelIndex++;
                 if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 1500));
+                    await new Promise(r => setTimeout(r, 1000));
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
@@ -119,7 +127,7 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
     } catch (err) {
         if (retries > 0 && err.message !== 'MISSING_API_KEYS') {
             currentKeyIndex++;
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 1500));
             return fetchOpenRouter(body, options, retries - 1);
         }
         throw err;
