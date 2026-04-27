@@ -226,7 +226,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', height: '100vh', width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '80px', overflow: 'hidden' }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
