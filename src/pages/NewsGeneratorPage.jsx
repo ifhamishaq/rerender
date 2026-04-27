@@ -23,9 +23,18 @@ const NewsGeneratorPage = () => {
     // Text Editor State
     const [textSegments, setTextSegments] = useState([]); // [{text: 'MOST GEN Z', highlight: false}, ...]
     const [fontFamily, setFontFamily] = useState('Impact, sans-serif');
-    const [handle, setHandle] = useState(() => localStorage.getItem('news_gen_handle') || 'YOUR_HANDLE');
-    const [brandColor, setBrandColor] = useState(() => localStorage.getItem('news_gen_brandColor') || '#E8111A');
-    const [logo, setLogo] = useState(() => localStorage.getItem('news_gen_logo') || null);
+    const [handle, setHandle] = useState(() => {
+        try { return localStorage.getItem('news_gen_handle') || 'YOUR_HANDLE'; } 
+        catch (e) { return 'YOUR_HANDLE'; }
+    });
+    const [brandColor, setBrandColor] = useState(() => {
+        try { return localStorage.getItem('news_gen_brandColor') || '#E8111A'; } 
+        catch (e) { return '#E8111A'; }
+    });
+    const [logo, setLogo] = useState(() => {
+        try { return localStorage.getItem('news_gen_logo') || null; } 
+        catch (e) { return null; }
+    });
     const [category, setCategory] = useState('all');
     const [bgPrompt, setBgPrompt] = useState('abstract modern background');
     const [fontSizeAdjustment, setFontSizeAdjustment] = useState(0);
@@ -33,10 +42,14 @@ const NewsGeneratorPage = () => {
     
     // Save settings to localStorage
     useEffect(() => {
-        localStorage.setItem('news_gen_handle', handle);
-        localStorage.setItem('news_gen_brandColor', brandColor);
-        if (logo && logo.startsWith('data:')) {
-            localStorage.setItem('news_gen_logo', logo);
+        try {
+            localStorage.setItem('news_gen_handle', handle);
+            localStorage.setItem('news_gen_brandColor', brandColor);
+            if (logo && logo.startsWith('data:') && logo.length < 2000000) { // Limit to 2MB
+                localStorage.setItem('news_gen_logo', logo);
+            }
+        } catch (e) {
+            console.warn("LocalStorage quota exceeded, branding not saved.");
         }
     }, [handle, brandColor, logo]);
     
@@ -253,7 +266,7 @@ const NewsGeneratorPage = () => {
     };
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: '#050505', color: '#fff', paddingTop: '40px', overflow: 'hidden', zIndex: 10 }}>
             {/* Inject custom scrollbar styling for this page */}
             <style>
                 {`
