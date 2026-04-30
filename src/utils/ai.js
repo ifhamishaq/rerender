@@ -45,23 +45,22 @@ export const safeParseJSON = (text) => {
         try {
             return JSON.parse(cleaned);
         } catch (innerErr) {
-            console.error('[AI_JSON_PARSE_FATAL]:', innerErr);
+            console.error('[AI] JSON parse failed');
             throw innerErr;
         }
     }
 };
 
 /**
- * Intelligent fetch for OpenRouter with automatic Model and Key rotation
+ * Intelligent fetch for OpenRouter with automatic Model and Key rotation.
+ * options.onStatus(msg) — optional callback for status updates
  */
-export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
+export const fetchOpenRouter = async (body, options = {}, retries = 8) => {
     const keys = getApiKeys();
-    if (keys.length === 0) throw new Error('MISSING_API_KEYS');
+    if (keys.length === 0) throw new Error('No API keys configured.');
 
-    // Use current rotation indices
     const key = keys[currentKeyIndex % keys.length];
     
-    // If the requested model is a 'free' model, we rotate through the pool
     const isFreeModel = body.model?.endsWith(':free');
     const modelToUse = isFreeModel ? FREE_MODEL_POOL[currentModelIndex % FREE_MODEL_POOL.length] : body.model;
 
@@ -81,25 +80,25 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
 
         // Handle Rate Limiting (429) or Congestion (503)
         if (response.status === 429 || response.status === 503) {
-            console.warn(`[AI_ROTATE] Model/Key limited. Switching...`);
             currentKeyIndex++;
             if (isFreeModel) currentModelIndex++;
 
             if (retries > 0) {
-                const backoff = isFreeModel ? 800 : 2000; 
+                if (options.onStatus) options.onStatus('Finding the best AI model...');
+                const backoff = isFreeModel ? 1200 : 2500; 
                 await new Promise(r => setTimeout(r, backoff));
                 return fetchOpenRouter(body, options, retries - 1);
             }
         }
 
-        // Handle Bad Request (400) or Not Found (404) - Likely invalid/deprecated Model ID
+        // Handle Bad Request (400) or Not Found (404) - invalid/deprecated Model ID
         if (response.status === 400 || response.status === 404) {
             const data = await response.json().catch(() => ({}));
             const msg = data.error?.message || '';
             if (msg.includes('not a valid model ID') || msg.includes('does not exist') || msg.includes('No endpoints found')) {
-                console.error(`[AI_INVALID_MODEL] ${modelToUse} failed. Rotating...`);
                 if (isFreeModel && retries > 0) {
                     currentModelIndex++; 
+                    if (options.onStatus) options.onStatus('Switching AI model...');
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
@@ -113,7 +112,8 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
             if (errorMsg.includes('overloaded') || errorMsg.includes('congested')) {
                 if (isFreeModel) currentModelIndex++;
                 if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 1000));
+                    if (options.onStatus) options.onStatus('Almost there...');
+                    await new Promise(r => setTimeout(r, 1500));
                     return fetchOpenRouter(body, options, retries - 1);
                 }
             }
@@ -122,9 +122,10 @@ export const fetchOpenRouter = async (body, options = {}, retries = 5) => {
 
         return await response.json();
     } catch (err) {
-        if (retries > 0 && err.message !== 'MISSING_API_KEYS') {
+        if (retries > 0 && err.message !== 'No API keys configured.') {
             currentKeyIndex++;
-            await new Promise(r => setTimeout(r, 1500));
+            if (options.onStatus) options.onStatus('Retrying...');
+            await new Promise(r => setTimeout(r, 1800));
             return fetchOpenRouter(body, options, retries - 1);
         }
         throw err;
