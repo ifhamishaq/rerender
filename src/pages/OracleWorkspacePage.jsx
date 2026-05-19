@@ -1,111 +1,59 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { 
-    Plus, MessageSquare, Trash2, Zap, Send, 
-    Image as ImageIcon, RefreshCw, Target, Search, Maximize2,
-    Type, FileText, Briefcase, Calendar, FileDown, Edit3
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Plus, MessageSquare, Trash2, Send, Image as ImageIcon, RefreshCw,
+    Target, Search, Maximize2, FileText, Briefcase, Calendar, FileDown,
+    Edit3, X, ArrowUp, Paperclip, Zap, ChevronLeft
 } from 'lucide-react';
 import { useOracle } from '../context/OracleContext';
 import { useAuth } from '../context/AuthContext';
-import LabPill from '../components/LabPill';
 
-// --- Components ---
-
-const MarkdownText = ({ text }) => {
+/* ── Markdown renderer ── */
+const Md = ({ text }) => {
     if (!text) return null;
     const parts = text.split(/(\*\*.*?\*\*)/g);
-    return (
-        <span>
-            {parts.map((part, i) => {
-                if (part.startsWith('**') && part.endsWith('**')) {
-                    return <strong key={i} style={{ color: 'var(--color-accent)', fontWeight: 900 }}>{part.slice(2, -2)}</strong>;
-                }
-                return <span key={i}>{part}</span>;
-            })}
-        </span>
-    );
+    return <span>{parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**')
+            ? <strong key={i} style={{ color: 'var(--color-accent)', fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+            : <span key={i}>{p}</span>
+    )}</span>;
 };
 
-const seenTexts = new Set();
-
-const TypewriterText = ({ text }) => {
-    const [display, setDisplay] = useState(seenTexts.has(text) ? text : '');
-    
+const seen = new Set();
+const Typewriter = ({ text }) => {
+    const [d, setD] = useState(seen.has(text) ? text : '');
     useEffect(() => {
-        if (seenTexts.has(text)) {
-            setDisplay(text);
-            return;
-        }
-        
+        if (seen.has(text)) { setD(text); return; }
         let i = 0;
-        const interval = setInterval(() => {
-            i += 4; // Much faster typing (4 chars per tick)
-            if (i >= text.length) {
-                setDisplay(text);
-                seenTexts.add(text);
-                clearInterval(interval);
-            } else {
-                setDisplay(text.substring(0, i));
-            }
-        }, 10); 
-        return () => clearInterval(interval);
+        const iv = setInterval(() => {
+            i += 4;
+            if (i >= text.length) { setD(text); seen.add(text); clearInterval(iv); }
+            else setD(text.substring(0, i));
+        }, 10);
+        return () => clearInterval(iv);
     }, [text]);
-    
-    return <MarkdownText text={display} />;
+    return <Md text={d} />;
 };
 
-const StoryboardCard = ({ scenes, projectTitle }) => {
+/* ── Storyboard export ── */
+const StoryboardCard = ({ scenes, title }) => {
     const exportPdf = () => {
-        const win = window.open('', '_blank');
-        win.document.write(`
-            <html>
-                <head>
-                    <title>STORYBOARD: ${projectTitle}</title>
-                    <style>
-                        body { font-family: -apple-system, sans-serif; padding: 40px; }
-                        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-                        .scene { border: 1px solid #ccc; padding: 20px; border-radius: 12px; }
-                        img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
-                        .meta { font-family: monospace; font-size: 11px; opacity: 0.6; }
-                        @media print { .no-print { display: none; } }
-                    </style>
-                </head>
-                <body>
-                    <h2>${projectTitle}</h2>
-                    <button class="no-print" onclick="window.print()">PRINT</button>
-                    <div class="grid">
-                        ${scenes.map(s => `
-                            <div class="scene">
-                                ${s.imageUrl ? `<img src="${s.imageUrl}" />` : '<div style="height:200px;background:#eee;"></div>'}
-                                <div class="meta">CAM: ${s.camera} // EMO: ${s.emotion}</div>
-                                <p>${s.description}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </body>
-            </html>
-        `);
-        win.document.close();
+        const w = window.open('', '_blank');
+        w.document.write(`<html><head><title>${title}</title><style>body{font-family:-apple-system,sans-serif;padding:40px}.g{display:grid;grid-template-columns:1fr 1fr;gap:30px}.s{border:1px solid #ddd;padding:16px;border-radius:12px}img{width:100%;border-radius:8px;margin-bottom:8px}.m{font-size:11px;opacity:.5}@media print{.np{display:none}}</style></head><body><h2>${title}</h2><button class="np" onclick="window.print()">Print</button><div class="g">${scenes.map(s => `<div class="s">${s.imageUrl ? `<img src="${s.imageUrl}"/>` : '<div style="height:180px;background:#f0f0f0;border-radius:8px"></div>'}<div class="m">${s.camera} / ${s.emotion}</div><p>${s.description}</p></div>`).join('')}</div></body></html>`);
+        w.document.close();
     };
-
     return (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border)', width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 900 }}>🎬 VISUAL STORYBOARD ({scenes.length} SCENES)</div>
-                <button onClick={exportPdf} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Maximize2 size={12} /> EXPORT
-                </button>
+        <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Storyboard — {scenes.length} scenes</span>
+                <button onClick={exportPdf} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Maximize2 size={12} /> Export</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 10 }}>
                 {scenes.map((s, i) => (
-                    <div key={i} style={{ backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '0.75rem' }}>
-                        {s.imageUrl ? (
-                            <img src={s.imageUrl} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '4px', marginBottom: '0.5rem' }} />
-                        ) : (
-                            <div style={{ width: '100%', aspectRatio: '16/9', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem', fontSize: '0.6rem' }}>PENDING...</div>
-                        )}
-                        <div style={{ fontSize: '0.6rem', fontFamily: 'var(--font-mono)', opacity: 0.5, marginBottom: '0.25rem' }}>{s.camera} // {s.emotion}</div>
-                        <div style={{ fontSize: '0.75rem', lineHeight: 1.4 }}>{s.description}</div>
+                    <div key={i} style={{ background: 'rgba(0,0,0,0.06)', borderRadius: 10, padding: 10 }}>
+                        {s.imageUrl ? <img src={s.imageUrl} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 6, marginBottom: 6 }} /> : <div style={{ width: '100%', aspectRatio: '16/9', background: 'var(--color-border)', borderRadius: 6, marginBottom: 6 }} />}
+                        <div style={{ fontSize: 11, opacity: .4, marginBottom: 2 }}>{s.camera} · {s.emotion}</div>
+                        <div style={{ fontSize: 13, lineHeight: 1.4 }}>{s.description}</div>
                     </div>
                 ))}
             </div>
@@ -114,290 +62,266 @@ const StoryboardCard = ({ scenes, projectTitle }) => {
 };
 
 const AnalysisCard = ({ analysis, imageUrl }) => (
-    <div style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flexShrink: 0 }}>
-            <div>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>DESKTOP</div>
-                <img src={imageUrl} style={{ width: '200px', borderRadius: '8px', objectFit: 'cover' }} />
+    <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0 }}>
+                <img src={imageUrl} alt="" style={{ width: 180, borderRadius: 10 }} />
+                <img src={imageUrl} alt="" style={{ width: 100, borderRadius: 6, marginTop: 8 }} />
             </div>
-            <div>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>MOBILE (120px)</div>
-                <img src={imageUrl} style={{ width: '120px', borderRadius: '4px', objectFit: 'cover' }} />
-            </div>
-        </div>
-        <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>{analysis.grade} <span style={{ fontSize: '1rem', opacity: 0.5 }}>({analysis.estimated_ctr})</span></div>
-            
-            <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.7rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>FIRST IMPRESSION</div>
-                <div style={{ fontSize: '0.85rem' }}>{analysis.first_impression}</div>
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.7rem', opacity: 0.5, fontWeight: 900, marginBottom: '0.25rem' }}>EMOTIONAL RESPONSE</div>
-                <div style={{ fontSize: '0.85rem' }}>{analysis.emotional_response}</div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                <div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '0.25rem' }}>STRENGTHS</div>
-                    <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '0.8rem' }}>
-                        {analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}
-                    </ul>
+            <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-accent)' }}>{analysis.grade} <span style={{ fontSize: 14, opacity: .4 }}>{analysis.estimated_ctr}</span></div>
+                <p style={{ fontSize: 14, opacity: .7, margin: '8px 0 16px' }}>{analysis.first_impression}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div><div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-accent)', marginBottom: 4 }}>Strengths</div><ul style={{ margin: 0, paddingLeft: 16, fontSize: 13 }}>{analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}</ul></div>
+                    <div><div style={{ fontSize: 11, fontWeight: 700, color: '#ef4444', marginBottom: 4 }}>Fixes</div><ul style={{ margin: 0, paddingLeft: 16, fontSize: 13 }}>{analysis.critical_fixes?.map((f, i) => <li key={i}>{f}</li>)}</ul></div>
                 </div>
-                <div>
-                    <div style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 900, marginBottom: '0.25rem' }}>CRITICAL FIXES</div>
-                    <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '0.8rem' }}>
-                        {analysis.critical_fixes?.map((f, i) => <li key={i}>{f}</li>)}
-                    </ul>
-                </div>
-            </div>
-
-            <div style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '0.25rem' }}>NEURAL PROMPT</div>
-                <div style={{ fontSize: '0.75rem', fontStyle: 'italic', opacity: 0.7 }}>{analysis.neural_prompt}</div>
             </div>
         </div>
     </div>
 );
 
-// --- Sequential Guided Forms ---
-
+/* ── Forms config ── */
 const FORMS = {
-    short_film: { steps: ["What is the core premise or idea for the film?", "What is the visual style? (e.g., Cyberpunk, Cinematic)", "What is the target duration? (e.g., 60 seconds)"] },
-    storyboard: { steps: ["Paste your script to generate a visual storyboard..."] },
-    audit: { steps: ["Paste a URL or topic for viral analysis..."] },
-    rewriter: { steps: ["Paste a hook, title, or topic to optimize & rewrite..."] },
-    proposal: { steps: ["What specific service are you proposing?", "What is the client's industry or niche?", "What is your target project rate ($)?"] },
-    calendar: { steps: ["What is your channel's core niche?", "Roughly how many subscribers do you have?", "What is your main goal? (e.g., Growth, Monetization)"] },
-    brief: { steps: ["Paste the messy client message to extract a clean brief..."] }
+    short_film: { label: 'Short Film', icon: <Target size={14} />, cost: 5, steps: ["Core premise or idea?", "Visual style? (Cyberpunk, Cinematic, etc.)", "Target duration? (60s, 90s, etc.)"] },
+    storyboard: { label: 'Storyboard', icon: <ImageIcon size={14} />, cost: 25, steps: ["Paste your script..."] },
+    audit: { label: 'Viral Audit', icon: <Search size={14} />, cost: 5, steps: ["Paste a URL or topic..."] },
+    rewriter: { label: 'Rewriter', icon: <Edit3 size={14} />, cost: 5, steps: ["Paste a hook or title to optimize..."] },
+    proposal: { label: 'Proposal', icon: <Briefcase size={14} />, cost: 5, steps: ["Service you're proposing?", "Client's industry?", "Target rate ($)?"] },
+    calendar: { label: 'Calendar', icon: <Calendar size={14} />, cost: 5, steps: ["Channel's core niche?", "Subscriber count?", "Main goal?"] },
+    brief: { label: 'Brief Extractor', icon: <FileDown size={14} />, cost: 5, steps: ["Paste the client message..."] }
 };
 
-// --- Main Page ---
-
+/* ── Main Page ── */
 const OracleWorkspacePage = () => {
-    const { 
-        projects, currentProject, status, 
+    const {
+        projects, currentProject, status,
         createProject, loadProject, renameProject, deleteProject,
         chat, generateImage, analyzeImage,
         runStoryboardEngine, runShortFilmGenerator, runViralBreakdown, runNeuralLoop,
         runRewriter, runProposalGenerator, runContentCalendar, runBriefExtractor
     } = useOracle();
     const { user, profile } = useAuth();
-    
-    const [inputText, setInputText] = useState('');
-    const [activeForm, setActiveForm] = useState(null); // { type: 'short_film'|'storyboard'|'audit' }
-    const [editingProjectId, setEditingProjectId] = useState(null);
+
+    const [input, setInput] = useState('');
+    const [activeForm, setActiveForm] = useState(null);
+    const [editId, setEditId] = useState(null);
     const [editTitle, setEditTitle] = useState('');
     const [pendingImage, setPendingImage] = useState(null);
-    const chatEndRef = useRef(null);
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+    const endRef = useRef(null);
+    const taRef = useRef(null);
 
+    useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [currentProject?.messages, status.isTyping]);
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [currentProject?.messages, status.isTyping]);
+        if (taRef.current) { taRef.current.style.height = '24px'; taRef.current.style.height = Math.min(taRef.current.scrollHeight, 140) + 'px'; }
+    }, [input]);
 
     const handleSend = () => {
-        if (!inputText.trim() && !pendingImage) return;
-        
+        if (!input.trim() && !pendingImage) return;
         if (activeForm) {
-            const currentForm = FORMS[activeForm.type];
-            const newAnswers = [...(activeForm.answers || []), inputText.trim()];
-            
-            if (newAnswers.length < currentForm.steps.length) {
-                setActiveForm({ ...activeForm, stepIndex: (activeForm.stepIndex || 0) + 1, answers: newAnswers });
-                setInputText('');
-                return; // Wait for next step
+            const form = FORMS[activeForm.type];
+            const answers = [...(activeForm.answers || []), input.trim()];
+            if (answers.length < form.steps.length) {
+                setActiveForm({ ...activeForm, stepIndex: (activeForm.stepIndex || 0) + 1, answers });
+                setInput(''); return;
             }
-
-            // All steps complete, trigger generation
-            const finalAnswers = newAnswers;
-            
-            if (activeForm.type === 'short_film') runShortFilmGenerator(finalAnswers[0], finalAnswers[1], finalAnswers[2]);
-            if (activeForm.type === 'storyboard') runStoryboardEngine(finalAnswers[0]);
-            if (activeForm.type === 'audit') runViralBreakdown(finalAnswers[0]);
-            if (activeForm.type === 'rewriter') runRewriter(finalAnswers[0]);
-            if (activeForm.type === 'proposal') runProposalGenerator(`Service: ${finalAnswers[0]}, Niche: ${finalAnswers[1]}, Rate: ${finalAnswers[2]}`);
-            if (activeForm.type === 'calendar') runContentCalendar(`Niche: ${finalAnswers[0]}, Size: ${finalAnswers[1]}, Goals: ${finalAnswers[2]}`);
-            if (activeForm.type === 'brief') runBriefExtractor(finalAnswers[0]);
-            
+            const a = answers;
+            if (activeForm.type === 'short_film') runShortFilmGenerator(a[0], a[1], a[2]);
+            if (activeForm.type === 'storyboard') runStoryboardEngine(a[0]);
+            if (activeForm.type === 'audit') runViralBreakdown(a[0]);
+            if (activeForm.type === 'rewriter') runRewriter(a[0]);
+            if (activeForm.type === 'proposal') runProposalGenerator(`Service: ${a[0]}, Niche: ${a[1]}, Rate: ${a[2]}`);
+            if (activeForm.type === 'calendar') runContentCalendar(`Niche: ${a[0]}, Size: ${a[1]}, Goals: ${a[2]}`);
+            if (activeForm.type === 'brief') runBriefExtractor(a[0]);
             setActiveForm(null);
         } else {
-            chat(inputText || "Analyze this image.", pendingImage);
+            chat(input || "Analyze this image.", pendingImage);
         }
-        setInputText('');
-        setPendingImage(null);
+        setInput(''); setPendingImage(null);
     };
 
-    if (!user) {
-        return <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)' }}>🚨 LOGIN_REQUIRED</div>;
-    }
+    if (!user) return (
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+            <Zap size={32} opacity={0.2} />
+            <span style={{ fontSize: 14, opacity: 0.4 }}>Please log in to use Oracle</span>
+        </div>
+    );
 
     return (
-        <div style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden' }}>
-            {/* SIDEBAR */}
-            <aside style={{ width: '280px', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.5 }}>BALANCE</span>
-                        <span style={{ color: 'var(--color-accent)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                            <Zap size={14} /> {profile?.credits || 0}
-                        </span>
-                    </div>
-                    <button onClick={() => createProject()} style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 900, cursor: 'pointer' }}>
-                        <Plus size={14} /> NEW_CHAT
-                    </button>
-                </div>
-                <div data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '0 1rem' }}>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--color-accent)', fontWeight: 900, marginBottom: '1rem', paddingLeft: '0.5rem' }}>HISTORY</div>
-                    {projects.map(p => (
-                        <div key={p.id} onClick={() => { if(editingProjectId !== p.id) loadProject(p); }} style={{ padding: '0.75rem', borderRadius: '6px', cursor: 'pointer', backgroundColor: currentProject?.id === p.id ? 'rgba(255,255,255,0.05)' : 'transparent', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                            <MessageSquare size={14} opacity={0.5} />
-                            {editingProjectId === p.id ? (
-                                <input 
-                                    autoFocus
-                                    value={editTitle}
-                                    onChange={(e) => setEditTitle(e.target.value)}
-                                    onBlur={() => {
-                                        if (editTitle.trim() && editTitle !== p.title) renameProject(p.id, editTitle.trim());
-                                        setEditingProjectId(null);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            if (editTitle.trim() && editTitle !== p.title) renameProject(p.id, editTitle.trim());
-                                            setEditingProjectId(null);
-                                        }
-                                        if (e.key === 'Escape') setEditingProjectId(null);
-                                    }}
-                                    style={{ flex: 1, background: 'var(--color-bg)', border: '1px solid var(--color-accent)', color: 'var(--color-text)', fontSize: '0.8rem', padding: '0.25rem', borderRadius: '4px', outline: 'none' }}
-                                />
-                            ) : (
-                                <span onDoubleClick={() => { setEditTitle(p.title); setEditingProjectId(p.id); }} style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{p.title}</span>
-                            )}
-                            {currentProject?.id === p.id && editingProjectId !== p.id && (
-                                <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', opacity: 0.5 }}><Trash2 size={12} /></button>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </aside>
+        <div className="ow-root" style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden', fontFamily: 'Inter,-apple-system,sans-serif' }}>
+            <style>{`
+                .ow-root *{box-sizing:border-box}
+                .ow-sb::-webkit-scrollbar{width:0}.ow-sb{scrollbar-width:none}
+                .ow-spin{animation:owSpin 1s linear infinite}
+                @keyframes owSpin{to{transform:rotate(360deg)}}
+                @keyframes owPulse{0%,80%,100%{opacity:.15}40%{opacity:.6}}
+                .ow-bubble{animation:owFade .25s ease-out}
+                @keyframes owFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+                .ow-input::placeholder{color:var(--color-text);opacity:.3}
+                .ow-input:focus{outline:none}
+                .ow-pill{padding:6px 14px;border-radius:100px;border:1px solid var(--color-border);background:transparent;color:var(--color-text);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s}
+                .ow-pill:hover{background:var(--color-text);color:var(--color-bg)}
+                .ow-side-item{padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:2px;transition:background .1s;font-size:13px}
+                .ow-side-item:hover{background:rgba(128,128,128,.08)}
+            `}</style>
 
-            {/* CHAT CANVAS */}
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            {/* ── Sidebar ── */}
+            <AnimatePresence>
+                {sidebarOpen && (
+                    <motion.aside
+                        initial={{ width: 0, opacity: 0 }} animate={{ width: 260, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}
+                    >
+                        <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
+                            <button onClick={() => createProject()} style={{ width: '100%', padding: '10px', background: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
+                                <Plus size={15} /> New Chat
+                            </button>
+                        </div>
+                        <div className="ow-sb" style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, opacity: .3, padding: '8px 12px', textTransform: 'uppercase' }}>History</div>
+                            {projects.map(p => (
+                                <div key={p.id} className="ow-side-item" onClick={() => { if (editId !== p.id) loadProject(p); }}
+                                    style={{ background: currentProject?.id === p.id ? 'rgba(128,128,128,.1)' : undefined }}>
+                                    <MessageSquare size={14} style={{ opacity: .35, flexShrink: 0 }} />
+                                    {editId === p.id ? (
+                                        <input autoFocus value={editTitle} onChange={e => setEditTitle(e.target.value)}
+                                            onBlur={() => { if (editTitle.trim()) renameProject(p.id, editTitle.trim()); setEditId(null); }}
+                                            onKeyDown={e => { if (e.key === 'Enter') { renameProject(p.id, editTitle.trim()); setEditId(null); } if (e.key === 'Escape') setEditId(null); }}
+                                            style={{ flex: 1, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: 13, padding: '2px 6px', borderRadius: 6, outline: 'none' }} />
+                                    ) : (
+                                        <span onDoubleClick={() => { setEditTitle(p.title); setEditId(p.id); }}
+                                            style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+                                    )}
+                                    {currentProject?.id === p.id && editId !== p.id && (
+                                        <button onClick={e => { e.stopPropagation(); deleteProject(p.id); }}
+                                            style={{ background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer', opacity: .25, padding: 2, display: 'flex' }}><Trash2 size={13} /></button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-border)', fontSize: 12, opacity: .35, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Zap size={12} /> {profile?.credits || 0} credits
+                        </div>
+                    </motion.aside>
+                )}
+            </AnimatePresence>
+
+            {/* ── Main Chat ── */}
+            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                {/* Top bar */}
+                <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-text)', opacity: .4 }}>
+                        <ChevronLeft size={18} style={{ transform: sidebarOpen ? 'none' : 'rotate(180deg)', transition: 'transform .2s' }} />
+                    </button>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} />
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>Oracle</span>
+                    {currentProject && <span style={{ fontSize: 12, opacity: .3 }}>· {currentProject.title}</span>}
+                </div>
+
                 {!currentProject ? (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                        <Zap size={40} color="var(--color-accent)" />
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.5 }}>SELECT_OR_CREATE_PROJECT</div>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: .3 }}>
+                        <Zap size={36} />
+                        <span style={{ fontSize: 14 }}>Select or create a chat to start</span>
                     </div>
                 ) : (
                     <>
-                        <div data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '2rem 10%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            {currentProject.messages.map((m, i) => (
-                                <div key={i} style={{ display: 'flex', gap: '1.5rem', width: '100%', maxWidth: '800px', margin: m.role === 'user' ? '0 0 0 auto' : '0 auto' }}>
-                                    {m.role === 'assistant' && (
-                                        <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Zap size={16} /></div>
-                                    )}
-                                    <div style={{ flex: 1, overflow: 'hidden' }}>
-                                        {m.role === 'user' && <div style={{ fontSize: '0.6rem', fontWeight: 900, marginBottom: '0.5rem', opacity: 0.5, textAlign: 'right' }}>YOU</div>}
-                                        
-                                        <div style={{ backgroundColor: m.role === 'user' ? 'rgba(255,255,255,0.05)' : 'transparent', padding: m.role === 'user' ? '1rem' : '0', borderRadius: '12px', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                                            {/* TEXT */}
-                                            {m.type === 'text' && (m.role === 'assistant' && m.isNew && i === currentProject.messages.length - 1 ? <TypewriterText text={m.content} /> : <MarkdownText text={m.content} />)}
-                                            
-                                            {/* UPLOADED IMAGE */}
-                                            {m.type === 'image_upload' && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                    <img src={m.image} style={{ maxWidth: '300px', borderRadius: '8px' }} />
-                                                    {m.content}
+                        {/* Messages */}
+                        <div className="ow-sb" style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, minHeight: 0 }}>
+                            <div style={{ maxWidth: 760, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                {currentProject.messages.map((m, i) => (
+                                    <div key={i} className="ow-bubble" style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 4 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 500, opacity: .25, padding: '0 4px' }}>{m.role === 'user' ? 'You' : 'Oracle'}</span>
+                                        <div style={{ maxWidth: '85%' }}>
+                                            {m.type === 'text' && (
+                                                <div style={{
+                                                    padding: '10px 14px', borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                                    background: m.role === 'user' ? 'rgba(128,128,128,.08)' : 'transparent',
+                                                    border: m.role === 'user' ? 'none' : '1px solid rgba(128,128,128,.08)',
+                                                    fontSize: 14, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word'
+                                                }}>
+                                                    {m.role === 'assistant' && m.isNew && i === currentProject.messages.length - 1
+                                                        ? <Typewriter text={m.content} /> : <Md text={m.content} />}
                                                 </div>
                                             )}
-
-                                            {/* GENERATED IMAGE */}
+                                            {m.type === 'image_upload' && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                    <img src={m.image} alt="" style={{ maxWidth: 260, borderRadius: 12, border: '1px solid var(--color-border)' }} />
+                                                    {m.content && <span style={{ fontSize: 14 }}>{m.content}</span>}
+                                                </div>
+                                            )}
                                             {m.type === 'image' && (
-                                                <div style={{ display: 'inline-block', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-                                                    <img src={m.url} style={{ maxWidth: '400px', borderRadius: '8px', marginBottom: '1rem' }} />
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button onClick={() => analyzeImage(m.url)} style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-accent)', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>ANALYZE</button>
-                                                        <button onClick={() => runNeuralLoop(m.content)} style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '4px', fontWeight: 900, cursor: 'pointer' }}>NEURAL_LOOP</button>
+                                                <div style={{ padding: 12, background: 'var(--color-surface)', borderRadius: 16, border: '1px solid var(--color-border)' }}>
+                                                    <img src={m.url} alt="" style={{ maxWidth: 360, borderRadius: 10, marginBottom: 10 }} />
+                                                    <div style={{ display: 'flex', gap: 6 }}>
+                                                        <button onClick={() => analyzeImage(m.url)} className="ow-pill">Analyze</button>
+                                                        <button onClick={() => runNeuralLoop(m.content)} className="ow-pill">Neural Loop</button>
                                                     </div>
                                                 </div>
                                             )}
-
-                                            {/* STORYBOARD */}
-                                            {m.type === 'storyboard' && <StoryboardCard scenes={m.content} projectTitle={currentProject.title} />}
-
-                                            {/* ANALYSIS */}
+                                            {m.type === 'storyboard' && <StoryboardCard scenes={m.content} title={currentProject.title} />}
                                             {m.type === 'analysis' && <AnalysisCard analysis={m.content} imageUrl={m.imageUrl} />}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                            {status.isTyping && <div style={{ margin: '0 auto', width: '100%', maxWidth: '800px', display: 'flex', gap: '1.5rem' }}><div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={16} /></div><div style={{ opacity: 0.5, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RefreshCw size={14} className="spin" /> SYNTHESIZING...</div></div>}
-                            <div ref={chatEndRef} />
+                                ))}
+                                {status.isTyping && (
+                                    <div className="ow-bubble" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 500, opacity: .25, padding: '0 4px' }}>Oracle</span>
+                                        <div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', border: '1px solid rgba(128,128,128,.08)', display: 'flex', gap: 5 }}>
+                                            {[0, 1, 2].map(d => <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-text)', animation: `owPulse 1.4s ease-in-out ${d * .2}s infinite` }} />)}
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={endRef} />
+                            </div>
                         </div>
 
-                        {/* INPUT AREA */}
-                        <div style={{ padding: '2rem 10%', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-                            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                                
-                                {/* Smart Actions */}
+                        {/* Input */}
+                        <div style={{ padding: '12px 24px 20px', flexShrink: 0 }}>
+                            <div style={{ maxWidth: 760, margin: '0 auto' }}>
+                                {/* Smart actions */}
                                 {!activeForm && (
-                                    <div data-lenis-prevent="true" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', whiteSpace: 'nowrap' }}>
-                                        <LabPill onClick={() => setActiveForm({ type: 'short_film' })}><Target size={12} /> SHORT_FILM <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'storyboard' })}><ImageIcon size={12} /> STORYBOARD <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡25</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'audit' })}><Search size={12} /> VIRAL_AUDIT <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'rewriter' })}><Edit3 size={12} /> REWRITER <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'proposal' })}><Briefcase size={12} /> PROPOSAL <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'calendar' })}><Calendar size={12} /> CALENDAR <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
-                                        <LabPill onClick={() => setActiveForm({ type: 'brief' })}><FileDown size={12} /> BRIEF_EXTRACTOR <span style={{ opacity: 0.5, fontSize: '0.6rem', marginLeft: '4px' }}>⚡5</span></LabPill>
+                                    <div className="ow-sb" style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', paddingBottom: 4 }}>
+                                        {Object.entries(FORMS).map(([key, f]) => (
+                                            <button key={key} className="ow-pill" onClick={() => setActiveForm({ type: key, stepIndex: 0, answers: [] })}>
+                                                {f.icon} {f.label} <span style={{ opacity: .35, fontSize: 10 }}>⚡{f.cost}</span>
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
-
-                                {/* Inline Form Hint */}
                                 {activeForm && (
-                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {FORMS[activeForm.type]?.steps?.length > 1 && (
-                                                <span style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900, fontSize: '0.7rem' }}>
-                                                    STEP {(activeForm.stepIndex || 0) + 1}/{FORMS[activeForm.type].steps.length}
-                                                </span>
-                                            )}
-                                            <span style={{ color: 'var(--color-accent)' }}>
-                                                {FORMS[activeForm.type]?.steps[activeForm.stepIndex || 0]}
-                                            </span>
-                                        </div>
-                                        <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, cursor: 'pointer' }}>CANCEL</button>
+                                    <div style={{ marginBottom: 8, padding: '8px 14px', background: 'rgba(128,128,128,.06)', borderRadius: 12, fontSize: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ opacity: .7 }}>
+                                            {FORMS[activeForm.type].steps.length > 1 && <span style={{ background: 'var(--color-accent)', color: '#000', padding: '1px 6px', borderRadius: 4, fontSize: 11, fontWeight: 600, marginRight: 8 }}>
+                                                {(activeForm.stepIndex || 0) + 1}/{FORMS[activeForm.type].steps.length}
+                                            </span>}
+                                            {FORMS[activeForm.type].steps[activeForm.stepIndex || 0]}
+                                        </span>
+                                        <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: .3, display: 'flex', color: 'var(--color-text)' }}><X size={14} /></button>
                                     </div>
                                 )}
-
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', backgroundColor: 'rgba(255,255,255,0.02)', padding: '0.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
-                                    <input type="file" id="img-upload" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            const r = new FileReader();
-                                            r.onload = () => setPendingImage(r.result);
-                                            r.readAsDataURL(file);
-                                        }
-                                        e.target.value = null; // reset
-                                    }} />
-                                    <button onClick={() => document.getElementById('img-upload').click()} style={{ background: 'none', border: 'none', color: 'var(--color-text)', opacity: 0.5, padding: '0.5rem', cursor: 'pointer' }}>
-                                        <ImageIcon size={20} />
-                                    </button>
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        {pendingImage && (
-                                            <div style={{ position: 'relative', width: 'fit-content', padding: '0.5rem 0' }}>
-                                                <img src={pendingImage} style={{ height: '60px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
-                                                <button onClick={() => setPendingImage(null)} style={{ position: 'absolute', top: 0, right: '-10px', background: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>✕</button>
-                                            </div>
-                                        )}
-                                        <textarea 
-                                            value={inputText} onChange={e => setInputText(e.target.value)}
-                                            onKeyDown={e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                                            placeholder={activeForm ? "Type here..." : "Message Oracle..."}
-                                            style={{ width: '100%', background: 'none', border: 'none', color: 'var(--color-text)', padding: '0.75rem 0', outline: 'none', resize: 'none', maxHeight: '150px', fontSize: '0.95rem' }}
-                                        />
+                                {pendingImage && (
+                                    <div style={{ marginBottom: 8, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 10, background: 'rgba(128,128,128,.06)' }}>
+                                        <img src={pendingImage} alt="" style={{ height: 40, borderRadius: 6 }} />
+                                        <button onClick={() => setPendingImage(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: .3, display: 'flex', color: 'var(--color-text)' }}><X size={12} /></button>
                                     </div>
-                                    <button onClick={handleSend} style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginBottom: '4px' }}>
-                                        <Send size={16} />
+                                )}
+                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, padding: '8px 8px 8px 14px', borderRadius: 22, border: '1px solid rgba(128,128,128,.12)', background: 'rgba(128,128,128,.03)' }}>
+                                    <input type="file" id="ow-img" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                                        const f = e.target.files?.[0]; if (f) { const r = new FileReader(); r.onload = () => setPendingImage(r.result); r.readAsDataURL(f); } e.target.value = null;
+                                    }} />
+                                    <button onClick={() => document.getElementById('ow-img').click()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px', display: 'flex', color: 'var(--color-text)', opacity: .3, flexShrink: 0, marginBottom: 2 }}>
+                                        <Paperclip size={16} />
+                                    </button>
+                                    <textarea ref={taRef} className="ow-input" value={input} onChange={e => setInput(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                                        placeholder={activeForm ? "Type here..." : "Message Oracle..."} rows={1}
+                                        style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--color-text)', fontSize: 14, lineHeight: '24px', resize: 'none', padding: 0, fontFamily: 'inherit', maxHeight: 140 }} />
+                                    <button onClick={handleSend} disabled={!input.trim() && !pendingImage}
+                                        style={{ width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            background: (input.trim() || pendingImage) ? 'var(--color-text)' : 'transparent', color: (input.trim() || pendingImage) ? 'var(--color-bg)' : 'var(--color-text)',
+                                            opacity: (input.trim() || pendingImage) ? 1 : .15, transition: 'all .2s' }}>
+                                        <ArrowUp size={16} strokeWidth={2.5} />
                                     </button>
                                 </div>
                             </div>
@@ -405,10 +329,6 @@ const OracleWorkspacePage = () => {
                     </>
                 )}
             </main>
-            <style>{`
-                .spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 };
