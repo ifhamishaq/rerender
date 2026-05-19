@@ -11,7 +11,7 @@ import LabPill from '../components/LabPill';
 
 const VISION_MODEL = 'baidu/qianfan-ocr-fast:free';
 const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
-const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
+const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const ACCENT = 'var(--color-accent)';
 

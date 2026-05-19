@@ -12,7 +12,7 @@ import LabPill from '../components/LabPill';
 const ACCENT = '#E8111A';
 
 const MODEL = 'baidu/qianfan-ocr-fast:free';
-const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
+const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },

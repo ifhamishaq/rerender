@@ -34,8 +34,7 @@ const PosterContent = ({
     textSegments,
     toggleHighlight,
     isLifetime,
-    setShowUnlockModal,
-    isHDEquivalent = false
+    setShowUnlockModal
 }) => {
     return (
         <div 
@@ -59,10 +58,7 @@ const PosterContent = ({
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
                 cursor: isDraggingBg ? 'grabbing' : 'grab',
-                userSelect: 'none',
-                // Critical: Force 1.0 scale and high-res dimensions for the HD capture clone
-                transform: isHDEquivalent ? 'none' : undefined,
-                zoom: isHDEquivalent ? '1' : undefined
+                userSelect: 'none'
             }}
         >
             {bgImage ? (
@@ -156,7 +152,13 @@ const PosterContent = ({
 const NewsGeneratorPage = () => {
     const { user, profile, spendCredits } = useAuth();
     const navigate = useNavigate();
-    const isMobile = window.innerWidth < 768;
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     const [news, setNews] = useState([]);
     const [loadingNews, setLoadingNews] = useState(false);
     
@@ -284,7 +286,6 @@ const NewsGeneratorPage = () => {
     };
     
     const posterRef = useRef(null);
-    const hdPosterRef = useRef(null);
 
     useEffect(() => {
         fetchNews(category);
@@ -533,21 +534,20 @@ const NewsGeneratorPage = () => {
     };
 
     const exportImage = async () => {
-        const captureRef = hdPosterRef.current || posterRef.current;
-        if (!captureRef || !bgImage) return;
+        if (!posterRef.current || !bgImage) return;
         
         const success = await spendCredits(50, 'NEWS_EXPORT');
         if (!success) {
-            setErrorMessage('Not enough credits — downloading costs 50 credits.');
+            setErrorMessage('Not enough credits \u2014 downloading costs 50 credits.');
             setTimeout(() => setErrorMessage(''), 4000);
             return;
         }
 
         setIsExporting(true);
         try {
-            // High-fidelity capture from the HIDDEN HD Anchor (hdPosterRef)
-            // This anchor is 1080px wide and has NO zoom/scaling applied.
-            const canvas = await html2canvas(captureRef, { 
+            // Capture the VISIBLE poster — exact same thing the user sees.
+            // The onclone hook resets zoom so html2canvas gets a full 1080px render.
+            const canvas = await html2canvas(posterRef.current, { 
                 useCORS: true, 
                 scale: 2, 
                 backgroundColor: '#000',
@@ -555,7 +555,19 @@ const NewsGeneratorPage = () => {
                 logging: false,
                 allowTaint: true,
                 onclone: (clonedDoc) => {
-                    // Forcefully remove watermark in the capture clone if Pro
+                    // Reset workspace zoom so capture is at native 1080px resolution
+                    const workspace = clonedDoc.querySelector('.poster-workspace');
+                    if (workspace) {
+                        workspace.style.zoom = '1';
+                        workspace.style.transform = 'none';
+                    }
+                    // Clean up poster border/shadow artifacts
+                    const poster = clonedDoc.querySelector('.poster-canvas');
+                    if (poster) {
+                        poster.style.boxShadow = 'none';
+                        poster.style.border = 'none';
+                    }
+                    // Remove watermark for Pro users
                     if (isLifetime) {
                         const wm = clonedDoc.querySelector('[data-watermark="oracle"]');
                         if (wm) wm.style.display = 'none';
@@ -564,14 +576,11 @@ const NewsGeneratorPage = () => {
             });
             const img = canvas.toDataURL('image/png', 1.0); // Maximum quality
             
-            // 3. Set background (Proxying through images.weserv.nl to fix CORS export issues)
-            const proxiedUrl = `https://images.weserv.nl/?url=${encodeURIComponent(bgImage)}&w=1200&q=90`;
-            
-            // Save to gallery
+            // Save to gallery (use raw bgImage — avoid double-proxying)
             const newDesign = {
                 id: Date.now(),
                 title: selectedNews?.title || 'Untitled',
-                bgImage: proxiedUrl, 
+                bgImage: bgImage, 
                 textSegments: textSegments,
                 caption: caption,
                 aspectRatio,
@@ -664,8 +673,7 @@ const NewsGeneratorPage = () => {
                     style={{ 
                         width: '320px', flexShrink: 0, height: 'calc(100vh - 60px)', borderRight: '2px solid var(--color-text)', 
                         display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
-                        overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px',
-                        scrollbarWidth: 'none', msOverflowStyle: 'none'
+                        overflowY: 'auto', zIndex: 10, position: 'sticky', top: '60px'
                     }}
                 >
                     <header style={{ marginBottom: '2rem' }}>
@@ -934,10 +942,15 @@ const NewsGeneratorPage = () => {
                         <div style={{ width: '100%', maxWidth: '600px', padding: '2rem', backgroundColor: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <div style={{ fontSize: '0.75rem', opacity: 0.4, fontWeight: 900, color: 'var(--color-text)', letterSpacing: '0.1em' }}>Caption</div>
-                                <button onClick={copyToClipboard} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.7rem', fontWeight: 900, color: copied ? 'var(--color-accent)' : 'var(--color-text)', cursor: 'pointer', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem 1rem', borderRadius: '30px', transition: 'all 0.2s' }}>
-                                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                                    {copied ? 'Copied!' : 'Copy'}
-                                </button>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button onClick={regenerateCaption} disabled={isGenerating} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 900, color: 'var(--color-text)', cursor: 'pointer', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem 1rem', borderRadius: '30px', transition: 'all 0.2s', opacity: isGenerating ? 0.5 : 1 }}>
+                                        <RefreshCw size={12} /> New
+                                    </button>
+                                    <button onClick={copyToClipboard} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 900, color: copied ? 'var(--color-accent)' : 'var(--color-text)', cursor: 'pointer', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem 1rem', borderRadius: '30px', transition: 'all 0.2s' }}>
+                                        {copied ? <Check size={12} /> : <Copy size={12} />}
+                                        {copied ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
                             </div>
                             <div style={{ padding: '1.5rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--color-text)', whiteSpace: 'pre-wrap', fontFamily: 'Inter, sans-serif' }}>
                                 {caption || 'Caption will appear here...'}
@@ -1221,34 +1234,6 @@ const NewsGeneratorPage = () => {
                             Maybe Later
                         </button>
                     </div>
-                </div>
-            )}
-
-            {/* Hidden HD Anchor: For Pixel-Perfect Export (Always available when image exists) */}
-            {bgImage && (
-                <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
-                    <PosterContent 
-                        posterRef={hdPosterRef}
-                        dimensions={getCanvasDimensions()}
-                        bgImage={bgImage}
-                        bgPosX={bgPosX}
-                        bgPosY={bgPosY}
-                        bgZoom={bgZoom}
-                        overlayOpacity={overlayOpacity}
-                        textPosition={textPosition}
-                        logo={logo}
-                        handle={handle}
-                        brandColor={brandColor}
-                        fontFamily={fontFamily}
-                        fontSize={getFontSize()}
-                        lineHeight={lineHeight}
-                        letterSpacing={letterSpacing}
-                        textGlow={textGlow}
-                        useStroke={useStroke}
-                        textSegments={textSegments}
-                        isLifetime={isLifetime}
-                        isHDEquivalent={true} // Locked at 1.0 scale
-                    />
                 </div>
             )}
         </div>

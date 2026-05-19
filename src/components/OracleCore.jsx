@@ -7,10 +7,10 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import LabPill from './LabPill';
 
-const MODEL = 'baidu/qianfan-ocr-fast:free';
-const VISION_MODEL = 'google/gemma-4-26b-a4b-it:free';
-const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
-const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const VISION_MODEL = 'deepseek/deepseek-v4-flash:free';
+const VISION_FAST_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
 
 // Mode-specific use-case templates
 const USE_CASE_SETS = {

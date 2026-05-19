@@ -11,16 +11,18 @@ export const AI_COSTS = {
 };
 
 /**
- * Verified high-performance free models on OpenRouter (Updated April 2026)
- * Optimized order: Most reliable/high-RPM models first to minimize retry delays.
+ * Verified high-performance free models on OpenRouter (Updated May 2026)
+ * Ordered by reliability (token volume) — general-purpose models preferred.
  */
 const FREE_MODEL_POOL = [
-    "google/gemma-4-31b-it:free",            // Verified SOTA
-    "nvidia/nemotron-3-super-120b-a12b:free", // Flagship Quality
-    "openai/gpt-oss-120b:free",              // High Reasoning
-    "tencent/hy3-preview:free",
-    "minimax/minimax-m2.5:free",
-    "mistralai/mistral-7b-instruct:free"     // Stable Fallback
+    "nvidia/nemotron-3-super-120b-a12b:free", // 629B tokens — #1 most used free model
+    "deepseek/deepseek-v4-flash:free",        // 62B tokens — fast, 1M context, strong reasoning
+    "openai/gpt-oss-120b:free",               // 138B tokens — high reasoning, tool use
+    "z-ai/glm-4.5-air:free",                  // 82B tokens — good general purpose
+    "minimax/minimax-m2.5:free",              // 44B tokens — proven stable
+    "arcee-ai/trinity-large-thinking:free",   // 40B tokens — strong reasoning
+    "openai/gpt-oss-20b:free",               // 31B tokens — lightweight fast fallback
+    "nvidia/nemotron-3-nano-30b-a3b:free"    // 34B tokens — efficient last-resort
 ];
 
 const getApiKeys = () => {
