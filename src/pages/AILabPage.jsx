@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import OracleCore from '../components/OracleCore';
 import LabHeader from '../components/LabHeader';
 import { useAuth } from '../context/AuthContext';
@@ -27,38 +26,30 @@ const AILabPage = () => {
                 accentColor="var(--color-accent)"
             />
 
-            <div style={{ maxWidth: '1200px', margin: '3rem auto', padding: '0 2rem' }}>
-                {/* Centered AI Agent Container */}
+            <div style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 1.5rem' }}>
+                {/* Chat Container */}
                 <div style={{ 
-                    height: '75vh', 
-                    maxHeight: '850px', 
-                    position: 'relative',
-                    border: '2px solid var(--color-text)',
-                    backgroundColor: 'var(--color-surface)',
-                    boxShadow: '15px 15px 0px rgba(0,0,0,0.05)'
+                    height: '70vh', 
+                    maxHeight: '800px', 
+                    minHeight: '500px',
+                    borderRadius: '20px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--color-bg)',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.08)'
                 }}>
                     <OracleCore mode="standard" />
                 </div>
 
-                {/* Technical Meta */}
+                {/* Subtle footer */}
                 <div style={{ 
-                    marginTop: '4rem', 
-                    borderTop: '1px solid var(--color-border)', 
-                    paddingTop: '2rem', 
-                    opacity: 0.5,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.65rem'
+                    marginTop: '2rem', 
+                    textAlign: 'center',
+                    fontSize: '0.7rem',
+                    opacity: 0.3,
+                    fontWeight: 500
                 }}>
-                    <div>
-                        <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>DIRECTIVE_ENGINE:</span> GEMMA_4_31B<br />
-                        <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>PROMPT_FIDELITY:</span> MAXIMUM
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>LATENCY:</span> OPTIMIZED<br />
-                        <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> ORACLE_V4
-                    </div>
+                    Oracle is powered by AI and may make mistakes. Verify important information.
                 </div>
             </div>
         </div>

@@ -9,8 +9,8 @@ import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
 
-const VISION_MODEL = 'baidu/qianfan-ocr-fast:free';
-const VISION_FAST_MODEL = 'baidu/qianfan-ocr-fast:free';
+const VISION_MODEL = 'google/gemma-4-31b-it:free';
+const VISION_FAST_MODEL = 'meta-llama/llama-4-maverick:free';
 const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const ACCENT = 'var(--color-accent)';

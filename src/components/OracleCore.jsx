@@ -1,30 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Send, RefreshCw, User, Bot, X, Target, Palette, FileText, Zap, Image as ImageIcon, Wand2, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, RefreshCw, User, Bot, X, Target, Palette, FileText, Zap, Image as ImageIcon, Wand2, Upload, Trash2 } from 'lucide-react';
 
 import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import LabPill from './LabPill';
 
 const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const VISION_MODEL = 'deepseek/deepseek-v4-flash:free';
-const VISION_FAST_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const VISION_MODEL = 'google/gemma-4-31b-it:free';
+const VISION_FAST_MODEL = 'meta-llama/llama-4-maverick:free';
 const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
 
-// Mode-specific use-case templates
-const USE_CASE_SETS = {
+// Quick action templates per mode
+const QUICK_ACTIONS = {
     standard: [
-        { id: 'hook', label: 'GENERATE HOOK', icon: <Target size={14} />, prompt: "Generate 3 high-impact 'scroll-stopping' hooks for a TikTok/Reel about: " },
-        { id: 'aesthetic', label: 'AESTHETIC STAR', icon: <Palette size={14} />, prompt: "Give me an 'Aesthetic North Star' (3 words), Hex codes, and font pairings for this 'vibe': " },
-        { id: 'script', label: 'SCRIPT DOCTOR', icon: <FileText size={14} />, prompt: "Turn this rough idea into a high-paced, RE-RENDER style short-form script: " },
-        { id: 'critique', label: 'BRUTAL CRITIQUE', icon: <Zap size={14} />, prompt: "Give me a 'Brutal Agency Critique' of this creative concept to make it world-class: " }
+        { id: 'hook', label: 'Generate Hook', icon: <Target size={13} />, prompt: "Generate 3 high-impact 'scroll-stopping' hooks for a TikTok/Reel about: " },
+        { id: 'aesthetic', label: 'Aesthetic Guide', icon: <Palette size={13} />, prompt: "Give me an 'Aesthetic North Star' (3 words), Hex codes, and font pairings for this 'vibe': " },
+        { id: 'script', label: 'Script Doctor', icon: <FileText size={13} />, prompt: "Turn this rough idea into a high-paced, RE-RENDER style short-form script: " },
+        { id: 'critique', label: 'Brutal Critique', icon: <Zap size={13} />, prompt: "Give me a 'Brutal Agency Critique' of this creative concept to make it world-class: " }
     ],
     wallpaper: [
-        { id: 'cinematic', label: 'CINEMATIC PROMPT', icon: <ImageIcon size={14} />, prompt: "Generate a cinematic wallpaper prompt with dramatic lighting and depth for the theme: " },
-        { id: 'abstract', label: 'ABSTRACT ART', icon: <Wand2 size={14} />, prompt: "Create an abstract digital art prompt with bold geometric shapes and neon accents for: " },
-        { id: 'brutalist', label: 'BRUTALIST STYLE', icon: <Zap size={14} />, prompt: "Design a digital brutalist wallpaper prompt with raw textures, concrete, and electric lime for: " },
-        { id: 'nature', label: 'NATURE + TECH', icon: <Palette size={14} />, prompt: "Create a wallpaper prompt that blends organic nature with futuristic technology for: " }
+        { id: 'cinematic', label: 'Cinematic', icon: <ImageIcon size={13} />, prompt: "Generate a cinematic wallpaper prompt with dramatic lighting and depth for the theme: " },
+        { id: 'abstract', label: 'Abstract Art', icon: <Wand2 size={13} />, prompt: "Create an abstract digital art prompt with bold geometric shapes and neon accents for: " },
+        { id: 'brutalist', label: 'Brutalist', icon: <Zap size={13} />, prompt: "Design a digital brutalist wallpaper prompt with raw textures, concrete, and electric lime for: " },
+        { id: 'nature', label: 'Nature + Tech', icon: <Palette size={13} />, prompt: "Create a wallpaper prompt that blends organic nature with futuristic technology for: " }
     ],
     global: []
 };
@@ -32,7 +31,7 @@ const USE_CASE_SETS = {
 const OracleCore = ({
     mode = 'standard',
     context = '',
-    initialMessage = "ORACLE_ONLINE. I am the Aesthetic Oracle, created by **Ifham**. How shall we re-render your vision today?",
+    initialMessage = "Hey! I'm Oracle, your creative AI assistant built by **Ifham**. How can I help you today?",
     onExecute = null,
     onClose = null
 }) => {
@@ -51,7 +50,7 @@ const OracleCore = ({
     const scrollRef = useRef(null);
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
-    const useCases = USE_CASE_SETS[mode] || [];
+    const actions = QUICK_ACTIONS[mode] || [];
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
@@ -66,25 +65,34 @@ const OracleCore = ({
 
     useEffect(() => {
         localStorage.setItem(storageKey, JSON.stringify(messages));
-        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (scrollRef.current) {
+            requestAnimationFrame(() => {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            });
+        }
     }, [messages, isTyping, storageKey]);
 
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
         }
     }, [input]);
+
+    const clearChat = () => {
+        setMessages([{ role: 'assistant', content: initialMessage }]);
+        localStorage.removeItem(storageKey);
+    };
 
     const formatContent = (content) => {
         if (!content) return '';
         let cleaned = content.replace(/—/g, '-');
-        let formatted = cleaned.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-accent); font-weight: 900;">$1</strong>');
-        formatted = formatted.replace(/^### (.*$)/gm, '<h3 style="color: var(--color-accent); font-size: 0.9rem; margin-top: 1.5rem; margin-bottom: 0.5rem; font-family: var(--font-mono); letter-spacing: 0.1em; font-weight: 900;">$1</h3>');
-        formatted = formatted.replace(/^## (.*$)/gm, '<h2 style="color: var(--color-text); font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.25rem; font-weight: 900;">$1</h2>');
-        formatted = formatted.replace(/^[\s]*[-*][\s]+(.*)/gm, '<div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; padding-left: 0.5rem;"><span style="color: var(--color-accent)">•</span><span>$1</span></div>');
-        formatted = formatted.replace(/^---$/gm, '<div style="height: 1px; background: var(--color-border); margin: 2rem 0; opacity: 0.5;"></div>');
-        formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: var(--color-accent); text-decoration: underline; font-weight: 700;" target="_blank" rel="noopener noreferrer">$1</a>');
+        let formatted = cleaned.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-accent); font-weight: 700;">$1</strong>');
+        formatted = formatted.replace(/^### (.*$)/gm, '<h3 style="color: var(--color-accent); font-size: 0.85rem; margin-top: 1.2rem; margin-bottom: 0.4rem; font-weight: 700;">$1</h3>');
+        formatted = formatted.replace(/^## (.*$)/gm, '<h2 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 700;">$1</h2>');
+        formatted = formatted.replace(/^[\s]*[-*][\s]+(.*)/gm, '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.3rem; padding-left: 0.25rem;"><span style="color: var(--color-accent); flex-shrink: 0;">•</span><span>$1</span></div>');
+        formatted = formatted.replace(/^---$/gm, '<div style="height: 1px; background: var(--color-border); margin: 1rem 0;"></div>');
+        formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: var(--color-accent); text-decoration: underline;" target="_blank" rel="noopener noreferrer">$1</a>');
         return formatted;
     };
 
@@ -96,13 +104,13 @@ const OracleCore = ({
         if (isTyping) return;
 
         if (!user) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "🚨 **ACCESS_DENIED**: You must be logged in to use the Oracle." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "Please **log in** to use Oracle." }]);
             setIsAuthModalOpen(true);
             return;
         }
 
         if (!profile || profile.credits < AI_COSTS.ORACLE) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "📉 **OUT_OF_COMPUTE**: Insufficient credits." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "You're out of credits. Visit your **profile** to get more." }]);
             return;
         }
 
@@ -111,7 +119,7 @@ const OracleCore = ({
 
         const userMessage = {
             role: 'user',
-            content: messageText || (hasImage ? '📸 Analyze this image' : ''),
+            content: messageText || (hasImage ? 'Analyze this image' : ''),
             image: hasImage ? pendingImage.preview : null
         };
         setMessages(prev => [...prev, userMessage]);
@@ -121,88 +129,25 @@ const OracleCore = ({
         setIsTyping(true);
 
         try {
+            const systemPrompt = `You are Oracle, an AI creative assistant built by Ifham, founder of RE-RENDER.
+Your job is to help users with creative ideas, thumbnails, videos, and content strategy.
+Be professional but friendly. Give clear, actionable advice.
+Use **bold text** to highlight important points.
+Keep answers concise and well-structured.
+NEVER use em-dashes.
+
+SITEMAP: Home /, Our Work /work, About /about, Contact /get-in-touch, Caption Writer /lab/caption-writer, Thumbnail Analyser /lab/thumbnail-analyser, Wallpaper Lab /tools/wallpaper-lab
+
+If user asks for help: Give value first, then suggest RE-RENDER services naturally.`;
+
             const apiMessages = hasImage ? [
-                { role: 'system', content: `🧠 ORACLE – CORE IDENTITY
-Name: Oracle
-Built by: Ifham (Founder of RE-RENDER)
-Role: Creative assistant + client guide + problem solver
-
-🔥 SYSTEM PROMPT
-You are Oracle, an AI creative assistant built by Ifham, founder of RE-RENDER.
-Your job is to:
-- Help users with creative ideas (thumbnails, videos, content)
-- Guide potential clients to RE-RENDER services
-- Give simple, clear, and useful answers
-- Sound professional but friendly
-- Focus on results (growth, engagement, conversions)
-
-You think like a creative director and strategist.
-
-RULES:
-- Use simple English. Keep answers short and clear.
-- Use **bold text** to highlight important points.
-- Provide [links](/work) to relevant pages using markdown syntax.
-- Be helpful first, then suggest services naturally.
-- CRITICAL: NEVER use em-dashes (—).
-
-SITEMAP (Use these links):
-- Home: /
-- Our Work: /work
-- About Us: /about
-- Get in Touch/Hire Us: /get-in-touch
-- AI Agent (Aesthetic Oracle): /lab/ai-agent
-- Caption Writer: /lab/caption-writer
-- Thumbnail Analyser: /lab/thumbnail-analyser
-- Wallpaper Lab: /tools/wallpaper-lab
-
-KNOWLEDGE BASE:
-RE-RENDER is a creative agency that helps clients grow using Thumbnail design, Video editing, and Short-form content.
-- Thumbnails: Focus on big bold text, high contrast, and emotion/curiosity.
-- Video: Focus on fast pacing, clean cuts, and B-roll.
-- Short-form: Focus on the hook (first 2 seconds).
-
-SALES BEHAVIOR:
-If user asks for help: Give value first, then gently say "If you want, our team at RE-RENDER can help you with this."
-If user sounds serious: move toward closing "Want me to connect you with our team?"
-
-PERSONAL TOUCH:
-Sometimes mention: "This system was designed by Ifham to help creators get better results."` },
+                { role: 'system', content: systemPrompt },
                 { role: 'user', content: [
                     { type: 'text', text: messageText || 'Analyze this image.' },
                     { type: 'image_url', image_url: { url: currentImage.base64 } }
                 ]}
             ] : [
-                { role: 'system', content: `🧠 ORACLE – CORE IDENTITY
-Name: Oracle
-Built by: Ifham (Founder of RE-RENDER)
-Role: Creative assistant + client guide + problem solver
-
-🔥 SYSTEM PROMPT
-You are Oracle, an AI creative assistant built by Ifham, founder of RE-RENDER.
-Your job is to:
-- Help users with creative ideas (thumbnails, videos, content)
-- Guide potential clients to RE-RENDER services
-- Give simple, clear, and useful answers
-- Sound professional but friendly
-- Focus on results (growth, engagement, conversions)
-
-SITEMAP (Use these links):
-- Our Work: /work
-- About Us: /about
-- Get in Touch/Hire Us: /get-in-touch
-- Caption Writer: /lab/caption-writer
-- Thumbnail Analyser: /lab/thumbnail-analyser
-- Wallpaper Lab: /tools/wallpaper-lab
-
-RULES:
-- Use **bold text** to highlight important points.
-- Use simple English. Keep answers short and clear.
-- Be helpful first, then suggest services naturally.
-- CRITICAL: NEVER use em-dashes (—).
-
-SALES BEHAVIOR:
-If user asks for help: Give value first, then gently say "If you want, our team at RE-RENDER can help you with this."
-If user sounds serious: move toward closing "Want me to connect you with our team?"` },
+                { role: 'system', content: systemPrompt },
                 ...messages.filter(m => !m.image).slice(-5).map(m => ({ role: m.role, content: m.content })),
                 { role: 'user', content: messageText }
             ];
@@ -215,20 +160,19 @@ If user sounds serious: move toward closing "Want me to connect you with our tea
                     model: modelToUse,
                     messages: apiMessages,
                     temperature: 0.7,
-                }, { title: 'RE-RENDER Aesthetic Oracle' });
+                });
             } catch (err) {
-                console.warn('[ORACLE] Fast vision failed, trying primary vision...', err);
                 data = await fetchOpenRouter({
                     model: hasImage ? VISION_MODEL : FALLBACK_MODEL,
                     messages: apiMessages,
                     temperature: 0.7,
-                }, { title: 'RE-RENDER Aesthetic Oracle (Recovery)' });
+                });
             }
 
-            const assistantMessage = data.choices?.[0]?.message?.content || 'EMPTY_RESPONSE';
+            const assistantMessage = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. Please try again.";
             setMessages(prev => [...prev, { role: 'assistant', content: assistantMessage }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: `SYSTEM_FAIL: ${error.message}` }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: `Something went wrong. Please try again.` }]);
         } finally {
             setIsTyping(false);
         }
@@ -238,94 +182,250 @@ If user sounds serious: move toward closing "Want me to connect you with our tea
         <div style={{
             display: 'flex', flexDirection: 'column',
             height: '100%', width: '100%',
-            fontFamily: 'var(--font-sans)', position: 'relative',
+            fontFamily: 'var(--font-sans)',
             backgroundColor: 'var(--color-bg)',
+            overflow: 'hidden',
+            position: 'relative'
         }}>
-            {/* Header */}
+            <style>{`
+                .oracle-scrollbar::-webkit-scrollbar { width: 4px; }
+                .oracle-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .oracle-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 4px; }
+                .oracle-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.4); }
+                .oracle-spin { animation: oracle-spin 1s linear infinite; }
+                @keyframes oracle-spin { 100% { transform: rotate(360deg); } }
+                .oracle-msg-enter { animation: oracle-fade-up 0.3s ease-out; }
+                @keyframes oracle-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
+
+            {/* ─── Header ─── */}
             <div style={{
-                padding: '1.25rem 2rem', 
-                borderBottom: '1.5px solid var(--color-text)',
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid var(--color-border)',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                fontFamily: 'var(--font-mono)',
+                flexShrink: 0,
+                backgroundColor: 'var(--color-bg)'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-accent)', borderRadius: '50%' }}></div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.1em' }}>
-                        {mode.toUpperCase()}_UNIT // ACTIVE
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--color-accent)', borderRadius: '50%' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+                        Oracle
+                    </span>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.4, fontWeight: 500 }}>
+                        {mode === 'global' ? `• ${context || 'Home'}` : '• AI Assistant'}
                     </span>
                 </div>
-                {onClose && (
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
-                )}
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button 
+                        onClick={clearChat} 
+                        title="Clear chat"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.3, padding: '4px', display: 'flex', color: 'var(--color-text)' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                    {onClose && (
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', color: 'var(--color-text)', opacity: 0.5 }}>
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Chat Area */}
-            <div ref={scrollRef} style={{ flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* ─── Messages ─── */}
+            <div 
+                ref={scrollRef} 
+                className="oracle-scrollbar"
+                style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    overflowX: 'hidden',
+                    padding: '1.25rem',
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '1.25rem',
+                    minHeight: 0
+                }}
+            >
                 {messages.map((m, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '1.5rem', flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
-                        <div style={{ width: '32px', height: '32px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: m.role === 'user' ? 'var(--color-border)' : 'var(--color-text)', color: m.role === 'user' ? 'var(--color-text)' : 'var(--color-bg)', borderRadius: '4px' }}>
-                            {m.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+                    <div key={i} className="oracle-msg-enter" style={{ 
+                        display: 'flex', 
+                        gap: '0.75rem', 
+                        flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
+                        alignItems: 'flex-start'
+                    }}>
+                        {/* Avatar */}
+                        <div style={{ 
+                            width: '28px', height: '28px', flexShrink: 0, 
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                            backgroundColor: m.role === 'user' ? 'var(--color-border)' : 'var(--color-accent)', 
+                            color: m.role === 'user' ? 'var(--color-text)' : '#000', 
+                            borderRadius: '50%'
+                        }}>
+                            {m.role === 'user' ? <User size={13} /> : <Bot size={13} />}
                         </div>
-                        <div style={{ flex: 1, maxWidth: '80%', display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                            <div style={{ fontSize: '0.55rem', fontWeight: 900, marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', opacity: 0.5 }}>
-                                {m.role === 'user' ? 'CLIENT_NODE' : 'ORACLE_CORE'}
-                            </div>
-                            {m.image && <img src={m.image} alt="Uploaded" style={{ maxWidth: '250px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--color-border)' }} />}
+
+                        {/* Message Bubble */}
+                        <div style={{ 
+                            flex: 1, maxWidth: '85%', 
+                            display: 'flex', flexDirection: 'column', 
+                            alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' 
+                        }}>
+                            {m.image && (
+                                <img src={m.image} alt="Uploaded" style={{ 
+                                    maxWidth: '200px', borderRadius: '12px', marginBottom: '0.5rem', 
+                                    border: '1px solid var(--color-border)' 
+                                }} />
+                            )}
                             <div style={{
-                                backgroundColor: m.role === 'user' ? 'rgba(0,0,0,0.02)' : 'transparent',
-                                padding: '1rem',
-                                border: m.role === 'user' ? '1px solid var(--color-border)' : 'none',
-                                fontSize: '0.95rem',
+                                backgroundColor: m.role === 'user' 
+                                    ? 'var(--color-accent)' 
+                                    : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                                color: m.role === 'user' ? '#000' : 'var(--color-text)',
+                                padding: '0.75rem 1rem',
+                                borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                fontSize: '0.85rem',
                                 lineHeight: 1.6,
-                                whiteSpace: 'pre-wrap'
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word'
                             }} dangerouslySetInnerHTML={{ __html: formatContent(m.content) }} />
                         </div>
                     </div>
                 ))}
+
+                {/* Typing indicator */}
                 {isTyping && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 900 }}>
-                        <RefreshCw size={12} className="spin" /> SYNTHESIZING...
+                    <div className="oracle-msg-enter" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ 
+                            width: '28px', height: '28px', flexShrink: 0, display: 'flex', 
+                            alignItems: 'center', justifyContent: 'center', 
+                            backgroundColor: 'var(--color-accent)', color: '#000', borderRadius: '50%' 
+                        }}>
+                            <Bot size={13} />
+                        </div>
+                        <div style={{ 
+                            padding: '0.75rem 1rem', 
+                            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                            borderRadius: '16px 16px 16px 4px',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                            fontSize: '0.8rem', opacity: 0.6
+                        }}>
+                            <RefreshCw size={12} className="oracle-spin" /> Thinking...
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Input Area */}
-            <div style={{ padding: '2rem', borderTop: '1.5px solid var(--color-text)' }}>
-                {useCases.length > 0 && (
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                        {useCases.map(uc => (
-                            <LabPill key={uc.id} onClick={() => setInput(uc.prompt)}>{uc.label}</LabPill>
+            {/* ─── Input Area ─── */}
+            <div style={{ 
+                borderTop: '1px solid var(--color-border)', 
+                padding: '1rem 1.25rem',
+                flexShrink: 0,
+                backgroundColor: 'var(--color-bg)'
+            }}>
+                {/* Quick Actions */}
+                {actions.length > 0 && (
+                    <div style={{ 
+                        display: 'flex', gap: '0.4rem', marginBottom: '0.75rem', 
+                        overflowX: 'auto', paddingBottom: '0.25rem',
+                        scrollbarWidth: 'none', msOverflowStyle: 'none'
+                    }}>
+                        {actions.map(a => (
+                            <button 
+                                key={a.id} 
+                                onClick={() => setInput(a.prompt)}
+                                style={{ 
+                                    padding: '0.4rem 0.75rem', 
+                                    borderRadius: '100px',
+                                    border: '1px solid var(--color-border)',
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--color-text)',
+                                    fontSize: '0.65rem', fontWeight: 600,
+                                    cursor: 'pointer', whiteSpace: 'nowrap',
+                                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                                    transition: 'all 0.15s'
+                                }}
+                            >
+                                {a.icon} {a.label}
+                            </button>
                         ))}
                     </div>
                 )}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+
+                {/* Pending Image Preview */}
+                {pendingImage && (
+                    <div style={{ 
+                        display: 'flex', alignItems: 'center', gap: '0.5rem', 
+                        marginBottom: '0.5rem', padding: '0.5rem',
+                        backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                        borderRadius: '8px'
+                    }}>
+                        <img src={pendingImage.preview} alt="Preview" style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '6px' }} />
+                        <span style={{ fontSize: '0.7rem', opacity: 0.6, flex: 1 }}>{pendingImage.name}</span>
+                        <button onClick={() => setPendingImage(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, display: 'flex', color: 'var(--color-text)' }}>
+                            <X size={14} />
+                        </button>
+                    </div>
+                )}
+
+                {/* Input Row */}
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                    <button 
+                        onClick={() => fileInputRef.current?.click()} 
+                        style={{ 
+                            background: 'none', 
+                            border: '1px solid var(--color-border)', 
+                            borderRadius: '10px',
+                            width: '38px', height: '38px', flexShrink: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                            cursor: 'pointer', color: 'var(--color-text)', opacity: 0.5,
+                            transition: 'opacity 0.15s'
+                        }}
+                    >
+                        <Upload size={15} />
+                    </button>
                     <textarea
                         ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                        placeholder="INPUT_DIRECTIVE..."
+                        placeholder="Ask Oracle anything..."
+                        rows={1}
                         style={{
-                            flex: 1, backgroundColor: 'transparent', border: '1.5px solid var(--color-text)',
-                            padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', outline: 'none', resize: 'none',
-                            maxHeight: '150px'
+                            flex: 1, 
+                            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '12px',
+                            padding: '0.6rem 0.9rem', 
+                            fontSize: '0.85rem', 
+                            outline: 'none', 
+                            resize: 'none',
+                            color: 'var(--color-text)',
+                            fontFamily: 'inherit',
+                            lineHeight: 1.5,
+                            maxHeight: '120px',
+                            transition: 'border-color 0.15s'
                         }}
                     />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <button onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: '1.5px solid var(--color-text)', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                            <Upload size={18} />
-                        </button>
-                        <button onClick={() => handleSendMessage()} style={{ background: 'var(--color-text)', color: 'var(--color-bg)', border: 'none', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                            <Send size={18} />
-                        </button>
-                    </div>
+                    <button 
+                        onClick={() => handleSendMessage()} 
+                        disabled={isTyping || (!input.trim() && !pendingImage)}
+                        style={{ 
+                            background: 'var(--color-accent)', 
+                            color: '#000', 
+                            border: 'none', 
+                            borderRadius: '10px',
+                            width: '38px', height: '38px', flexShrink: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                            cursor: 'pointer',
+                            opacity: (isTyping || (!input.trim() && !pendingImage)) ? 0.4 : 1,
+                            transition: 'opacity 0.15s'
+                        }}
+                    >
+                        <Send size={15} />
+                    </button>
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
                 </div>
             </div>
-            <style>{`
-                .spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 };

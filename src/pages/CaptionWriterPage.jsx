@@ -11,7 +11,7 @@ import LabPill from '../components/LabPill';
 
 const ACCENT = '#E8111A';
 
-const MODEL = 'baidu/qianfan-ocr-fast:free';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 const PLATFORMS = [
