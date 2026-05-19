@@ -7,8 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const VISION_MODEL = 'google/gemma-4-31b-it:free';
-const VISION_FAST_MODEL = 'meta-llama/llama-4-maverick:free';
+const VISION_MODEL = 'nvidia/nemotron-3-nano-2-vl:free';
+const VISION_FAST_MODEL = 'nvidia/nemotron-3-nano-2-vl:free';
 const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
 
 // Quick action templates per mode

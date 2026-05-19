@@ -79,6 +79,8 @@ export const AuthProvider = ({ children }) => {
     const [isSpending, setIsSpending] = useState(false);
 
     const spendCredits = async (amount, reason = 'SYSTEM_USAGE') => {
+        // Admin bypass — owner never pays
+        if (profile?.role === 'admin') return true;
         if (!profile || profile.credits < amount) return false;
         if (isSpending) return false; // Prevent double-spend race condition
 
