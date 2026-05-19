@@ -1,88 +1,79 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import OracleCore from './OracleCore';
 
 const GlobalOracle = () => {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
-    
-    // Hide on the main AI Agent page
-    const isMainOraclePage = location.pathname === '/lab/ai-agent';
-    
-    const getPageContext = () => {
-        const path = location.pathname.substring(1);
-        if (!path) return 'Home';
-        return path.split('/').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    };
 
-    if (isMainOraclePage) return null;
+    if (location.pathname === '/lab/ai-agent') return null;
+
+    const getContext = () => {
+        const p = location.pathname.substring(1);
+        return p ? p.split('/').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Home';
+    };
 
     return (
         <>
-            {/* Floating Action Button */}
-            {!isOpen && (
-                <motion.button
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsOpen(true)}
-                    style={{
-                        position: 'fixed', bottom: '1.5rem', right: '1.5rem',
-                        width: '52px', height: '52px', borderRadius: '50%',
-                        backgroundColor: 'var(--color-accent)', color: '#000',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', zIndex: 9999, border: 'none'
-                    }}
-                >
-                    <Sparkles size={22} />
-                </motion.button>
-            )}
+            {/* FAB */}
+            <AnimatePresence>
+                {!isOpen && (
+                    <motion.button
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.94 }}
+                        onClick={() => setIsOpen(true)}
+                        style={{
+                            position: 'fixed', bottom: 20, right: 20,
+                            width: 48, height: 48, borderRadius: '50%',
+                            background: 'var(--color-text)', color: 'var(--color-bg)',
+                            border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+                            zIndex: 9999
+                        }}
+                    >
+                        <MessageCircle size={20} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
 
-            {/* Chat Drawer */}
+            {/* Panel */}
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
                             onClick={() => setIsOpen(false)}
-                            style={{
-                                position: 'fixed', inset: 0,
-                                backgroundColor: 'rgba(0,0,0,0.3)',
-                                zIndex: 9999
-                            }}
+                            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', zIndex: 9999 }}
                         />
-                        {/* Panel */}
                         <motion.div
-                            initial={{ y: 30, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 30, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                             style={{
-                                position: 'fixed', 
-                                bottom: '1.5rem', right: '1.5rem',
-                                width: 'min(400px, calc(100vw - 2rem))', 
-                                height: 'min(600px, calc(100vh - 6rem))',
-                                backgroundColor: 'var(--color-bg)', 
+                                position: 'fixed',
+                                bottom: 20, right: 20,
+                                width: 'min(380px, calc(100vw - 32px))',
+                                height: 'min(560px, calc(100vh - 80px))',
+                                borderRadius: 20,
+                                overflow: 'hidden',
+                                backgroundColor: 'var(--color-bg)',
                                 border: '1px solid var(--color-border)',
-                                borderRadius: '20px',
-                                boxShadow: '0 12px 48px rgba(0,0,0,0.25)',
-                                zIndex: 10000, 
-                                overflow: 'hidden', 
+                                boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+                                zIndex: 10000,
                                 display: 'flex', flexDirection: 'column'
                             }}
                         >
-                            <OracleCore 
-                                mode="global" 
-                                context={getPageContext()} 
-                                onClose={() => setIsOpen(false)}
-                            />
+                            <OracleCore mode="global" context={getContext()} onClose={() => setIsOpen(false)} />
                         </motion.div>
                     </>
                 )}

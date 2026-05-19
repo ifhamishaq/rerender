@@ -1,56 +1,59 @@
 import React, { useEffect } from 'react';
 import OracleCore from '../components/OracleCore';
-import LabHeader from '../components/LabHeader';
 import { useAuth } from '../context/AuthContext';
 
 const AILabPage = () => {
     const { profile } = useAuth();
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+    useEffect(() => { window.scrollTo(0, 0); }, []);
 
     return (
-        <div style={{ 
-            minHeight: '100vh', 
-            backgroundColor: 'var(--color-bg)', 
-            color: 'var(--color-text)', 
-            paddingTop: '80px',
-            paddingBottom: '8rem'
+        <div style={{
+            minHeight: '100vh',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            paddingTop: '80px'
         }}>
-            <LabHeader 
-                title="AESTHETIC" 
-                subtitle="Oracle." 
-                vol="04" 
-                credits={profile?.credits ?? 0} 
-                accentColor="var(--color-accent)"
-            />
+            {/* Title */}
+            <div style={{ padding: '3rem 2rem 0', textAlign: 'center' }}>
+                <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.2rem)', fontWeight: 800, margin: 0, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+                    Oracle
+                </h1>
+                <p style={{ fontSize: 14, opacity: 0.4, marginTop: 8, fontWeight: 500 }}>
+                    Your creative AI assistant
+                </p>
+            </div>
 
-            <div style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 1.5rem' }}>
-                {/* Chat Container */}
-                <div style={{ 
-                    height: '70vh', 
-                    maxHeight: '800px', 
-                    minHeight: '500px',
-                    borderRadius: '20px',
+            {/* Chat */}
+            <div style={{
+                width: '100%',
+                maxWidth: 720,
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '1.5rem',
+                paddingBottom: '2rem',
+                minHeight: 0
+            }}>
+                <div style={{
+                    flex: 1,
+                    borderRadius: 20,
                     border: '1px solid var(--color-border)',
-                    backgroundColor: 'var(--color-bg)',
                     overflow: 'hidden',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.08)'
+                    minHeight: 'min(65vh, 500px)',
+                    maxHeight: '72vh',
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}>
                     <OracleCore mode="standard" />
                 </div>
 
-                {/* Subtle footer */}
-                <div style={{ 
-                    marginTop: '2rem', 
-                    textAlign: 'center',
-                    fontSize: '0.7rem',
-                    opacity: 0.3,
-                    fontWeight: 500
-                }}>
-                    Oracle is powered by AI and may make mistakes. Verify important information.
-                </div>
+                <p style={{ textAlign: 'center', fontSize: 12, opacity: 0.25, marginTop: 16, fontWeight: 500 }}>
+                    Oracle may make mistakes. Verify important information.
+                </p>
             </div>
         </div>
     );
