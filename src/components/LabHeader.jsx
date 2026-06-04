@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 const LabHeader = ({ title, subtitle, vol, credits = 0, accentColor = 'var(--color-accent)' }) => {
-    const isMobile = window.innerWidth < 600;
+    const { width } = useWindowSize();
+    const isMobile = width < 600;
 
     return (
         <header style={{

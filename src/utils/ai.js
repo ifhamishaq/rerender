@@ -63,8 +63,8 @@ export const fetchOpenRouter = async (body, options = {}, retries = 8) => {
 
     const key = keys[currentKeyIndex % keys.length];
     
-    const isFreeModel = body.model?.endsWith(':free');
-    const modelToUse = isFreeModel ? FREE_MODEL_POOL[currentModelIndex % FREE_MODEL_POOL.length] : body.model;
+    const isFreeModel = body.model?.endsWith(':free') || body.model === 'openrouter/free';
+    const modelToUse = isFreeModel ? 'openrouter/free' : body.model;
 
     const requestBody = { ...body, model: modelToUse };
 

@@ -8,11 +8,12 @@ import { useAuth } from '../context/AuthContext';
 import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 const ACCENT = '#E8111A';
 
-const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const FALLBACK_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const MODEL = 'openrouter/free';
+const FALLBACK_MODEL = 'openrouter/free';
 
 const PLATFORMS = [
     { id: 'instagram', name: 'INSTAGRAM', icon: <Instagram size={16} />, color: '#E1306C' },
@@ -26,6 +27,7 @@ const PLATFORMS = [
 const TONES = ['professional', 'casual', 'witty', 'inspirational', 'edgy', 'gen-z'];
 
 const CaptionWriterPage = () => {
+    const { width } = useWindowSize();
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [description, setDescription] = useState('');
     const [tone, setTone] = useState('professional');
@@ -151,8 +153,8 @@ Adapt tone to: ${tone}`
                 margin: '3rem auto',
                 padding: '0 2rem',
                 display: 'grid',
-                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
-                gap: window.innerWidth < 1000 ? '2rem' : '4rem'
+                gridTemplateColumns: width < 1000 ? '1fr' : '1fr 400px',
+                gap: width < 1000 ? '2rem' : '4rem'
             }}>
                 {/* Column 01: Results / Canvas */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

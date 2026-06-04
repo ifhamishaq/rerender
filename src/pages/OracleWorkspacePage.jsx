@@ -157,8 +157,42 @@ const OracleWorkspacePage = () => {
                 @keyframes owPulse{0%,80%,100%{opacity:.15}40%{opacity:.6}}
                 .ow-bubble{animation:owFade .25s ease-out}
                 @keyframes owFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+                .ow-input-container {
+                    display: flex;
+                    align-items: flex-end;
+                    gap: 8px;
+                    padding: 8px 8px 8px 14px;
+                    border-radius: 22px;
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    background-color: rgba(0, 0, 0, 0.02);
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+                }
+                body.dark-mode .ow-input-container {
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background-color: rgba(255, 255, 255, 0.03);
+                }
+                .ow-input-container:focus-within {
+                    border-color: #22c55e !important;
+                    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+                    background-color: rgba(0, 0, 0, 0.03);
+                }
+                body.dark-mode .ow-input-container:focus-within {
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+                .ow-input {
+                    border: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    outline: none !important;
+                }
+                .ow-input:focus {
+                    border: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                }
                 .ow-input::placeholder{color:var(--color-text);opacity:.3}
-                .ow-input:focus{outline:none}
                 .ow-pill{padding:6px 14px;border-radius:100px;border:1px solid var(--color-border);background:transparent;color:var(--color-text);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s}
                 .ow-pill:hover{background:var(--color-text);color:var(--color-bg)}
                 .ow-side-item{padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:2px;transition:background .1s;font-size:13px}
@@ -178,7 +212,7 @@ const OracleWorkspacePage = () => {
                                 <Plus size={15} /> New Chat
                             </button>
                         </div>
-                        <div className="ow-sb" style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+                        <div className="ow-sb" data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
                             <div style={{ fontSize: 11, fontWeight: 600, opacity: .3, padding: '8px 12px', textTransform: 'uppercase' }}>History</div>
                             {projects.map(p => (
                                 <div key={p.id} className="ow-side-item" onClick={() => { if (editId !== p.id) loadProject(p); }}
@@ -227,7 +261,7 @@ const OracleWorkspacePage = () => {
                 ) : (
                     <>
                         {/* Messages */}
-                        <div className="ow-sb" style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, minHeight: 0 }}>
+                        <div className="ow-sb" data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, minHeight: 0 }}>
                             <div style={{ maxWidth: 760, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 {currentProject.messages.map((m, i) => (
                                     <div key={i} className="ow-bubble" style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 4 }}>
@@ -306,7 +340,7 @@ const OracleWorkspacePage = () => {
                                         <button onClick={() => setPendingImage(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: .3, display: 'flex', color: 'var(--color-text)' }}><X size={12} /></button>
                                     </div>
                                 )}
-                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, padding: '8px 8px 8px 14px', borderRadius: 22, border: '1px solid rgba(128,128,128,.12)', background: 'rgba(128,128,128,.03)' }}>
+                                <div className="ow-input-container">
                                     <input type="file" id="ow-img" accept="image/*" style={{ display: 'none' }} onChange={e => {
                                         const f = e.target.files?.[0]; if (f) { const r = new FileReader(); r.onload = () => setPendingImage(r.result); r.readAsDataURL(f); } e.target.value = null;
                                     }} />

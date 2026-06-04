@@ -13,6 +13,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { supabase } from '../utils/supabase';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 const COLORS = {
     bgLight: '#FAFAFA',
@@ -98,15 +99,10 @@ const Pill = ({ active, onClick, children }) => (
 );
 
 const WallpaperLab = () => {
+    const { width } = useWindowSize();
     const { isDarkMode } = useTheme();
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const isMobile = width < 768;
 
     const themeVars = {
         '--theme-bg': isDarkMode ? COLORS.bgDark : COLORS.bgLight,
@@ -146,7 +142,7 @@ const WallpaperLab = () => {
         setIsEnhancing(true);
         try {
             const data = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super-120b-a12b:free',
+                model: 'openrouter/free',
                 messages: [
                     {
                         role: 'system',
@@ -326,10 +322,10 @@ const WallpaperLab = () => {
                 maxWidth: '1200px',
                 margin: '0 auto',
                 display: 'flex',
-                flexDirection: window.innerWidth < 600 ? 'column' : 'row',
+                flexDirection: width < 600 ? 'column' : 'row',
                 justifyContent: 'space-between',
-                alignItems: window.innerWidth < 600 ? 'flex-start' : 'baseline',
-                gap: window.innerWidth < 600 ? '1.5rem' : '0'
+                alignItems: width < 600 ? 'flex-start' : 'baseline',
+                gap: width < 600 ? '1.5rem' : '0'
             }}>
                 <div>
                     <div style={{
@@ -360,11 +356,11 @@ const WallpaperLab = () => {
                 </div>
 
                 <div style={{
-                    textAlign: window.innerWidth < 600 ? 'left' : 'right',
+                    textAlign: width < 600 ? 'left' : 'right',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.5rem',
-                    width: window.innerWidth < 600 ? '100%' : 'auto'
+                    width: width < 600 ? '100%' : 'auto'
                 }}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.6 }}>COMPUTE_RESERVE</div>
                     <div style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'var(--font-display)' }}>
@@ -392,8 +388,8 @@ const WallpaperLab = () => {
                 margin: '3rem auto',
                 padding: '0 2rem',
                 display: 'grid',
-                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
-                gap: window.innerWidth < 1000 ? '2rem' : '4rem'
+                gridTemplateColumns: width < 1000 ? '1fr' : '1fr 400px',
+                gap: width < 1000 ? '2rem' : '4rem'
             }}>
 
                 {/* Column 01: Visual Canvas */}
@@ -440,7 +436,7 @@ const WallpaperLab = () => {
 
                     <div style={{
                         display: 'flex',
-                        flexDirection: window.innerWidth < 600 ? 'column' : 'row',
+                        flexDirection: width < 600 ? 'column' : 'row',
                         gap: '1.5rem',
                         padding: '1.5rem',
                         border: '1px solid var(--color-border)',
@@ -565,13 +561,16 @@ const WallpaperLab = () => {
                                 <span>{isEnhancing ? 'ENHANCING' : 'AI_ENHANCE'}</span>
                             </button>
                         </div>
-                        <div style={{
-                            width: '100%', padding: '1.5rem',
-                            backgroundColor: 'rgba(0,0,0,0.02)', color: 'var(--color-text)',
-                            border: '1px solid var(--color-border)',
-                            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.6,
-                            maxHeight: '150px', overflowY: 'auto', fontStyle: 'italic'
-                        }}>
+                        <div 
+                            data-lenis-prevent="true"
+                            style={{
+                                width: '100%', padding: '1.5rem',
+                                backgroundColor: 'rgba(0,0,0,0.02)', color: 'var(--color-text)',
+                                border: '1px solid var(--color-border)',
+                                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.6,
+                                maxHeight: '150px', overflowY: 'auto', fontStyle: 'italic'
+                            }}
+                        >
                             "{livePrompt}"
                         </div>
                     </div>

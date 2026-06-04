@@ -358,7 +358,7 @@ const NewsGeneratorPage = () => {
         try {
             // 1. Ask Oracle to generate a hook and a background image prompt
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super-120b-a12b:free',
+                model: 'openrouter/free',
                 messages: [
                     { role: 'system', content: `You are a viral social media manager. I will give you a news headline. 
                     1. Write a punchy, viral 5-10 word text hook for an image overlay. No emojis in the TEXT hook. Surround the 2 or 3 most important words with asterisks for highlighting (e.g. *BREAKING* NEWS). Format it like this: TEXT: [hook]
@@ -438,7 +438,7 @@ const NewsGeneratorPage = () => {
         setStatusMessage('Generating new headline...');
         try {
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super-120b-a12b:free',
+                model: 'openrouter/free',
                 messages: [
                     { role: 'system', content: `Give me a DIFFERENT viral 5-10 word text hook for this news. Surround 2-3 words with asterisks. Format: TEXT: [hook]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -460,7 +460,7 @@ const NewsGeneratorPage = () => {
         setStatusMessage('Writing new caption...');
         try {
             const promptData = await fetchOpenRouter({
-                model: 'nvidia/nemotron-3-super-120b-a12b:free',
+                model: 'openrouter/free',
                 messages: [
                     { role: 'system', content: `Write a long, engaging Instagram caption for this news with emojis and hashtags. Format: CAPTION: [caption]` },
                     { role: 'user', content: `Headline: ${selectedNews.title}` }
@@ -670,6 +670,7 @@ const NewsGeneratorPage = () => {
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     className="news-sidebar custom-scrollbar" 
+                    data-lenis-prevent="true"
                     style={{ 
                         width: '320px', flexShrink: 0, height: 'calc(100vh - 60px)', borderRight: '2px solid var(--color-text)', 
                         display: 'flex', flexDirection: 'column', padding: '2rem', backgroundColor: 'var(--color-bg)', 
@@ -736,6 +737,7 @@ const NewsGeneratorPage = () => {
 
                 {/* Scrollable News List */}
                 <div 
+                    data-lenis-prevent="true"
                     style={{ 
                         flex: 1, 
                         overflowY: 'auto', 
@@ -777,7 +779,7 @@ const NewsGeneratorPage = () => {
                 </div>
                 </>
                 ) : (
-                    <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
+                    <div className="custom-scrollbar" data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto' }}>
                         {gallery.length === 0 ? (
                             <div style={{ opacity: 0.4, fontSize: '0.8rem', textAlign: 'center', marginTop: '2rem' }}>No saved designs yet</div>
                         ) : (
@@ -965,11 +967,13 @@ const NewsGeneratorPage = () => {
                 <motion.div 
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    className="design-sidebar" 
+                    className="design-sidebar custom-scrollbar" 
+                    data-lenis-prevent="true"
                     style={{ 
                         width: '350px', flexShrink: 0, borderLeft: '2px solid var(--color-text)', 
                         backgroundColor: 'var(--color-bg)', padding: '2rem', display: 'flex', 
-                        flexDirection: 'column', gap: '2rem', color: 'var(--color-text)', zIndex: 10 
+                        flexDirection: 'column', gap: '2rem', color: 'var(--color-text)', zIndex: 10,
+                        height: 'calc(100vh - 60px)', position: 'sticky', top: '60px', overflowY: 'auto'
                     }}
                 >
                     <header style={{ marginBottom: '1.5rem' }}>

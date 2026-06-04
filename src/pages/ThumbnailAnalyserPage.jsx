@@ -8,14 +8,16 @@ import { useAuth } from '../context/AuthContext';
 import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import LabPill from '../components/LabPill';
+import { useWindowSize } from '../hooks/useWindowSize';
 
-const VISION_MODEL = 'google/gemma-4-31b-it:free';
-const VISION_FAST_MODEL = 'meta-llama/llama-4-maverick:free';
-const FALLBACK_MODEL = 'google/gemma-4-31b-it:free';
+const VISION_MODEL = 'openrouter/free';
+const VISION_FAST_MODEL = 'openrouter/free';
+const FALLBACK_MODEL = 'openrouter/free';
 
 const ACCENT = 'var(--color-accent)';
 
 const ThumbnailAnalyserPage = () => {
+    const { width } = useWindowSize();
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -203,8 +205,8 @@ END OF REPORT
                 margin: '3rem auto',
                 padding: '0 2rem',
                 display: 'grid',
-                gridTemplateColumns: window.innerWidth < 1000 ? '1fr' : '1fr 400px',
-                gap: window.innerWidth < 1000 ? '2rem' : '4rem'
+                gridTemplateColumns: width < 1000 ? '1fr' : '1fr 400px',
+                gap: width < 1000 ? '2rem' : '4rem'
             }}>
                 {/* Column 01: Visual Canvas & Detailed Analysis */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -233,7 +235,7 @@ END OF REPORT
                     </div>
 
                     {analysis && !isAnalyzing && (
-                        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', gap: '2rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: width < 768 ? '1fr' : '1fr 1fr', gap: '2rem' }}>
                             <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#10B981' }}>
                                     <CheckCircle2 size={18} />

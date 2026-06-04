@@ -6,10 +6,10 @@ import { fetchOpenRouter, AI_COSTS } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const VISION_MODEL = 'google/gemma-4-31b-it:free';
-const VISION_FAST_MODEL = 'meta-llama/llama-4-maverick:free';
-const FALLBACK_MODEL = 'openai/gpt-oss-120b:free';
+const MODEL = 'openrouter/free';
+const VISION_MODEL = 'openrouter/free';
+const VISION_FAST_MODEL = 'openrouter/free';
+const FALLBACK_MODEL = 'openrouter/free';
 
 const OracleCore = ({
     mode = 'standard',
@@ -139,8 +139,42 @@ Links: Work /work, About /about, Contact /get-in-touch, Tools /tools`;
                 .oracle-bubble { animation: oFadeIn 0.25s ease-out; }
                 @keyframes oFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes oPulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+                .oracle-input-container {
+                    display: flex;
+                    align-items: flex-end;
+                    gap: 8px;
+                    padding: 8px 8px 8px 14px;
+                    border-radius: 22px;
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    background-color: rgba(0, 0, 0, 0.02);
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+                }
+                body.dark-mode .oracle-input-container {
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background-color: rgba(255, 255, 255, 0.03);
+                }
+                .oracle-input-container:focus-within {
+                    border-color: #22c55e !important;
+                    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+                    background-color: rgba(0, 0, 0, 0.03);
+                }
+                body.dark-mode .oracle-input-container:focus-within {
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+                .oracle-input {
+                    border: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    outline: none !important;
+                }
+                .oracle-input:focus {
+                    border: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                }
                 .oracle-input::placeholder { color: var(--color-text); opacity: 0.3; }
-                .oracle-input:focus { outline: none; }
                 .oracle-action:hover { background: var(--color-text) !important; color: var(--color-bg) !important; }
             `}</style>
 
@@ -163,7 +197,7 @@ Links: Work /work, About /about, Contact /get-in-touch, Tools /tools`;
             </div>
 
             {/* ── Messages ── */}
-            <div ref={scrollRef} className="oracle-msgs" style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: 20, minHeight: 0 }}>
+            <div ref={scrollRef} className="oracle-msgs" data-lenis-prevent="true" style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: 20, minHeight: 0 }}>
                 {messages.map((m, i) => (
                     <div key={i} className="oracle-bubble" style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 6 }}>
                         {/* Label */}
@@ -217,14 +251,7 @@ Links: Work /work, About /about, Contact /get-in-touch, Tools /tools`;
                 </AnimatePresence>
 
                 {/* Input bar */}
-                <div style={{
-                    display: 'flex', alignItems: 'flex-end', gap: 8,
-                    padding: '8px 8px 8px 14px',
-                    borderRadius: 22,
-                    border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                    transition: 'border-color 0.2s'
-                }}>
+                <div className="oracle-input-container">
                     <button onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px', display: 'flex', color: 'var(--color-text)', opacity: 0.3, flexShrink: 0, marginBottom: 2 }}>
                         <Paperclip size={16} />
                     </button>

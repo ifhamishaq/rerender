@@ -95,7 +95,7 @@ export const OracleProvider = ({ children }) => {
 
     // --- Core AI: Fallback Wrapper ---
     const fetchWithFallback = async (messages) => {
-        const primaryModel = 'baidu/qianfan-ocr-fast:free'; // Always fast
+        const primaryModel = 'openrouter/free'; // Always fast
         
         try {
             // Give primary model a 15-second timeout
@@ -276,7 +276,7 @@ You exist to make content that dominates.` },
 
         try {
             const data = await fetchOpenRouter({
-                model: 'baidu/qianfan-ocr-fast:free',
+                model: 'openrouter/free',
                 messages: [
                     { role: 'system', content: `You are a senior thumbnail strategist.
 Analyze this thumbnail with the eye of
