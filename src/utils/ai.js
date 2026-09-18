@@ -162,10 +162,10 @@ export const fetchOpenRouter = async (body, options = {}, retries = 8) => {
 };
 
 /**
- * Synthesize speech using OpenRouter's Deepgram Flux TTS (deepgram/flux-tts).
+ * Synthesize speech using OpenRouter's Deepgram Flux TTS (deepgram/flux-tts:free).
  * Free voice model with high clarity and low latency.
  */
-export const synthesizeSpeech = async ({ text, voice = 'flux-alexis-en', responseFormat = 'mp3' }, options = {}, retries = 3) => {
+export const synthesizeSpeech = async ({ text, voice = 'flux-alexis-en', responseFormat = 'mp3', model = 'deepgram/flux-tts:free' }, options = {}, retries = 3) => {
     const keys = getApiKeys();
     if (keys.length === 0) {
         throw new Error('MISSING_API_KEY');
@@ -173,60 +173,82 @@ export const synthesizeSpeech = async ({ text, voice = 'flux-alexis-en', respons
 
     const key = keys[currentKeyIndex % keys.length];
 
-    try {
-        const response = await fetch('https://openrouter.ai/api/v1/audio/speech', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${key}`,
-                'HTTP-Referer': 'https://re-render.netlify.app',
-                'X-Title': 'RE-RENDER Creator OS',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'deepgram/flux-tts',
-                input: text,
-                voice,
-                response_format: responseFormat
-            })
-        });
+    // Priority sequence: try deepgram/flux-tts:free first, then deepgram/flux-tts
+    const candidateModels = [
+        'deepgram/flux-tts:free',
+        'deepgram/flux-tts'
+    ];
 
-        // Handle Rate Limiting (429) or Congestion (503)
-        if (response.status === 429 || response.status === 503) {
-            currentKeyIndex++;
-            if (retries > 0) {
-                if (options.onStatus) options.onStatus('Connecting to audio engine...');
-                await new Promise(r => setTimeout(r, 1500));
-                return synthesizeSpeech({ text, voice, responseFormat }, options, retries - 1);
+    let lastError = null;
+
+    for (const candidateModel of candidateModels) {
+        try {
+            const response = await fetch('https://openrouter.ai/api/v1/audio/speech', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${key}`,
+                    'HTTP-Referer': 'https://re-render.netlify.app',
+                    'X-Title': 'RE-RENDER Creator OS',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: candidateModel,
+                    input: text,
+                    voice,
+                    response_format: responseFormat
+                })
+            });
+
+            // Handle Rate Limiting (429) or Congestion (503)
+            if (response.status === 429 || response.status === 503) {
+                currentKeyIndex++;
+                if (retries > 0) {
+                    if (options.onStatus) options.onStatus('Connecting to audio engine...');
+                    await new Promise(r => setTimeout(r, 1500));
+                    return synthesizeSpeech({ text, voice, responseFormat, model: candidateModel }, options, retries - 1);
+                }
             }
-        }
 
-        if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            const msg = data.error?.message || `Speech synthesis failed (${response.status})`;
-            throw new Error(msg);
-        }
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                const msg = data.error?.message || `Speech synthesis failed (${response.status})`;
+                lastError = new Error(msg);
+                
+                // If this model has no endpoints, try the next candidate
+                if (msg.includes('No endpoints found') || response.status === 404) {
+                    continue;
+                }
+                throw lastError;
+            }
 
-        const buffer = await response.arrayBuffer();
-        const mimeType = responseFormat === 'mp3' ? 'audio/mpeg' : 'audio/wav';
-        const blob = new Blob([buffer], { type: mimeType });
-        const audioUrl = URL.createObjectURL(blob);
+            const buffer = await response.arrayBuffer();
+            const mimeType = responseFormat === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+            const blob = new Blob([buffer], { type: mimeType });
+            const audioUrl = URL.createObjectURL(blob);
 
-        return {
-            audioUrl,
-            blob,
-            sizeBytes: buffer.byteLength,
-            voice,
-            format: responseFormat,
-            timestamp: Date.now()
-        };
-    } catch (err) {
-        if (retries > 0 && err.message !== 'MISSING_API_KEY') {
-            currentKeyIndex++;
-            if (options.onStatus) options.onStatus('Retrying speech synthesis...');
-            await new Promise(r => setTimeout(r, 1500));
-            return synthesizeSpeech({ text, voice, responseFormat }, options, retries - 1);
+            return {
+                audioUrl,
+                blob,
+                sizeBytes: buffer.byteLength,
+                voice,
+                modelUsed: candidateModel,
+                format: responseFormat,
+                timestamp: Date.now()
+            };
+        } catch (err) {
+            lastError = err;
+            if (err.message && err.message.includes('No endpoints found')) {
+                continue;
+            }
+            if (retries > 0 && !err.message.includes('MISSING_API_KEY')) {
+                currentKeyIndex++;
+                if (options.onStatus) options.onStatus('Retrying speech synthesis...');
+                await new Promise(r => setTimeout(r, 1500));
+                return synthesizeSpeech({ text, voice, responseFormat, model: candidateModel }, options, retries - 1);
+            }
+            throw err;
         }
-        throw err;
     }
-};
 
+    throw lastError || new Error('No endpoints currently found for deepgram/flux-tts. OpenRouter upstream provider may be temporarily offline.');
+};
