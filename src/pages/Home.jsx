@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
     Sparkles, ArrowRight, Video, Image as ImageIcon, Eye, FileText, 
-    Zap, Layers, Play, CheckCircle2, Cpu, BarChart3, Terminal, Check
+    Zap, Layers, Play, CheckCircle2, Cpu, BarChart3, Terminal, Check, Mic
 } from 'lucide-react';
 import Hero from '../components/Hero';
 import StickySidebar from '../components/StickySidebar';
@@ -367,7 +367,68 @@ const Home = () => {
                         </Link>
                     </motion.div>
 
-                    {/* Card 6: Wallpaper Lab & Arcade (Psychological Color: Violet — Creative Sandbox) */}
+                    {/* Card 6: AI Voice Studio (Psychological Color: Electric Rose — Sound & Resonance) */}
+                    <motion.div 
+                        whileHover={{ y: -6 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                            backgroundColor: 'var(--color-surface)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '24px',
+                            padding: '2rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1.25rem',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            boxShadow: 'var(--shadow-raised)'
+                        }}
+                    >
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, rgba(244,63,94,0.18) 0%, rgba(9,9,11,0.85) 100%)' }}>
+                            <div style={{ textAlign: 'center', padding: '1rem' }}>
+                                <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🎙️</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#f43f5e', letterSpacing: '0.15em', fontWeight: 700 }}>
+                                    DEEPGRAM // FLUX TTS
+                                </div>
+                            </div>
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#f43f5e', border: '1px solid rgba(244,63,94,0.3)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                AUDIO // NEURAL
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Mic size={16} color="#f43f5e" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: '#f43f5e', fontWeight: 700, textTransform: 'uppercase' }}>
+                                    SPEECH SYNTHESIS & VOICE
+                                </span>
+                            </div>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                AI Voice Studio
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
+                                Instant studio-quality voiceovers with Deepgram Flux TTS. 20+ distinct female and male creator voices, live audio waveforms, and 1-click MP3 downloads.
+                            </p>
+                        </div>
+
+                        <Link 
+                            to="/lab/voice-lab" 
+                            style={{ 
+                                marginTop: 'auto', 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '8px', 
+                                color: 'var(--color-text)', 
+                                fontWeight: 700, 
+                                fontSize: '0.9rem',
+                                textDecoration: 'none'
+                            }}
+                        >
+                            Open Voice Studio <ArrowRight size={15} color="#f43f5e" />
+                        </Link>
+                    </motion.div>
+
+                    {/* Card 7: Wallpaper Lab & Arcade (Psychological Color: Violet — Creative Sandbox) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}

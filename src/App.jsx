@@ -31,6 +31,7 @@ import ToolsPage from './pages/ToolsPage';
 import AILabPage from './pages/AILabPage';
 import CaptionWriterPage from './pages/CaptionWriterPage';
 import ThumbnailAnalyserPage from './pages/ThumbnailAnalyserPage';
+import VoiceLabPage from './pages/VoiceLabPage';
 import WallpaperLab from './pages/WallpaperLab';
 import HexCodeHeroPage from './pages/HexCodeHeroPage';
 import PalettePickerPage from './pages/PalettePickerPage';
@@ -126,6 +127,8 @@ const AnimatedRoutes = () => {
           <Route path="/lab/ai-agent" element={<Navigate to="/lab/oracle-workspace" replace />} />
           <Route path="/lab/caption-writer" element={<TransitionWipe><CaptionWriterPage /></TransitionWipe>} />
           <Route path="/lab/thumbnail-analyser" element={<TransitionWipe><ThumbnailAnalyserPage /></TransitionWipe>} />
+          <Route path="/lab/voice-lab" element={<TransitionWipe><VoiceLabPage /></TransitionWipe>} />
+          <Route path="/tools/voice-lab" element={<Navigate to="/lab/voice-lab" replace />} />
           <Route path="/lab/news-generator" element={<NewsGeneratorPage />} />
 
           {/* Tools / Creative Lab Routes */}

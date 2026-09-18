@@ -181,6 +181,15 @@ const ToolsSection = () => {
                             isHot={true}
                         />
                         <ToolCard
+                            icon="🎙️"
+                            title="AI Voice Studio"
+                            desc="Real-time neural voiceover studio powered by Deepgram Flux TTS. 20+ creator voices with instant MP3 export."
+                            link="/lab/voice-lab"
+                            tag="Sound & Voice"
+                            accentColor="#f43f5e"
+                            isHot={true}
+                        />
+                        <ToolCard
                             icon="📰"
                             title="Auto News Generator"
                             desc="Scans real-time trending news and generates instant viral social posters with custom AI imagery and bold text."

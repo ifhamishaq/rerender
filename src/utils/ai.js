@@ -7,7 +7,8 @@ export const AI_COSTS = {
     ORACLE: 0,
     ANALYSER: 5,
     CAPTION: 1,
-    GEN_IMAGE: 10
+    GEN_IMAGE: 10,
+    VOICE: 1
 };
 
 /**
@@ -25,9 +26,35 @@ const FREE_MODEL_POOL = [
     "nvidia/nemotron-3-nano-30b-a3b:free"    // 34B tokens — efficient last-resort
 ];
 
-const getApiKeys = () => {
+export const getApiKeys = () => {
     const keysStr = import.meta.env.VITE_OPENROUTER_API_KEYS || import.meta.env.VITE_OPENROUTER_API_KEY || '';
-    return keysStr.split(',').map(k => k.trim()).filter(Boolean);
+    const envKeys = keysStr.split(',').map(k => k.trim()).filter(Boolean);
+    const localKey = typeof window !== 'undefined' ? localStorage.getItem('openrouter_api_key') : null;
+    if (localKey && localKey.trim()) {
+        return [localKey.trim(), ...envKeys];
+    }
+    return envKeys;
+};
+
+export const hasApiKey = () => {
+    return getApiKeys().length > 0;
+};
+
+export const setLocalApiKey = (key) => {
+    if (typeof window !== 'undefined') {
+        if (key && key.trim()) {
+            localStorage.setItem('openrouter_api_key', key.trim());
+        } else {
+            localStorage.removeItem('openrouter_api_key');
+        }
+    }
+};
+
+export const getLocalApiKey = () => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('openrouter_api_key') || '';
+    }
+    return '';
 };
 
 let currentKeyIndex = 0;
@@ -133,3 +160,73 @@ export const fetchOpenRouter = async (body, options = {}, retries = 8) => {
         throw err;
     }
 };
+
+/**
+ * Synthesize speech using OpenRouter's Deepgram Flux TTS (deepgram/flux-tts).
+ * Free voice model with high clarity and low latency.
+ */
+export const synthesizeSpeech = async ({ text, voice = 'flux-alexis-en', responseFormat = 'mp3' }, options = {}, retries = 3) => {
+    const keys = getApiKeys();
+    if (keys.length === 0) {
+        throw new Error('MISSING_API_KEY');
+    }
+
+    const key = keys[currentKeyIndex % keys.length];
+
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${key}`,
+                'HTTP-Referer': 'https://re-render.netlify.app',
+                'X-Title': 'RE-RENDER Creator OS',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'deepgram/flux-tts',
+                input: text,
+                voice,
+                response_format: responseFormat
+            })
+        });
+
+        // Handle Rate Limiting (429) or Congestion (503)
+        if (response.status === 429 || response.status === 503) {
+            currentKeyIndex++;
+            if (retries > 0) {
+                if (options.onStatus) options.onStatus('Connecting to audio engine...');
+                await new Promise(r => setTimeout(r, 1500));
+                return synthesizeSpeech({ text, voice, responseFormat }, options, retries - 1);
+            }
+        }
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            const msg = data.error?.message || `Speech synthesis failed (${response.status})`;
+            throw new Error(msg);
+        }
+
+        const buffer = await response.arrayBuffer();
+        const mimeType = responseFormat === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+        const blob = new Blob([buffer], { type: mimeType });
+        const audioUrl = URL.createObjectURL(blob);
+
+        return {
+            audioUrl,
+            blob,
+            sizeBytes: buffer.byteLength,
+            voice,
+            format: responseFormat,
+            timestamp: Date.now()
+        };
+    } catch (err) {
+        if (retries > 0 && err.message !== 'MISSING_API_KEY') {
+            currentKeyIndex++;
+            if (options.onStatus) options.onStatus('Retrying speech synthesis...');
+            await new Promise(r => setTimeout(r, 1500));
+            return synthesizeSpeech({ text, voice, responseFormat }, options, retries - 1);
+        }
+        throw err;
+    }
+};
+
