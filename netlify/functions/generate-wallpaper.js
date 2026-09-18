@@ -90,11 +90,21 @@ export default async (request, context) => {
     }
 };
 
+function getEnv(name) {
+    if (typeof Netlify !== 'undefined' && Netlify?.env?.get) {
+        return Netlify.env.get(name) || "";
+    }
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env[name] || "";
+    }
+    return "";
+}
+
 function getApiKeys() {
     const keys = [];
     
     // Check for comma-separated list in primary key
-    const primaryStr = Netlify.env.get("PIXAZO_API_KEY") || "";
+    const primaryStr = getEnv("PIXAZO_API_KEY");
     if (primaryStr.includes(',')) {
         keys.push(...primaryStr.split(',').map(k => k.trim()).filter(Boolean));
     } else if (primaryStr) {
@@ -103,7 +113,7 @@ function getApiKeys() {
 
     // Check for numbered fallback keys (PIXAZO_API_KEY_2, etc)
     for (let i = 2; i <= 10; i++) {
-        const key = Netlify.env.get(`PIXAZO_API_KEY_${i}`);
+        const key = getEnv(`PIXAZO_API_KEY_${i}`);
         if (key) {
             if (key.includes(',')) {
                 keys.push(...key.split(',').map(k => k.trim()).filter(Boolean));

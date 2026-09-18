@@ -42,7 +42,7 @@ export default function Hero() {
                                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                                 className="hero-line-white"
                             >
-                                WE MAKE CONTENT
+                                THE CREATOR OS.
                             </motion.span>
                         </div>
                         <div style={{ overflow: 'hidden' }}>
@@ -52,7 +52,7 @@ export default function Hero() {
                                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
                                 className="hero-line-accent"
                             >
-                                THAT PERFORMS.
+                                SCRIPT TO LAUNCH.
                             </motion.span>
                         </div>
                     </h1>
@@ -64,9 +64,9 @@ export default function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                     >
-                        Video Editing. Thumbnails. Motion Graphics.
+                        AI Director · Scene Storyboarding · Thumbnail CTR Audits · Viral Hooks.
                         <span className="hero-sub-break"> </span>
-                        For creators who refuse to be average.
+                        The all-in-one production engine for creators who refuse to be average.
                     </motion.p>
 
                     {/* CTA Buttons */}
@@ -78,31 +78,31 @@ export default function Hero() {
                     >
                         <button
                             className="hero-btn-primary"
-                            onClick={() => navigate('/work')}
+                            onClick={() => navigate('/tools')}
                         >
-                            VIEW OUR WORK
+                            EXPLORE CREATOR OS
                             <ArrowRight size={16} />
                         </button>
                         <button
                             className="hero-btn-outline"
-                            onClick={() => navigate('/get-in-touch')}
+                            onClick={() => navigate('/lab/oracle-workspace')}
                         >
-                            START A PROJECT
+                            LAUNCH ORACLE FREE
                         </button>
                     </motion.div>
 
-                    {/* Social Proof */}
+                    {/* Social Proof / Capability Badges */}
                     <motion.div
                         className="hero-proof"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.9 }}
                     >
-                        <span>50+ clients served</span>
+                        <span>5 AI Engines</span>
                         <span className="hero-proof-dot">·</span>
-                        <span>500K+ views generated</span>
+                        <span>Zero Subscription Lock-in</span>
                         <span className="hero-proof-dot">·</span>
-                        <span>Trusted by creators worldwide</span>
+                        <span>Free Instant Inference</span>
                     </motion.div>
                 </motion.div>
             </motion.div>
@@ -111,7 +111,7 @@ export default function Hero() {
             <div
                 className="hero-scroll-indicator"
                 onClick={() => {
-                    const next = document.getElementById('work');
+                    const next = document.getElementById('suite');
                     if (next) next.scrollIntoView({ behavior: 'smooth' });
                 }}
             >

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Sun, Moon, User, LogOut, Wallet, X, Home, FolderGit2, Mail, Briefcase, Info, Terminal } from 'lucide-react';
+import { Volume2, VolumeX, Sun, Moon, User, LogOut, Wallet, X, Home, FolderGit2, Mail, Briefcase, Info, Terminal, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -54,10 +54,9 @@ const Navbar = () => {
 
     const navLinks = [
         { href: '/', icon: <Home size={28} strokeWidth={1.5} />, label: 'Home' },
-        { href: '/work', icon: <FolderGit2 size={28} strokeWidth={1.5} />, label: 'Work' },
         { href: '/tools', icon: <Terminal size={28} strokeWidth={1.5} />, label: 'Tools' },
-        { href: '/get-in-touch', icon: <Mail size={28} strokeWidth={1.5} />, label: 'Contact' },
-        { href: '/careers', icon: <Briefcase size={28} strokeWidth={1.5} />, label: 'Careers' },
+        { href: '/lab/oracle-workspace', icon: <Sparkles size={28} strokeWidth={1.5} />, label: 'Oracle' },
+        { href: '/recharge', icon: <Wallet size={28} strokeWidth={1.5} />, label: 'Credits' },
         { href: '/about', icon: <Info size={28} strokeWidth={1.5} />, label: 'About' },
         { href: '/profile', icon: <User size={28} strokeWidth={1.5} />, label: 'Profile' },
     ];

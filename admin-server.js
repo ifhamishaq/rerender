@@ -16,6 +16,9 @@ app.use(bodyParser.json());
 
 const DATA_FILE = path.join(__dirname, 'src', 'data', 'products.json');
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
 // Configure Multer
 import multer from 'multer';
