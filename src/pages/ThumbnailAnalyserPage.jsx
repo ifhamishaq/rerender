@@ -14,7 +14,7 @@ const VISION_MODEL = 'openrouter/free';
 const VISION_FAST_MODEL = 'openrouter/free';
 const FALLBACK_MODEL = 'openrouter/free';
 
-const ACCENT = 'var(--color-accent)';
+const ACCENT = 'var(--color-vision)';
 
 const ThumbnailAnalyserPage = () => {
     const { width } = useWindowSize();
@@ -35,6 +35,7 @@ const ThumbnailAnalyserPage = () => {
             setImage(reader.result);
             setPreview(reader.result);
             setAnalysis(null);
+            setError(null);
         };
         reader.readAsDataURL(file);
     };
@@ -48,7 +49,7 @@ const ThumbnailAnalyserPage = () => {
         }
 
         if (!profile || profile.credits < AI_COSTS.ANALYSER) {
-            setError("📉 OUT_OF_COMPUTE: Insufficient credits.");
+            setError("Insufficient credits. Thumbnail audit costs 2 credits.");
             return;
         }
 
@@ -98,40 +99,45 @@ JSON_SCHEMA: {
     "strengths": ["What actually helps clicks"],
     "weaknesses": ["What reduces clicks"],
     "composition": "Simple explanation of layout and focus",
-    "colorTheory": "Simple explanation of colors and impact",
-    "improvements": ["Actionable fix 1", "Actionable fix 2", "Actionable fix 3"]
-}
+    "colorTheory": "Simple explanation of color choices and contrast",
+    "improvements": ["Actionable improvement 1", "Actionable improvement 2", "Actionable improvement 3"]
+}`;
 
-Always prioritize performance over design.`;
+            const userPrompt = "Analyze this thumbnail and tell me if it will get clicks.";
 
             const body = {
-                model: VISION_FAST_MODEL,
+                model: VISION_MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: [
-                        { type: 'text', text: "Audit this thumbnail for a high-performance YouTube channel. Give me a fair, detailed breakdown." },
-                        { type: 'image_url', image_url: { url: image } }
-                    ]}
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: userPrompt },
+                            { type: 'image_url', image_url: { url: image } }
+                        ]
+                    }
                 ],
-                temperature: 0.4
+                temperature: 0.3
             };
 
             let data;
             try {
-                data = await fetchOpenRouter(body, { title: 'RE-RENDER Thumbnail Audit (Fast)' });
+                data = await fetchOpenRouter(body, { title: 'RE-RENDER Thumbnail Analyser' });
             } catch (err) {
-                console.warn('[ANALYSER] Fast model failed, trying fallback...', err);
-                data = await fetchOpenRouter({ ...body, model: FALLBACK_MODEL }, { title: 'RE-RENDER Thumbnail Audit' });
+                console.warn('[VISION] Primary vision model failed, attempting fallback...');
+                data = await fetchOpenRouter({ ...body, model: FALLBACK_MODEL }, { title: 'RE-RENDER Thumbnail Analyser' });
             }
 
-            const parsed = safeParseJSON(data.choices?.[0]?.message?.content);
+            const raw = data.choices?.[0]?.message?.content || '';
+            const parsed = safeParseJSON(raw);
+
             if (parsed) {
                 setAnalysis(parsed);
             } else {
-                throw new Error("MALFORMED_RESPONSE");
+                throw new Error("Unable to parse AI response. Please try again.");
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message || "Failed to analyze image. Please try again.");
         } finally {
             setIsAnalyzing(false);
         }
@@ -140,17 +146,20 @@ Always prioritize performance over design.`;
     const handleDownloadReport = () => {
         if (!analysis) return;
         const report = `
-RE-RENDER NEURAL AUDIT REPORT
------------------------------
-TIMESTAMP: ${new Date().toLocaleString()}
+RE-RENDER CREATOR OS — THUMBNAIL AUDIT REPORT
+=============================================
+DATE: ${new Date().toLocaleString()}
 GRADE: ${analysis.thumbnailGrade}
 PREDICTED CTR: ${analysis.predictedCTR}
 
 VERDICT:
 ${analysis.verdict}
 
+KEY IMPROVEMENTS:
+${analysis.improvements?.map((i, idx) => `[${idx+1}] ${i}`).join('\n')}
+
 STRENGTHS:
-${analysis.strengths?.map(s => `- ${s}`).join('\n')}
+${analysis.strengths?.map(s => `+ ${s}`).join('\n')}
 
 WEAKNESSES:
 ${analysis.weaknesses?.map(w => `- ${w}`).join('\n')}
@@ -158,25 +167,21 @@ ${analysis.weaknesses?.map(w => `- ${w}`).join('\n')}
 VISUAL COMPOSITION:
 ${analysis.composition}
 
-COLOR THEORY:
+COLOR PSYCHOLOGY & CONTRAST:
 ${analysis.colorTheory}
-
-KEY IMPROVEMENTS:
-${analysis.improvements?.map(i => `- ${i}`).join('\n')}
 
 METRICS:
 - Contrast: ${analysis.metrics?.contrast}/10
-- Face Details: ${analysis.metrics?.faceDetails}/10
+- Subject / Face Details: ${analysis.metrics?.faceDetails}/10
 - Text Emphasis: ${analysis.metrics?.textEmphasis}/10
 - Hook Power: ${analysis.metrics?.hook}/10
------------------------------
-END OF REPORT
-        `;
+=============================================
+`;
         const blob = new Blob([report], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `rerender_audit_${Date.now()}.txt`;
+        a.download = `rerender_thumbnail_audit_${Date.now()}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -193,11 +198,12 @@ END OF REPORT
             paddingBottom: '8rem'
         }}>
             <LabHeader 
-                title="NEURAL" 
+                title="Thumbnail" 
                 subtitle="Analyser." 
                 vol="01" 
                 credits={profile?.credits ?? 0} 
                 accentColor={ACCENT}
+                tag="CREATOR OS"
             />
 
             <main style={{
@@ -205,190 +211,411 @@ END OF REPORT
                 margin: '3rem auto',
                 padding: '0 2rem',
                 display: 'grid',
-                gridTemplateColumns: width < 1000 ? '1fr' : '1fr 400px',
-                gap: width < 1000 ? '2rem' : '4rem'
+                gridTemplateColumns: width < 1000 ? '1fr' : '480px 1fr',
+                gap: '2.5rem'
             }}>
-                {/* Column 01: Visual Canvas & Detailed Analysis */}
+                {/* Column 01: Upload & Thumbnail Preview (Jakob's Law: Left Panel) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{
-                        width: '100%',
-                        aspectRatio: '16/9',
                         backgroundColor: 'var(--color-surface)',
-                        border: '2px solid var(--color-text)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
-                        position: 'relative',
-                        boxShadow: '10px 10px 0px rgba(0,0,0,0.05)'
-                    }}>
-                        {isAnalyzing ? (
-                            <LabLoader label="PERFORMING_DEEP_STRATEGIC_SCAN..." />
-                        ) : preview ? (
-                            <img src={preview} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                            <div onClick={() => fileRef.current?.click()} style={{ color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
-                                <ImageIcon size={48} opacity={0.2} />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>UPLOAD_ASSET_FOR_AUDIT</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {analysis && !isAnalyzing && (
-                        <div style={{ display: 'grid', gridTemplateColumns: width < 768 ? '1fr' : '1fr 1fr', gap: '2rem' }}>
-                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#10B981' }}>
-                                    <CheckCircle2 size={18} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>STRENGTHS</span>
-                                </div>
-                                <ul style={{ paddingLeft: '1rem', margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>
-                                    {analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}
-                                </ul>
-                            </div>
-                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#EF4444' }}>
-                                    <AlertTriangle size={18} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>WEAKNESSES</span>
-                                </div>
-                                <ul style={{ paddingLeft: '1rem', margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>
-                                    {analysis.weaknesses?.map((w, i) => <li key={i}>{w}</li>)}
-                                </ul>
-                            </div>
-                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                                    <Layout size={18} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>COMPOSITION</span>
-                                </div>
-                                <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>{analysis.composition}</p>
-                            </div>
-                            <div style={{ border: '1.5px solid var(--color-text)', padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                                    <Palette size={18} />
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 900 }}>COLOR THEORY</span>
-                                </div>
-                                <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: 1.6 }}>{analysis.colorTheory}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{
-                        display: 'flex',
-                        gap: '1.5rem',
-                        padding: '1.5rem',
                         border: '1px solid var(--color-border)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.65rem',
-                        color: 'var(--color-text-secondary)'
+                        borderRadius: '24px',
+                        padding: '1.75rem',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.03)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1.5rem'
                     }}>
-                        <div style={{ flex: 1 }}>
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>ENGINE:</span> {VISION_FAST_MODEL.split('/')[1].toUpperCase()}<br />
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>SCAN_DEPTH:</span> DEEP_STRATEGIC
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                letterSpacing: '0.08em',
+                                color: 'var(--color-text-secondary)',
+                                textTransform: 'uppercase'
+                            }}>
+                                Thumbnail Canvas
+                            </span>
+                            {preview && (
+                                <button
+                                    onClick={() => fileRef.current?.click()}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: ACCENT,
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Replace Image
+                                </button>
+                            )}
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>RE-RENDER_ID:</span> {analysis ? 'SCAN_SUCCESS' : 'NULL'}<br />
-                            <span style={{ color: 'var(--color-text)', fontWeight: 900 }}>TIMESTAMP:</span> {new Date().toLocaleTimeString()}
+
+                        {/* Dropzone / Preview */}
+                        <div 
+                            onClick={() => !preview && fileRef.current?.click()}
+                            style={{
+                                width: '100%',
+                                aspectRatio: '16/9',
+                                backgroundColor: 'var(--color-bg)',
+                                border: `2px dashed ${preview ? 'transparent' : 'var(--color-border)'}`,
+                                borderRadius: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                position: 'relative',
+                                cursor: preview ? 'default' : 'pointer',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => { if (!preview) e.currentTarget.style.borderColor = ACCENT; }}
+                            onMouseLeave={(e) => { if (!preview) e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                        >
+                            {isAnalyzing ? (
+                                <LabLoader label="Scanning visual composition & CTR triggers..." accentColor={ACCENT} />
+                            ) : preview ? (
+                                <img 
+                                    src={preview} 
+                                    alt="Thumbnail preview" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                />
+                            ) : (
+                                <div style={{ 
+                                    color: 'var(--color-text-secondary)', 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    gap: '1rem',
+                                    padding: '2rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{
+                                        width: '56px', height: '56px',
+                                        borderRadius: '16px',
+                                        backgroundColor: 'var(--color-surface)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        border: '1px solid var(--color-border)',
+                                        color: ACCENT
+                                    }}>
+                                        <Upload size={24} />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: 'var(--color-text)' }}>
+                                            Upload Thumbnail to Audit
+                                        </div>
+                                        <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.3rem' }}>
+                                            PNG, JPG, or WebP (16:9 recommended)
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Action Button (Von Restorff Effect) */}
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={isAnalyzing || !preview}
+                            style={{
+                                width: '100%',
+                                padding: '1.1rem',
+                                backgroundColor: (isAnalyzing || !preview) ? 'var(--color-border)' : ACCENT,
+                                color: (isAnalyzing || !preview) ? 'var(--color-text-muted)' : '#ffffff',
+                                border: 'none',
+                                borderRadius: '16px',
+                                fontFamily: 'var(--font-sans)',
+                                fontWeight: 700,
+                                fontSize: '0.95rem',
+                                cursor: (isAnalyzing || !preview) ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.75rem',
+                                transition: 'all 0.2s ease',
+                                boxShadow: (isAnalyzing || !preview) ? 'none' : `0 4px 20px color-mix(in srgb, ${ACCENT} 40%, transparent)`
+                            }}
+                        >
+                            {isAnalyzing ? (
+                                <>
+                                    <RefreshCw size={18} className="spin" />
+                                    <span>Auditing Thumbnail...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Eye size={18} />
+                                    <span>Analyze Thumbnail</span>
+                                </>
+                            )}
+                        </button>
                     </div>
 
                     {error && (
-                        <div style={{ color: '#FF0000', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', fontWeight: 900, border: '1px solid #FF0000', padding: '1rem' }}>
-                            CRITICAL_ERROR: {error.toUpperCase()}
+                        <div style={{ 
+                            color: 'var(--color-viral)', 
+                            fontSize: '0.85rem', 
+                            backgroundColor: 'color-mix(in srgb, var(--color-viral) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--color-viral) 30%, transparent)', 
+                            borderRadius: '16px',
+                            padding: '1rem 1.25rem',
+                            fontWeight: 600
+                        }}>
+                            {error}
                         </div>
                     )}
                 </div>
 
-                {/* Column 02: Controls & Metrics */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                    
-                    {analysis ? (
+                {/* Column 02: Analysis Results & Metrics (Peak-End Rule: Right Panel) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {analysis && !isAnalyzing ? (
                         <>
-                            {/* Dashboard */}
-                            <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>AUDIT_DASHBOARD</div>
-                                <div style={{ backgroundColor: 'var(--color-surface)', border: '1.5px solid var(--color-text)', padding: '2rem', position: 'relative' }}>
-                                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', fontSize: '2.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', color: ACCENT }}>{analysis.thumbnailGrade}</div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', opacity: 0.5 }}>PREDICTED_CTR</div>
-                                    <div style={{ fontSize: '3.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{analysis.predictedCTR}</div>
-                                    <p style={{ marginTop: '2rem', fontSize: '0.9rem', fontStyle: 'italic', opacity: 0.8 }}>"{analysis.verdict?.replace(/—/g, '-')}"</p>
+                            {/* Score Card */}
+                            <div style={{
+                                backgroundColor: 'var(--color-surface)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '24px',
+                                padding: '2rem',
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.03)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                <div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                                        Predicted Click-Through Potential
+                                    </div>
+                                    <div style={{ fontSize: '3.5rem', fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1.1, marginTop: '0.5rem', color: 'var(--color-text)' }}>
+                                        {analysis.predictedCTR}
+                                    </div>
+                                    <p style={{ marginTop: '1rem', fontSize: '0.95rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, maxWidth: '420px', margin: '1rem 0 0' }}>
+                                        "{analysis.verdict?.replace(/—/g, '-')}"
+                                    </p>
+                                </div>
+
+                                <div style={{
+                                    backgroundColor: `color-mix(in srgb, ${ACCENT} 12%, transparent)`,
+                                    color: ACCENT,
+                                    padding: '0.75rem 1.25rem',
+                                    borderRadius: '16px',
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '2.25rem',
+                                    fontWeight: 900,
+                                    border: `1px solid color-mix(in srgb, ${ACCENT} 30%, transparent)`,
+                                    lineHeight: 1
+                                }}>
+                                    {analysis.thumbnailGrade}
                                 </div>
                             </div>
 
-                            {/* Download Button */}
-                            <button
-                                onClick={handleDownloadReport}
-                                style={{
-                                    width: '100%', padding: '1.25rem',
-                                    backgroundColor: 'var(--color-text)',
-                                    color: 'var(--color-bg)',
-                                    border: 'none',
-                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.8rem',
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
-                                    boxShadow: '6px 6px 0px rgba(0,0,0,0.1)'
-                                }}
-                            >
-                                <Download size={18} />
-                                DOWNLOAD_REPORT.TXT
-                            </button>
+                            {/* Improvements (Actionable Fixes) */}
+                            {analysis.improvements && (
+                                <div style={{
+                                    backgroundColor: 'var(--color-surface)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '24px',
+                                    padding: '2rem',
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.03)'
+                                }}>
+                                    <div style={{
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 700,
+                                        letterSpacing: '0.08em',
+                                        color: ACCENT,
+                                        textTransform: 'uppercase',
+                                        marginBottom: '1.25rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}>
+                                        <Sparkles size={14} />
+                                        <span>Actionable CTR Fixes</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        {analysis.improvements.map((imp, i) => (
+                                            <div key={i} style={{
+                                                padding: '1rem 1.25rem',
+                                                backgroundColor: 'var(--color-bg)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '12px',
+                                                fontSize: '0.9rem',
+                                                lineHeight: 1.5,
+                                                display: 'flex',
+                                                gap: '0.75rem',
+                                                alignItems: 'flex-start'
+                                            }}>
+                                                <span style={{ 
+                                                    color: ACCENT, 
+                                                    fontWeight: 800, 
+                                                    fontFamily: 'var(--font-mono)',
+                                                    backgroundColor: `color-mix(in srgb, ${ACCENT} 12%, transparent)`,
+                                                    padding: '0.1rem 0.45rem',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.75rem'
+                                                }}>
+                                                    #{i+1}
+                                                </span>
+                                                <span style={{ color: 'var(--color-text)' }}>{imp}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                            {/* Metrics */}
-                            <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>VISUAL_METRICS</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {Object.entries(analysis.metrics || {}).map(([key, val]) => (
-                                        <div key={key}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontFamily: 'var(--font-mono)', fontWeight: 900, marginBottom: '0.4rem' }}>
-                                                <span>{key.toUpperCase()}</span>
-                                                <span>{val}/10</span>
-                                            </div>
-                                            <div style={{ height: '4px', backgroundColor: 'var(--color-border)' }}>
-                                                <div style={{ height: '100%', width: `${val * 10}%`, backgroundColor: ACCENT }}></div>
-                                            </div>
-                                        </div>
-                                    ))}
+                            {/* Breakdown Grid: Strengths & Weaknesses */}
+                            <div style={{ display: 'grid', gridTemplateColumns: width < 768 ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
+                                <div style={{
+                                    backgroundColor: 'var(--color-surface)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '20px',
+                                    padding: '1.5rem'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#16a34a' }}>
+                                        <CheckCircle2 size={16} />
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800 }}>WHAT WORKS</span>
+                                    </div>
+                                    <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
+                                        {analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}
+                                    </ul>
+                                </div>
+
+                                <div style={{
+                                    backgroundColor: 'var(--color-surface)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '20px',
+                                    padding: '1.5rem'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#ea580c' }}>
+                                        <AlertTriangle size={16} />
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800 }}>CTR FRICTION</span>
+                                    </div>
+                                    <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>
+                                        {analysis.weaknesses?.map((w, i) => <li key={i}>{w}</li>)}
+                                    </ul>
                                 </div>
                             </div>
 
-                            {/* Improvements */}
-                            <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>SYNTHETIC_IMPROVEMENTS</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    {analysis.improvements?.map((imp, i) => (
-                                        <div key={i} style={{ padding: '1rem', border: '1px solid var(--color-border)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
-                                            <span style={{ color: ACCENT, fontWeight: 900 }}>[{i+1}]</span> {imp}
-                                        </div>
-                                    ))}
+                            {/* Visual Metrics Progress Bars */}
+                            {analysis.metrics && (
+                                <div style={{
+                                    backgroundColor: 'var(--color-surface)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '20px',
+                                    padding: '1.5rem'
+                                }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: '1.25rem', textTransform: 'uppercase' }}>
+                                        Core Visual Metrics
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: width < 768 ? '1fr' : '1fr 1fr', gap: '1.25rem' }}>
+                                        {Object.entries(analysis.metrics).map(([key, val]) => (
+                                            <div key={key}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', fontWeight: 700, marginBottom: '0.4rem' }}>
+                                                    <span style={{ color: 'var(--color-text)' }}>{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
+                                                    <span style={{ color: ACCENT }}>{val}/10</span>
+                                                </div>
+                                                <div style={{ height: '6px', backgroundColor: 'var(--color-bg)', borderRadius: '10px', overflow: 'hidden' }}>
+                                                    <div style={{ height: '100%', width: `${val * 10}%`, backgroundColor: ACCENT, borderRadius: '10px' }}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <button 
-                                    onClick={() => { setPreview(null); setAnalysis(null); }} 
-                                    style={{ marginTop: '2rem', width: '100%', padding: '1rem', background: 'none', border: '1.5px solid var(--color-text)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                            )}
+
+                            {/* Action Bar */}
+                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                <button
+                                    onClick={handleDownloadReport}
+                                    style={{
+                                        flex: 1,
+                                        padding: '1rem',
+                                        backgroundColor: 'var(--color-surface)',
+                                        color: 'var(--color-text)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '14px',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontWeight: 700,
+                                        fontSize: '0.8rem',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        transition: 'all 0.15s ease'
+                                    }}
                                 >
-                                    START_NEW_AUDIT
+                                    <Download size={16} />
+                                    <span>Download Report (.txt)</span>
+                                </button>
+                                <button 
+                                    onClick={() => { setPreview(null); setImage(null); setAnalysis(null); }} 
+                                    style={{
+                                        padding: '1rem 1.5rem',
+                                        background: 'none',
+                                        border: '1px solid var(--color-border)',
+                                        color: 'var(--color-text-secondary)',
+                                        borderRadius: '14px',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Reset
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <div>
-                            <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'var(--font-mono)', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>DIRECTIVE_COMMAND</div>
-                            <button
-                                onClick={handleAnalyze}
-                                disabled={isAnalyzing || !preview}
-                                style={{
-                                    width: '100%', padding: '1.5rem',
-                                    backgroundColor: (isAnalyzing || !preview) ? 'var(--color-border)' : 'var(--color-text)',
-                                    color: (isAnalyzing || !preview) ? 'var(--color-text-secondary)' : 'var(--color-bg)',
-                                    border: 'none',
-                                    fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '0.9rem',
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
-                                    letterSpacing: '0.1em'
-                                }}
-                            >
-                                {isAnalyzing ? <RefreshCw size={20} className="spin" /> : (
-                                    <>
-                                        <Eye size={18} />
-                                        EXECUTE_AUDIT_SEQUENCE
-                                    </>
-                                )}
-                            </button>
+                        /* Empty State Guidance */
+                        <div style={{
+                            backgroundColor: 'var(--color-surface)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '24px',
+                            padding: '3rem 2rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            minHeight: '400px',
+                            justifyContent: 'center'
+                        }}>
+                            <div style={{
+                                width: '64px', height: '64px',
+                                borderRadius: '20px',
+                                backgroundColor: 'var(--color-bg)',
+                                border: '1px solid var(--color-border)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginBottom: '1.5rem',
+                                color: ACCENT
+                            }}>
+                                <Eye size={30} />
+                            </div>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.5rem', color: 'var(--color-text)' }}>
+                                How AI Vision Audits Your Thumbnail
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', maxWidth: '440px', lineHeight: 1.6, margin: '0 0 2rem' }}>
+                                Upload any draft or competitor thumbnail on the left. The engine evaluates clickability, visual hierarchy, mobile readability, and provides 3 concrete CTR fixes.
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', width: '100%', maxWidth: '420px' }}>
+                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: ACCENT, fontWeight: 700 }}>01</div>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, marginTop: '0.25rem' }}>Contrast</div>
+                                </div>
+                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: ACCENT, fontWeight: 700 }}>02</div>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, marginTop: '0.25rem' }}>Focal Point</div>
+                                </div>
+                                <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: ACCENT, fontWeight: 700 }}>03</div>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, marginTop: '0.25rem' }}>CTR Potential</div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

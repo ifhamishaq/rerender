@@ -14,7 +14,7 @@ const Md = ({ text }) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return <span>{parts.map((p, i) =>
         p.startsWith('**') && p.endsWith('**')
-            ? <strong key={i} style={{ color: 'var(--color-accent)', fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+            ? <strong key={i} style={{ color: 'var(--color-oracle)', fontWeight: 700 }}>{p.slice(2, -2)}</strong>
             : <span key={i}>{p}</span>
     )}</span>;
 };
@@ -46,7 +46,7 @@ const StoryboardCard = ({ scenes, title }) => {
         <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>Storyboard — {scenes.length} scenes</span>
-                <button onClick={exportPdf} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Maximize2 size={12} /> Export</button>
+                <button onClick={exportPdf} style={{ background: 'none', border: 'none', color: 'var(--color-oracle)', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Maximize2 size={12} /> Export</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 10 }}>
                 {scenes.map((s, i) => (
@@ -69,7 +69,7 @@ const AnalysisCard = ({ analysis, imageUrl }) => (
                 <img src={imageUrl} alt="" style={{ width: 100, borderRadius: 6, marginTop: 8 }} />
             </div>
             <div style={{ flex: 1, minWidth: 200 }}>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-accent)' }}>{analysis.grade} <span style={{ fontSize: 14, opacity: .4 }}>{analysis.estimated_ctr}</span></div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-oracle)' }}>{analysis.grade} <span style={{ fontSize: 14, opacity: .4 }}>{analysis.estimated_ctr}</span></div>
                 <p style={{ fontSize: 14, opacity: .7, margin: '8px 0 16px' }}>{analysis.first_impression}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div><div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-accent)', marginBottom: 4 }}>Strengths</div><ul style={{ margin: 0, paddingLeft: 16, fontSize: 13 }}>{analysis.strengths?.map((s, i) => <li key={i}>{s}</li>)}</ul></div>
@@ -148,7 +148,7 @@ const OracleWorkspacePage = () => {
     );
 
     return (
-        <div className="ow-root" style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden', fontFamily: 'Inter,-apple-system,sans-serif' }}>
+        <div className="ow-root" style={{ display: 'flex', height: 'calc(100vh - 28px)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', overflow: 'hidden', fontFamily: 'var(--font-sans)' }}>
             <style>{`
                 .ow-root *{box-sizing:border-box}
                 .ow-sb::-webkit-scrollbar{width:0}.ow-sb{scrollbar-width:none}
@@ -163,21 +163,13 @@ const OracleWorkspacePage = () => {
                     gap: 8px;
                     padding: 8px 8px 8px 14px;
                     border-radius: 22px;
-                    border: 1px solid rgba(0, 0, 0, 0.1);
-                    background-color: rgba(0, 0, 0, 0.02);
+                    border: 1px solid var(--color-border);
+                    background-color: var(--color-surface);
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
                 }
-                body.dark-mode .ow-input-container {
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background-color: rgba(255, 255, 255, 0.03);
-                }
                 .ow-input-container:focus-within {
-                    border-color: #22c55e !important;
-                    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
-                    background-color: rgba(0, 0, 0, 0.03);
-                }
-                body.dark-mode .ow-input-container:focus-within {
-                    background-color: rgba(255, 255, 255, 0.05);
+                    border-color: var(--color-oracle) !important;
+                    box-shadow: 0 0 16px color-mix(in srgb, var(--color-oracle) 35%, transparent);
                 }
                 .ow-input {
                     border: none !important;
@@ -192,9 +184,9 @@ const OracleWorkspacePage = () => {
                     box-shadow: none !important;
                     outline: none !important;
                 }
-                .ow-input::placeholder{color:var(--color-text);opacity:.3}
-                .ow-pill{padding:6px 14px;border-radius:100px;border:1px solid var(--color-border);background:transparent;color:var(--color-text);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s}
-                .ow-pill:hover{background:var(--color-text);color:var(--color-bg)}
+                .ow-input::placeholder{color:var(--color-text);opacity:.35}
+                .ow-pill{padding:6px 14px;border-radius:100px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s}
+                .ow-pill:hover{background:color-mix(in srgb, var(--color-oracle) 12%, transparent);border-color:var(--color-oracle);color:var(--color-text)}
                 .ow-side-item{padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:2px;transition:background .1s;font-size:13px}
                 .ow-side-item:hover{background:rgba(128,128,128,.08)}
             `}</style>
@@ -352,9 +344,10 @@ const OracleWorkspacePage = () => {
                                         placeholder={activeForm ? "Type here..." : "Message Oracle..."} rows={1}
                                         style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--color-text)', fontSize: 14, lineHeight: '24px', resize: 'none', padding: 0, fontFamily: 'inherit', maxHeight: 140 }} />
                                     <button onClick={handleSend} disabled={!input.trim() && !pendingImage}
-                                        style={{ width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            background: (input.trim() || pendingImage) ? 'var(--color-text)' : 'transparent', color: (input.trim() || pendingImage) ? 'var(--color-bg)' : 'var(--color-text)',
-                                            opacity: (input.trim() || pendingImage) ? 1 : .15, transition: 'all .2s' }}>
+                                        style={{ width: 32, height: 32, borderRadius: '50%', border: 'none', flexShrink: 0, cursor: (input.trim() || pendingImage) ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            background: (input.trim() || pendingImage) ? 'var(--color-oracle)' : 'transparent', color: (input.trim() || pendingImage) ? '#ffffff' : 'var(--color-text)',
+                                            boxShadow: (input.trim() || pendingImage) ? '0 2px 10px color-mix(in srgb, var(--color-oracle) 40%, transparent)' : 'none',
+                                            opacity: (input.trim() || pendingImage) ? 1 : .2, transition: 'all .2s' }}>
                                         <ArrowUp size={16} strokeWidth={2.5} />
                                     </button>
                                 </div>
