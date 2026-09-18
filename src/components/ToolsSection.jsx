@@ -40,7 +40,7 @@ const GlitchText = ({ text }) => {
     return <span onClick={trigger} style={{ cursor: 'pointer', userSelect: 'none' }}>{display}</span>;
 };
 
-const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false }) => (
+const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false, accentColor = 'var(--color-accent)' }) => (
     <Link to={link || "#"} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <motion.div
             whileHover={{ y: -6, scale: 1.02 }}
@@ -61,8 +61,8 @@ const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false }) =
                 position: 'absolute', top: '-50px', right: '-50px',
                 width: '150px', height: '150px',
                 borderRadius: '50%',
-                background: isHot ? 'radial-gradient(circle, var(--color-accent) 0%, transparent 70%)' : 'none',
-                opacity: 0.1,
+                background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)`,
+                opacity: 0.12,
                 pointerEvents: 'none'
             }} />
             
@@ -80,38 +80,39 @@ const ToolCard = ({ title, desc, icon, link, tag = "UTILITY", isHot = false }) =
                 </div>
                 {isHot && (
                     <div style={{
-                        backgroundColor: 'rgba(57, 255, 20, 0.1)',
-                        color: 'var(--color-accent)',
-                        padding: '0.4rem 1rem',
+                        backgroundColor: `color-mix(in srgb, ${accentColor} 14%, transparent)`,
+                        color: accentColor,
+                        padding: '0.4rem 0.9rem',
                         borderRadius: '20px',
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.65rem',
                         fontWeight: 800,
                         letterSpacing: '0.05em',
-                        border: '1px solid rgba(57, 255, 20, 0.2)'
+                        border: `1px solid color-mix(in srgb, ${accentColor} 28%, transparent)`
                     }}>
-                        New
+                        LIVE
                     </div>
                 )}
             </div>
 
             <div style={{ flex: 1, marginTop: '1rem' }}>
                 <div style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em',
-                    color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 600
+                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.12em',
+                    color: accentColor, textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700
                 }}>
                     {tag}
                 </div>
                 <h3 style={{
-                    fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem',
-                    color: 'var(--color-text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em'
+                    fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.3rem',
+                    color: 'var(--color-text)', margin: '0 0 0.5rem', letterSpacing: '-0.02em',
+                    lineHeight: 1.2
                 }}>
                     {title}
                 </h3>
                 <p style={{
-                    fontFamily: 'var(--font-sans)', fontSize: '0.9rem',
-                    color: 'var(--color-text-secondary)', lineHeight: 1.5, margin: 0,
-                    fontWeight: 500
+                    fontFamily: 'var(--font-sans)', fontSize: '0.92rem',
+                    color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0,
+                    fontWeight: 450
                 }}>
                     {desc}
                 </p>
@@ -132,30 +133,30 @@ const ToolsSection = () => {
                         fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.25em',
                         textTransform: 'uppercase', color: ACCENT, marginBottom: '2rem'
                     }}>
-                        <span style={{ fontWeight: 900 }}>SYSTEM_TOOLS</span>
-                        <span style={{ flex: 1, height: '1px', backgroundColor: ACCENT_BORDER }} />
+                        <span style={{ fontWeight: 800 }}>CREATOR_OS_TOOLS</span>
+                        <span style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
                     </div>
 
                     <h1 style={{
                         fontFamily: 'var(--font-display)', fontWeight: 900,
-                        fontSize: 'clamp(3rem, 12vw, 7rem)', lineHeight: 0.85, margin: 0,
+                        fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', lineHeight: 1.08, margin: 0,
                         textTransform: 'uppercase', letterSpacing: '-0.04em'
                     }}>
-                        <GlitchText text="UTILITY" /><br />
-                        <span style={{ color: ACCENT }}>LABS</span>
+                        <GlitchText text="CREATOR" /><br />
+                        <span style={{ color: ACCENT }}>TOOLKIT</span>
                     </h1>
                     
                     <p style={{
-                        fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--color-text-secondary)',
-                        maxWidth: '600px', lineHeight: 1.7, marginTop: '2.5rem'
+                        fontFamily: 'var(--font-sans)', fontSize: '1.1rem', color: 'var(--color-text-secondary)',
+                        maxWidth: '620px', lineHeight: 1.7, marginTop: '2rem', fontWeight: 450
                     }}>
-                        Proprietary toolsets and creative engines developed by RE-RENDER. High-performance utilities for digital architects and post-internet creators.
+                        High-precision creative engines engineered for modern creators. From storytelling and real-time viral posters to visual thumbnail scoring.
                     </p>
                 </div>
             </section>
 
             {/* ── TOOLS GRID ── */}
-            <section style={{ padding: '4rem 2rem 10rem' }}>
+            <section style={{ padding: '2rem 2rem 10rem' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{
                         display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
@@ -163,74 +164,81 @@ const ToolsSection = () => {
                     }}>
                         <ToolCard
                             icon="🔮"
-                            title="AESTHETIC ORACLE"
-                            desc="GEMMA-3 powered Creative Director. Engineered to generate high-fidelity scripts and visual directives."
+                            title="Aesthetic Oracle"
+                            desc="Creative Director AI. Brainstorm narratives, visual treatments, and full scene scripts in minutes."
                             link="/lab/ai-agent"
-                            tag="AI_CORE"
-                            isHot={true}
-                        />
-                        <ToolCard
-                            icon="🌌"
-                            title="WALLPAPER LAB"
-                            desc="Harness Flux-1 Schnell to render custom digital backdrops. Infinite variations, zero compromise."
-                            link="/tools/wallpaper-lab"
-                            tag="AI_RENDERER"
-                            isHot={true}
-                        />
-                        <ToolCard
-                            icon="✍️"
-                            title="CAPTION WRITER"
-                            desc="Describe your post. AI generates platform-specific captions for IG, TikTok, X, YouTube, LinkedIn & Facebook."
-                            link="/lab/caption-writer"
-                            tag="AI_TEXT"
-                            isHot={true}
-                        />
-                        <ToolCard
-                            icon="📰"
-                            title="AUTO CONTENT GENERATOR"
-                            desc="Fetches real-time trending news and instantly creates a viral social media poster with AI imagery and bold text overlays."
-                            link="/lab/news-generator"
-                            tag="AI_TOOL"
+                            tag="Creativity & Wisdom"
+                            accentColor="var(--color-oracle)"
                             isHot={true}
                         />
                         <ToolCard
                             icon="🖼️"
-                            title="THUMBNAIL ANALYSER"
-                            desc="Upload any thumbnail — AI Vision scores click-through potential, analyzes composition, and gives 3 improvements."
+                            title="Thumbnail Analyser"
+                            desc="Upload any thumbnail — AI Vision evaluates click-through potential, composition clarity, and provides 3 CTR fixes."
                             link="/lab/thumbnail-analyser"
-                            tag="AI_VISION"
+                            tag="Clarity & Trust"
+                            accentColor="var(--color-vision)"
                             isHot={true}
                         />
                         <ToolCard
-                            icon="⌨️"
-                            title="TYPE RACER"
-                            desc="Your keyboard is the weapon. Type design manifests and code snippets. Speed earns glory."
-                            link="/tools/type-racer"
-                            tag="EXPERIMENT"
+                            icon="📰"
+                            title="Auto News Generator"
+                            desc="Scans real-time trending news and generates instant viral social posters with custom AI imagery and bold text."
+                            link="/lab/news-generator"
+                            tag="Urgency & Viral"
+                            accentColor="var(--color-viral)"
+                            isHot={true}
                         />
                         <ToolCard
-                            icon="👁️"
-                            title="HEX CODE HERO"
-                            desc="Read the matrix. Three hex codes, one background color. Can you spot the difference?"
-                            link="/tools/hex-code-hero"
-                            tag="EXPERIMENT"
+                            icon="✍️"
+                            title="Caption Writer"
+                            desc="Generate targeted, high-conversion captions tailored for Instagram, TikTok, X, YouTube, and LinkedIn."
+                            link="/lab/caption-writer"
+                            tag="Growth & Action"
+                            accentColor="var(--color-accent)"
+                            isHot={true}
+                        />
+                        <ToolCard
+                            icon="🌌"
+                            title="Wallpaper Lab"
+                            desc="Render custom digital backdrops and aesthetic wallpapers with zero compromise using Flux Schnell."
+                            link="/tools/wallpaper-lab"
+                            tag="Growth & Action"
+                            accentColor="var(--color-accent)"
+                            isHot={true}
                         />
                         <ToolCard
                             icon="🎨"
-                            title="PALETTE PICKER"
-                            desc="Steal the aesthetic. Extract and generate cohesive color palettes from visual inputs."
+                            title="Palette Picker"
+                            desc="Extract and harmonize psychology-backed color palettes directly from any visual reference."
                             link="/tools/palette-picker"
-                            tag="UTILITY"
+                            tag="Color Psychology"
+                            accentColor="var(--color-vision)"
+                        />
+                        <ToolCard
+                            icon="⌨️"
+                            title="Type Racer"
+                            desc="Hone your keyboard velocity. Type design manifests and code snippets with live WPM tracking."
+                            link="/tools/type-racer"
+                            tag="Speed Utility"
+                            accentColor="var(--color-text-muted)"
+                        />
+                        <ToolCard
+                            icon="👁️"
+                            title="Hex Code Hero"
+                            desc="Sharpen your design instincts. Three hex codes, one color sample. Train your eyes."
+                            link="/tools/hex-code-hero"
+                            tag="Color Accuracy"
+                            accentColor="var(--color-oracle)"
                         />
                         <ToolCard
                             icon="⏱️"
-                            title="CHRONO STRIKE"
-                            desc="Stop the clock exactly at 5.000s. A brutal test of internal timing and reflexes."
+                            title="Chrono Strike"
+                            desc="Stop the clock exactly at 5.000 seconds. Test your internal timing and reaction reflexes."
                             link="/tools/reflex"
-                            tag="EXPERIMENT"
+                            tag="Timing Utility"
+                            accentColor="var(--color-viral)"
                         />
-
-
                     </div>
                 </div>
             </section>

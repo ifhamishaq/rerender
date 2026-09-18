@@ -1,26 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,900;1,600&display=swap');
 
 :root {
-  /* Modern Premium Light Mode */
-  --color-bg: #f5f5f7;
-  --color-text: #1d1d1f;
-  --color-text-secondary: #86868b;
-  --color-accent: #39FF14; 
-  --color-surface: #FFFFFF;
-  --color-border: #d2d2d7;
+  /* ══════════════════════════════════════════════════════════════
+     COLOR THEORY & PSYCHOLOGY SYSTEM (Light Mode)
+     Dominant: Clean Architectural White (#FAFAFC / #FFFFFF)
+     Structure: Neutral Zinc (#71717A / #E4E4E7)
+     Accents: Growth Green (#16a34a), Wisdom Purple (#9333ea), 
+              Vision Blue (#0284c7), Urgency Orange (#ea580c)
+     ══════════════════════════════════════════════════════════════ */
+  --color-bg: #fafafc;
+  --color-text: #09090b;
+  --color-text-secondary: #71717a;
+  --color-surface: #ffffff;
+  --color-border: #e4e4e7;
+  --color-border-hover: #d4d4d8;
+
+  /* Psychological Accents */
+  --color-accent: #16a34a; /* Action, Vitality, Growth */
+  --color-accent-hover: #15803d;
+  --color-accent-glow: rgba(22, 163, 74, 0.25);
+
+  --color-oracle: #9333ea; /* Creative Intelligence, Wisdom, Mystery */
+  --color-oracle-glow: rgba(147, 51, 234, 0.2);
+
+  --color-vision: #0284c7; /* Vision, Clarity, Metrics, Trust */
+  --color-vision-glow: rgba(2, 132, 199, 0.2);
+
+  --color-viral: #ea580c; /* High Energy, Virality, Urgency */
+  --color-viral-glow: rgba(234, 88, 12, 0.2);
 
   /* Soft UI Shadows */
   --shadow-raised: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-screen: 0 8px 32px rgba(0, 0, 0, 0.08);
 
-  --led-glow: 0 0 16px rgba(57, 255, 20, 0.3);
+  --led-glow: 0 0 16px rgba(22, 163, 74, 0.35);
   --led-off: none;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  /* Editorial Typography System */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  --font-serif: 'Playfair Display', Georgia, serif;
 
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
@@ -31,20 +52,40 @@
 }
 
 body.dark-mode {
-  /* Modern Premium Dark Mode */
-  --color-bg: #000000;
-  --color-text: #f5f5f7;
-  --color-text-secondary: #86868b;
-  --color-accent: #39FF14; 
-  --color-surface: #1d1d1f;
-  --color-border: #424245;
+  /* ══════════════════════════════════════════════════════════════
+     COLOR THEORY & PSYCHOLOGY SYSTEM (Dark Mode)
+     Dominant: Deep Obsidian / OLED Black (#09090B / #121215)
+     Structure: High-contrast Slate/Zinc (#A1A1AA / #27272A)
+     Accents: Electric Emerald (#22c55e), Vivid Purple (#a855f7),
+              Sky Blue (#38bdf8), Tangerine (#fb923c)
+     ══════════════════════════════════════════════════════════════ */
+  --color-bg: #09090b;
+  --color-text: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-surface: #121215;
+  --color-border: #27272a;
+  --color-border-hover: #3f3f46;
+
+  /* Psychological Accents */
+  --color-accent: #22c55e; /* Vibrant Action & Vitality */
+  --color-accent-hover: #4ade80;
+  --color-accent-glow: rgba(34, 197, 94, 0.35);
+
+  --color-oracle: #a855f7; /* Creative Director Intelligence */
+  --color-oracle-glow: rgba(168, 85, 247, 0.3);
+
+  --color-vision: #38bdf8; /* Multimodal Vision Clarity */
+  --color-vision-glow: rgba(56, 189, 248, 0.3);
+
+  --color-viral: #fb923c; /* Viral Excitement */
+  --color-viral-glow: rgba(251, 146, 60, 0.3);
 
   /* Deep Soft Shadows */
   --shadow-raised: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.05);
   --shadow-pressed: inset 0 2px 8px rgba(0, 0, 0, 0.8);
   --shadow-screen: 0 12px 48px rgba(0, 0, 0, 0.6);
 
-  --led-glow: 0 0 24px rgba(57, 255, 20, 0.5);
+  --led-glow: 0 0 24px rgba(34, 197, 94, 0.5);
   --led-off: none;
 }
 
@@ -500,10 +541,11 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
   text-transform: uppercase;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 code,

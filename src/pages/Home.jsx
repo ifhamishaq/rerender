@@ -32,16 +32,17 @@ const Home = () => {
             {/* ── HERO SECTION (Featuring /hero.gif) ── */}
             <Hero />
 
-            {/* ── 01. THE CREATOR OS SUITE (BENTO GRID WITH GIFS) ── */}
+            {/* ── 01. THE CREATOR OS SUITE (BENTO GRID WITH PSYCHOLOGICAL PALETTE & GIFS) ── */}
             <section id="suite" style={{ padding: 'clamp(5rem, 10vw, 8rem) clamp(1.5rem, 5vw, 4rem)', maxWidth: '1360px', margin: '0 auto' }}>
                 <div style={{ marginBottom: '4rem' }}>
                     <div className="section-label">01 — THE CREATOR OS SUITE</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '880px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '880px' }}>
                         <h2 style={{ 
+                            fontFamily: 'var(--font-display)',
                             fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', 
-                            fontWeight: 900, 
-                            lineHeight: 1, 
-                            letterSpacing: '-0.03em', 
+                            fontWeight: 800, 
+                            lineHeight: 1.05, 
+                            letterSpacing: '-0.035em', 
                             textTransform: 'uppercase',
                             margin: 0 
                         }}>
@@ -49,13 +50,13 @@ const Home = () => {
                             <span style={{ color: 'var(--color-accent)' }}>IN YOUR BROWSER.</span>
                         </h2>
                         <p style={{ 
-                            fontFamily: 'var(--font-mono)', 
-                            fontSize: 'clamp(0.95rem, 1.5vw, 1.1rem)', 
+                            fontFamily: 'var(--font-sans)', 
+                            fontSize: 'clamp(1rem, 1.5vw, 1.15rem)', 
                             color: 'var(--color-text-secondary)', 
                             lineHeight: 1.7,
                             margin: 0
                         }}>
-                            Stop bouncing between 10 different subscription apps. RE-RENDER unites the complete content lifecycle—from raw concept and cinematic storyboards to CTR auditing and multi-platform distribution.
+                            Eliminate fragmented subscriptions and cognitive fatigue. RE-RENDER unites the complete content lifecycle—from deep narrative ideation and cinematic storyboards to multimodal CTR auditing and multi-platform distribution.
                         </p>
                     </div>
                 </div>
@@ -67,7 +68,7 @@ const Home = () => {
                     gap: '2rem' 
                 }}>
                     
-                    {/* Card 1: Oracle AI Director */}
+                    {/* Card 1: Oracle AI Director (Psychological Color: Purple — Wisdom & Creative Intelligence) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -84,27 +85,29 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
                             <img 
                                 src="/service-video.gif" 
                                 alt="Oracle Director" 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', border: '1px solid rgba(57,255,20,0.3)' }}>
-                                ORACLE_CORE
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-oracle)', border: '1px solid var(--color-oracle-glow)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                DIRECTOR // WISDOM
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <Sparkles size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
-                                    DIRECTOR & SCRIPTING
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Sparkles size={16} color="var(--color-oracle)" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'var(--color-oracle)', fontWeight: 700, textTransform: 'uppercase' }}>
+                                    CREATIVE INTELLIGENCE
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Aesthetic Oracle</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                                Your 24/7 creative director. Formulates irresistible 10-second opening hooks, outlines camera direction, and writes scripts engineered for maximum audience retention.
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Aesthetic Oracle
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
+                                Your 24/7 creative director. Formulates irresistible 10-second opening hooks, outlines camera direction, and writes scripts engineered for psychological retention.
                             </p>
                         </div>
 
@@ -121,11 +124,11 @@ const Home = () => {
                                 textDecoration: 'none'
                             }}
                         >
-                            Launch Oracle Workspace <ArrowRight size={15} color="var(--color-accent)" />
+                            Launch Oracle Workspace <ArrowRight size={15} color="var(--color-oracle)" />
                         </Link>
                     </motion.div>
 
-                    {/* Card 2: Thumbnail Analyser */}
+                    {/* Card 2: Thumbnail Analyser (Psychological Color: Blue — Clarity, Logic & Metric Trust) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -142,26 +145,28 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
                             <img 
                                 src="/service-design.gif" 
                                 alt="Thumbnail Analyser" 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)' }}>
-                                VISION_CTR
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-vision)', border: '1px solid var(--color-vision-glow)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                VISION // CTR LOGIC
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <Eye size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Eye size={16} color="var(--color-vision)" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'var(--color-vision)', fontWeight: 700, textTransform: 'uppercase' }}>
                                     PACKAGING & AUDITING
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Thumbnail Analyser</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Thumbnail Analyser
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Never post a weak thumbnail again. Multimodal AI scores your packaging S/A/B/C/D, evaluates eye-tracking focal points, and provides a neural prompt to fix flaws instantly.
                             </p>
                         </div>
@@ -179,11 +184,11 @@ const Home = () => {
                                 textDecoration: 'none'
                             }}
                         >
-                            Audit Your Thumbnail <ArrowRight size={15} color="var(--color-accent)" />
+                            Audit Your Thumbnail <ArrowRight size={15} color="var(--color-vision)" />
                         </Link>
                     </motion.div>
 
-                    {/* Card 3: Storyboard Pre-Vis Engine */}
+                    {/* Card 3: Storyboard Pre-Vis Engine (Psychological Color: Rose/Pink — Cinematic Imagination) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -200,26 +205,28 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
                             <img 
                                 src="/service-3d.gif" 
                                 alt="Storyboard Engine" 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)' }}>
-                                PRE_VIS
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                PRE_VIS // SCENE
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <Layers size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Layers size={16} color="#ec4899" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: '#ec4899', fontWeight: 700, textTransform: 'uppercase' }}>
                                     DIRECTOR'S PITCH DECK
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Storyboard Lab</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Storyboard Lab
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Turn any script into a full production storyboard. Generates camera movements, lighting moods, character emotions, and AI visual sketches exportable as a clean PDF.
                             </p>
                         </div>
@@ -237,11 +244,11 @@ const Home = () => {
                                 textDecoration: 'none'
                             }}
                         >
-                            Open Storyboard Studio <ArrowRight size={15} color="var(--color-accent)" />
+                            Open Storyboard Studio <ArrowRight size={15} color="#ec4899" />
                         </Link>
                     </motion.div>
 
-                    {/* Card 4: Viral News & Short-Form Generator */}
+                    {/* Card 4: Viral News & Short-Form Generator (Psychological Color: Tangerine/Amber — Urgency & Excitement) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -258,26 +265,28 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
                             <img 
                                 src="/service-web.gif" 
                                 alt="Auto News Generator" 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>
-                                VIRAL_FEED
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-viral)', border: '1px solid var(--color-viral-glow)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                VIRAL // URGENCY
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <Zap size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Zap size={16} color="var(--color-viral)" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'var(--color-viral)', fontWeight: 700, textTransform: 'uppercase' }}>
                                     REAL-TIME VIRAL HOOKS
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Auto News Generator</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Auto News Generator
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Pulls live trending headlines and transforms them into viral social media cards with punchy text hooks, bold highlight typography, and auto-generated image backgrounds.
                             </p>
                         </div>
@@ -295,11 +304,11 @@ const Home = () => {
                                 textDecoration: 'none'
                             }}
                         >
-                            Generate Viral News Card <ArrowRight size={15} color="var(--color-accent)" />
+                            Generate Viral News Card <ArrowRight size={15} color="var(--color-viral)" />
                         </Link>
                     </motion.div>
 
-                    {/* Card 5: Multi-Platform Caption Lab */}
+                    {/* Card 5: Multi-Platform Caption Lab (Psychological Color: Emerald Green — Action & Distribution) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -316,25 +325,27 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, rgba(57,255,20,0.1) 0%, rgba(0,0,0,0.4) 100%)' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, var(--color-accent-glow) 0%, rgba(9,9,11,0.6) 100%)' }}>
                             <div style={{ textAlign: 'center', padding: '1rem' }}>
                                 <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>✍️</div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-accent)' }}>YOUTUBE · TIKTOK · IG · X · LINKEDIN</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--color-accent)', fontWeight: 700, letterSpacing: '0.08em' }}>YOUTUBE · TIKTOK · IG · X · LINKEDIN</div>
                             </div>
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', border: '1px solid rgba(57,255,20,0.3)' }}>
-                                COPY_ENGINE
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', border: '1px solid var(--color-accent-glow)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                COPY // CONVERSION
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                 <FileText size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'var(--color-accent)', fontWeight: 700, textTransform: 'uppercase' }}>
                                     ENGAGEMENT & DISTRIBUTION
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Caption Writer</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Caption Writer
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Craft tone-tailored captions that convert passive scrollers into followers. Formatted with curated hashtags and tailored for high algorithmic engagement across every major platform.
                             </p>
                         </div>
@@ -356,7 +367,7 @@ const Home = () => {
                         </Link>
                     </motion.div>
 
-                    {/* Card 6: Wallpaper Lab & Arcade */}
+                    {/* Card 6: Wallpaper Lab & Arcade (Psychological Color: Violet — Creative Sandbox) */}
                     <motion.div 
                         whileHover={{ y: -6 }}
                         transition={{ duration: 0.3 }}
@@ -373,26 +384,28 @@ const Home = () => {
                             boxShadow: 'var(--shadow-raised)'
                         }}
                     >
-                        <div style={{ borderRadius: '14px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
+                        <div style={{ borderRadius: '16px', overflow: 'hidden', height: '190px', border: '1px solid var(--color-border)', position: 'relative' }}>
                             <img 
                                 src="/arcade.gif" 
                                 alt="Arcade & Utilities" 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
-                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.3)' }}>
-                                ASSET_ARCADE
+                            <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                ASSET // PLAYGROUND
                             </div>
                         </div>
 
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <Terminal size={16} color="var(--color-accent)" />
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Terminal size={16} color="#a78bfa" />
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: '#a78bfa', fontWeight: 700, textTransform: 'uppercase' }}>
                                     GENERATIVE ASSETS & UTILITIES
                                 </span>
                             </div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Wallpaper Lab & Arcade</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em' }}>
+                                Wallpaper Lab & Arcade
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Render custom 4K background textures, curate color palettes with Palette Picker, and sharpen your aesthetic reflexes in the creative playground.
                             </p>
                         </div>
@@ -410,7 +423,7 @@ const Home = () => {
                                 textDecoration: 'none'
                             }}
                         >
-                            Explore All Utilities <ArrowRight size={15} color="var(--color-accent)" />
+                            Explore All Utilities <ArrowRight size={15} color="#a78bfa" />
                         </Link>
                     </motion.div>
                 </div>
@@ -419,7 +432,7 @@ const Home = () => {
             {/* ── 02. THE 3-STEP CREATOR PIPELINE ── */}
             <section id="pipeline" style={{ 
                 padding: 'clamp(5rem, 10vw, 8rem) clamp(1.5rem, 5vw, 4rem)', 
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)',
+                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)',
                 borderTop: '1px solid var(--color-border)',
                 borderBottom: '1px solid var(--color-border)'
             }}>
@@ -427,10 +440,11 @@ const Home = () => {
                     <div className="section-label">02 — THE PRODUCTION PIPELINE</div>
                     
                     <h2 style={{ 
+                        fontFamily: 'var(--font-display)',
                         fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', 
-                        fontWeight: 900, 
-                        lineHeight: 1, 
-                        letterSpacing: '-0.03em', 
+                        fontWeight: 800, 
+                        lineHeight: 1.05, 
+                        letterSpacing: '-0.035em', 
                         textTransform: 'uppercase',
                         marginBottom: '3rem'
                     }}>
@@ -441,51 +455,57 @@ const Home = () => {
                         
                         {/* Step 1 */}
                         <div style={{ 
-                            padding: '2rem', 
-                            borderRadius: '20px', 
+                            padding: '2.25rem', 
+                            borderRadius: '24px', 
                             backgroundColor: 'var(--color-surface)', 
                             border: '1px solid var(--color-border)',
                             position: 'relative'
                         }}>
-                            <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', opacity: 0.3, marginBottom: '1rem' }}>
+                            <div style={{ fontSize: '3.2rem', fontWeight: 900, fontFamily: 'var(--font-display)', color: 'var(--color-oracle)', opacity: 0.4, marginBottom: '0.75rem', lineHeight: 1 }}>
                                 01
                             </div>
-                            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem' }}>Ideate & Retention-Engineer</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
+                                Ideate & Retention-Engineer
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.94rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Consult Oracle with your topic or concept. Instantly receive psychological retention hooks, viral title formulas, and structured script blocks that keep viewers glued.
                             </p>
                         </div>
 
                         {/* Step 2 */}
                         <div style={{ 
-                            padding: '2rem', 
-                            borderRadius: '20px', 
+                            padding: '2.25rem', 
+                            borderRadius: '24px', 
                             backgroundColor: 'var(--color-surface)', 
                             border: '1px solid var(--color-border)',
                             position: 'relative'
                         }}>
-                            <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', opacity: 0.3, marginBottom: '1rem' }}>
+                            <div style={{ fontSize: '3.2rem', fontWeight: 900, fontFamily: 'var(--font-display)', color: '#ec4899', opacity: 0.4, marginBottom: '0.75rem', lineHeight: 1 }}>
                                 02
                             </div>
-                            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem' }}>Pre-Visualize & Storyboard</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
+                                Pre-Visualize & Storyboard
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.94rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Let the Storyboard Engine translate your script into cinematic scenes. Plan camera angles, lighting states, and visual cues before turning on the camera.
                             </p>
                         </div>
 
                         {/* Step 3 */}
                         <div style={{ 
-                            padding: '2rem', 
-                            borderRadius: '20px', 
+                            padding: '2.25rem', 
+                            borderRadius: '24px', 
                             backgroundColor: 'var(--color-surface)', 
                             border: '1px solid var(--color-border)',
                             position: 'relative'
                         }}>
-                            <div style={{ fontSize: '3rem', fontWeight: 900, fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', opacity: 0.3, marginBottom: '1rem' }}>
+                            <div style={{ fontSize: '3.2rem', fontWeight: 900, fontFamily: 'var(--font-display)', color: 'var(--color-vision)', opacity: 0.4, marginBottom: '0.75rem', lineHeight: 1 }}>
                                 03
                             </div>
-                            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem' }}>Audit Packaging & Publish</h3>
-                            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+                            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
+                                Audit Packaging & Publish
+                            </h3>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.94rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Run your thumbnail through the multimodal vision auditor to predict CTR, fix weaknesses, and generate tailored platform captions for high algorithmic distribution.
                             </p>
                         </div>
@@ -499,33 +519,43 @@ const Home = () => {
                     borderRadius: '28px', 
                     border: '1px solid var(--color-border)', 
                     backgroundColor: 'var(--color-surface)', 
-                    padding: 'clamp(2rem, 6vw, 4rem)',
+                    padding: 'clamp(2.5rem, 6vw, 4.5rem)',
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                    gap: '3rem',
+                    gap: '3.5rem',
                     alignItems: 'center',
                     boxShadow: 'var(--shadow-raised)'
                 }}>
                     <div>
                         <div className="section-label" style={{ marginBottom: '1.5rem' }}>03 — THE INTELLIGENCE ENGINE</div>
-                        <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1.05, textTransform: 'uppercase', margin: '0 0 1.5rem 0' }}>
+                        <h2 style={{ 
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 'clamp(2rem, 5vw, 3.5rem)', 
+                            fontWeight: 800, 
+                            lineHeight: 1.05, 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '-0.03em',
+                            margin: '0 0 1.5rem 0' 
+                        }}>
                             MEET ORACLE. <br />
-                            <span style={{ color: 'var(--color-accent)' }}>BUILT FOR PRODUCTION.</span>
+                            <span style={{ color: 'var(--color-oracle)' }}>BUILT FOR PRODUCTION.</span>
                         </h2>
-                        <p style={{ fontSize: '1rem', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '2rem' }}>
+                        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.05rem', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '2rem' }}>
                             Oracle isn't another generic chatbot. It was trained to think like an uncompromising creative director. Direct, authoritative, and focused solely on making content that dominates feeds.
                         </p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '2.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '2.5rem' }}>
                             {[
                                 "Understands retention psychology & opening 3-second hooks",
                                 "Zero filler phrases — outputs high-density creative directions",
                                 "Supports image inputs for visual critique & design improvement",
                                 "Generates scene-by-scene storyboard grids with PDF exports"
                             ].map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.95rem' }}>
-                                    <Check size={16} color="var(--color-accent)" strokeWidth={3} />
-                                    <span>{item}</span>
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.95rem' }}>
+                                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--color-oracle-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <Check size={13} color="var(--color-oracle)" strokeWidth={3} />
+                                    </div>
+                                    <span style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-text)' }}>{item}</span>
                                 </div>
                             ))}
                         </div>
@@ -533,7 +563,13 @@ const Home = () => {
                         <button 
                             onClick={() => navigate('/lab/oracle-workspace')}
                             className="skeuo-button"
-                            style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}
+                            style={{ 
+                                padding: '1rem 2.5rem', 
+                                fontSize: '0.95rem',
+                                background: 'var(--color-oracle)',
+                                color: '#ffffff',
+                                boxShadow: '0 4px 20px var(--color-oracle-glow)'
+                            }}
                         >
                             OPEN ORACLE WORKSPACE <ArrowRight size={16} />
                         </button>
@@ -544,23 +580,24 @@ const Home = () => {
                         borderRadius: '20px', 
                         border: '1px solid var(--color-border)', 
                         backgroundColor: 'var(--color-bg)', 
-                        padding: '1.5rem',
+                        padding: '1.75rem',
                         fontFamily: 'var(--font-mono)',
-                        fontSize: '0.85rem'
+                        fontSize: '0.85rem',
+                        boxShadow: 'var(--shadow-screen)'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
-                            <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--color-text)' }}>ORACLE 2.0 // DIRECTIVE</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1.25rem' }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-oracle)' }} />
+                            <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--color-text)', letterSpacing: '0.05em' }}>ORACLE 2.0 // DIRECTIVE</span>
                         </div>
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--color-text)' }}>
                             <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(128,128,128,0.08)', alignSelf: 'flex-end', maxWidth: '85%' }}>
                                 Give me a viral hook for a video on how AI will change filmmaking.
                             </div>
-                            <div style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(57,255,20,0.2)', background: 'rgba(57,255,20,0.03)', alignSelf: 'flex-start', maxWidth: '95%', lineHeight: 1.6 }}>
-                                <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>THE HOOK:</span><br />
+                            <div style={{ padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--color-oracle-glow)', background: 'rgba(147, 51, 234, 0.04)', alignSelf: 'flex-start', maxWidth: '95%', lineHeight: 1.65 }}>
+                                <span style={{ color: 'var(--color-oracle)', fontWeight: 700 }}>THE HOOK:</span><br />
                                 "In 24 months, a single teenager will win an Oscar without ever touching a camera. Here's how Hollywood is secretly preparing for it."<br /><br />
-                                <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>RETENTION RATING: 94% · PSYCHOLOGICAL CURIOSITY GAP</span>
+                                <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em' }}>RETENTION RATING: 94% · PSYCHOLOGICAL CURIOSITY GAP</span>
                             </div>
                         </div>
                     </div>
@@ -570,48 +607,57 @@ const Home = () => {
             {/* ── 04. FAIR CREDIT ARCHITECTURE ── */}
             <section id="credits" style={{ 
                 padding: 'clamp(5rem, 10vw, 8rem) clamp(1.5rem, 5vw, 4rem)',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)',
+                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)',
                 borderTop: '1px solid var(--color-border)'
             }}>
                 <div style={{ maxWidth: '1360px', margin: '0 auto' }}>
                     <div className="section-label">04 — FAIR CREDIT ARCHITECTURE</div>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '2rem', marginBottom: '3.5rem' }}>
-                        <div style={{ maxWidth: '700px' }}>
-                            <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 1rem 0' }}>
+                        <div style={{ maxWidth: '720px' }}>
+                            <h2 style={{ 
+                                fontFamily: 'var(--font-display)',
+                                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', 
+                                fontWeight: 800, 
+                                lineHeight: 1.05, 
+                                letterSpacing: '-0.035em', 
+                                textTransform: 'uppercase', 
+                                margin: '0 0 1rem 0' 
+                            }}>
                                 ZERO SUBSCRIPTION LOCK-IN. <br />
                                 <span style={{ color: 'var(--color-accent)' }}>PAY AS YOU CREATE.</span>
                             </h2>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1.05rem', color: 'var(--color-text-secondary)', lineHeight: 1.65, margin: 0 }}>
                                 Tired of $30/month SaaS tools you only use twice? RE-RENDER operates on flexible compute credits. Start free, top-up whenever you need, and never lose your balance.
                             </p>
                         </div>
-                        <Link to="/recharge" className="skeuo-button" style={{ padding: '0.85rem 2rem' }}>
+                        <Link to="/recharge" className="skeuo-button" style={{ padding: '0.9rem 2.2rem' }}>
                             VIEW TOP-UP PACKS <ArrowRight size={16} />
                         </Link>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
                         {[
-                            { name: "Oracle Chat", cost: "0–1 Credit", desc: "Script ideation, director consultation & viral hook engineering." },
-                            { name: "Thumbnail Audit", cost: "5 Credits", desc: "Multimodal CTR grading, vision feedback & neural prompt rewrite." },
-                            { name: "News Generation", cost: "0 Credits", desc: "Daily viral news scraping and automated headline layout." },
-                            { name: "AI Image Render", cost: "10 Credits", desc: "High-resolution 4K wallpaper & visual asset synthesis." }
+                            { name: "Oracle Chat", cost: "0–1 Credit", color: "var(--color-oracle)", desc: "Script ideation, director consultation & viral hook engineering." },
+                            { name: "Thumbnail Audit", cost: "5 Credits", color: "var(--color-vision)", desc: "Multimodal CTR grading, vision feedback & neural prompt rewrite." },
+                            { name: "News Generation", cost: "0 Credits", color: "var(--color-viral)", desc: "Daily viral news scraping and automated headline layout." },
+                            { name: "AI Image Render", cost: "10 Credits", color: "var(--color-accent)", desc: "High-resolution 4K wallpaper & visual asset synthesis." }
                         ].map((tier, idx) => (
                             <div key={idx} style={{ 
-                                padding: '1.75rem', 
-                                borderRadius: '18px', 
+                                padding: '2rem', 
+                                borderRadius: '20px', 
                                 backgroundColor: 'var(--color-surface)', 
                                 border: '1px solid var(--color-border)',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '0.75rem'
+                                gap: '0.75rem',
+                                boxShadow: 'var(--shadow-raised)'
                             }}>
-                                <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)', fontWeight: 700 }}>
+                                <div style={{ fontSize: '0.82rem', fontFamily: 'var(--font-mono)', color: tier.color, fontWeight: 700, letterSpacing: '0.05em' }}>
                                     {tier.cost}
                                 </div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{tier.name}</div>
-                                <div style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>{tier.desc}</div>
+                                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{tier.name}</div>
+                                <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>{tier.desc}</div>
                             </div>
                         ))}
                     </div>
@@ -623,7 +669,7 @@ const Home = () => {
                 <PricingFAQ />
             </div>
 
-            {/* ── 06. FINAL CTA (Featuring /cta-bg.gif) ── */}
+            {/* ── 06. FINAL CTA (Featuring /cta-bg.gif with psychological conversion glow) ── */}
             <section style={{
                 position: 'relative',
                 padding: 'clamp(6rem, 15vw, 10rem) clamp(1rem, 5vw, 2rem)',
@@ -657,9 +703,11 @@ const Home = () => {
                     </div>
 
                     <h2 style={{
+                        fontFamily: 'var(--font-display)',
                         fontSize: 'clamp(2.8rem, 8vw, 6.5rem)',
                         lineHeight: 0.95,
                         fontWeight: 900,
+                        letterSpacing: '-0.035em',
                         textTransform: 'uppercase',
                         margin: '0 0 1.5rem 0'
                     }}>
@@ -668,8 +716,8 @@ const Home = () => {
                     </h2>
 
                     <p style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: 'clamp(1rem, 2vw, 1.2rem)',
                         color: 'var(--color-text-secondary)',
                         lineHeight: 1.7,
                         maxWidth: '620px',
@@ -683,9 +731,11 @@ const Home = () => {
                             onClick={() => navigate('/lab/oracle-workspace')}
                             className="skeuo-button" 
                             style={{ 
-                                fontSize: '1.15rem', 
-                                padding: '1.25rem 3rem',
-                                border: '2px solid var(--color-accent)'
+                                fontSize: '1.05rem', 
+                                padding: '1.2rem 3rem',
+                                background: 'var(--color-accent)',
+                                color: '#ffffff',
+                                boxShadow: '0 0 24px var(--color-accent-glow)'
                             }}
                         >
                             LAUNCH ORACLE WORKSPACE <ArrowRight size={18} />
@@ -694,8 +744,8 @@ const Home = () => {
                             onClick={() => navigate('/tools')}
                             className="skeuo-button" 
                             style={{ 
-                                fontSize: '1.15rem', 
-                                padding: '1.25rem 3rem',
+                                fontSize: '1.05rem', 
+                                padding: '1.2rem 3rem',
                                 backgroundColor: 'var(--color-surface)',
                                 color: 'var(--color-text)',
                                 border: '1px solid var(--color-border)'
