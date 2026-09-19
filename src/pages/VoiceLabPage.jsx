@@ -1,19 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
     Mic, Play, Pause, Download, Volume2, VolumeX, 
     Sparkles, Key, Check, Copy, Sliders, RefreshCw, AudioLines,
-    FileText, Radio, ArrowRight, AlertCircle, Cpu, Globe
+    FileText, Radio, ArrowLeft, AlertCircle, Cpu, Globe, Search, Coins, X
 } from 'lucide-react';
 
 import { synthesizeSpeech, AI_COSTS, getLocalApiKey, setLocalApiKey, hasApiKey } from '../utils/ai';
 import { useAuth } from '../context/AuthContext';
-import LabHeader from '../components/LabHeader';
 import LabLoader from '../components/LabLoader';
 import { useWindowSize } from '../hooks/useWindowSize';
 
-const ACCENT = '#f43f5e'; // Electric Rose / Sound Wave
+const ACCENT = '#f43f5e';
 const ACCENT_GLOW = 'rgba(244, 63, 94, 0.25)';
 
 // Curated Deepgram Flux TTS Voices with persona tags
@@ -45,26 +44,27 @@ const FLUX_VOICES = [
 
 const PRESET_SCRIPTS = [
     {
-        title: "YouTube Viral Hook",
+        title: "YouTube Hook",
         text: "99% of creators make this exact mistake in their first three seconds. If you fix just this one thing, your retention will double immediately."
     },
     {
-        title: "Cinematic Documentary",
+        title: "Documentary",
         text: "Deep beneath the silence of the ocean, an unseen world pulses with bioluminescent energy. A sanctuary untouched by the passage of time."
     },
     {
-        title: "SaaS / Tech Product",
+        title: "SaaS Pitch",
         text: "Meet RE-RENDER Creator OS. The high-performance suite engineered for modern digital storytellers. From script to final master, all in one place."
     },
     {
-        title: "TikTok / Reel Ad",
+        title: "TikTok Ad",
         text: "Stop scrolling! If you're still doing voiceovers manually, you're wasting hours every week. Try this neural voice engine right now."
     }
 ];
 
 const VoiceLabPage = () => {
+    const navigate = useNavigate();
     const { width } = useWindowSize();
-    const isMobile = width < 860;
+    const isMobile = width < 960;
     const { user, profile, spendCredits, setIsAuthModalOpen } = useAuth();
 
     // Engine Mode: 'openrouter' (Deepgram Flux TTS) vs 'browser' (Native Web Speech)
@@ -74,6 +74,7 @@ const VoiceLabPage = () => {
     const [script, setScript] = useState(PRESET_SCRIPTS[0].text);
     const [selectedVoice, setSelectedVoice] = useState(FLUX_VOICES[0].id);
     const [genderFilter, setGenderFilter] = useState('All');
+    const [voiceSearch, setVoiceSearch] = useState('');
     const [responseFormat, setResponseFormat] = useState('mp3');
     const [isGenerating, setIsGenerating] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
@@ -123,7 +124,20 @@ const VoiceLabPage = () => {
             window.speechSynthesis.onvoiceschanged = updateVoices;
         }
 
+        // Spacebar shortcut for Play/Pause when not focused in textarea/input
+        const handleKeyDown = (e) => {
+            if (e.code === 'Space') {
+                const tag = document.activeElement?.tagName?.toLowerCase();
+                if (tag !== 'textarea' && tag !== 'input') {
+                    e.preventDefault();
+                    togglePlay();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+
         return () => {
+            window.removeEventListener('keydown', handleKeyDown);
             if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
             }
@@ -133,8 +147,12 @@ const VoiceLabPage = () => {
 
     // Filtered Flux Voices
     const filteredFluxVoices = FLUX_VOICES.filter(v => {
-        if (genderFilter === 'All') return true;
-        return v.gender === genderFilter;
+        const matchesGender = genderFilter === 'All' || v.gender === genderFilter;
+        const matchesSearch = !voiceSearch.trim() || 
+            v.name.toLowerCase().includes(voiceSearch.toLowerCase()) || 
+            v.vibe.toLowerCase().includes(voiceSearch.toLowerCase()) ||
+            v.tag.toLowerCase().includes(voiceSearch.toLowerCase());
+        return matchesGender && matchesSearch;
     });
 
     const activeFluxVoiceObj = FLUX_VOICES.find(v => v.id === selectedVoice) || FLUX_VOICES[0];
@@ -180,7 +198,7 @@ const VoiceLabPage = () => {
         if (!success) return;
 
         setIsGenerating(true);
-        setStatusMessage("Connecting to Deepgram Flux TTS (deepgram/flux-tts:free)...");
+        setStatusMessage("Connecting to Deepgram Flux TTS...");
         setError(null);
         setEndpointDown(false);
 
@@ -200,7 +218,7 @@ const VoiceLabPage = () => {
                 ...result,
                 script: script.trim(),
                 voiceObj: activeFluxVoiceObj,
-                engine: 'OpenRouter Deepgram Flux',
+                engine: 'Deepgram Flux TTS',
                 id: Date.now()
             };
 
@@ -215,7 +233,7 @@ const VoiceLabPage = () => {
                 setShowKeyModal(true);
             } else if (errMsg.includes('No endpoints found') || errMsg.includes('not a valid model ID')) {
                 setEndpointDown(true);
-                setError("OpenRouter's free Flux TTS endpoint is currently experiencing upstream provider downtime. You can switch to the Browser Voice Engine with 1 click below.");
+                setError("OpenRouter Flux TTS endpoint is temporarily offline. Switch to Browser Voice Engine below.");
             } else {
                 setError(errMsg || 'Speech synthesis failed. Please check your settings.');
             }
@@ -251,10 +269,10 @@ const VoiceLabPage = () => {
             script: script.trim(),
             voiceObj: {
                 name: matchedVoice ? matchedVoice.name.split(' ')[0] : 'System Voice',
-                vibe: matchedVoice?.lang || 'Native',
+                vibe: matchedVoice?.lang || 'Native Speech',
                 gender: matchedVoice?.name.toLowerCase().includes('female') ? 'Female' : 'Voice'
             },
-            engine: 'Browser Neural Speech',
+            engine: 'Browser Neural Voice',
             format: 'LIVE',
             durationEstimate: estDuration,
             id: Date.now()
@@ -357,9 +375,8 @@ const VoiceLabPage = () => {
     const handleDownload = (audioItem = currentAudio) => {
         if (!audioItem || !audioItem.audioUrl) {
             if (audioItem?.isBrowserSpeech) {
-                // If browser audio, copy script text
                 navigator.clipboard.writeText(audioItem.script);
-                alert("Browser Speech is streamed live through your device audio output. Script copied to clipboard!");
+                alert("Browser Speech is streamed live via Web Audio. Script copied to clipboard!");
             }
             return;
         }
@@ -386,16 +403,25 @@ const VoiceLabPage = () => {
     };
 
     return (
-        <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', color: 'var(--color-text)', paddingBottom: '8rem' }}>
-            {/* Header */}
-            <LabHeader 
-                title="Voice" 
-                subtitle="Studio." 
-                vol="04" 
-                credits={profile?.credits || 0}
-                accentColor={ACCENT}
-                tag="CREATOR OS"
-            />
+        <div style={{
+            height: isMobile ? 'auto' : 'calc(100vh - 28px)',
+            minHeight: isMobile ? '100vh' : 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'var(--color-bg)',
+            color: 'var(--color-text)',
+            overflow: isMobile ? 'auto' : 'hidden',
+            fontFamily: 'var(--font-sans)',
+            boxSizing: 'border-box'
+        }}>
+            <style>{`
+                .vl-sb::-webkit-scrollbar { width: 5px; height: 5px; }
+                .vl-sb::-webkit-scrollbar-track { background: transparent; }
+                .vl-sb::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+                .vl-sb::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--color-text-secondary) 50%, transparent); }
+                .vl-pill { transition: all 0.15s ease; cursor: pointer; border: 1px solid var(--color-border); }
+                .vl-pill:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
+            `}</style>
 
             {/* Hidden HTML Audio Tag for OpenRouter files */}
             {currentAudio && currentAudio.audioUrl && (
@@ -409,303 +435,274 @@ const VoiceLabPage = () => {
                 />
             )}
 
-            {/* Main Studio Console */}
-            <main style={{ maxWidth: '1200px', margin: '2.5rem auto 0', padding: '0 2rem' }}>
-                
-                {/* Engine Selector & Status Bar */}
+            {/* ── 1. LOCKED STUDIO HEADER BAR ── */}
+            <header style={{
+                height: '54px',
+                minHeight: '54px',
+                borderBottom: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 1.25rem',
+                zIndex: 20
+            }}>
+                {/* Left: Nav Back & Title */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Link
+                        to="/tools"
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            color: 'var(--color-text-secondary)',
+                            textDecoration: 'none',
+                            fontSize: '0.75rem',
+                            fontFamily: 'var(--font-mono)',
+                            padding: '4px 8px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border)',
+                            transition: 'all 0.15s ease'
+                        }}
+                        title="Back to Tools"
+                    >
+                        <ArrowLeft size={13} />
+                        <span>Tools</span>
+                    </Link>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: isGenerating ? '#eab308' : ACCENT,
+                            boxShadow: `0 0 10px ${isGenerating ? '#eab308' : ACCENT}`,
+                            animation: isGenerating ? 'pulse 1s infinite' : 'none'
+                        }} />
+                        <h1 style={{
+                            fontSize: '0.95rem',
+                            fontWeight: 800,
+                            fontFamily: 'var(--font-display)',
+                            margin: 0,
+                            letterSpacing: '-0.02em',
+                            textTransform: 'uppercase'
+                        }}>
+                            Voice Lab <span style={{ color: ACCENT, fontStyle: 'italic', fontFamily: 'Playfair Display', fontWeight: 400 }}>Studio</span>
+                        </h1>
+                        <span style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.65rem',
+                            color: 'var(--color-text-muted)',
+                            border: '1px solid var(--color-border)',
+                            padding: '2px 6px',
+                            borderRadius: '4px'
+                        }}>
+                            VOL. 04
+                        </span>
+                    </div>
+                </div>
+
+                {/* Center: Engine Segmented Switch */}
                 <div style={{
+                    display: isMobile ? 'none' : 'inline-flex',
+                    backgroundColor: 'var(--color-bg)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '10px',
+                    padding: '3px'
+                }}>
+                    <button
+                        onClick={() => { setEngineMode('openrouter'); setError(null); }}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '4px 10px',
+                            borderRadius: '7px',
+                            border: 'none',
+                            backgroundColor: engineMode === 'openrouter' ? ACCENT : 'transparent',
+                            color: engineMode === 'openrouter' ? '#fff' : 'var(--color-text-secondary)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                        }}
+                    >
+                        <Cpu size={12} />
+                        <span>Deepgram Flux (Free)</span>
+                    </button>
+
+                    <button
+                        onClick={() => { setEngineMode('browser'); setError(null); setEndpointDown(false); }}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '4px 10px',
+                            borderRadius: '7px',
+                            border: 'none',
+                            backgroundColor: engineMode === 'browser' ? ACCENT : 'transparent',
+                            color: engineMode === 'browser' ? '#fff' : 'var(--color-text-secondary)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                        }}
+                    >
+                        <Globe size={12} />
+                        <span>Browser Engine (Offline)</span>
+                    </button>
+                </div>
+
+                {/* Right: Credits & API Key config */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.75rem',
+                        fontFamily: 'var(--font-mono)',
+                        backgroundColor: 'var(--color-bg)',
+                        border: '1px solid var(--color-border)',
+                        padding: '4px 10px',
+                        borderRadius: '8px'
+                    }}>
+                        <Coins size={12} color={ACCENT} />
+                        <span style={{ fontWeight: 700 }}>{profile?.credits ?? 0}</span>
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.65rem' }}>CR</span>
+                    </div>
+
+                    {engineMode === 'openrouter' && (
+                        <button
+                            onClick={() => setShowKeyModal(true)}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                background: keyConfigured ? 'rgba(255,255,255,0.04)' : 'rgba(244, 63, 94, 0.12)',
+                                border: `1px solid ${keyConfigured ? 'var(--color-border)' : 'rgba(244, 63, 94, 0.3)'}`,
+                                color: keyConfigured ? 'var(--color-text-secondary)' : ACCENT,
+                                padding: '4px 8px',
+                                borderRadius: '8px',
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                            }}
+                            title="OpenRouter API Key Settings"
+                        >
+                            <Key size={11} />
+                            <span>{keyConfigured ? 'Key OK' : 'Set Key'}</span>
+                        </button>
+                    )}
+                </div>
+            </header>
+
+            {/* Down/Error Alert Banner (if needed) */}
+            {endpointDown && (
+                <div style={{
+                    padding: '8px 1.25rem',
+                    backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                    borderBottom: '1px solid rgba(244, 63, 94, 0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    flexWrap: 'wrap',
+                    fontSize: '0.75rem',
                     gap: '1rem',
-                    padding: '0.85rem 1.25rem',
+                    zIndex: 15
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <AlertCircle size={14} color={ACCENT} />
+                        <span>OpenRouter Flux TTS is currently offline upstream. Switch to Browser Engine for instant zero-lag voiceover.</span>
+                    </div>
+                    <button
+                        onClick={() => { setEngineMode('browser'); setEndpointDown(false); setError(null); }}
+                        style={{
+                            padding: '3px 10px',
+                            backgroundColor: ACCENT,
+                            border: 'none',
+                            color: '#fff',
+                            borderRadius: '6px',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Switch Now
+                    </button>
+                </div>
+            )}
+
+            {/* ── 2. LOCKED TWO-COLUMN WORKSPACE GRID ── */}
+            <main style={{
+                flex: 1,
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1.12fr 0.88fr',
+                gap: '14px',
+                padding: '14px',
+                overflow: isMobile ? 'visible' : 'hidden',
+                boxSizing: 'border-box'
+            }}>
+
+                {/* ── LEFT COLUMN: SCRIPT & VOICE CONSOLE ── */}
+                <section style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
                     backgroundColor: 'var(--color-surface)',
                     border: '1px solid var(--color-border)',
                     borderRadius: '16px',
-                    marginBottom: '2rem'
+                    overflow: 'hidden',
+                    boxShadow: 'var(--shadow-raised)'
                 }}>
-                    {/* Mode Toggle */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-secondary)', fontWeight: 700 }}>
-                            ENGINE:
+                    {/* Presets Strip */}
+                    <div style={{
+                        padding: '10px 14px',
+                        borderBottom: '1px solid var(--color-border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px'
+                    }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>
+                            Quick Presets:
                         </span>
-                        <div style={{
-                            display: 'inline-flex',
-                            backgroundColor: 'var(--color-bg)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '10px',
-                            padding: '3px'
-                        }}>
-                            <button
-                                onClick={() => { setEngineMode('openrouter'); setError(null); }}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    padding: '4px 10px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    backgroundColor: engineMode === 'openrouter' ? ACCENT : 'transparent',
-                                    color: engineMode === 'openrouter' ? '#fff' : 'var(--color-text-secondary)',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
-                                }}
-                            >
-                                <Cpu size={12} />
-                                <span>Flux TTS (OpenRouter)</span>
-                            </button>
-
-                            <button
-                                onClick={() => { setEngineMode('browser'); setError(null); setEndpointDown(false); }}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    padding: '4px 10px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    backgroundColor: engineMode === 'browser' ? ACCENT : 'transparent',
-                                    color: engineMode === 'browser' ? '#fff' : 'var(--color-text-secondary)',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
-                                }}
-                            >
-                                <Globe size={12} />
-                                <span>Browser Neural Engine (Always Online)</span>
-                            </button>
+                        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }} className="vl-sb">
+                            {PRESET_SCRIPTS.map((preset, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setScript(preset.text)}
+                                    className="vl-pill"
+                                    style={{
+                                        padding: '3px 9px',
+                                        borderRadius: '7px',
+                                        backgroundColor: script === preset.text ? `color-mix(in srgb, ${ACCENT} 14%, transparent)` : 'var(--color-bg)',
+                                        borderColor: script === preset.text ? ACCENT : 'var(--color-border)',
+                                        color: script === preset.text ? ACCENT : 'var(--color-text)',
+                                        fontFamily: 'var(--font-sans)',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {preset.title}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    {/* API Key Status */}
-                    {engineMode === 'openrouter' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <button
-                                onClick={() => setShowKeyModal(true)}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    background: keyConfigured ? 'rgba(255,255,255,0.04)' : 'rgba(244, 63, 94, 0.12)',
-                                    border: `1px solid ${keyConfigured ? 'var(--color-border)' : 'rgba(244, 63, 94, 0.3)'}`,
-                                    color: keyConfigured ? 'var(--color-text-secondary)' : ACCENT,
-                                    padding: '0.35rem 0.75rem',
-                                    borderRadius: '10px',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease'
-                                }}
-                            >
-                                <Key size={13} />
-                                <span>{keyConfigured ? 'OpenRouter Key Active' : 'Configure API Key'}</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Endpoint Down or Error Notification */}
-                {endpointDown && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                            padding: '1.25rem 1.5rem',
-                            backgroundColor: 'rgba(244, 63, 94, 0.08)',
-                            border: '1px solid rgba(244, 63, 94, 0.3)',
-                            borderRadius: '16px',
-                            color: 'var(--color-text)',
-                            marginBottom: '2rem',
-                            display: 'flex',
-                            flexDirection: isMobile ? 'column' : 'row',
-                            alignItems: isMobile ? 'flex-start' : 'center',
-                            justifyContent: 'space-between',
-                            gap: '1rem'
-                        }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                            <AlertCircle size={20} color={ACCENT} style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <div>
-                                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: ACCENT }}>
-                                    OpenRouter Flux TTS Endpoint Temporarily Offline
-                                </div>
-                                <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '2px', lineHeight: 1.5 }}>
-                                    OpenRouter reported: <em>"No endpoints found for deepgram/flux-tts"</em>. This occurs when the upstream provider's cluster has zero active replicas or is experiencing an outage. You can switch to the <strong>Browser Voice Engine</strong> to generate speech immediately with zero downtime.
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={() => {
-                                setEngineMode('browser');
-                                setEndpointDown(false);
-                                setError(null);
-                            }}
-                            style={{
-                                padding: '0.65rem 1.25rem',
-                                borderRadius: '10px',
-                                backgroundColor: ACCENT,
-                                color: '#ffffff',
-                                border: 'none',
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.75rem',
-                                fontWeight: 800,
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                boxShadow: `0 4px 14px ${ACCENT_GLOW}`
-                            }}
-                        >
-                            ⚡ Switch to Browser Voice Engine
-                        </button>
-                    </motion.div>
-                )}
-
-                {error && !endpointDown && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                            padding: '1rem 1.25rem',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                            borderRadius: '14px',
-                            color: '#ef4444',
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.85rem',
-                            marginBottom: '2rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '1rem'
-                        }}
-                    >
-                        <span>{error}</span>
-                        <button 
-                            onClick={() => setError(null)}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 700 }}
-                        >
-                            Dismiss
-                        </button>
-                    </motion.div>
-                )}
-
-                {/* 2-Column Studio Grid */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : '1.15fr 0.85fr',
-                    gap: '2.5rem',
-                    alignItems: 'start'
-                }}>
-
-                    {/* ── LEFT PANEL: SCRIPT & VOICE CONTROLS ── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-                        
-                        {/* Quick Presets */}
-                        <div style={{
-                            backgroundColor: 'var(--color-surface)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '20px',
-                            padding: '1.5rem'
-                        }}>
-                            <div style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.7rem',
-                                letterSpacing: '0.12em',
-                                color: 'var(--color-text-secondary)',
-                                textTransform: 'uppercase',
-                                marginBottom: '0.85rem',
-                                fontWeight: 700
-                            }}>
-                                1-Click Script Starters
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                                gap: '0.6rem'
-                            }}>
-                                {PRESET_SCRIPTS.map((preset, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setScript(preset.text)}
-                                        style={{
-                                            padding: '0.55rem 0.85rem',
-                                            backgroundColor: script === preset.text ? `color-mix(in srgb, ${ACCENT} 12%, transparent)` : 'var(--color-bg)',
-                                            border: `1px solid ${script === preset.text ? ACCENT : 'var(--color-border)'}`,
-                                            borderRadius: '10px',
-                                            color: script === preset.text ? ACCENT : 'var(--color-text)',
-                                            fontFamily: 'var(--font-sans)',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 600,
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.15s ease'
-                                        }}
-                                    >
-                                        {preset.title}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Script Input Box */}
-                        <div style={{
-                            backgroundColor: 'var(--color-surface)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '20px',
-                            padding: '1.5rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <label style={{
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem',
-                                    letterSpacing: '0.12em',
-                                    color: ACCENT,
-                                    textTransform: 'uppercase',
-                                    fontWeight: 700
-                                }}>
-                                    Voiceover Script
-                                </label>
-                                <div style={{
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem',
-                                    color: 'var(--color-text-muted)'
-                                }}>
-                                    {wordCount} words · ~{estimatedSeconds}s est.
-                                </div>
-                            </div>
-
-                            <textarea
-                                value={script}
-                                onChange={(e) => setScript(e.target.value)}
-                                placeholder="Paste your video script, podcast intro, hook, or narration here..."
-                                rows={5}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: 'var(--color-bg)',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: '12px',
-                                    padding: '1rem',
-                                    color: 'var(--color-text)',
-                                    fontFamily: 'var(--font-sans)',
-                                    fontSize: '0.95rem',
-                                    lineHeight: 1.6,
-                                    resize: 'vertical',
-                                    outline: 'none',
-                                    boxSizing: 'border-box'
-                                }}
-                            />
-
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    {/* Script Textarea Card */}
+                    <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: ACCENT, letterSpacing: '0.08em', fontWeight: 700, textTransform: 'uppercase' }}>
+                                Voiceover Script
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
+                                    {wordCount} words · ~{estimatedSeconds}s
+                                </span>
                                 <button
                                     onClick={() => setScript('')}
                                     style={{
@@ -713,9 +710,9 @@ const VoiceLabPage = () => {
                                         border: 'none',
                                         color: 'var(--color-text-muted)',
                                         fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.7rem',
+                                        fontSize: '0.65rem',
                                         cursor: 'pointer',
-                                        padding: '4px 8px'
+                                        padding: '0 4px'
                                     }}
                                 >
                                     Clear
@@ -723,148 +720,165 @@ const VoiceLabPage = () => {
                             </div>
                         </div>
 
-                        {/* Voice Selector: Mode Specific */}
-                        {engineMode === 'openrouter' ? (
-                            <div style={{
-                                backgroundColor: 'var(--color-surface)',
+                        <textarea
+                            value={script}
+                            onChange={(e) => setScript(e.target.value)}
+                            placeholder="Enter script text or dialogue to synthesize..."
+                            rows={isMobile ? 4 : 3}
+                            style={{
+                                width: '100%',
+                                backgroundColor: 'var(--color-bg)',
                                 border: '1px solid var(--color-border)',
-                                borderRadius: '20px',
-                                padding: '1.5rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '1.25rem'
-                            }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                                    <div>
-                                        <div style={{
-                                            fontFamily: 'var(--font-mono)',
-                                            fontSize: '0.7rem',
-                                            letterSpacing: '0.12em',
-                                            color: 'var(--color-text-secondary)',
-                                            textTransform: 'uppercase',
-                                            fontWeight: 700
-                                        }}>
-                                            Select AI Voice Actor
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                                            {activeFluxVoiceObj.name} · {activeFluxVoiceObj.vibe}
-                                        </div>
+                                borderRadius: '10px',
+                                padding: '10px 12px',
+                                color: 'var(--color-text)',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '0.88rem',
+                                lineHeight: 1.5,
+                                resize: 'none',
+                                outline: 'none',
+                                boxSizing: 'border-box'
+                            }}
+                        />
+                    </div>
+
+                    {/* Voice Actor Selector Deck (Scrollable) */}
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        padding: '10px 14px'
+                    }}>
+                        {/* Voice Filters Bar */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '8px',
+                            gap: '8px'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>
+                                    {engineMode === 'openrouter' ? 'Flux Actors' : 'System Voices'}
+                                </span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                    ({engineMode === 'openrouter' ? filteredFluxVoices.length : systemVoices.length})
+                                </span>
+                            </div>
+
+                            {engineMode === 'openrouter' && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    {/* Search Input */}
+                                    <div style={{ position: 'relative', width: '120px' }}>
+                                        <Search size={11} style={{ position: 'absolute', left: '7px', top: '7px', color: 'var(--color-text-muted)' }} />
+                                        <input 
+                                            type="text"
+                                            value={voiceSearch}
+                                            onChange={(e) => setVoiceSearch(e.target.value)}
+                                            placeholder="Search..."
+                                            style={{
+                                                width: '100%',
+                                                padding: '3px 6px 3px 22px',
+                                                fontSize: '0.65rem',
+                                                backgroundColor: 'var(--color-bg)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '6px',
+                                                color: 'var(--color-text)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box'
+                                            }}
+                                        />
                                     </div>
 
-                                    {/* Gender Filter Tabs */}
-                                    <div style={{
-                                        display: 'inline-flex',
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '10px',
-                                        padding: '3px'
-                                    }}>
+                                    {/* Gender Segment */}
+                                    <div style={{ display: 'inline-flex', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '2px' }}>
                                         {['All', 'Female', 'Male'].map((g) => (
                                             <button
                                                 key={g}
                                                 onClick={() => setGenderFilter(g)}
                                                 style={{
-                                                    padding: '4px 12px',
-                                                    borderRadius: '8px',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
                                                     border: 'none',
                                                     backgroundColor: genderFilter === g ? ACCENT : 'transparent',
-                                                    color: genderFilter === g ? '#fff' : 'var(--color-text-secondary)',
+                                                    color: genderFilter === g ? '#fff' : 'var(--color-text-muted)',
+                                                    fontSize: '0.62rem',
                                                     fontFamily: 'var(--font-mono)',
-                                                    fontSize: '0.65rem',
                                                     fontWeight: 700,
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.15s ease'
+                                                    cursor: 'pointer'
                                                 }}
                                             >
-                                                {g}
+                                                {g === 'All' ? 'All' : g[0]}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
+                            )}
+                        </div>
 
-                                {/* Voice Grid */}
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                                    gap: '0.75rem',
-                                    maxHeight: '260px',
+                        {/* Voices Grid */}
+                        {engineMode === 'openrouter' ? (
+                            <div 
+                                className="vl-sb"
+                                style={{
+                                    flex: 1,
                                     overflowY: 'auto',
-                                    paddingRight: '4px'
-                                }}>
-                                    {filteredFluxVoices.map((voice) => {
-                                        const isSelected = selectedVoice === voice.id;
-                                        return (
-                                            <div
-                                                key={voice.id}
-                                                onClick={() => setSelectedVoice(voice.id)}
-                                                style={{
-                                                    padding: '0.85rem',
-                                                    backgroundColor: isSelected ? `color-mix(in srgb, ${ACCENT} 10%, transparent)` : 'var(--color-bg)',
-                                                    border: `1px solid ${isSelected ? ACCENT : 'var(--color-border)'}`,
-                                                    borderRadius: '12px',
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    gap: '4px',
-                                                    transition: 'all 0.2s ease',
-                                                    boxShadow: isSelected ? `0 0 16px ${ACCENT_GLOW}` : 'none'
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{
-                                                        fontFamily: 'var(--font-display)',
-                                                        fontSize: '0.95rem',
-                                                        fontWeight: 800,
-                                                        color: isSelected ? ACCENT : 'var(--color-text)'
-                                                    }}>
-                                                        {voice.name}
-                                                    </span>
-                                                    <span style={{
-                                                        fontFamily: 'var(--font-mono)',
-                                                        fontSize: '0.55rem',
-                                                        color: 'var(--color-text-muted)',
-                                                        border: '1px solid var(--color-border)',
-                                                        padding: '1px 5px',
-                                                        borderRadius: '4px'
-                                                    }}>
-                                                        {voice.gender[0]}
-                                                    </span>
-                                                </div>
-                                                <div style={{
-                                                    fontFamily: 'var(--font-sans)',
-                                                    fontSize: '0.7rem',
-                                                    color: 'var(--color-text-secondary)',
-                                                    fontWeight: 500
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                                    gap: '8px',
+                                    paddingRight: '2px'
+                                }}
+                            >
+                                {filteredFluxVoices.map((voice) => {
+                                    const isSelected = selectedVoice === voice.id;
+                                    return (
+                                        <div
+                                            key={voice.id}
+                                            onClick={() => setSelectedVoice(voice.id)}
+                                            style={{
+                                                padding: '8px 10px',
+                                                backgroundColor: isSelected ? `color-mix(in srgb, ${ACCENT} 10%, transparent)` : 'var(--color-bg)',
+                                                border: `1px solid ${isSelected ? ACCENT : 'var(--color-border)'}`,
+                                                borderRadius: '10px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '3px',
+                                                boxShadow: isSelected ? `0 0 12px ${ACCENT_GLOW}` : 'none',
+                                                transition: 'all 0.15s ease'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{
+                                                    fontFamily: 'var(--font-display)',
+                                                    fontSize: '0.82rem',
+                                                    fontWeight: 800,
+                                                    color: isSelected ? ACCENT : 'var(--color-text)'
                                                 }}>
-                                                    {voice.vibe}
-                                                </div>
+                                                    {voice.name}
+                                                </span>
+                                                <span style={{
+                                                    fontFamily: 'var(--font-mono)',
+                                                    fontSize: '0.55rem',
+                                                    color: 'var(--color-text-muted)',
+                                                    padding: '1px 4px',
+                                                    borderRadius: '3px',
+                                                    backgroundColor: 'var(--color-surface)'
+                                                }}>
+                                                    {voice.gender[0]}
+                                                </span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                            <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                                                {voice.vibe}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ) : (
-                            /* Browser System Voices Selector */
-                            <div style={{
-                                backgroundColor: 'var(--color-surface)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '20px',
-                                padding: '1.5rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '1.25rem'
-                            }}>
-                                <div style={{
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem',
-                                    letterSpacing: '0.12em',
-                                    color: ACCENT,
-                                    textTransform: 'uppercase',
-                                    fontWeight: 700
-                                }}>
-                                    Browser Neural Voices ({systemVoices.length} Available)
-                                </div>
-
+                            /* Browser System Voice Controls */
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }} className="vl-sb">
                                 <select
                                     value={selectedSysVoice}
                                     onChange={(e) => setSelectedSysVoice(e.target.value)}
@@ -872,11 +886,11 @@ const VoiceLabPage = () => {
                                         width: '100%',
                                         backgroundColor: 'var(--color-bg)',
                                         border: '1px solid var(--color-border)',
-                                        borderRadius: '12px',
-                                        padding: '0.85rem 1rem',
+                                        borderRadius: '10px',
+                                        padding: '8px 10px',
                                         color: 'var(--color-text)',
                                         fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.85rem',
+                                        fontSize: '0.75rem',
                                         outline: 'none',
                                         cursor: 'pointer'
                                     }}
@@ -888,11 +902,11 @@ const VoiceLabPage = () => {
                                     ))}
                                 </select>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', paddingTop: '0.5rem' }}>
-                                    <div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
-                                            <span>Speed Multiplier</span>
-                                            <span>{speechRate}x</span>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div style={{ backgroundColor: 'var(--color-bg)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>
+                                            <span>Playback Rate</span>
+                                            <span style={{ fontWeight: 700, color: ACCENT }}>{speechRate}x</span>
                                         </div>
                                         <input 
                                             type="range"
@@ -905,10 +919,10 @@ const VoiceLabPage = () => {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
-                                            <span>Pitch</span>
-                                            <span>{speechPitch}x</span>
+                                    <div style={{ backgroundColor: 'var(--color-bg)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>
+                                            <span>Vocal Pitch</span>
+                                            <span style={{ fontWeight: 700, color: ACCENT }}>{speechPitch}x</span>
                                         </div>
                                         <input 
                                             type="range"
@@ -923,138 +937,191 @@ const VoiceLabPage = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
 
-                        {/* Primary Synthesize Button */}
+                    {/* Bottom Action Strip (Locked) */}
+                    <div style={{
+                        padding: '10px 14px',
+                        borderTop: '1px solid var(--color-border)',
+                        backgroundColor: 'var(--color-surface)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px'
+                    }}>
+                        {/* Format selector */}
+                        {engineMode === 'openrouter' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>FMT:</span>
+                                {['mp3', 'pcm'].map(fmt => (
+                                    <button
+                                        key={fmt}
+                                        onClick={() => setResponseFormat(fmt)}
+                                        style={{
+                                            padding: '2px 7px',
+                                            borderRadius: '5px',
+                                            border: `1px solid ${responseFormat === fmt ? ACCENT : 'var(--color-border)'}`,
+                                            backgroundColor: responseFormat === fmt ? `color-mix(in srgb, ${ACCENT} 14%, transparent)` : 'transparent',
+                                            color: responseFormat === fmt ? ACCENT : 'var(--color-text-muted)',
+                                            fontFamily: 'var(--font-mono)',
+                                            fontSize: '0.62rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            textTransform: 'uppercase'
+                                        }}
+                                    >
+                                        {fmt}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
+                                NATIVE AUDIO
+                            </span>
+                        )}
+
+                        {/* Big Primary Button */}
                         <motion.button
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
                             onClick={handleGenerate}
                             disabled={isGenerating || !script.trim()}
                             style={{
-                                width: '100%',
-                                padding: '1.25rem 2rem',
-                                backgroundColor: isGenerating || !script.trim() ? 'var(--color-surface)' : ACCENT,
+                                padding: '10px 20px',
+                                backgroundColor: isGenerating || !script.trim() ? 'var(--color-border)' : ACCENT,
                                 color: isGenerating || !script.trim() ? 'var(--color-text-muted)' : '#ffffff',
                                 border: 'none',
-                                borderRadius: '16px',
+                                borderRadius: '12px',
                                 fontFamily: 'var(--font-display)',
-                                fontSize: '1.05rem',
+                                fontSize: '0.88rem',
                                 fontWeight: 800,
                                 letterSpacing: '0.04em',
                                 textTransform: 'uppercase',
                                 cursor: isGenerating || !script.trim() ? 'not-allowed' : 'pointer',
-                                display: 'flex',
+                                display: 'inline-flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.75rem',
-                                boxShadow: isGenerating || !script.trim() ? 'none' : `0 8px 30px ${ACCENT_GLOW}`,
+                                gap: '8px',
+                                boxShadow: isGenerating || !script.trim() ? 'none' : `0 4px 16px ${ACCENT_GLOW}`,
                                 transition: 'all 0.2s ease'
                             }}
                         >
-                            <Mic size={20} />
+                            <Mic size={15} />
                             <span>
                                 {isGenerating 
-                                    ? 'Synthesizing Audio...' 
+                                    ? 'Synthesizing...' 
                                     : engineMode === 'browser' 
-                                        ? 'Play Browser Voiceover' 
-                                        : 'Synthesize Flux Voiceover'}
+                                        ? 'Play Voiceover' 
+                                        : 'Synthesize Master'}
                             </span>
                             <span style={{
                                 fontFamily: 'var(--font-mono)',
-                                fontSize: '0.7rem',
-                                backgroundColor: 'rgba(0,0,0,0.2)',
-                                padding: '3px 8px',
-                                borderRadius: '6px',
-                                marginLeft: '8px'
+                                fontSize: '0.65rem',
+                                backgroundColor: 'rgba(0,0,0,0.25)',
+                                padding: '2px 6px',
+                                borderRadius: '5px'
                             }}>
                                 {engineMode === 'browser' ? 'FREE' : '1 CR'}
                             </span>
                         </motion.button>
                     </div>
+                </section>
 
-                    {/* ── RIGHT PANEL: AUDIO MASTER CONSOLE ── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-                        
-                        {/* Audio Player Card */}
-                        <div style={{
-                            backgroundColor: 'var(--color-surface)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '24px',
-                            padding: '2rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1.5rem',
-                            boxShadow: 'var(--shadow-raised)',
-                            minHeight: '320px',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <AudioLines size={18} color={ACCENT} />
-                                    <span style={{
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 700,
-                                        letterSpacing: '0.12em',
-                                        color: ACCENT,
-                                        textTransform: 'uppercase'
-                                    }}>
-                                        Master Track Console
-                                    </span>
-                                </div>
-
-                                {currentAudio && (
-                                    <span style={{
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.65rem',
-                                        color: 'var(--color-text-muted)',
-                                        border: '1px solid var(--color-border)',
-                                        padding: '2px 8px',
-                                        borderRadius: '100px'
-                                    }}>
-                                        {currentAudio.engine}
-                                    </span>
-                                )}
+                {/* ── RIGHT COLUMN: MASTER DECK & SESSION TAKES ── */}
+                <section style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    gap: '14px',
+                    overflow: 'hidden'
+                }}>
+                    
+                    {/* Master Deck Audio Player Card */}
+                    <div style={{
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        boxShadow: 'var(--shadow-raised)'
+                    }}>
+                        {/* Player Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <AudioLines size={15} color={ACCENT} />
+                                <span style={{
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                    letterSpacing: '0.1em',
+                                    color: ACCENT,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    Master Track Monitor
+                                </span>
                             </div>
 
+                            {currentAudio && (
+                                <span style={{
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '0.62rem',
+                                    color: 'var(--color-text-muted)',
+                                    border: '1px solid var(--color-border)',
+                                    padding: '2px 6px',
+                                    borderRadius: '100px'
+                                }}>
+                                    {currentAudio.voiceObj?.name} · {currentAudio.engine}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Monitor Screen / Waveform Box */}
+                        <div style={{
+                            backgroundColor: 'var(--color-bg)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '12px',
+                            padding: '12px 14px',
+                            minHeight: '110px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            position: 'relative'
+                        }}>
                             {isGenerating ? (
-                                <div style={{ margin: 'auto' }}>
-                                    <LabLoader label={statusMessage || "Generating speech..."} accentColor={ACCENT} />
+                                <div style={{ transform: 'scale(0.85)' }}>
+                                    <LabLoader label={statusMessage || "Synthesizing audio..."} accentColor={ACCENT} />
                                 </div>
                             ) : currentAudio ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    
-                                    {/* Waveform Visualizer simulation */}
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {/* 36-Band Waveform simulation */}
                                     <div style={{
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '16px',
-                                        padding: '1.5rem 1rem',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '4px',
-                                        height: '90px'
+                                        gap: '3px',
+                                        height: '52px',
+                                        width: '100%'
                                     }}>
-                                        {Array.from({ length: 32 }).map((_, i) => {
+                                        {Array.from({ length: 36 }).map((_, i) => {
                                             const progress = duration > 0 ? currentTime / duration : 0;
-                                            const barProgress = i / 32;
+                                            const barProgress = i / 36;
                                             const isPassed = barProgress <= progress;
                                             return (
                                                 <motion.div
                                                     key={i}
                                                     animate={{
                                                         height: isPlaying 
-                                                            ? `${20 + Math.sin(i * 0.5 + currentTime * 8) * 35 + 20}%`
-                                                            : `${25 + Math.sin(i * 0.4) * 20}%`
+                                                            ? `${20 + Math.sin(i * 0.45 + currentTime * 8) * 35 + 20}%`
+                                                            : `${25 + Math.sin(i * 0.35) * 20}%`
                                                     }}
-                                                    transition={{ duration: 0.15 }}
+                                                    transition={{ duration: 0.12 }}
                                                     style={{
                                                         flex: 1,
                                                         backgroundColor: isPassed ? ACCENT : 'var(--color-border)',
                                                         borderRadius: '2px',
-                                                        maxWidth: '6px',
+                                                        maxWidth: '5px',
                                                         boxShadow: isPassed ? `0 0 6px ${ACCENT_GLOW}` : 'none'
                                                     }}
                                                 />
@@ -1063,7 +1130,7 @@ const VoiceLabPage = () => {
                                     </div>
 
                                     {/* Timeline Slider */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                                         <input
                                             type="range"
                                             min="0"
@@ -1075,266 +1142,269 @@ const VoiceLabPage = () => {
                                             style={{
                                                 width: '100%',
                                                 accentColor: ACCENT,
-                                                cursor: currentAudio.isBrowserSpeech ? 'default' : 'pointer'
+                                                cursor: currentAudio.isBrowserSpeech ? 'default' : 'pointer',
+                                                height: '4px'
                                             }}
                                         />
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>
                                             <span>{formatTime(currentTime)}</span>
                                             <span>{formatTime(duration)}</span>
                                         </div>
                                     </div>
-
-                                    {/* Playback Controls Bar */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <button
-                                                onClick={togglePlay}
-                                                style={{
-                                                    width: '50px',
-                                                    height: '50px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: ACCENT,
-                                                    border: 'none',
-                                                    color: '#ffffff',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    cursor: 'pointer',
-                                                    boxShadow: `0 4px 16px ${ACCENT_GLOW}`,
-                                                    transition: 'all 0.15s ease'
-                                                }}
-                                            >
-                                                {isPlaying ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: '3px' }} />}
-                                            </button>
-
-                                            {!currentAudio.isBrowserSpeech && (
-                                                <button
-                                                    onClick={() => setIsMuted(!isMuted)}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: '1px solid var(--color-border)',
-                                                        borderRadius: '10px',
-                                                        padding: '8px',
-                                                        color: isMuted ? ACCENT : 'var(--color-text-secondary)',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                onClick={handleCopyScript}
-                                                style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    padding: '0.55rem 0.85rem',
-                                                    borderRadius: '10px',
-                                                    backgroundColor: 'var(--color-bg)',
-                                                    border: '1px solid var(--color-border)',
-                                                    color: copied ? ACCENT : 'var(--color-text)',
-                                                    fontFamily: 'var(--font-mono)',
-                                                    fontSize: '0.7rem',
-                                                    fontWeight: 600,
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                {copied ? <Check size={13} /> : <Copy size={13} />}
-                                                <span>{copied ? 'Copied' : 'Copy Text'}</span>
-                                            </button>
-
-                                            {currentAudio.audioUrl && (
-                                                <button
-                                                    onClick={() => handleDownload(currentAudio)}
-                                                    style={{
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px',
-                                                        padding: '0.55rem 1rem',
-                                                        borderRadius: '10px',
-                                                        backgroundColor: ACCENT,
-                                                        border: 'none',
-                                                        color: '#ffffff',
-                                                        fontFamily: 'var(--font-mono)',
-                                                        fontSize: '0.7rem',
-                                                        fontWeight: 700,
-                                                        cursor: 'pointer',
-                                                        boxShadow: `0 4px 12px ${ACCENT_GLOW}`
-                                                    }}
-                                                >
-                                                    <Download size={14} />
-                                                    <span>Download MP3</span>
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Track Metadata */}
-                                    <div style={{
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: '1px solid var(--color-border)',
-                                        borderRadius: '12px',
-                                        padding: '0.85rem 1rem',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '4px'
-                                    }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                            <span style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}>Actor Voice:</span>
-                                            <span style={{ fontWeight: 700, color: ACCENT }}>{currentAudio.voiceObj?.name} ({currentAudio.voiceObj?.vibe})</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic', marginTop: '4px' }}>
-                                            "{currentAudio.script.slice(0, 100)}..."
-                                        </div>
-                                    </div>
-
                                 </div>
                             ) : (
-                                <div style={{
-                                    margin: 'auto',
-                                    textAlign: 'center',
-                                    padding: '2rem 1rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '1rem'
-                                }}>
-                                    <div style={{
-                                        width: '60px',
-                                        height: '60px',
-                                        borderRadius: '50%',
-                                        backgroundColor: 'var(--color-bg)',
-                                        border: '1px solid var(--color-border)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <Radio size={24} color="var(--color-text-muted)" />
-                                    </div>
-                                    <div>
-                                        <h4 style={{ fontFamily: 'var(--font-display)', margin: '0 0 0.4rem', fontSize: '1.1rem' }}>
-                                            No Audio Master Synthesized Yet
-                                        </h4>
-                                        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', maxWidth: '320px', margin: 0 }}>
-                                            Choose a script starter, pick your preferred voice actor on the left, and click Synthesize to generate studio voiceovers.
-                                        </p>
+                                <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '10px 0' }}>
+                                    <Radio size={20} style={{ margin: '0 auto 6px', display: 'block', opacity: 0.5 }} />
+                                    <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>Master Monitor Idle</div>
+                                    <div style={{ fontSize: '0.68rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                                        Select voice and click Synthesize to monitor playback
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Recent Generations History */}
-                        {history.length > 0 && (
-                            <div style={{
-                                backgroundColor: 'var(--color-surface)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '20px',
-                                padding: '1.5rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '1rem'
-                            }}>
-                                <div style={{
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.7rem',
-                                    letterSpacing: '0.12em',
-                                    color: 'var(--color-text-secondary)',
-                                    textTransform: 'uppercase',
-                                    fontWeight: 700
-                                }}>
-                                    Session Voice Clips ({history.length})
-                                </div>
+                        {/* Transport Bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '2px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <button
+                                    onClick={togglePlay}
+                                    disabled={!currentAudio}
+                                    style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        borderRadius: '50%',
+                                        backgroundColor: currentAudio ? ACCENT : 'var(--color-border)',
+                                        border: 'none',
+                                        color: '#ffffff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: currentAudio ? 'pointer' : 'not-allowed',
+                                        boxShadow: currentAudio ? `0 3px 12px ${ACCENT_GLOW}` : 'none',
+                                        transition: 'all 0.15s ease'
+                                    }}
+                                    title="Play / Pause (Space)"
+                                >
+                                    {isPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: '2px' }} />}
+                                </button>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                    {history.map((item, idx) => (
-                                        <div
-                                            key={item.id || idx}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                padding: '0.75rem 1rem',
-                                                backgroundColor: 'var(--color-bg)',
-                                                border: '1px solid var(--color-border)',
-                                                borderRadius: '12px',
-                                                gap: '0.75rem'
-                                            }}
-                                        >
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{
-                                                    fontFamily: 'var(--font-display)',
-                                                    fontSize: '0.85rem',
-                                                    fontWeight: 700,
-                                                    color: 'var(--color-text)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px'
-                                                }}>
-                                                    <span>{item.voiceObj?.name}</span>
-                                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-                                                        {item.engine}
-                                                    </span>
-                                                </div>
-                                                <div style={{
-                                                    fontFamily: 'var(--font-sans)',
-                                                    fontSize: '0.7rem',
-                                                    color: 'var(--color-text-secondary)',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
-                                                }}>
-                                                    {item.script}
-                                                </div>
-                                            </div>
-
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <button
-                                                    onClick={() => {
-                                                        setCurrentAudio(item);
-                                                        setIsPlaying(false);
-                                                    }}
-                                                    style={{
-                                                        padding: '5px 10px',
-                                                        borderRadius: '8px',
-                                                        backgroundColor: 'var(--color-surface)',
-                                                        border: '1px solid var(--color-border)',
-                                                        color: ACCENT,
-                                                        fontFamily: 'var(--font-mono)',
-                                                        fontSize: '0.65rem',
-                                                        fontWeight: 700,
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    Load
-                                                </button>
-                                                {item.audioUrl && (
-                                                    <button
-                                                        onClick={() => handleDownload(item)}
-                                                        style={{
-                                                            padding: '5px 8px',
-                                                            borderRadius: '8px',
-                                                            backgroundColor: 'var(--color-surface)',
-                                                            border: '1px solid var(--color-border)',
-                                                            color: 'var(--color-text-secondary)',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        <Download size={12} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                {!currentAudio?.isBrowserSpeech && (
+                                    <button
+                                        onClick={() => setIsMuted(!isMuted)}
+                                        disabled={!currentAudio}
+                                        style={{
+                                            background: 'none',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '8px',
+                                            padding: '6px',
+                                            color: isMuted ? ACCENT : 'var(--color-text-secondary)',
+                                            cursor: currentAudio ? 'pointer' : 'not-allowed'
+                                        }}
+                                        title={isMuted ? 'Unmute' : 'Mute'}
+                                    >
+                                        {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                                    </button>
+                                )}
                             </div>
-                        )}
 
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                                <button
+                                    onClick={handleCopyScript}
+                                    disabled={!currentAudio}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '6px 10px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--color-bg)',
+                                        border: '1px solid var(--color-border)',
+                                        color: copied ? ACCENT : 'var(--color-text)',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 600,
+                                        cursor: currentAudio ? 'pointer' : 'not-allowed'
+                                    }}
+                                >
+                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                                </button>
+
+                                {currentAudio?.audioUrl && (
+                                    <button
+                                        onClick={() => handleDownload(currentAudio)}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                            padding: '6px 12px',
+                                            borderRadius: '8px',
+                                            backgroundColor: ACCENT,
+                                            border: 'none',
+                                            color: '#ffffff',
+                                            fontFamily: 'var(--font-mono)',
+                                            fontSize: '0.68rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            boxShadow: `0 3px 10px ${ACCENT_GLOW}`
+                                        }}
+                                    >
+                                        <Download size={12} />
+                                        <span>Download MP3</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                </div>
+                    {/* Session Takes Rack (Scrollable) */}
+                    <div style={{
+                        flex: 1,
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        padding: '12px 14px'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '8px'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>
+                                    Session Takes
+                                </span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                    ({history.length})
+                                </span>
+                            </div>
+
+                            {history.length > 0 && (
+                                <button
+                                    onClick={() => setHistory([])}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: 'var(--color-text-muted)',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.62rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Clear History
+                                </button>
+                            )}
+                        </div>
+
+                        {history.length > 0 ? (
+                            <div 
+                                className="vl-sb"
+                                style={{
+                                    flex: 1,
+                                    overflowY: 'auto',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '6px',
+                                    paddingRight: '2px'
+                                }}
+                            >
+                                {history.map((item, idx) => (
+                                    <div
+                                        key={item.id || idx}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            padding: '7px 10px',
+                                            backgroundColor: currentAudio?.id === item.id ? `color-mix(in srgb, ${ACCENT} 8%, var(--color-bg))` : 'var(--color-bg)',
+                                            border: `1px solid ${currentAudio?.id === item.id ? ACCENT : 'var(--color-border)'}`,
+                                            borderRadius: '8px',
+                                            gap: '8px',
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                    >
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text)' }}>
+                                                    {item.voiceObj?.name}
+                                                </span>
+                                                <span style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                                    {item.engine?.split(' ')[0]}
+                                                </span>
+                                            </div>
+                                            <div style={{
+                                                fontSize: '0.68rem',
+                                                color: 'var(--color-text-secondary)',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis'
+                                            }}>
+                                                {item.script}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <button
+                                                onClick={() => {
+                                                    setCurrentAudio(item);
+                                                    setIsPlaying(false);
+                                                }}
+                                                style={{
+                                                    padding: '3px 8px',
+                                                    borderRadius: '6px',
+                                                    backgroundColor: 'var(--color-surface)',
+                                                    border: '1px solid var(--color-border)',
+                                                    color: ACCENT,
+                                                    fontFamily: 'var(--font-mono)',
+                                                    fontSize: '0.62rem',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Load
+                                            </button>
+                                            {item.audioUrl && (
+                                                <button
+                                                    onClick={() => handleDownload(item)}
+                                                    style={{
+                                                        padding: '3px 6px',
+                                                        borderRadius: '6px',
+                                                        backgroundColor: 'var(--color-surface)',
+                                                        border: '1px solid var(--color-border)',
+                                                        color: 'var(--color-text-secondary)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title="Download MP3"
+                                                >
+                                                    <Download size={11} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--color-text-muted)',
+                                fontSize: '0.72rem',
+                                fontFamily: 'var(--font-mono)',
+                                textAlign: 'center',
+                                padding: '1rem'
+                            }}>
+                                No audio takes recorded in this session
+                            </div>
+                        )}
+                    </div>
+
+                </section>
 
             </main>
 
@@ -1359,41 +1429,49 @@ const VoiceLabPage = () => {
                             style={{
                                 backgroundColor: 'var(--color-surface)',
                                 border: '1px solid var(--color-border)',
-                                borderRadius: '24px',
-                                padding: '2rem',
-                                maxWidth: '500px',
+                                borderRadius: '20px',
+                                padding: '1.75rem',
+                                maxWidth: '460px',
                                 width: '100%',
                                 boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '1.25rem'
+                                gap: '1rem'
                             }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '10px',
-                                    backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: ACCENT
-                                }}>
-                                    <Key size={20} />
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: ACCENT
+                                    }}>
+                                        <Key size={18} />
+                                    </div>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 800 }}>
+                                            OpenRouter API Key
+                                        </h3>
+                                        <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                                            Required for Deepgram Flux TTS models
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 800 }}>
-                                        OpenRouter API Key
-                                    </h3>
-                                    <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                                        Required for Deepgram Flux TTS neural synthesis.
-                                    </p>
-                                </div>
+                                <button
+                                    onClick={() => setShowKeyModal(false)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
 
-                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                You can get an API key with zero upfront cost directly from your OpenRouter dashboard. Paste it below to enable voice generation directly in your browser.
+                            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.82rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                Enter your free OpenRouter API key to synthesize voice clips directly. The key is stored locally in your browser session.
                             </p>
 
                             <input 
@@ -1405,17 +1483,17 @@ const VoiceLabPage = () => {
                                     width: '100%',
                                     backgroundColor: 'var(--color-bg)',
                                     border: '1px solid var(--color-border)',
-                                    borderRadius: '12px',
-                                    padding: '0.85rem 1rem',
+                                    borderRadius: '10px',
+                                    padding: '0.75rem 1rem',
                                     color: 'var(--color-text)',
                                     fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.85rem',
+                                    fontSize: '0.82rem',
                                     outline: 'none',
                                     boxSizing: 'border-box'
                                 }}
                             />
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px' }}>
                                 <a 
                                     href="https://openrouter.ai/settings/keys" 
                                     target="_blank" 
@@ -1423,27 +1501,27 @@ const VoiceLabPage = () => {
                                     style={{
                                         color: ACCENT,
                                         fontFamily: 'var(--font-mono)',
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.72rem',
                                         textDecoration: 'none',
                                         display: 'inline-flex',
                                         alignItems: 'center',
                                         gap: '4px'
                                     }}
                                 >
-                                    Get Free Key on OpenRouter <ArrowRight size={12} />
+                                    Get Free Key on OpenRouter
                                 </a>
 
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <button
                                         onClick={() => setShowKeyModal(false)}
                                         style={{
-                                            padding: '0.65rem 1.1rem',
-                                            borderRadius: '10px',
+                                            padding: '0.55rem 1rem',
+                                            borderRadius: '8px',
                                             backgroundColor: 'transparent',
                                             border: '1px solid var(--color-border)',
                                             color: 'var(--color-text-secondary)',
                                             fontFamily: 'var(--font-mono)',
-                                            fontSize: '0.75rem',
+                                            fontSize: '0.72rem',
                                             cursor: 'pointer'
                                         }}
                                     >
@@ -1452,13 +1530,13 @@ const VoiceLabPage = () => {
                                     <button
                                         onClick={handleSaveKey}
                                         style={{
-                                            padding: '0.65rem 1.25rem',
-                                            borderRadius: '10px',
+                                            padding: '0.55rem 1.15rem',
+                                            borderRadius: '8px',
                                             backgroundColor: ACCENT,
                                             border: 'none',
                                             color: '#ffffff',
                                             fontFamily: 'var(--font-mono)',
-                                            fontSize: '0.75rem',
+                                            fontSize: '0.72rem',
                                             fontWeight: 700,
                                             cursor: 'pointer'
                                         }}

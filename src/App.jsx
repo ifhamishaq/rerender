@@ -160,6 +160,7 @@ const AppContent = () => {
     const isWorkspace = location.pathname === '/lab/oracle-workspace' || 
                         location.pathname === '/lab/oracle2.0' ||
                         location.pathname === '/lab/ai-agent' ||
+                        location.pathname === '/lab/voice-lab' ||
                         location.pathname === '/lab/news-generator';
 
     return (
